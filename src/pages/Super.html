@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Super Saiyan Web Filter ⚡</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        video {
+            display: none; /* Hide original video, we will draw it on canvas */
+        }
+        canvas {
+            position: absolute;
+            transform: scaleX(-1); /* Mirror effect */
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+        #loading {
+            position: absolute;
+            color: #ffcc00;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10;
+            text-shadow: 2px 2px 5px black;
+        }
+        /* Camera Shake Animation */
+        @keyframes shake {
+            0% { transform: scaleX(-1) translate(1px, 1px) rotate(0deg); }
+            10% { transform: scaleX(-1) translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: scaleX(-1) translate(-3px, 0px) rotate(1deg); }
+            30% { transform: scaleX(-1) translate(3px, 2px) rotate(0deg); }
+            40% { transform: scaleX(-1) translate(1px, -1px) rotate(1deg); }
+            50% { transform: scaleX(-1) translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: scaleX(-1) translate(-3px, 1px) rotate(0deg); }
+            70% { transform: scaleX(-1) translate(3px, 1px) rotate(-1deg); }
+            80% { transform: scaleX(-1) translate(-1px, -1px) rotate(1deg); }
+            90% { transform: scaleX(-1) translate(1px, 2px) rotate(0deg); }
+            100% { transform: scaleX(-1) translate(1px, -2px) rotate(-1deg); }
+        }
+        .shaking {
+            animation: shake 0.2s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="loading">Initializing Camera & Face Tracking... ⏳</div>
+        <video id="input_video" autoplay playsinline></video>
+        <canvas id="output_canvas"></canvas>
+    </div>
+
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const loadingText = document.getElementById('loading');
+
+        // Super Saiyan Threshold
+        const MOUTH_OPEN_THRESHOLD = 0.04; 
+
+        // Load Face Mesh
+        const faceMesh = new FaceMesh({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }});
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        faceMesh.onResults(onResults);
+
+        // Start Camera
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await faceMesh.send({image: videoElement});
+            },
+            width: 1280,
+            height: 720
+        });
+        camera.start();
+
+        function onResults(results) {
+            loadingText.style.display = 'none';
+
+            // Set canvas dimensions to match video
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+
+            // Draw Video frame on Canvas
+            canvasCtx.save();
+            canvasCtx.drawImage(results.image, 0, 0, w, h);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+
+                // Mouth Points: 13 (Upper Lip), 14 (Lower Lip)
+                const upperLip = landmarks[13];
+                const lowerLip = landmarks[14];
+                
+                // Calculate Mouth Open Distance
+                const mouthDist = Math.abs(lowerLip.y - upperLip.y);
+
+                // If user opens mouth wide -> TRIGGER SUPER SAIYAN
+                if (mouthDist > MOUTH_OPEN_THRESHOLD) {
+                    canvasElement.classList.add('shaking'); // Screen Shake
+                    
+                    // Draw Aura
+                    drawAura(landmarks[10].x * w, landmarks[10].y * h, w, h);
+                    
+                    // Draw Spiky Hair
+                    drawHair(landmarks, w, h);
+
+                    // Draw Glowing Eyes (Points 159 & 386 are roughly center eyes)
+                    drawGlowingEye(landmarks[159].x * w, landmarks[159].y * h);
+                    drawGlowingEye(landmarks[386].x * w, landmarks[386].y * h);
+                } else {
+                    canvasElement.classList.remove('shaking');
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        function drawAura(cx, cy, w, h) {
+            const gradient = canvasCtx.createRadialGradient(cx, cy + 100, 50, cx, cy + 100, w/1.5);
+            gradient.addColorStop(0, "rgba(255, 255, 0, 0.6)");
+            gradient.addColorStop(0.5, "rgba(255, 165, 0, 0.3)");
+            gradient.addColorStop(1, "transparent");
+            
+            canvasCtx.globalCompositeOperation = "screen";
+            canvasCtx.fillStyle = gradient;
+            canvasCtx.beginPath();
+            canvasCtx.arc(cx, cy + 100, w/1.5, 0, 2 * Math.PI);
+            canvasCtx.fill();
+            canvasCtx.globalCompositeOperation = "source-over"; // Reset
+        }
+
+        function drawGlowingEye(x, y) {
+            canvasCtx.beginPath();
+            canvasCtx.arc(x, y, 15, 0, 2 * Math.PI);
+            canvasCtx.fillStyle = "#00FFFF";
+            canvasCtx.shadowColor = "#00FFFF";
+            canvasCtx.shadowBlur = 20;
+            canvasCtx.fill();
+            canvasCtx.shadowBlur = 0; // Reset
+        }
+
+        function drawHair(landmarks, w, h) {
+            // Point 10 is top of the forehead
+            const forehead = landmarks[10];
+            const fx = forehead.x * w;
+            const fy = forehead.y * h;
+            
+            // Draw pure Canvas Spiky Anime Hair
+            canvasCtx.fillStyle = "#FFD700";
+            canvasCtx.shadowColor = "#FFA500";
+            canvasCtx.shadowBlur = 15;
+            canvasCtx.beginPath();
+            
+            // Base of hair (forehead)
+            canvasCtx.moveTo(fx - 100, fy); 
+            
+            // Draw Spikes
+            canvasCtx.lineTo(fx - 150, fy - 100); // Spike 1 Left
+            canvasCtx.lineTo(fx - 50, fy - 50); 
+            canvasCtx.lineTo(fx - 100, fy - 200); // Spike 2 Left
+            canvasCtx.lineTo(fx, fy - 80); 
+            canvasCtx.lineTo(fx, fy - 250);       // Center Spike
+            canvasCtx.lineTo(fx + 50, fy - 80); 
+            canvasCtx.lineTo(fx + 100, fy - 200); // Spike 3 Right
+            canvasCtx.lineTo(fx + 50, fy - 50); 
+            canvasCtx.lineTo(fx + 150, fy - 100); // Spike 4 Right
+            
+            // Back to base
+            canvasCtx.lineTo(fx + 100, fy); 
+            canvasCtx.closePath();
+            canvasCtx.fill();
+            canvasCtx.shadowBlur = 0; // Reset
+        }
+    </script>
+</body>
+</html>
