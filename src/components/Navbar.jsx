@@ -113,7 +113,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
   const btnStyle = (color) => ({
     padding:"4px 12px", borderRadius:6, background:color, color:"#fff",
-    border:"none", cursor:"pointer", fontSize:13, fontWeight:600
+    border:"none", cursor:"pointer", fontSize:13, fontWeight:600, textTransform:"uppercase"
   })
 
   /* ── Button with notification badge ── */
@@ -145,14 +145,14 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   const drawerBtnStyle = (color) => ({
     padding:"10px 14px", borderRadius:8, background:color+"15", color,
     border:`1px solid ${color}30`, cursor:"pointer", fontSize:13,
-    fontWeight:600, textAlign:"left", width:"100%"
+    fontWeight:600, textAlign:"left", width:"100%", textTransform:"uppercase"
   })
 
   return (
     <>
       {/* ─── DESKTOP NAVBAR ─── */}
       <header style={{ display:isMobile?"none":"flex", justifyContent:"space-between", alignItems:"center", background:"#fff", padding:"16px", borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)", marginBottom:24, flexWrap:"wrap", gap:8 }}>
-        <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>EducaVeda</h1>
+        <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>EducaVeda Store</h1>
         <div style={{ display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
           {publicBtns.map(b => (
             <button key={b.page} onClick={() => go(b.page)} style={btnStyle(b.color)}>{b.label}</button>
@@ -185,7 +185,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
       {/* ─── MOBILE TOP BAR ─── */}
       <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
-        <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EducaVeda</h1>
+        <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EducaVeda Store</h1>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           {loggedIn && (
             <>
@@ -271,7 +271,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           <button key={item.page} onClick={() => go(item.page)}
             style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"8px 4px", background:"none", border:"none", cursor:"pointer", gap:2 }}>
             <span style={{ fontSize:18 }}>{item.icon}</span>
-            <span style={{ fontSize:9, color:"#64748b", fontWeight:600 }}>{item.label}</span>
+            <span style={{ fontSize:9, color:"#64748b", fontWeight:600, textTransform:"uppercase" }}>{item.label}</span>
           </button>
         ))}
       </nav>
