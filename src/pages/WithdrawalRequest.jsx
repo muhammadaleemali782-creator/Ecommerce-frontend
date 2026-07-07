@@ -139,7 +139,7 @@ export default function WithdrawalRequest() {
   const currentRate     = walletData?.currentPPCRate || 0
 
   const walletLabel = (key) => {
-    if (key === "sellerWallet" || key === "sellerWalletAsSeller") return "Seller Wallet"
+    if (key === "sellerWallet" || key === "sellerWalletAsSeller") return "Direct Seller Wallet"
     if (key === "userWallet"   || key === "userWalletAsSeller")   return "User Wallet"
     if (key === "distributorWallet")                               return "Distributor Wallet"
     return key
@@ -253,7 +253,7 @@ export default function WithdrawalRequest() {
             {withdrawableWallets.map((w, idx) => (
               <div key={w.key} className={`px-4 py-4 text-center bg-green-50 ${idx < withdrawableWallets.length - 1 ? "border-r border-gray-100" : ""}`}>
                 <p className="text-xs text-gray-500 mb-0.5">
-                  {w.key === "sellerWallet" ? "Seller Wallet" :
+                  {w.key === "sellerWallet" ? "Direct Seller Wallet" :
                    w.key === "userWallet"   ? "User Wallet"   : "Wallet"} ✅
                 </p>
                 <p className="text-2xl font-bold text-green-600">

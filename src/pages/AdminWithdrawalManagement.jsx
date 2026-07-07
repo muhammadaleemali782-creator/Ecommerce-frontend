@@ -163,8 +163,8 @@ export default function AdminWithdrawalManagement() {
   }
   
   const getWalletLabel = (type) => {
-    if (type === "sellerWallet") return "Seller Wallet"
-    if (type === "sellerWalletAsSeller") return "Seller Wallet"
+    if (type === "sellerWallet") return "Direct Seller Wallet"
+    if (type === "sellerWalletAsSeller") return "Direct Seller Wallet"
     if (type === "userWalletAsSeller") return "User Wallet"
     return type
   }

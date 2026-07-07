@@ -201,7 +201,7 @@ export default function PPCWallet({ setPage }) {
                 <span style={{ fontSize:18 }}>📊</span>
                 <div>
                   <div style={{ fontSize:13, fontWeight:800, color:"#0369a1" }}>Combined PPC Level</div>
-                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>User Wallet + Seller Wallet dono mil ke level decide karte hain</div>
+                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>User Wallet + Direct Seller Wallet dono mil ke level decide karte hain</div>
                 </div>
               </div>
               <div style={{ textAlign:"right" }}>
@@ -218,7 +218,7 @@ export default function PPCWallet({ setPage }) {
               </div>
               <div style={{ display:"flex", alignItems:"center", fontSize:18, color:"#94a3b8", fontWeight:700 }}>+</div>
               <div style={{ flex:1, background:"#fff", border:"1px solid #e0f2fe", borderRadius:8, padding:"8px 12px", textAlign:"center" }}>
-                <div style={{ fontSize:10, color:"#64748b", marginBottom:2 }}>🛍️ Seller Wallet</div>
+                <div style={{ fontSize:10, color:"#64748b", marginBottom:2 }}>🛍️ Direct Seller Wallet</div>
                 <div style={{ fontSize:16, fontWeight:800, color:"#8b5cf6" }}>{sellerPPC} <span style={{ fontSize:11, fontWeight:500 }}>PPC</span></div>
               </div>
               <div style={{ display:"flex", alignItems:"center", fontSize:18, color:"#94a3b8", fontWeight:700 }}>=</div>
@@ -334,7 +334,7 @@ export default function PPCWallet({ setPage }) {
                   <div className="flex-1">
                     <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
                       {key === "distributorWallet" && "📊 Distributor Wallet"}
-                      {key === "sellerWallet" && "💼 Seller Wallet"}
+                      {key === "sellerWallet" && "💼 Direct Seller Wallet"}
                       {key === "userWallet" && "👤 User Wallet"}
                     </h3>
                   </div>
@@ -487,7 +487,7 @@ export default function PPCWallet({ setPage }) {
                       </p>
                     </div>
 
-                    {/* ✅ Distributor ke Seller Wallet mein level roadmap */}
+                    {/* ✅ Distributor ke Direct Seller Wallet mein level roadmap */}
                     {key === "sellerWallet" && walletData.role === "distributor" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
                       const thresholds   = walletData.sellerLevelUpThresholds
                       const levelNames   = walletData.sellerLevelNames   || {}
@@ -622,7 +622,7 @@ export default function PPCWallet({ setPage }) {
                     const rupee = item.rupeeValue || (item.ppcCount * rate * pct / 100)
                     const walletLabel =
                       item.walletType === "userWallet"           ? "User Wallet"
-                    : item.walletType === "sellerWalletAsSeller" ? "Seller Wallet"
+                    : item.walletType === "sellerWalletAsSeller" ? "Direct Seller Wallet"
                     : item.walletType === "sellerWallet"         ? "Dist. Wallet"
                     : item.walletType || "—"
 

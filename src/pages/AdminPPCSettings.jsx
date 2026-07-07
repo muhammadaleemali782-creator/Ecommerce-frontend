@@ -407,7 +407,7 @@ export default function AdminPPCSettings() {
           <div style={{ marginTop:24, padding:"20px", background:"#eff6ff", borderRadius:12, border:"1px solid #bfdbfe" }}>
             <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Seller Level Up Settings</h3>
             <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Seller ki <strong>User Wallet + Seller Wallet</strong> dono ki combined PPC se level calculate hoga — naam aur threshold set karo
+              Seller ki <strong>User Wallet + Direct Seller Wallet</strong> dono ki combined PPC se level calculate hoga — naam aur threshold set karo
             </p>
             {[0,1,2,3,4].map(lvl => (
               <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
