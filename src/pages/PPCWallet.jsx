@@ -623,7 +623,7 @@ export default function PPCWallet({ setPage }) {
                     const walletLabel =
                       item.walletType === "userWallet"           ? "User Wallet"
                     : item.walletType === "sellerWalletAsSeller" ? "Direct Seller Wallet"
-                    : item.walletType === "sellerWallet"         ? "Dist. Wallet"
+                    : item.walletType === "sellerWallet"         ? "Direct Seller Wallet"
                     : item.walletType || "—"
 
                     const posColor =
