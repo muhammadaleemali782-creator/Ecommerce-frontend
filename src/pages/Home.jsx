@@ -23,7 +23,7 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
     <div
       style={{
         perspective: "1000px",
-        height: "420px",
+        height: "320px",
         cursor: "pointer",
       }}
       onClick={() => setFlipped(f => !f)}
@@ -199,16 +199,15 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
           <div style={{
             flex: 1, position: "relative",
             background: "rgba(255,255,255,0.07)",
-            borderRadius: 10, padding: "12px 14px",
+            borderRadius: 10, padding: "10px 12px",
             marginBottom: 12, overflow: "hidden",
-            display: "flex", flexDirection: "column",
           }}>
-            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+            <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
               Product Details
             </div>
             <p style={{
-              fontSize: 13, lineHeight: 1.7, color: "#e2e8f0",
-              overflow: "auto", flex: 1,
+              fontSize: 12, lineHeight: 1.6, color: "#e2e8f0",
+              overflow: "auto", maxHeight: 90,
             }}>
               {product.description
                 ? product.description
