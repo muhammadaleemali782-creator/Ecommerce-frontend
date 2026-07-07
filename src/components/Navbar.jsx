@@ -152,7 +152,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     <>
       {/* ─── DESKTOP NAVBAR ─── */}
       <header style={{ display:isMobile?"none":"flex", justifyContent:"space-between", alignItems:"center", background:"#fff", padding:"16px", borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)", marginBottom:24, flexWrap:"wrap", gap:8 }}>
-        <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>My E-Commerce Store</h1>
+        <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>EducaVeda</h1>
         <div style={{ display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
           {publicBtns.map(b => (
             <button key={b.page} onClick={() => go(b.page)} style={btnStyle(b.color)}>{b.label}</button>
@@ -185,7 +185,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
       {/* ─── MOBILE TOP BAR ─── */}
       <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
-        <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>My E-Commerce Store</h1>
+        <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EducaVeda</h1>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           {loggedIn && (
             <>
