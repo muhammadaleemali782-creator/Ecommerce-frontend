@@ -23,7 +23,6 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
     <div
       style={{
         perspective: "1000px",
-        height: "320px",
         cursor: "pointer",
       }}
       onClick={() => setFlipped(f => !f)}
@@ -32,16 +31,15 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
         style={{
           position: "relative",
           width: "100%",
-          height: "100%",
           transformStyle: "preserve-3d",
           transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
-        {/* ══ FRONT ══ */}
+        {/* ══ FRONT (normal flow — sets the card's height) ══ */}
         <div
           style={{
-            position: "absolute", inset: 0,
+            position: "relative",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             borderRadius: 16,
@@ -145,7 +143,7 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
           </div>
         </div>
 
-        {/* ══ BACK ══ */}
+        {/* ══ BACK (absolute — matches the height set by front) ══ */}
         <div
           style={{
             position: "absolute", inset: 0,
@@ -195,19 +193,20 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
             </div>
           </div>
 
-          {/* Description */}
+          {/* Description — fills the rest of the card */}
           <div style={{
             flex: 1, position: "relative",
             background: "rgba(255,255,255,0.07)",
-            borderRadius: 10, padding: "10px 12px",
-            marginBottom: 12, overflow: "hidden",
+            borderRadius: 10, padding: "12px 14px",
+            overflow: "hidden",
+            display: "flex", flexDirection: "column",
           }}>
-            <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
               Product Details
             </div>
             <p style={{
-              fontSize: 12, lineHeight: 1.6, color: "#e2e8f0",
-              overflow: "auto", maxHeight: 90,
+              fontSize: 13, lineHeight: 1.7, color: "#e2e8f0",
+              overflow: "auto", flex: 1,
             }}>
               {product.description
                 ? product.description
@@ -215,42 +214,7 @@ function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
             </p>
           </div>
 
-          {/* Price + PPC info */}
-          <div style={{
-            background: "rgba(255,255,255,0.1)",
-            borderRadius: 10, padding: "8px 12px",
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            marginBottom: 10,
-          }}>
-            <div>
-              <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 600 }}>Price</div>
-              <div style={{ fontWeight: 900, fontSize: 20, color: "#fde68a" }}>₹{product.price}</div>
-            </div>
-            {showPPC && ppc > 0 && (
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 600 }}>PPC Reward</div>
-                <div style={{ fontWeight: 900, fontSize: 20, color: "#86efac" }}>💎 {ppc}</div>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              onAddToCart ? onAddToCart(product) : onLoginRedirect?.()
-            }}
-            style={{
-              background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
-              border: "none", borderRadius: 10,
-              padding: "10px 0", fontWeight: 800, fontSize: 13,
-              cursor: "pointer", width: "100%",
-              boxShadow: "0 2px 12px rgba(245,158,11,0.4)",
-            }}
-          >
-            🛒 Add to Cart
-          </button>
-
-          <div style={{ textAlign: "center", marginTop: 8, fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
+          <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
             tap to flip back
           </div>
         </div>
