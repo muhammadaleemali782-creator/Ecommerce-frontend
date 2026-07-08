@@ -54,6 +54,7 @@ import SellerOrders      from "./pages/SellerOrders"
 import AdminNukeData from "./pages/AdminNukeData"
 import AdminInvoiceSettings from "./pages/AdminInvoiceSettings"
 import AdminServices from "./pages/AdminServices"
+import AdminBannerManagement from "./pages/AdminBannerManagement"
 
 // ── Contexts ──
 import { StoreProvider, useStore } from "./context/StoreContext"
@@ -254,6 +255,11 @@ function AppContent() {
           if (!loggedIn) return <Login setPage={setPage} />
           if (role !== "admin") return <Unauth />
           return <AdminServices setPage={setPage} />
+
+        case "admin-banners":
+          if (!loggedIn) return <Login setPage={setPage} />
+          if (role !== "admin") return <Unauth />
+          return <AdminBannerManagement setPage={setPage} />
 
         default:
           console.log("⚠️ Unknown page:", page)

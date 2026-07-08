@@ -96,6 +96,10 @@ export default function Admin({ setPage }) {
           className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 whitespace-nowrap hover:border-violet-300 hover:text-violet-700 transition">
           🧩 Manage Services
         </button>
+        <button onClick={() => setPage?.("admin-banners")}
+          className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 whitespace-nowrap hover:border-violet-300 hover:text-violet-700 transition">
+          🎬 Home Banners / Ads
+        </button>
         <button onClick={() => setPage?.("admin-orders")}
           className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 whitespace-nowrap hover:border-violet-300 hover:text-violet-700 transition">
           📦 Manage Orders
