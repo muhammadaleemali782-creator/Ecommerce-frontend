@@ -3,7 +3,7 @@ import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 
 /* ─── Flip Card Component ─── */
-function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
+export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
   const [flipped, setFlipped] = useState(false)
 
   const productId = product.id || product._id

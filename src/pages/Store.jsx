@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
+import { ProductCard } from "./Home"
 
 export default function Store({ setPage }) {
   // ✅ FIX: addToCart StoreContext se lo — duplicate local function hataya
@@ -30,15 +31,6 @@ export default function Store({ setPage }) {
       return matchesSearch && matchesCategory
     })
   }, [products, search, category])
-
-  const getImageSrc = (product) => {
-    if (!product.image) return null
-    if (typeof product.image === "string") {
-      return product.image.startsWith("http") ? product.image : `${import.meta.env.VITE_API_URL}/uploads/${product.image}`
-    }
-    if (product.image instanceof File) return URL.createObjectURL(product.image)
-    return null
-  }
 
   return (
     <div>
@@ -112,88 +104,37 @@ export default function Store({ setPage }) {
         </div>
       )}
 
+      {/* ══ FLIP HINT ══ */}
+      <div style={{
+        background: "linear-gradient(90deg,#ede9fe,#f0f9ff)",
+        border: "1px solid #ddd6fe",
+        borderRadius: 10, padding: "8px 14px",
+        fontSize: 12, color: "#7c3aed", fontWeight: 600,
+        marginBottom: 14, display: "flex", alignItems: "center", gap: 8,
+      }}>
+        💡 Kisi bhi card pe tap karo — flip ho ke poori details dikhegi!
+      </div>
+
       {/* ══ PRODUCT GRID ══ */}
       {(!visibleProducts || visibleProducts.length === 0) ? (
         <div className="text-center text-gray-500 mt-12 text-lg">
           {(!products || products.length === 0) ? "No products available right now" : "Koi product nahi mila — search/category change karo"}
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
-          {visibleProducts.map(product => {
-            const productId = product.id || product._id
-            const ppc = product.ppcReward || 0
-            const imgSrc = getImageSrc(product)
-
-            return (
-              <div
-                key={productId}
-                className="bg-white rounded-xl shadow hover:shadow-lg transition duration-200 overflow-hidden relative flex flex-col"
-              >
-                {/* ⭐ PPC Badge — sirf distributor/seller ko */}
-                {showPPC && ppc > 0 && (
-                  <div className="absolute top-2 right-2 z-10 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow flex items-center gap-1">
-                    💎 {ppc} PPC
-                  </div>
-                )}
-
-                {/* Product Image */}
-                {imgSrc ? (
-                  <div className="h-28 md:h-36 bg-gray-100 overflow-hidden">
-                    <img
-                      src={imgSrc}
-                      alt={product.title}
-                      className="h-full w-full object-cover"
-                      onError={(e) => (e.target.style.display = "none")}
-                    />
-                  </div>
-                ) : (
-                  <div className="h-28 md:h-36 bg-gray-50 flex items-center justify-center text-gray-300 text-3xl">
-                    📦
-                  </div>
-                )}
-
-                <div className="p-3 flex flex-col flex-1">
-                  {/* Title */}
-                  <h2 className="font-bold text-sm md:text-base text-gray-900 leading-snug truncate">
-                    {product.title}
-                  </h2>
-
-                  {/* Category */}
-                  {product.category && (
-                    <span className="text-xs text-purple-600 font-semibold mt-0.5">{product.category}</span>
-                  )}
-
-                  {/* Price */}
-                  <p className="text-gray-900 font-extrabold text-base mt-1">
-                    ₹{product.price}
-                  </p>
-
-                  {/* ⭐ PPC Detail line — sirf distributor/seller ko */}
-                  {showPPC && ppc > 0 && (
-                    <div className="mt-2 flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-lg px-2 py-1.5">
-                      <span className="text-base">💎</span>
-                      <div className="min-w-0">
-                        <span className="text-xs font-bold text-purple-700 block">
-                          {ppc} PPC Reward
-                        </span>
-                        <p className="text-[11px] text-purple-500 leading-tight">
-                          Is sale par {ppc} PPC milenge
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Add to Cart */}
-                  <button
-                    onClick={() => user ? addToCart(product) : setPage("login")}
-                    className="bg-yellow-400 hover:bg-yellow-500 active:scale-95 w-full mt-2 py-2 rounded-lg font-bold transition text-sm mt-auto"
-                  >
-                    🛒 Add to Cart
-                  </button>
-                </div>
-              </div>
-            )
-          })}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+          gap: 14,
+        }}>
+          {visibleProducts.map(product => (
+            <ProductCard
+              key={product.id || product._id}
+              product={product}
+              showPPC={showPPC}
+              onAddToCart={user ? addToCart : null}
+              onLoginRedirect={() => setPage("login")}
+            />
+          ))}
         </div>
       )}
     </div>
