@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import Navbar from "./components/Navbar"
+import HeroBanner from "./components/HeroBanner"
 
 // ── Pages ──
 import Home              from "./pages/Home"
@@ -277,7 +278,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} />
+      <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
+      {page === "home" && <HeroBanner setPage={setPage} />}
       <main className="p-3 sm:p-6 pb-24 sm:pb-6">
         {renderPage()}
       </main>

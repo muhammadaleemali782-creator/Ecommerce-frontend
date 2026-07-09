@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
-import HeroBanner from "../components/HeroBanner"
 
 /* ─── Flip Card Component ─── */
 export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
@@ -250,9 +249,6 @@ export default function Store({ setPage }) {
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
-
-      {/* ══ HERO BANNER / ADS (admin controlled) ══ */}
-      <HeroBanner setPage={setPage} />
 
       {/* ══ SEARCH BAR ══ */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12, alignItems: "center" }}>

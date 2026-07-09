@@ -63,29 +63,22 @@ export default function HeroBanner({ setPage }) {
   }
 
   return (
-    <>
-      {/* Counter the page's top padding so banner touches navbar directly (mobile + desktop) */}
-      <style>{`
-        .hero-banner-fullbleed { margin-top: -12px; }
-        @media (min-width: 640px) { .hero-banner-fullbleed { margin-top: -24px; } }
-      `}</style>
-      <div
-        className="hero-banner-fullbleed"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
-          // poori viewport width le leta hai — professional edge-to-edge hero
-          position: "relative",
-          left: "50%", right: "50%",
-          marginLeft: "-50vw", marginRight: "-50vw",
-          width: "100vw",
-          height: "clamp(280px, 60vh, 620px)",
-          overflow: "hidden",
-          marginBottom: 28,
-          background: "#0f172a",
-        }}
-      >
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
+        // poori viewport width le leta hai — professional edge-to-edge hero
+        position: "relative",
+        left: "50%", right: "50%",
+        marginLeft: "-50vw", marginRight: "-50vw",
+        width: "100vw",
+        height: "clamp(280px, 60vh, 620px)",
+        overflow: "hidden",
+        marginBottom: 28,
+        background: "#0f172a",
+      }}
+    >
       {/* ══ MEDIA ══ */}
       {mediaUrl && (
         banner.mediaType === "video" ? (
@@ -227,6 +220,5 @@ export default function HeroBanner({ setPage }) {
         </div>
       )}
       </div>
-    </>
   )
 }

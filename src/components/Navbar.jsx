@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import NotificationBell from "./NotificationBell"
 
-export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
+export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMargin = false }) {
   const { loggedIn, logout, user } = useAuth() || {}
   const safeUser = user || {}
   const role = safeUser?.role || "guest"
@@ -151,7 +151,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   return (
     <>
       {/* ─── DESKTOP NAVBAR ─── */}
-      <header style={{ display:isMobile?"none":"flex", justifyContent:"space-between", alignItems:"center", background:"#fff", padding:"16px", borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)", marginBottom:24, flexWrap:"wrap", gap:8 }}>
+      <header style={{ display:isMobile?"none":"flex", justifyContent:"space-between", alignItems:"center", background:"#fff", padding:"16px", borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)", marginBottom:noBottomMargin?0:24, flexWrap:"wrap", gap:8 }}>
         <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>EDUCA Store</h1>
         <div style={{ display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
           {publicBtns.map(b => (
@@ -184,7 +184,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       </header>
 
       {/* ─── MOBILE TOP BAR ─── */}
-      <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
+      <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:noBottomMargin?0:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
         <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EDUCA Store</h1>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           {loggedIn && (
