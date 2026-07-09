@@ -4,8 +4,9 @@ import { useAuth } from "../context/AuthContext"
 import AdSlot from "../components/AdSlot"
 
 /* ─── Flip Card Component ─── */
-export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
+export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, setPage }) {
   const [flipped, setFlipped] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
   const productId = product.id || product._id
   const ppc = product.ppcReward || 0
@@ -21,6 +22,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) 
   const imgSrc = getImageSrc(product)
 
   return (
+    <>
     <div
       style={{
         perspective: "1000px",
@@ -125,7 +127,12 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) 
             <button
               onClick={e => {
                 e.stopPropagation()
-                onAddToCart ? onAddToCart(product) : onLoginRedirect?.()
+                if (onAddToCart) {
+                  onAddToCart(product)
+                  setJustAdded(true)
+                } else {
+                  onLoginRedirect?.()
+                }
               }}
               style={{
                 marginTop: "auto",
@@ -221,6 +228,58 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) 
         </div>
       </div>
     </div>
+
+    {/* ══ ADDED TO CART POPUP ══ */}
+    {justAdded && (
+      <div
+        onClick={() => setJustAdded(false)}
+        style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(15,23,42,0.55)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 20,
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: "#fff", borderRadius: 18, padding: "28px 24px",
+            maxWidth: 340, width: "100%", textAlign: "center",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ fontSize: 40, marginBottom: 10 }}>🛒✅</div>
+          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#1e293b" }}>
+            Cart mein add ho gaya!
+          </h3>
+          <p style={{ fontSize: 13, color: "#64748b", margin: "8px 0 20px" }}>
+            Kya aap aur shopping karna chahte hain, ya order complete karna chahte hain?
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <button
+              onClick={() => setPage?.("cart")}
+              style={{
+                background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
+                border: "none", borderRadius: 10, padding: "12px 0",
+                fontWeight: 800, fontSize: 14, color: "#1e293b", cursor: "pointer",
+              }}
+            >
+              ✅ Order Complete Karo
+            </button>
+            <button
+              onClick={() => setJustAdded(false)}
+              style={{
+                background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 10,
+                padding: "12px 0", fontWeight: 700, fontSize: 14, color: "#374151", cursor: "pointer",
+              }}
+            >
+              🛍️ Shopping Jaari Rakhein
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 
@@ -349,6 +408,7 @@ export default function Store({ setPage }) {
               showPPC={showPPC}
               onAddToCart={user ? addToCart : null}
               onLoginRedirect={() => setPage("login")}
+              setPage={setPage}
             />
           ))}
         </div>

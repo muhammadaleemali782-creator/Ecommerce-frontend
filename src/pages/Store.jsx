@@ -133,6 +133,7 @@ export default function Store({ setPage }) {
               showPPC={showPPC}
               onAddToCart={user ? addToCart : null}
               onLoginRedirect={() => setPage("login")}
+              setPage={setPage}
             />
           ))}
         </div>

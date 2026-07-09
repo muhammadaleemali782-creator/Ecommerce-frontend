@@ -17,6 +17,14 @@ export default function HeroBanner({ setPage }) {
   const [muted, setMuted]     = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const touchX = useRef(null)
+  const videoRef = useRef(null)
+
+  // ⭐ React kabhi <video> ka `muted` prop update ke baad DOM mein reflect
+  // nahi karta — isliye direct DOM property set karo taake sound toggle
+  // reliably kaam kare
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted, index])
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -95,6 +103,7 @@ export default function HeroBanner({ setPage }) {
         activeMediaType === "video" ? (
           <video
             key={mediaUrl}
+            ref={videoRef}
             src={mediaUrl}
             autoPlay muted={muted} loop playsInline
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}

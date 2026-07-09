@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const API = `${import.meta.env.VITE_API_URL}`
 
@@ -15,6 +15,14 @@ export default function AdSlot({ slot, setPage }) {
   const [loaded, setLoaded]   = useState(false)
   const [muted, setMuted]     = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const videoRef = useRef(null)
+
+  // ⭐ React kabhi <video> ka `muted` prop update ke baad DOM mein reflect
+  // nahi karta — isliye direct DOM property set karo taake sound toggle
+  // reliably kaam kare
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted, banner])
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -74,6 +82,7 @@ export default function AdSlot({ slot, setPage }) {
         activeMediaType === "video" ? (
           <video
             key={mediaUrl}
+            ref={videoRef}
             src={mediaUrl}
             autoPlay muted={muted} loop playsInline
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
