@@ -14,6 +14,7 @@ export default function HeroBanner({ setPage }) {
   const [banners, setBanners] = useState([])
   const [index, setIndex]     = useState(0)
   const [loaded, setLoaded]   = useState(false)
+  const [muted, setMuted]     = useState(true)
   const touchX = useRef(null)
 
   useEffect(() => {
@@ -62,29 +63,36 @@ export default function HeroBanner({ setPage }) {
   }
 
   return (
-    <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      style={{
-        // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
-        // poori viewport width le leta hai — professional edge-to-edge hero
-        position: "relative",
-        left: "50%", right: "50%",
-        marginLeft: "-50vw", marginRight: "-50vw",
-        width: "100vw",
-        height: "clamp(280px, 60vh, 620px)",
-        overflow: "hidden",
-        marginBottom: 28,
-        background: "#0f172a",
-      }}
-    >
+    <>
+      {/* Counter the page's top padding so banner touches navbar directly (mobile + desktop) */}
+      <style>{`
+        .hero-banner-fullbleed { margin-top: -12px; }
+        @media (min-width: 640px) { .hero-banner-fullbleed { margin-top: -24px; } }
+      `}</style>
+      <div
+        className="hero-banner-fullbleed"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
+          // poori viewport width le leta hai — professional edge-to-edge hero
+          position: "relative",
+          left: "50%", right: "50%",
+          marginLeft: "-50vw", marginRight: "-50vw",
+          width: "100vw",
+          height: "clamp(280px, 60vh, 620px)",
+          overflow: "hidden",
+          marginBottom: 28,
+          background: "#0f172a",
+        }}
+      >
       {/* ══ MEDIA ══ */}
       {mediaUrl && (
         banner.mediaType === "video" ? (
           <video
             key={mediaUrl}
             src={mediaUrl}
-            autoPlay muted loop playsInline
+            autoPlay muted={muted} loop playsInline
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
           />
         ) : (
@@ -177,6 +185,25 @@ export default function HeroBanner({ setPage }) {
         </div>
       )}
 
+      {/* ══ SOUND TOGGLE (video banners only) ══ */}
+      {banner.mediaType === "video" && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setMuted(m => !m) }}
+          aria-label={muted ? "Sound on karo" : "Sound off karo"}
+          style={{
+            position: "absolute", top: "clamp(12px,2vw,20px)", right: "clamp(12px,2vw,20px)",
+            zIndex: 6, width: 36, height: 36, borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.3)",
+            background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(4px)",
+            color: "#fff", fontSize: 16, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          {muted ? "🔇" : "🔊"}
+        </button>
+      )}
+
       {/* ══ CAROUSEL DOTS ══ */}
       {banners.length > 1 && (
         <div style={{
@@ -199,6 +226,7 @@ export default function HeroBanner({ setPage }) {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
