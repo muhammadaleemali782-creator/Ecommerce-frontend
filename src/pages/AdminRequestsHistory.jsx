@@ -9,7 +9,8 @@ export default function AdminRequestHistory() {
   const [search,setSearch]=useState("")
   const [statusFilter,setStatusFilter]=useState("")
   const [typeFilter,setTypeFilter]=useState("")
-  const [dateFilter,setDateFilter]=useState("")
+  const [dateFilter,setDateFilter]=useState("")        // requested date
+  const [decidedDateFilter,setDecidedDateFilter]=useState("")  // ⭐ NEW - approve/reject date
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +29,9 @@ export default function AdminRequestHistory() {
   }, [])
 
   /* ================= FILTER LOGIC ================= */
+
+  /* ⭐ Jab decision liya gaya (approve/reject) — jo bhi field mila wahi use karo */
+  const getDecidedAt = (r) => r.approvedAt || r.rejectedAt || null
 
   const filteredRequests=requests.filter(r=>{
 
@@ -49,7 +53,12 @@ export default function AdminRequestHistory() {
       .toISOString()
       .slice(0,10)===dateFilter
 
-    return (emailMatch||idMatch)&&statusMatch&&typeMatch&&dateMatch
+    const decidedAt = getDecidedAt(r)
+    const decidedDateMatch=
+      decidedDateFilter==="" ||
+      (decidedAt && new Date(decidedAt).toISOString().slice(0,10)===decidedDateFilter)
+
+    return (emailMatch||idMatch)&&statusMatch&&typeMatch&&dateMatch&&decidedDateMatch
 
   })
 
@@ -91,12 +100,25 @@ export default function AdminRequestHistory() {
           <option value="password-reset">Password Reset</option>
         </select>
 
-        <input
-        type="date"
-        value={dateFilter}
-        onChange={e=>setDateFilter(e.target.value)}
-        className="border p-2 rounded"
-        />
+        <div className="flex flex-col">
+          <label className="text-[11px] text-gray-500 mb-0.5">Request Aane ki Date</label>
+          <input
+          type="date"
+          value={dateFilter}
+          onChange={e=>setDateFilter(e.target.value)}
+          className="border p-2 rounded"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-[11px] text-gray-500 mb-0.5">Approve/Reject Hone ki Date</label>
+          <input
+          type="date"
+          value={decidedDateFilter}
+          onChange={e=>setDecidedDateFilter(e.target.value)}
+          className="border p-2 rounded"
+          />
+        </div>
 
         <button
         onClick={()=>{
@@ -104,8 +126,9 @@ export default function AdminRequestHistory() {
           setStatusFilter("")
           setTypeFilter("")
           setDateFilter("")
+          setDecidedDateFilter("")
         }}
-        className="bg-gray-700 text-white px-4 py-2 rounded"
+        className="bg-gray-700 text-white px-4 py-2 rounded self-end"
         >
           Reset
         </button>
@@ -132,9 +155,16 @@ export default function AdminRequestHistory() {
 
           {/* ================= DATE DISPLAY ================= */}
 
-          <div className="text-xs text-gray-400">
-            {new Date(r.createdAt).toLocaleString()}
+          <div className="text-xs text-gray-400 mt-1">
+            🕐 Request aayi: {new Date(r.createdAt).toLocaleString("en-IN", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12: true })}
           </div>
+
+          {getDecidedAt(r) && (
+            <div className={`text-xs mt-0.5 ${r.status === "approved" ? "text-green-500" : "text-red-500"}`}>
+              {r.status === "approved" ? "✅ Approve hui:" : "❌ Reject hui:"}{" "}
+              {new Date(getDecidedAt(r)).toLocaleString("en-IN", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12: true })}
+            </div>
+          )}
 
         </div>
       ))}

@@ -225,7 +225,7 @@ export default function AdminRequests() {
                 )}
 
                 <span className="text-xs text-gray-400">
-                  🕐 {new Date(r.createdAt).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })}
+                  🕐 {new Date(r.createdAt).toLocaleString("en-IN", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12: true })}
                 </span>
               </div>
             </div>
