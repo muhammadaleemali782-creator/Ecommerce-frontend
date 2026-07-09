@@ -4,9 +4,11 @@ const API = `${import.meta.env.VITE_API_URL}`
 
 /* =====================================================
    HERO BANNER — Home page ke top pe dikhne wala professional ad slot.
+   Full-bleed (edge-to-edge, viewport ki poori width) — jaise modern
+   SaaS/landing pages (Rocket, Linear, Stripe) ke hero sections hote hain.
    Admin dashboard (Home Banners) se fully control hota hai:
-   image / gif / video, heading, subheading, CTA button, multiple
-   banners ho to auto-carousel.
+   image / gif / video, badge, heading, subheading, CTA button,
+   multiple banners ho to auto-carousel.
 ===================================================== */
 export default function HeroBanner({ setPage }) {
   const [banners, setBanners] = useState([])
@@ -38,6 +40,7 @@ export default function HeroBanner({ setPage }) {
 
   const banner = banners[index]
   const mediaUrl = banner.media ? `${API}${banner.media}` : null
+  const centered = banner.align === "center"
 
   const goTo = (i) => setIndex(((i % banners.length) + banners.length) % banners.length)
 
@@ -63,14 +66,16 @@ export default function HeroBanner({ setPage }) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{
+        // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
+        // poori viewport width le leta hai — professional edge-to-edge hero
         position: "relative",
-        width: "100%",
-        height: "clamp(200px, 34vw, 420px)",
-        borderRadius: 20,
+        left: "50%", right: "50%",
+        marginLeft: "-50vw", marginRight: "-50vw",
+        width: "100vw",
+        height: "clamp(280px, 60vh, 620px)",
         overflow: "hidden",
-        marginBottom: 20,
+        marginBottom: 28,
         background: "#0f172a",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
       }}
     >
       {/* ══ MEDIA ══ */}
@@ -96,62 +101,87 @@ export default function HeroBanner({ setPage }) {
       {banner.overlay !== false && (
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.65) 100%)",
+          background: centered
+            ? "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.55) 100%)"
+            : "linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.10) 100%)",
         }} />
       )}
 
       {/* ══ CONTENT ══ */}
-      {(banner.title || banner.subtitle || banner.buttonText) && (
+      {(banner.eyebrow || banner.title || banner.subtitle || banner.buttonText) && (
         <div style={{
-          position: "absolute", left: 0, right: 0, bottom: 0,
-          padding: "clamp(16px,4vw,36px)",
+          position: "absolute", inset: 0,
+          display: "flex", flexDirection: "column",
+          justifyContent: "center",
+          alignItems: centered ? "center" : "flex-start",
+          textAlign: centered ? "center" : "left",
+          padding: "clamp(20px,5vw,64px)",
           color: "#fff",
         }}>
-          {banner.title && (
-            <h2 style={{
-              margin: 0, marginBottom: banner.subtitle ? 6 : 0,
-              fontSize: "clamp(18px, 4vw, 32px)",
-              fontWeight: 900, lineHeight: 1.2,
-              textShadow: "0 2px 10px rgba(0,0,0,0.4)",
-              maxWidth: 560,
-            }}>
-              {banner.title}
-            </h2>
-          )}
-          {banner.subtitle && (
-            <p style={{
-              margin: 0, marginBottom: banner.buttonText ? 14 : 0,
-              fontSize: "clamp(12px, 2vw, 16px)",
-              fontWeight: 500, opacity: 0.92,
-              textShadow: "0 1px 6px rgba(0,0,0,0.35)",
-              maxWidth: 480,
-            }}>
-              {banner.subtitle}
-            </p>
-          )}
-          {banner.buttonText && (
-            <button
-              onClick={handleCTA}
-              style={{
-                background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
-                border: "none", borderRadius: 10,
-                padding: "clamp(8px,1.4vw,12px) clamp(16px,3vw,26px)",
-                fontWeight: 800, fontSize: "clamp(12px,1.6vw,14px)",
-                color: "#1e293b", cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(245,158,11,0.4)",
-              }}
-            >
-              {banner.buttonText}
-            </button>
-          )}
+          <div style={{ maxWidth: centered ? 700 : 620 }}>
+            {banner.eyebrow && (
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                background: "rgba(255,255,255,0.14)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                borderRadius: 20,
+                padding: "6px 14px",
+                fontSize: "clamp(11px, 1.4vw, 13px)",
+                fontWeight: 700,
+                marginBottom: 16,
+              }}>
+                {banner.eyebrow}
+              </div>
+            )}
+
+            {banner.title && (
+              <h2 style={{
+                margin: 0, marginBottom: banner.subtitle ? 12 : 0,
+                fontSize: "clamp(24px, 5vw, 48px)",
+                fontWeight: 900, lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                textShadow: "0 2px 16px rgba(0,0,0,0.35)",
+              }}>
+                {banner.title}
+              </h2>
+            )}
+
+            {banner.subtitle && (
+              <p style={{
+                margin: 0, marginBottom: banner.buttonText ? 24 : 0,
+                fontSize: "clamp(13px, 2vw, 18px)",
+                fontWeight: 500, opacity: 0.92, lineHeight: 1.5,
+                textShadow: "0 1px 8px rgba(0,0,0,0.3)",
+              }}>
+                {banner.subtitle}
+              </p>
+            )}
+
+            {banner.buttonText && (
+              <button
+                onClick={handleCTA}
+                style={{
+                  background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
+                  border: "none", borderRadius: 10,
+                  padding: "clamp(10px,1.6vw,15px) clamp(20px,3.4vw,34px)",
+                  fontWeight: 800, fontSize: "clamp(13px,1.7vw,16px)",
+                  color: "#1e293b", cursor: "pointer",
+                  boxShadow: "0 6px 20px rgba(245,158,11,0.45)",
+                }}
+              >
+                {banner.buttonText}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {/* ══ CAROUSEL DOTS ══ */}
       {banners.length > 1 && (
         <div style={{
-          position: "absolute", top: "clamp(12px,2vw,20px)", right: "clamp(12px,2vw,20px)",
-          display: "flex", gap: 6, zIndex: 5,
+          position: "absolute", bottom: "clamp(16px,3vw,28px)", left: 0, right: 0,
+          display: "flex", justifyContent: "center", gap: 7, zIndex: 5,
         }}>
           {banners.map((_, i) => (
             <button
@@ -159,7 +189,7 @@ export default function HeroBanner({ setPage }) {
               onClick={() => goTo(i)}
               aria-label={`Slide ${i + 1}`}
               style={{
-                width: i === index ? 18 : 7, height: 7, borderRadius: 4,
+                width: i === index ? 22 : 8, height: 8, borderRadius: 4,
                 border: "none", cursor: "pointer",
                 background: i === index ? "#fbbf24" : "rgba(255,255,255,0.55)",
                 transition: "width 0.25s",

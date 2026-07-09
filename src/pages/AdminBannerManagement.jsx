@@ -19,7 +19,7 @@ export default function AdminBannerManagement({ setPage }) {
   const [preview, setPreview]   = useState(null) // { url, type }
 
   const [form, setForm] = useState({
-    title: "", subtitle: "", buttonText: "", buttonLink: "",
+    title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "",
     linkType: "internal", overlay: true, order: 0, media: null,
   })
 
@@ -43,7 +43,7 @@ export default function AdminBannerManagement({ setPage }) {
   useEffect(() => { load() }, [])
 
   const resetForm = () => {
-    setForm({ title: "", subtitle: "", buttonText: "", buttonLink: "", linkType: "internal", overlay: true, order: 0, media: null })
+    setForm({ title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "", linkType: "internal", overlay: true, order: 0, media: null })
     setPreview(null)
     setEditing(null)
     setShowForm(false)
@@ -53,6 +53,7 @@ export default function AdminBannerManagement({ setPage }) {
     setEditing(b)
     setForm({
       title: b.title || "", subtitle: b.subtitle || "",
+      eyebrow: b.eyebrow || "", align: b.align || "left",
       buttonText: b.buttonText || "", buttonLink: b.buttonLink || "",
       linkType: b.linkType || "internal", overlay: b.overlay !== false,
       order: b.order || 0, media: null,
@@ -84,6 +85,8 @@ export default function AdminBannerManagement({ setPage }) {
       const fd = new FormData()
       fd.append("title", form.title)
       fd.append("subtitle", form.subtitle)
+      fd.append("eyebrow", form.eyebrow)
+      fd.append("align", form.align)
       fd.append("buttonText", form.buttonText)
       fd.append("buttonLink", form.buttonLink)
       fd.append("linkType", form.linkType)
@@ -207,9 +210,26 @@ export default function AdminBannerManagement({ setPage }) {
             </div>
 
             <div>
+              <label style={lbl}>Badge / Trust Text (optional)</label>
+              <input value={form.eyebrow} onChange={e => setForm(f => ({ ...f, eyebrow: e.target.value }))}
+                placeholder="e.g. ⭐ 4.3/5 Rating, 🔥 Limited Time Offer" style={inp} />
+              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+                Chhota pill-style badge jo heading ke upar dikhta hai — professional trust signal ke liye
+              </p>
+            </div>
+
+            <div>
               <label style={lbl}>Subheading (optional)</label>
               <input value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
                 placeholder="e.g. 50% tak ki chhoot sirf is hafte" style={inp} />
+            </div>
+
+            <div>
+              <label style={lbl}>Text Alignment</label>
+              <select value={form.align} onChange={e => setForm(f => ({ ...f, align: e.target.value }))} style={inp}>
+                <option value="left">⬅️ Left (image ke saath side-by-side feel)</option>
+                <option value="center">⏺️ Center (bold, symmetrical look)</option>
+              </select>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
