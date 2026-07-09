@@ -329,12 +329,12 @@ export default function AdminUsers() {
       {activeUsers.map(user => (
         <div
           key={user._id + refreshKey}
-          className="flex justify-between items-center border p-3 mb-2 rounded"
+          className="flex flex-col sm:flex-row sm:justify-between sm:items-center border p-3 mb-2 rounded gap-3"
         >
-          <div>
+          <div className="min-w-0">
             <b>{user.name}</b> ({getRoleLabel(user.role)})
 
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 break-all">
               {user.email}
             </div>
 
@@ -351,7 +351,7 @@ export default function AdminUsers() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
 
             <button
               onClick={() => setSelectedUser(user)}
@@ -363,7 +363,7 @@ export default function AdminUsers() {
             <button
               disabled={actionLoading === user._id}
               onClick={() => toggleBlock(user._id, user.isBlocked)}
-              className="bg-yellow-500 text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-yellow-500 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               {user.isBlocked ? "Unblock" : "Block"}
             </button>
@@ -371,14 +371,14 @@ export default function AdminUsers() {
             <button
               disabled={actionLoading === user._id}
               onClick={() => deleteUser(user._id)}
-              className="bg-red-600 text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               Delete
             </button>
 
             <button
               onClick={()=>resetPassword(user._id)}
-              className="bg-purple-600 text-white px-3 py-1 rounded"
+              className="bg-purple-600 text-white px-3 py-1 rounded text-sm"
             >
               Reset Password
             </button>
@@ -401,20 +401,20 @@ export default function AdminUsers() {
       {deletedUsers.map(user => (
         <div
           key={user._id}
-          className="flex justify-between items-center border p-3 mb-2 rounded bg-gray-100"
+          className="flex flex-col sm:flex-row sm:justify-between sm:items-center border p-3 mb-2 rounded bg-gray-100 gap-3"
         >
-          <div>
+          <div className="min-w-0">
             <b>{user.name}</b> ({getRoleLabel(user.role)})
             <div className="text-sm mt-1 text-gray-600 font-semibold">
               🗑 Deleted
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               disabled={actionLoading === user._id}
               onClick={() => restoreUser(user._id)}
-              className="bg-green-600 text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               Restore
             </button>
@@ -422,7 +422,7 @@ export default function AdminUsers() {
             <button
               disabled={actionLoading === user._id}
               onClick={() => permanentDeleteUser(user._id)}
-              className="bg-black text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-black text-white px-3 py-1 rounded text-sm disabled:opacity-50"
             >
               Permanent Delete
             </button>
