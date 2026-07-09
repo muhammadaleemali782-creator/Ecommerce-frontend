@@ -7,6 +7,7 @@ import AdSlot from "../components/AdSlot"
 export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, setPage }) {
   const [flipped, setFlipped] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
+  const { suppressCartPopup, setSuppressCartPopup } = useStore()
 
   const productId = product.id || product._id
   const ppc = product.ppcReward || 0
@@ -129,7 +130,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
                 e.stopPropagation()
                 if (onAddToCart) {
                   onAddToCart(product)
-                  setJustAdded(true)
+                  if (!suppressCartPopup) setJustAdded(true)
                 } else {
                   onLoginRedirect?.()
                 }
@@ -257,7 +258,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button
-              onClick={() => setPage?.("cart")}
+              onClick={() => { setJustAdded(false); setPage?.("cart") }}
               style={{
                 background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
                 border: "none", borderRadius: 10, padding: "12px 0",
@@ -267,7 +268,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
               ✅ Order Complete Karo
             </button>
             <button
-              onClick={() => setJustAdded(false)}
+              onClick={() => { setJustAdded(false); setSuppressCartPopup(true) }}
               style={{
                 background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 10,
                 padding: "12px 0", fontWeight: 700, fontSize: 14, color: "#374151", cursor: "pointer",

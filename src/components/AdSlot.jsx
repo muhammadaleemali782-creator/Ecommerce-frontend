@@ -114,7 +114,7 @@ export default function AdSlot({ slot, setPage }) {
           onClick={(e) => { e.stopPropagation(); setMuted(m => !m) }}
           aria-label={muted ? "Sound on karo" : "Sound off karo"}
           style={{
-            position: "absolute", top: 10, right: 10,
+            position: "absolute", top: 10, right: 10, zIndex: 10,
             width: 30, height: 30, borderRadius: "50%",
             border: "1px solid rgba(255,255,255,0.3)",
             background: "rgba(0,0,0,0.45)", color: "#fff",
@@ -129,7 +129,7 @@ export default function AdSlot({ slot, setPage }) {
       {/* ══ OVERLAY ══ */}
       {banner.overlay !== false && (
         <div style={{
-          position: "absolute", inset: 0,
+          position: "absolute", inset: 0, pointerEvents: "none",
           background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.6) 100%)",
         }} />
       )}

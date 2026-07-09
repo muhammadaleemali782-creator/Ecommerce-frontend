@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useStore } from "../context/StoreContext"
 
 export default function Cart({ setPage }) {
@@ -5,8 +6,15 @@ export default function Cart({ setPage }) {
     cart = [],
     incQty,
     decQty,
-    removeFromCart
+    removeFromCart,
+    setSuppressCartPopup
   } = useStore()
+
+  // ⭐ User yahan Cart/Order page pe wapas aa gaya — ab agli baar
+  // "Add to Cart" karne pe popup dobara dikhna chahiye
+  useEffect(() => {
+    setSuppressCartPopup(false)
+  }, [])
 
   /* ✅ FIX: Consistent ID resolver */
   const getItemId = (item) => item.id || item._id

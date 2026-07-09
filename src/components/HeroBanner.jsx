@@ -121,7 +121,7 @@ export default function HeroBanner({ setPage }) {
       {/* ══ OVERLAY ══ */}
       {banner.overlay !== false && (
         <div style={{
-          position: "absolute", inset: 0,
+          position: "absolute", inset: 0, pointerEvents: "none",
           background: centered
             ? "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.55) 100%)"
             : "linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.10) 100%)",

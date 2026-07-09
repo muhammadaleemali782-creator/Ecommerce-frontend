@@ -32,6 +32,13 @@ export const StoreProvider = ({ children }) => {
   const [networkTree, setNetworkTree] = useState([])
 
   /* =====================================================
+     🛍️ ADD-TO-CART POPUP SUPPRESSION
+     Jab user "Shopping Jaari Rakhein" choose kare, tab tak dobara popup
+     mat dikhao jab tak wo Cart/Order page pe wapas na aa jaye (ya page reload ho jaye)
+  ===================================================== */
+  const [suppressCartPopup, setSuppressCartPopup] = useState(false)
+
+  /* =====================================================
      🔥 FETCH PRODUCTS FROM BACKEND (FINAL FIX)
   ===================================================== */
   const fetchProducts = async () => {
@@ -236,7 +243,9 @@ export const StoreProvider = ({ children }) => {
         clearCart,
         addUser: (u) => setUsers(prev => [...prev, u]),
         fetchUsers,
-        fetchProducts
+        fetchProducts,
+        suppressCartPopup,
+        setSuppressCartPopup
       }}
     >
       {children}
