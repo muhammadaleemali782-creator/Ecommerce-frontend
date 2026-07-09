@@ -210,8 +210,8 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
             overflow: "hidden",
             display: "flex", flexDirection: "column",
           }}>
-            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
-              Product Details
+            <div style={{ fontSize: 10.5, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6, whiteSpace: "nowrap" }}>
+              Details
             </div>
             <p style={{
               fontSize: 13, lineHeight: 1.7, color: "#e2e8f0",
