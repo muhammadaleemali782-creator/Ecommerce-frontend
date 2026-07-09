@@ -15,11 +15,18 @@ export default function HeroBanner({ setPage }) {
   const [index, setIndex]     = useState(0)
   const [loaded, setLoaded]   = useState(false)
   const [muted, setMuted]     = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const touchX = useRef(null)
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+
+  useEffect(() => {
     let mounted = true
-    fetch(`${API}/api/banners`)
+    fetch(`${API}/api/banners?placement=hero`)
       .then(r => r.json())
       .then(data => {
         if (!mounted) return
@@ -40,7 +47,11 @@ export default function HeroBanner({ setPage }) {
   if (!loaded || banners.length === 0) return null
 
   const banner = banners[index]
-  const mediaUrl = banner.media ? `${API}${banner.media}` : null
+  const useMobileMedia = isMobile && banner.mediaMobile
+  const mediaUrl = useMobileMedia
+    ? `${API}${banner.mediaMobile}`
+    : (banner.media ? `${API}${banner.media}` : null)
+  const activeMediaType = useMobileMedia ? banner.mediaTypeMobile : banner.mediaType
   const centered = banner.align === "center"
 
   const goTo = (i) => setIndex(((i % banners.length) + banners.length) % banners.length)
@@ -81,7 +92,7 @@ export default function HeroBanner({ setPage }) {
     >
       {/* ══ MEDIA ══ */}
       {mediaUrl && (
-        banner.mediaType === "video" ? (
+        activeMediaType === "video" ? (
           <video
             key={mediaUrl}
             src={mediaUrl}
@@ -179,7 +190,7 @@ export default function HeroBanner({ setPage }) {
       )}
 
       {/* ══ SOUND TOGGLE (video banners only) ══ */}
-      {banner.mediaType === "video" && (
+      {activeMediaType === "video" && (
         <button
           onClick={(e) => { e.stopPropagation(); setMuted(m => !m) }}
           aria-label={muted ? "Sound on karo" : "Sound off karo"}

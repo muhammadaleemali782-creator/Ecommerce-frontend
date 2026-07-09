@@ -16,11 +16,13 @@ export default function AdminBannerManagement({ setPage }) {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing]   = useState(null)
   const [busy, setBusy]         = useState(false)
-  const [preview, setPreview]   = useState(null) // { url, type }
+  const [preview, setPreview]   = useState(null) // { url, type } — desktop/default media
+  const [previewMobile, setPreviewMobile] = useState(null) // { url, type } — mobile-specific media
 
   const [form, setForm] = useState({
     title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "",
-    linkType: "internal", overlay: true, order: 0, media: null,
+    linkType: "internal", overlay: true, order: 0, media: null, mediaMobile: null,
+    placement: "hero", removeMobileMedia: false,
   })
 
   const token = () => localStorage.getItem("token")
@@ -43,8 +45,9 @@ export default function AdminBannerManagement({ setPage }) {
   useEffect(() => { load() }, [])
 
   const resetForm = () => {
-    setForm({ title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "", linkType: "internal", overlay: true, order: 0, media: null })
+    setForm({ title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "", linkType: "internal", overlay: true, order: 0, media: null, mediaMobile: null, placement: "hero", removeMobileMedia: false })
     setPreview(null)
+    setPreviewMobile(null)
     setEditing(null)
     setShowForm(false)
   }
@@ -56,9 +59,11 @@ export default function AdminBannerManagement({ setPage }) {
       eyebrow: b.eyebrow || "", align: b.align || "left",
       buttonText: b.buttonText || "", buttonLink: b.buttonLink || "",
       linkType: b.linkType || "internal", overlay: b.overlay !== false,
-      order: b.order || 0, media: null,
+      order: b.order || 0, media: null, mediaMobile: null,
+      placement: b.placement || "hero", removeMobileMedia: false,
     })
     setPreview(null)
+    setPreviewMobile(null)
     setShowForm(true)
   }
 
@@ -71,6 +76,18 @@ export default function AdminBannerManagement({ setPage }) {
       setPreview({ url, type })
     } else {
       setPreview(null)
+    }
+  }
+
+  const onFileChangeMobile = (e) => {
+    const file = e.target.files[0]
+    setForm(f => ({ ...f, mediaMobile: file, removeMobileMedia: false }))
+    if (file) {
+      const url = URL.createObjectURL(file)
+      const type = file.type.startsWith("video/") ? "video" : "image"
+      setPreviewMobile({ url, type })
+    } else {
+      setPreviewMobile(null)
     }
   }
 
@@ -92,7 +109,10 @@ export default function AdminBannerManagement({ setPage }) {
       fd.append("linkType", form.linkType)
       fd.append("overlay", String(form.overlay))
       fd.append("order", form.order)
+      fd.append("placement", form.placement)
       if (form.media) fd.append("media", form.media)
+      if (form.mediaMobile) fd.append("mediaMobile", form.mediaMobile)
+      if (form.removeMobileMedia) fd.append("clearMobile", "true")
 
       const url    = editing ? `${API}/api/banners/${editing._id}` : `${API}/api/banners`
       const method = editing ? "PUT" : "POST"
@@ -143,6 +163,13 @@ export default function AdminBannerManagement({ setPage }) {
     video: { emoji: "🎬", label: "Video", color: "#7c3aed", bg: "#ede9fe" },
   }[type] || { emoji: "📄", label: type, color: "#475569", bg: "#f1f5f9" })
 
+  const placementLabel = (p) => ({
+    hero:  "🖼️ Hero Banner",
+    slot1: "📱 Slot 1",
+    slot2: "📱 Slot 2",
+    slot3: "📱 Slot 3",
+  }[p] || p)
+
   return (
     <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 4px" }}>
       <button onClick={() => setPage?.("admin")}
@@ -174,7 +201,20 @@ export default function AdminBannerManagement({ setPage }) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
             <div>
-              <label style={lbl}>Media (Image / GIF / Video) {editing ? "— badalne ke liye naya select karo" : "*"}</label>
+              <label style={lbl}>Yeh Ad Kahan Dikhega?</label>
+              <select value={form.placement} onChange={e => setForm(f => ({ ...f, placement: e.target.value }))} style={inp}>
+                <option value="hero">🖼️ Top Hero Banner (poori width, sabse upar)</option>
+                <option value="slot1">📱 Vertical Slot 1 (search bar ke neeche)</option>
+                <option value="slot2">📱 Vertical Slot 2 (product list ke neeche)</option>
+                <option value="slot3">📱 Vertical Slot 3 (extra jagah)</option>
+              </select>
+              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+                Vertical slots optional hain — jab tak koi banner na daalo, wahan kuch bhi nahi dikhega, page normal rahega.
+              </p>
+            </div>
+
+            <div>
+              <label style={lbl}>Media — Desktop / Default (Image / GIF / Video) {editing ? "— badalne ke liye naya select karo" : "*"}</label>
               <input type="file" accept="image/*,video/*" onChange={onFileChange} style={{ ...inp, padding: "6px" }} />
               <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
                 Video ke liye size chhota rakho (kam se kam 5-10 sec) taake page fast load ho — max 80MB.
@@ -200,6 +240,47 @@ export default function AdminBannerManagement({ setPage }) {
                     <img src={`${API}${editing.media}`} alt="current" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
                   )}
                 </div>
+              )}
+            </div>
+
+            <div>
+              <label style={lbl}>Media — Mobile ke liye Alag (Optional)</label>
+              <input type="file" accept="image/*,video/*" onChange={onFileChangeMobile} style={{ ...inp, padding: "6px" }} />
+              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+                Agar khali chhoda to mobile pe bhi upar wala (desktop) media hi dikhega. Vertical/portrait video best rahega mobile ke liye.
+              </p>
+
+              {/* Live preview of newly selected mobile file */}
+              {previewMobile && (
+                <div style={{ marginTop: 10, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200, width: 130 }}>
+                  {previewMobile.type === "video" ? (
+                    <video src={previewMobile.url} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                  ) : (
+                    <img src={previewMobile.url} alt="preview mobile" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                  )}
+                </div>
+              )}
+
+              {/* Existing mobile media preview when editing */}
+              {!previewMobile && !form.removeMobileMedia && editing?.mediaMobile && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200, width: 130, marginBottom: 6 }}>
+                    {editing.mediaTypeMobile === "video" ? (
+                      <video src={`${API}${editing.mediaMobile}`} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    ) : (
+                      <img src={`${API}${editing.mediaMobile}`} alt="current mobile" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    )}
+                  </div>
+                  <button type="button" onClick={() => setForm(f => ({ ...f, removeMobileMedia: true, mediaMobile: null }))}
+                    style={{ fontSize: 11, color: "#dc2626", background: "none", border: "none", cursor: "pointer", padding: 0, fontWeight: 700 }}>
+                    ✕ Mobile-specific media hatao (wapas desktop wala hi chalega)
+                  </button>
+                </div>
+              )}
+              {form.removeMobileMedia && (
+                <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6, fontWeight: 600 }}>
+                  Save karne ke baad mobile-specific media hat jayegi.
+                </p>
               )}
             </div>
 
@@ -310,6 +391,9 @@ export default function AdminBannerManagement({ setPage }) {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, background: badge.bg, color: badge.color }}>
                       {badge.emoji} {badge.label}
+                    </span>
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, background: "#f1f5f9", color: "#475569" }}>
+                      {placementLabel(b.placement)}
                     </span>
                     <div style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>{b.title || "(No heading)"}</div>
                   </div>

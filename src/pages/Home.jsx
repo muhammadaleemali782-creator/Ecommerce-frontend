@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
+import AdSlot from "../components/AdSlot"
 
 /* ─── Flip Card Component ─── */
 export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
@@ -325,6 +326,9 @@ export default function Store({ setPage }) {
         💡 Kisi bhi card pe tap karo — flip ho ke poori details dikhegi!
       </div>
 
+      {/* ══ AD SLOT 1 (optional — khali ho to kuch nahi dikhega) ══ */}
+      <AdSlot slot="slot1" setPage={setPage} />
+
       {/* ══ PRODUCT GRID ══ */}
       {visibleProducts.length === 0 ? (
         <div style={{ textAlign: "center", color: "#94a3b8", marginTop: 48, fontSize: 16 }}>
@@ -349,6 +353,9 @@ export default function Store({ setPage }) {
           ))}
         </div>
       )}
+
+      {/* ══ AD SLOT 2 (optional — khali ho to kuch nahi dikhega) ══ */}
+      <AdSlot slot="slot2" setPage={setPage} />
     </div>
   )
 }
