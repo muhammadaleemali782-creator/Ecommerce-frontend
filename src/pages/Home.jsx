@@ -7,7 +7,6 @@ import AdSlot from "../components/AdSlot"
 export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, setPage }) {
   const [flipped, setFlipped] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
-  const { suppressCartPopup, setSuppressCartPopup } = useStore()
 
   const productId = product.id || product._id
   const ppc = product.ppcReward || 0
@@ -130,7 +129,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
                 e.stopPropagation()
                 if (onAddToCart) {
                   onAddToCart(product)
-                  if (!suppressCartPopup) setJustAdded(true)
+                  setJustAdded(true)
                 } else {
                   onLoginRedirect?.()
                 }
@@ -210,8 +209,8 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
             overflow: "hidden",
             display: "flex", flexDirection: "column",
           }}>
-            <div style={{ fontSize: 10.5, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6, whiteSpace: "nowrap" }}>
-              Details
+            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+              Product Details
             </div>
             <p style={{
               fontSize: 13, lineHeight: 1.7, color: "#e2e8f0",
@@ -258,7 +257,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button
-              onClick={() => { setJustAdded(false); setPage?.("cart") }}
+              onClick={() => setPage?.("cart")}
               style={{
                 background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
                 border: "none", borderRadius: 10, padding: "12px 0",
@@ -268,7 +267,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
               ✅ Order Complete Karo
             </button>
             <button
-              onClick={() => { setJustAdded(false); setSuppressCartPopup(true) }}
+              onClick={() => setJustAdded(false)}
               style={{
                 background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 10,
                 padding: "12px 0", fontWeight: 700, fontSize: 14, color: "#374151", cursor: "pointer",
