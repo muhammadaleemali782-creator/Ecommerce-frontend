@@ -1,358 +1,232 @@
-import { useState, useMemo } from "react"
-import { useStore } from "../context/StoreContext"
-import { useAuth } from "../context/AuthContext"
-import HeroBanner from "../components/HeroBanner"
+import { useState, useEffect, useRef } from "react"
 
-/* ─── Flip Card Component ─── */
-export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect }) {
-  const [flipped, setFlipped] = useState(false)
+const API = `${import.meta.env.VITE_API_URL}`
 
-  const productId = product.id || product._id
-  const ppc = product.ppcReward || 0
+/* =====================================================
+   HERO BANNER — Home page ke top pe dikhne wala professional ad slot.
+   Full-bleed (edge-to-edge, viewport ki poori width) — jaise modern
+   SaaS/landing pages (Rocket, Linear, Stripe) ke hero sections hote hain.
+   Admin dashboard (Home Banners) se fully control hota hai:
+   image / gif / video, badge, heading, subheading, CTA button,
+   multiple banners ho to auto-carousel.
+===================================================== */
+export default function HeroBanner({ setPage }) {
+  const [banners, setBanners] = useState([])
+  const [index, setIndex]     = useState(0)
+  const [loaded, setLoaded]   = useState(false)
+  const [muted, setMuted]     = useState(true)
+  const touchX = useRef(null)
 
-  const getImageSrc = (p) => {
-    if (!p.image) return null
-    if (typeof p.image === "string")
-      return p.image.startsWith("http") ? p.image : `${import.meta.env.VITE_API_URL}/uploads/${p.image}`
-    if (p.image instanceof File) return URL.createObjectURL(p.image)
-    return null
+  useEffect(() => {
+    let mounted = true
+    fetch(`${API}/api/banners`)
+      .then(r => r.json())
+      .then(data => {
+        if (!mounted) return
+        setBanners(data.banners || [])
+        setLoaded(true)
+      })
+      .catch(() => mounted && setLoaded(true))
+    return () => { mounted = false }
+  }, [])
+
+  // Auto-advance carousel every 6s if more than 1 banner
+  useEffect(() => {
+    if (banners.length < 2) return
+    const t = setInterval(() => setIndex(i => (i + 1) % banners.length), 6000)
+    return () => clearInterval(t)
+  }, [banners.length])
+
+  if (!loaded || banners.length === 0) return null
+
+  const banner = banners[index]
+  const mediaUrl = banner.media ? `${API}${banner.media}` : null
+  const centered = banner.align === "center"
+
+  const goTo = (i) => setIndex(((i % banners.length) + banners.length) % banners.length)
+
+  const handleTouchStart = (e) => { touchX.current = e.touches[0].clientX }
+  const handleTouchEnd = (e) => {
+    if (touchX.current == null) return
+    const diff = e.changedTouches[0].clientX - touchX.current
+    if (Math.abs(diff) > 40) goTo(index + (diff < 0 ? 1 : -1))
+    touchX.current = null
   }
 
-  const imgSrc = getImageSrc(product)
+  const handleCTA = () => {
+    if (!banner.buttonLink) return
+    if (banner.linkType === "external") {
+      window.open(banner.buttonLink, "_blank", "noopener,noreferrer")
+    } else {
+      setPage?.(banner.buttonLink)
+    }
+  }
 
   return (
-    <div
-      style={{
-        perspective: "1000px",
-        cursor: "pointer",
-      }}
-      onClick={() => setFlipped(f => !f)}
-    >
+    <>
+      {/* Counter the page's top padding so banner touches navbar directly (mobile + desktop) */}
+      <style>{`
+        .hero-banner-fullbleed { margin-top: -12px; }
+        @media (min-width: 640px) { .hero-banner-fullbleed { margin-top: -24px; } }
+      `}</style>
       <div
+        className="hero-banner-fullbleed"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={{
+          // ⭐ FULL-BLEED: parent page ke max-width container se bahar nikal ke
+          // poori viewport width le leta hai — professional edge-to-edge hero
           position: "relative",
-          width: "100%",
-          transformStyle: "preserve-3d",
-          transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          left: "50%", right: "50%",
+          marginLeft: "-50vw", marginRight: "-50vw",
+          width: "100vw",
+          height: "clamp(280px, 60vh, 620px)",
+          overflow: "hidden",
+          marginBottom: 28,
+          background: "#0f172a",
         }}
       >
-        {/* ══ FRONT (normal flow — sets the card's height) ══ */}
-        <div
-          style={{
-            position: "relative",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            borderRadius: 16,
-            overflow: "hidden",
-            background: "#fff",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* PPC Badge */}
-          {showPPC && ppc > 0 && (
-            <div style={{
-              position: "absolute", top: 10, right: 10, zIndex: 10,
-              background: "linear-gradient(135deg,#7c3aed,#a855f7)",
-              color: "#fff", fontSize: 11, fontWeight: 800,
-              padding: "4px 10px", borderRadius: 20,
-              boxShadow: "0 2px 8px rgba(124,58,237,0.35)",
-              display: "flex", alignItems: "center", gap: 4,
-            }}>
-              💎 {ppc} PPC
-            </div>
-          )}
+      {/* ══ MEDIA ══ */}
+      {mediaUrl && (
+        banner.mediaType === "video" ? (
+          <video
+            key={mediaUrl}
+            src={mediaUrl}
+            autoPlay muted={muted} loop playsInline
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <img
+            key={mediaUrl}
+            src={mediaUrl}
+            alt={banner.title || "banner"}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        )
+      )}
 
-          {/* Tap hint */}
-          <div style={{
-            position: "absolute", top: 10, left: 10, zIndex: 10,
-            background: "rgba(0,0,0,0.35)", color: "#fff",
-            fontSize: 10, fontWeight: 600, padding: "3px 8px",
-            borderRadius: 20, backdropFilter: "blur(4px)",
-          }}>
-            tap for info
-          </div>
+      {/* ══ OVERLAY ══ */}
+      {banner.overlay !== false && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: centered
+            ? "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.55) 100%)"
+            : "linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.10) 100%)",
+        }} />
+      )}
 
-          {/* Image */}
-          {imgSrc ? (
-            <div style={{ height: 140, background: "#f1f5f9", overflow: "hidden", flexShrink: 0 }}>
-              <img src={imgSrc} alt={product.title}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={e => (e.target.style.display = "none")} />
-            </div>
-          ) : (
-            <div style={{
-              height: 140, background: "linear-gradient(135deg,#f8fafc,#f1f5f9)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 44, flexShrink: 0,
-            }}>📦</div>
-          )}
-
-          <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", flex: 1 }}>
-            <h2 style={{
-              fontWeight: 800, fontSize: 14, color: "#1e293b",
-              lineHeight: 1.3, marginBottom: 2,
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-            }}>{product.title}</h2>
-
-            {product.category && (
-              <span style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, marginBottom: 4 }}>
-                {product.category}
-              </span>
-            )}
-
-            <p style={{ fontWeight: 900, fontSize: 18, color: "#0f172a", marginBottom: 6 }}>
-              ₹{product.price}
-            </p>
-
-            {showPPC && ppc > 0 && (
+      {/* ══ CONTENT ══ */}
+      {(banner.eyebrow || banner.title || banner.subtitle || banner.buttonText) && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", flexDirection: "column",
+          justifyContent: "center",
+          alignItems: centered ? "center" : "flex-start",
+          textAlign: centered ? "center" : "left",
+          padding: "clamp(20px,5vw,64px)",
+          color: "#fff",
+        }}>
+          <div style={{ maxWidth: centered ? 700 : 620 }}>
+            {banner.eyebrow && (
               <div style={{
-                background: "linear-gradient(135deg,#faf5ff,#ede9fe)",
-                border: "1px solid #ddd6fe",
-                borderRadius: 10, padding: "7px 10px",
-                display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
+                display: "inline-flex", alignItems: "center", gap: 6,
+                background: "rgba(255,255,255,0.14)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                borderRadius: 20,
+                padding: "6px 14px",
+                fontSize: "clamp(11px, 1.4vw, 13px)",
+                fontWeight: 700,
+                marginBottom: 16,
               }}>
-                <span style={{ fontSize: 16 }}>💎</span>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: "#6d28d9" }}>{ppc} PPC Reward</div>
-                  <div style={{ fontSize: 10, color: "#8b5cf6" }}>Is sale par {ppc} PPC milenge</div>
-                </div>
+                {banner.eyebrow}
               </div>
             )}
 
-            <button
-              onClick={e => {
-                e.stopPropagation()
-                onAddToCart ? onAddToCart(product) : onLoginRedirect?.()
-              }}
-              style={{
-                marginTop: "auto",
-                background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
-                border: "none", borderRadius: 10,
-                padding: "9px 0", fontWeight: 800, fontSize: 13,
-                cursor: "pointer", width: "100%",
-                boxShadow: "0 2px 8px rgba(245,158,11,0.3)",
-                transition: "transform 0.15s",
-              }}
-              onMouseDown={e => e.currentTarget.style.transform = "scale(0.96)"}
-              onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-            >
-              🛒 Add to Cart
-            </button>
-          </div>
-        </div>
-
-        {/* ══ BACK (absolute — matches the height set by front) ══ */}
-        <div
-          style={{
-            position: "absolute", inset: 0,
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-            borderRadius: 16,
-            overflow: "hidden",
-            background: "linear-gradient(145deg,#1e1b4b,#312e81,#4c1d95)",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
-            display: "flex",
-            flexDirection: "column",
-            padding: "18px 16px",
-            color: "#fff",
-          }}
-        >
-          {/* Decorative circles */}
-          <div style={{
-            position: "absolute", top: -30, right: -30,
-            width: 100, height: 100, borderRadius: "50%",
-            background: "rgba(167,139,250,0.15)",
-          }} />
-          <div style={{
-            position: "absolute", bottom: -20, left: -20,
-            width: 80, height: 80, borderRadius: "50%",
-            background: "rgba(196,181,253,0.12)",
-          }} />
-
-          {/* Back header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, position: "relative" }}>
-            {imgSrc ? (
-              <img src={imgSrc} alt={product.title}
-                style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }}
-                onError={e => (e.target.style.display = "none")} />
-            ) : (
-              <div style={{
-                width: 40, height: 40, borderRadius: 8, fontSize: 22,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "rgba(255,255,255,0.1)",
-              }}>📦</div>
+            {banner.title && (
+              <h2 style={{
+                margin: 0, marginBottom: banner.subtitle ? 12 : 0,
+                fontSize: "clamp(24px, 5vw, 48px)",
+                fontWeight: 900, lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                textShadow: "0 2px 16px rgba(0,0,0,0.35)",
+              }}>
+                {banner.title}
+              </h2>
             )}
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>{product.title}</div>
-              {product.category && (
-                <div style={{ fontSize: 10, color: "#c4b5fd", fontWeight: 600 }}>{product.category}</div>
-              )}
-            </div>
+
+            {banner.subtitle && (
+              <p style={{
+                margin: 0, marginBottom: banner.buttonText ? 24 : 0,
+                fontSize: "clamp(13px, 2vw, 18px)",
+                fontWeight: 500, opacity: 0.92, lineHeight: 1.5,
+                textShadow: "0 1px 8px rgba(0,0,0,0.3)",
+              }}>
+                {banner.subtitle}
+              </p>
+            )}
+
+            {banner.buttonText && (
+              <button
+                onClick={handleCTA}
+                style={{
+                  background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
+                  border: "none", borderRadius: 10,
+                  padding: "clamp(10px,1.6vw,15px) clamp(20px,3.4vw,34px)",
+                  fontWeight: 800, fontSize: "clamp(13px,1.7vw,16px)",
+                  color: "#1e293b", cursor: "pointer",
+                  boxShadow: "0 6px 20px rgba(245,158,11,0.45)",
+                }}
+              >
+                {banner.buttonText}
+              </button>
+            )}
           </div>
-
-          {/* Description — fills the rest of the card */}
-          <div style={{
-            flex: 1, position: "relative",
-            background: "rgba(255,255,255,0.07)",
-            borderRadius: 10, padding: "12px 14px",
-            overflow: "hidden",
-            display: "flex", flexDirection: "column",
-          }}>
-            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
-              Product Details
-            </div>
-            <p style={{
-              fontSize: 13, lineHeight: 1.7, color: "#e2e8f0",
-              overflow: "auto", flex: 1,
-            }}>
-              {product.description
-                ? product.description
-                : "Is product ke baare mein koi description available nahi hai. Admin se contact karo zyada jaankari ke liye."}
-            </p>
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
-            tap to flip back
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ─── Main Store Page ─── */
-export default function Store({ setPage }) {
-  const { products = [], addToCart } = useStore()
-  const { user } = useAuth()
-
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("all")
-
-  const role = user?.role || "guest"
-  const showPPC = role === "distributor" || role === "seller"
-
-  const categories = useMemo(() => {
-    const cats = (products || []).map(p => p.category).filter(Boolean)
-    return [...new Set(cats)]
-  }, [products])
-
-  const visibleProducts = useMemo(() => {
-    return (products || []).filter(p => {
-      const matchesSearch = !search.trim() || p.title?.toLowerCase().includes(search.trim().toLowerCase())
-      const matchesCategory = category === "all" || p.category === category
-      return matchesSearch && matchesCategory
-    })
-  }, [products, search, category])
-
-  return (
-    <div style={{ maxWidth: 900, margin: "0 auto" }}>
-
-      {/* ══ HERO BANNER / ADS (admin controlled) ══ */}
-      <HeroBanner setPage={setPage} />
-
-      {/* ══ SEARCH BAR ══ */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12, alignItems: "center" }}>
-        <div style={{
-          position: "relative", flex: 1, minWidth: 0,
-          height: 44, borderRadius: 22,
-          border: "1px solid #e2e8f0", background: "#f8fafc",
-        }}>
-          <span style={{
-            position: "absolute", left: 14, top: "50%",
-            transform: "translateY(-50%)", color: "#94a3b8", fontSize: 16
-          }}>🔍</span>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search products..."
-            style={{
-              width: "100%", height: "100%",
-              padding: "10px 14px 10px 40px",
-              border: "none", outline: "none",
-              fontSize: 14, boxSizing: "border-box",
-              background: "transparent", borderRadius: 22,
-            }}
-          />
-        </div>
-
-        {categories.length > 0 && (
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            style={{
-              padding: "10px 16px", borderRadius: 22,
-              border: "1px solid #e2e8f0", fontSize: 13,
-              background: "#f8fafc", flexShrink: 0,
-            }}
-          >
-            <option value="all">Sabhi Categories</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        )}
-      </div>
-
-      {/* ══ CATEGORY PILLS ══ */}
-      {categories.length > 0 && (
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 16, paddingBottom: 4 }}>
-          {["all", ...categories].map(c => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              style={{
-                padding: "7px 18px", borderRadius: 20,
-                border: "1px solid #e2e8f0",
-                background: category === c ? "#1e293b" : "#fff",
-                color: category === c ? "#fff" : "#475569",
-                fontWeight: 700, fontSize: 13,
-                whiteSpace: "nowrap", cursor: "pointer",
-                flexShrink: 0, transition: "all 0.2s",
-              }}
-            >
-              {c === "all" ? "All" : c}
-            </button>
-          ))}
         </div>
       )}
 
-      {/* ══ FLIP HINT ══ */}
-      <div style={{
-        background: "linear-gradient(90deg,#ede9fe,#f0f9ff)",
-        border: "1px solid #ddd6fe",
-        borderRadius: 10, padding: "8px 14px",
-        fontSize: 12, color: "#7c3aed", fontWeight: 600,
-        marginBottom: 14, display: "flex", alignItems: "center", gap: 8,
-      }}>
-        💡 Kisi bhi card pe tap karo — flip ho ke poori details dikhegi!
-      </div>
+      {/* ══ SOUND TOGGLE (video banners only) ══ */}
+      {banner.mediaType === "video" && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setMuted(m => !m) }}
+          aria-label={muted ? "Sound on karo" : "Sound off karo"}
+          style={{
+            position: "absolute", top: "clamp(12px,2vw,20px)", right: "clamp(12px,2vw,20px)",
+            zIndex: 6, width: 36, height: 36, borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.3)",
+            background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(4px)",
+            color: "#fff", fontSize: 16, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          {muted ? "🔇" : "🔊"}
+        </button>
+      )}
 
-      {/* ══ PRODUCT GRID ══ */}
-      {visibleProducts.length === 0 ? (
-        <div style={{ textAlign: "center", color: "#94a3b8", marginTop: 48, fontSize: 16 }}>
-          {products.length === 0
-            ? "Abhi koi product available nahi hai"
-            : "Koi product nahi mila — search ya category change karo"}
-        </div>
-      ) : (
+      {/* ══ CAROUSEL DOTS ══ */}
+      {banners.length > 1 && (
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-          gap: 14,
+          position: "absolute", bottom: "clamp(16px,3vw,28px)", left: 0, right: 0,
+          display: "flex", justifyContent: "center", gap: 7, zIndex: 5,
         }}>
-          {visibleProducts.map(product => (
-            <ProductCard
-              key={product.id || product._id}
-              product={product}
-              showPPC={showPPC}
-              onAddToCart={user ? addToCart : null}
-              onLoginRedirect={() => setPage("login")}
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Slide ${i + 1}`}
+              style={{
+                width: i === index ? 22 : 8, height: 8, borderRadius: 4,
+                border: "none", cursor: "pointer",
+                background: i === index ? "#fbbf24" : "rgba(255,255,255,0.55)",
+                transition: "width 0.25s",
+                padding: 0,
+              }}
             />
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
