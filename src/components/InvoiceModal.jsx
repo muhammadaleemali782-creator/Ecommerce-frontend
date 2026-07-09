@@ -502,17 +502,57 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
   const handlePrint=()=>{
     const el=printRef.current
     if(!el)return
-    const win=window.open("","_blank","width=900,height=700")
+
     const css=printMode==="thermal"
       ?`@page{size:${thermalWidth}mm auto;margin:2mm}body{width:${thermalWidth}mm}`
       :`@page{size:A4;margin:10mm}`
-    win.document.write(`<html><head><title>Invoice ${invNo}</title>
+
+    // ⭐ MOBILE-SAFE PRINT: window.open("_blank") popups mobile browsers
+    // (Chrome/Safari) pe reliably print/save trigger nahi karte — timing aur
+    // tab-focus issues ki wajah se. Hidden <iframe> approach dono desktop
+    // aur mobile pe consistently kaam karta hai.
+    const iframe=document.createElement("iframe")
+    iframe.style.position="fixed"
+    iframe.style.right="0"
+    iframe.style.bottom="0"
+    iframe.style.width="0"
+    iframe.style.height="0"
+    iframe.style.border="0"
+    iframe.style.visibility="hidden"
+    document.body.appendChild(iframe)
+
+    const doc=iframe.contentWindow.document
+    doc.open()
+    doc.write(`<html><head><title>Invoice ${invNo}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <style>*{margin:0;padding:0;box-sizing:border-box}
       body{font-family:${printMode==="thermal"?"'Courier New',monospace":"'Segoe UI',Arial,sans-serif"};background:#fff}
       @media print{${css};body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
       </style></head><body>${el.innerHTML}</body></html>`)
-    win.document.close();win.focus()
-    setTimeout(()=>{win.print();win.close()},400)
+    doc.close()
+
+    let printed=false
+    const doPrint=()=>{
+      if(printed)return
+      printed=true
+      try{
+        iframe.contentWindow.focus()
+        iframe.contentWindow.print()
+      }catch(err){
+        console.error("Print error:",err)
+        alert("Print/Save nahi ho paya — dobara try karo")
+      }
+      // Cleanup — thodi der baad iframe hata do (print dialog band hone ke baad)
+      setTimeout(()=>{
+        if(iframe.parentNode) document.body.removeChild(iframe)
+      },1000)
+    }
+
+    // Images/fonts load hone ka thoda wait karo, phir print karo
+    if(iframe.onload!==undefined){
+      iframe.onload=()=>setTimeout(doPrint,250)
+    }
+    setTimeout(doPrint,500) // fallback — kuch mobile browsers onload fire nahi karte
   }
 
   if(!order)return null
