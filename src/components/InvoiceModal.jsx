@@ -39,7 +39,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
   const customBottom = (settings?.customFields||[]).filter(f=>f.position==="bottom")
 
   return (
-    <div style={{background:paperBg,borderRadius:16,overflow:"hidden",
+    <div style={{background:paperBg,borderRadius:16,overflow:"hidden",minWidth:680,
       boxShadow:"0 4px 24px rgba(0,0,0,0.12)",position:"relative",fontFamily:"'Segoe UI',Arial,sans-serif"}}>
 
       {/* Watermark */}
@@ -576,7 +576,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         )}
 
         {/* INVOICE */}
-        <div style={{padding:16,background:"#f1f5f9"}}>
+        <div style={{padding:16,background:"#f1f5f9",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
           {loading?(
             <div style={{textAlign:"center",padding:60,color:"#64748b"}}>Loading invoice...</div>
           ):(
