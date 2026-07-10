@@ -40,6 +40,20 @@ export default function AdminPPCSettings() {
     userWalletLevel2Reward: "",
     userWalletLevel3Reward: "",
     userWalletLevel4Reward: "",
+    // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
+    distSellerLevel1Threshold: "",
+    distSellerLevel2Threshold: "",
+    distSellerLevel3Threshold: "",
+    distSellerLevel4Threshold: "",
+    distSellerLevel0Name: "",
+    distSellerLevel1Name: "",
+    distSellerLevel2Name: "",
+    distSellerLevel3Name: "",
+    distSellerLevel4Name: "",
+    distSellerLevel1Reward: "",
+    distSellerLevel2Reward: "",
+    distSellerLevel3Reward: "",
+    distSellerLevel4Reward: "",
   })
   
   useEffect(() => {
@@ -106,6 +120,20 @@ export default function AdminPPCSettings() {
           userWalletLevel2Reward: data.userWalletLevelRewards?.level2 || "🎁 ₹750 bonus credit",
           userWalletLevel3Reward: data.userWalletLevelRewards?.level3 || "🎁 ₹1500 + free kit",
           userWalletLevel4Reward: data.userWalletLevelRewards?.level4 || "🎁 ₹5000 + trip",
+          // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
+          distSellerLevel1Threshold: data.distSellerLevelUpThresholds?.level1 || 50,
+          distSellerLevel2Threshold: data.distSellerLevelUpThresholds?.level2 || 200,
+          distSellerLevel3Threshold: data.distSellerLevelUpThresholds?.level3 || 500,
+          distSellerLevel4Threshold: data.distSellerLevelUpThresholds?.level4 || 2000,
+          distSellerLevel0Name: data.distSellerLevelNames?.level0 || "Seller",
+          distSellerLevel1Name: data.distSellerLevelNames?.level1 || "Silver Seller",
+          distSellerLevel2Name: data.distSellerLevelNames?.level2 || "Gold Seller",
+          distSellerLevel3Name: data.distSellerLevelNames?.level3 || "Platinum Seller",
+          distSellerLevel4Name: data.distSellerLevelNames?.level4 || "Diamond Seller",
+          distSellerLevel1Reward: data.distSellerLevelRewards?.level1 || "🎁 ₹250 bonus credit",
+          distSellerLevel2Reward: data.distSellerLevelRewards?.level2 || "🎁 ₹750 bonus credit",
+          distSellerLevel3Reward: data.distSellerLevelRewards?.level3 || "🎁 ₹1500 + free kit",
+          distSellerLevel4Reward: data.distSellerLevelRewards?.level4 || "🎁 ₹5000 + trip",
         })
       }
       
@@ -201,6 +229,26 @@ export default function AdminPPCSettings() {
             level2: formData.userWalletLevel2Reward,
             level3: formData.userWalletLevel3Reward,
             level4: formData.userWalletLevel4Reward,
+          },
+          // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
+          distSellerLevelUpThresholds: {
+            level1: Number(formData.distSellerLevel1Threshold),
+            level2: Number(formData.distSellerLevel2Threshold),
+            level3: Number(formData.distSellerLevel3Threshold),
+            level4: Number(formData.distSellerLevel4Threshold),
+          },
+          distSellerLevelNames: {
+            level0: formData.distSellerLevel0Name,
+            level1: formData.distSellerLevel1Name,
+            level2: formData.distSellerLevel2Name,
+            level3: formData.distSellerLevel3Name,
+            level4: formData.distSellerLevel4Name,
+          },
+          distSellerLevelRewards: {
+            level1: formData.distSellerLevel1Reward,
+            level2: formData.distSellerLevel2Reward,
+            level3: formData.distSellerLevel3Reward,
+            level4: formData.distSellerLevel4Reward,
           }
         })
       })
@@ -451,11 +499,80 @@ export default function AdminPPCSettings() {
             </div>
           </div>
 
-          {/* 🛍️ Direct Seller Wallet — Level Up Settings */}
-          <div style={{ marginTop:24, padding:"20px", background:"#eff6ff", borderRadius:12, border:"1px solid #bfdbfe" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Direct Seller Wallet — Level Up Settings</h3>
+          {/* 🏢 Distributor's OWN Direct Seller Wallet — Level Up Settings */}
+          <div style={{ marginTop:24, padding:"20px", background:"#fff7ed", borderRadius:12, border:"1px solid #fed7aa" }}>
+            <h3 style={{ fontSize:14, fontWeight:800, color:"#c2410c", marginBottom:4 }}>🏢 Distributor's Direct Seller Wallet — Level Up Settings</h3>
             <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Sirf <strong>Direct Seller Wallet</strong> ki PPC se level calculate hoga — naam aur threshold set karo
+              Yeh <strong>Distributor</strong> ke apne Direct Seller Wallet (jab distributor khud commission kamaye) ke liye alag settings hain — Seller role ke Direct Seller Wallet se bilkul alag
+            </p>
+            {[0,1,2,3,4].map(lvl => (
+              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
+                <div>
+                  <label style={{ fontSize:10, fontWeight:700, color:"#c2410c", display:"block", marginBottom:4 }}>
+                    Distributor's Seller Wallet Level {lvl} Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData[`distSellerLevel${lvl}Name`] || ""}
+                    onChange={e => setFormData({ ...formData, [`distSellerLevel${lvl}Name`]: e.target.value })}
+                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #fed7aa", fontSize:12, boxSizing:"border-box" }}
+                    placeholder={`Level ${lvl} naam`}
+                  />
+                </div>
+                {lvl > 0 ? (
+                  <div>
+                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
+                      PPC Required for Level {lvl}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData[`distSellerLevel${lvl}Threshold`] || ""}
+                      onChange={e => setFormData({ ...formData, [`distSellerLevel${lvl}Threshold`]: e.target.value })}
+                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #fed7aa", fontSize:12, boxSizing:"border-box" }}
+                      placeholder="e.g. 50"
+                    />
+                  </div>
+                ) : (
+                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>Starting level (koi threshold nahi)</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 🏆 Distributor's Direct Seller Wallet — Level Rewards */}
+          <div style={{ background:"#fff7ed", border:"1.5px solid #fed7aa", borderRadius:12, padding:20, marginTop:24 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+              <span style={{ fontSize:18 }}>🏆</span>
+              <div>
+                <h3 style={{ fontSize:14, fontWeight:800, color:"#c2410c", margin:0 }}>Distributor's Direct Seller Wallet — Level Rewards</h3>
+                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
+                  Distributor ke apne Direct Seller Wallet ki PPC se level milne par reward
+                </p>
+              </div>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {[1,2,3,4].map(n => (
+                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span style={{ fontSize:12, fontWeight:700, color:"#c2410c", minWidth:70 }}>
+                    Level {n}:
+                  </span>
+                  <input
+                    type="text"
+                    value={formData[`distSellerLevel${n}Reward`] || ""}
+                    onChange={e => setFormData(p => ({ ...p, [`distSellerLevel${n}Reward`]: e.target.value }))}
+                    placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
+                    style={{ flex:1, border:"1px solid #fed7aa", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 🛍️ Seller's OWN Direct Seller Wallet — Level Up Settings */}
+          <div style={{ marginTop:24, padding:"20px", background:"#eff6ff", borderRadius:12, border:"1px solid #bfdbfe" }}>
+            <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Seller's Direct Seller Wallet — Level Up Settings</h3>
+            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
+              Yeh <strong>Seller</strong> role ke apne Direct Seller Wallet ke liye hai — Distributor wale se alag
             </p>
             {[0,1,2,3,4].map(lvl => (
               <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
@@ -496,9 +613,9 @@ export default function AdminPPCSettings() {
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
               <span style={{ fontSize:18 }}>🏆</span>
               <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#0369a1", margin:0 }}>Direct Seller Wallet — Level Rewards</h3>
+                <h3 style={{ fontSize:14, fontWeight:800, color:"#0369a1", margin:0 }}>Seller's Direct Seller Wallet — Level Rewards</h3>
                 <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  Seller Wallet ki PPC se level milne par reward — aap control karo
+                  Seller apne Direct Seller Wallet ki PPC se level milne par reward — aap control karo
                 </p>
               </div>
             </div>
