@@ -26,6 +26,20 @@ export default function AdminPPCSettings() {
     level2Reward: "",
     level3Reward: "",
     level4Reward: "",
+    // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
+    userWalletLevel1Threshold: "",
+    userWalletLevel2Threshold: "",
+    userWalletLevel3Threshold: "",
+    userWalletLevel4Threshold: "",
+    userWalletLevel0Name: "",
+    userWalletLevel1Name: "",
+    userWalletLevel2Name: "",
+    userWalletLevel3Name: "",
+    userWalletLevel4Name: "",
+    userWalletLevel1Reward: "",
+    userWalletLevel2Reward: "",
+    userWalletLevel3Reward: "",
+    userWalletLevel4Reward: "",
   })
   
   useEffect(() => {
@@ -78,6 +92,20 @@ export default function AdminPPCSettings() {
           sellerLevel2Reward: data.sellerLevelRewards?.level2 || "🎁 ₹750 bonus credit",
           sellerLevel3Reward: data.sellerLevelRewards?.level3 || "🎁 ₹1500 + free kit",
           sellerLevel4Reward: data.sellerLevelRewards?.level4 || "🎁 ₹5000 + trip",
+          // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
+          userWalletLevel1Threshold: data.userWalletLevelUpThresholds?.level1 || 50,
+          userWalletLevel2Threshold: data.userWalletLevelUpThresholds?.level2 || 200,
+          userWalletLevel3Threshold: data.userWalletLevelUpThresholds?.level3 || 500,
+          userWalletLevel4Threshold: data.userWalletLevelUpThresholds?.level4 || 2000,
+          userWalletLevel0Name: data.userWalletLevelNames?.level0 || "User",
+          userWalletLevel1Name: data.userWalletLevelNames?.level1 || "Silver User",
+          userWalletLevel2Name: data.userWalletLevelNames?.level2 || "Gold User",
+          userWalletLevel3Name: data.userWalletLevelNames?.level3 || "Platinum User",
+          userWalletLevel4Name: data.userWalletLevelNames?.level4 || "Diamond User",
+          userWalletLevel1Reward: data.userWalletLevelRewards?.level1 || "🎁 ₹250 bonus credit",
+          userWalletLevel2Reward: data.userWalletLevelRewards?.level2 || "🎁 ₹750 bonus credit",
+          userWalletLevel3Reward: data.userWalletLevelRewards?.level3 || "🎁 ₹1500 + free kit",
+          userWalletLevel4Reward: data.userWalletLevelRewards?.level4 || "🎁 ₹5000 + trip",
         })
       }
       
@@ -153,6 +181,26 @@ export default function AdminPPCSettings() {
             level2: formData.sellerLevel2Reward,
             level3: formData.sellerLevel3Reward,
             level4: formData.sellerLevel4Reward,
+          },
+          // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
+          userWalletLevelUpThresholds: {
+            level1: Number(formData.userWalletLevel1Threshold),
+            level2: Number(formData.userWalletLevel2Threshold),
+            level3: Number(formData.userWalletLevel3Threshold),
+            level4: Number(formData.userWalletLevel4Threshold),
+          },
+          userWalletLevelNames: {
+            level0: formData.userWalletLevel0Name,
+            level1: formData.userWalletLevel1Name,
+            level2: formData.userWalletLevel2Name,
+            level3: formData.userWalletLevel3Name,
+            level4: formData.userWalletLevel4Name,
+          },
+          userWalletLevelRewards: {
+            level1: formData.userWalletLevel1Reward,
+            level2: formData.userWalletLevel2Reward,
+            level3: formData.userWalletLevel3Reward,
+            level4: formData.userWalletLevel4Reward,
           }
         })
       })
@@ -403,11 +451,11 @@ export default function AdminPPCSettings() {
             </div>
           </div>
 
-          {/* 🛍️ Seller Level Up Settings */}
+          {/* 🛍️ Direct Seller Wallet — Level Up Settings */}
           <div style={{ marginTop:24, padding:"20px", background:"#eff6ff", borderRadius:12, border:"1px solid #bfdbfe" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Seller Level Up Settings</h3>
+            <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Direct Seller Wallet — Level Up Settings</h3>
             <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Seller ki <strong>User Wallet + Direct Seller Wallet</strong> dono ki combined PPC se level calculate hoga — naam aur threshold set karo
+              Sirf <strong>Direct Seller Wallet</strong> ki PPC se level calculate hoga — naam aur threshold set karo
             </p>
             {[0,1,2,3,4].map(lvl => (
               <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
@@ -443,14 +491,14 @@ export default function AdminPPCSettings() {
             ))}
           </div>
 
-          {/* 🏆 Seller Level Rewards */}
-          <div style={{ background:"#f0f9ff", border:"1.5px solid #7dd3fc", borderRadius:12, padding:20 }}>
+          {/* 🏆 Direct Seller Wallet — Level Rewards */}
+          <div style={{ background:"#f0f9ff", border:"1.5px solid #7dd3fc", borderRadius:12, padding:20, marginTop:24 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
               <span style={{ fontSize:18 }}>🏆</span>
               <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#0369a1", margin:0 }}>Seller Level Rewards</h3>
+                <h3 style={{ fontSize:14, fontWeight:800, color:"#0369a1", margin:0 }}>Direct Seller Wallet — Level Rewards</h3>
                 <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  Seller ko combined PPC (User + Seller wallet) se level milne par reward — aap control karo
+                  Seller Wallet ki PPC se level milne par reward — aap control karo
                 </p>
               </div>
             </div>
@@ -466,6 +514,75 @@ export default function AdminPPCSettings() {
                     onChange={e => setFormData(p => ({ ...p, [`sellerLevel${n}Reward`]: e.target.value }))}
                     placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
                     style={{ flex:1, border:"1px solid #7dd3fc", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 👤 User Wallet — Level Up Settings */}
+          <div style={{ marginTop:24, padding:"20px", background:"#fdf4ff", borderRadius:12, border:"1px solid #e9d5ff" }}>
+            <h3 style={{ fontSize:14, fontWeight:800, color:"#a21caf", marginBottom:4 }}>👤 User Wallet — Level Up Settings</h3>
+            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
+              Sirf <strong>User Wallet</strong> ki PPC se level calculate hoga — naam aur threshold set karo
+            </p>
+            {[0,1,2,3,4].map(lvl => (
+              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
+                <div>
+                  <label style={{ fontSize:10, fontWeight:700, color:"#a21caf", display:"block", marginBottom:4 }}>
+                    User Wallet Level {lvl} Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData[`userWalletLevel${lvl}Name`] || ""}
+                    onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Name`]: e.target.value })}
+                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #e9d5ff", fontSize:12, boxSizing:"border-box" }}
+                    placeholder={`User Wallet Level ${lvl} naam`}
+                  />
+                </div>
+                {lvl > 0 ? (
+                  <div>
+                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
+                      PPC Required for User Wallet Level {lvl}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData[`userWalletLevel${lvl}Threshold`] || ""}
+                      onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Threshold`]: e.target.value })}
+                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #e9d5ff", fontSize:12, boxSizing:"border-box" }}
+                      placeholder="e.g. 50"
+                    />
+                  </div>
+                ) : (
+                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>Starting level (koi threshold nahi)</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 🏆 User Wallet — Level Rewards */}
+          <div style={{ background:"#fdf4ff", border:"1.5px solid #e9d5ff", borderRadius:12, padding:20, marginTop:24 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+              <span style={{ fontSize:18 }}>🏆</span>
+              <div>
+                <h3 style={{ fontSize:14, fontWeight:800, color:"#a21caf", margin:0 }}>User Wallet — Level Rewards</h3>
+                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
+                  User Wallet ki PPC se level milne par reward — aap control karo
+                </p>
+              </div>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {[1,2,3,4].map(n => (
+                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span style={{ fontSize:12, fontWeight:700, color:"#a21caf", minWidth:70 }}>
+                    Level {n}:
+                  </span>
+                  <input
+                    type="text"
+                    value={formData[`userWalletLevel${n}Reward`] || ""}
+                    onChange={e => setFormData(p => ({ ...p, [`userWalletLevel${n}Reward`]: e.target.value }))}
+                    placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
+                    style={{ flex:1, border:"1px solid #e9d5ff", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
                   />
                 </div>
               ))}
