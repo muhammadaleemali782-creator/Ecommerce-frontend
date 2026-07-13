@@ -167,152 +167,9 @@ export default function PPCWallet({ setPage }) {
         
       </div>
 
-      {/* ✅ Seller Combined PPC Summary — sirf seller ke liye */}
-      {walletData.role === "seller" && walletData.sellerLevelUpThresholds && (() => {
-        const userPPC   = walletData.wallets?.userWallet?.ppcCount   || 0
-        const sellerPPC = walletData.wallets?.sellerWallet?.ppcCount || 0
-        const combined  = userPPC + sellerPPC
-        const thresholds = walletData.sellerLevelUpThresholds
-        const levelNames = walletData.sellerLevelNames || {}
-        // compute current level
-        let currentLevel = 0
-        Object.entries(thresholds).forEach(([k, v]) => {
-          const n = parseInt(k.replace("level",""))
-          if (combined >= v) currentLevel = n
-        })
-        const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
-        const sortedLevels = Object.entries(thresholds)
-          .map(([k, v]) => ({ n: parseInt(k.replace("level","")), v }))
-          .sort((a, b) => a.n - b.n)
-        const nextLvl       = sortedLevels.find(l => l.n > currentLevel)
-        const nextName      = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-        const nextThreshold = nextLvl?.v || null
-        const progress      = nextThreshold ? Math.min(100, Math.round(combined / nextThreshold * 100)) : 100
-        return (
-          <div style={{
-            background:"linear-gradient(135deg,#f0f9ff,#eff6ff)",
-            border:"1.5px solid #bae6fd",
-            borderRadius:14,
-            padding:"16px 20px",
-          }}>
-            {/* Header row */}
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ fontSize:18 }}>📊</span>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:800, color:"#0369a1" }}>Combined PPC Level</div>
-                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>User Wallet + Direct Seller Wallet dono mil ke level decide karte hain</div>
-                </div>
-              </div>
-              <div style={{ textAlign:"right" }}>
-                <div style={{ fontSize:22, fontWeight:900, color:"#7c3aed" }}>{combined} PPC</div>
-                <div style={{ fontSize:10, color:"#94a3b8" }}>Total Combined</div>
-              </div>
-            </div>
-
-            {/* Breakdown bar */}
-            <div style={{ display:"flex", gap:8, marginBottom:12 }}>
-              <div style={{ flex:1, background:"#fff", border:"1px solid #e0f2fe", borderRadius:8, padding:"8px 12px", textAlign:"center" }}>
-                <div style={{ fontSize:10, color:"#64748b", marginBottom:2 }}>👤 User Wallet</div>
-                <div style={{ fontSize:16, fontWeight:800, color:"#0ea5e9" }}>{userPPC} <span style={{ fontSize:11, fontWeight:500 }}>PPC</span></div>
-              </div>
-              <div style={{ display:"flex", alignItems:"center", fontSize:18, color:"#94a3b8", fontWeight:700 }}>+</div>
-              <div style={{ flex:1, background:"#fff", border:"1px solid #e0f2fe", borderRadius:8, padding:"8px 12px", textAlign:"center" }}>
-                <div style={{ fontSize:10, color:"#64748b", marginBottom:2 }}>🛍️ Direct Seller Wallet</div>
-                <div style={{ fontSize:16, fontWeight:800, color:"#8b5cf6" }}>{sellerPPC} <span style={{ fontSize:11, fontWeight:500 }}>PPC</span></div>
-              </div>
-              <div style={{ display:"flex", alignItems:"center", fontSize:18, color:"#94a3b8", fontWeight:700 }}>=</div>
-              <div style={{ flex:1, background:"linear-gradient(135deg,#ede9fe,#dbeafe)", border:"1.5px solid #a5b4fc", borderRadius:8, padding:"8px 12px", textAlign:"center" }}>
-                <div style={{ fontSize:10, color:"#6d28d9", marginBottom:2, fontWeight:700 }}>⚡ Combined</div>
-                <div style={{ fontSize:16, fontWeight:900, color:"#7c3aed" }}>{combined} <span style={{ fontSize:11, fontWeight:500 }}>PPC</span></div>
-              </div>
-            </div>
-
-            {/* Current Level + Progress */}
-            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-              <div style={{ background:"linear-gradient(135deg,#2563eb,#7c3aed)", borderRadius:8, padding:"6px 14px", color:"#fff", fontSize:12, fontWeight:800, whiteSpace:"nowrap" }}>
-                {currentLevelName}
-              </div>
-              {nextName && (
-                <div style={{ flex:1 }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:"#64748b", marginBottom:4 }}>
-                    <span>Next: <span style={{ color:"#2563eb", fontWeight:700 }}>{nextName}</span></span>
-                    <span style={{ fontWeight:700, color:"#7c3aed" }}>{combined}/{nextThreshold} PPC</span>
-                  </div>
-                  <div style={{ height:8, background:"#c7d2fe", borderRadius:99, overflow:"hidden" }}>
-                    <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#2563eb,#7c3aed)", borderRadius:99, transition:"width 0.5s ease" }}/>
-                  </div>
-                </div>
-              )}
-              {!nextName && (
-                <div style={{ fontSize:11, fontWeight:700, color:"#92400e", background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"4px 10px" }}>
-                  🏆 Max Level!
-                </div>
-              )}
-            </div>
-            {nextName && (
-              <div style={{ fontSize:10, color:"#94a3b8", textAlign:"right" }}>
-                {nextThreshold - combined} PPC aur chahiye → {nextName}
-              </div>
-            )}
-
-            {/* ✅ Level Roadmap & Rewards — collapsible */}
-            {walletData.sellerLevelRewards && (() => {
-              const rewards = walletData.sellerLevelRewards || {}
-              const names   = walletData.sellerLevelNames   || {}
-              const thr     = walletData.sellerLevelUpThresholds || {}
-              const sorted  = Object.entries(thr)
-                .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
-                .sort((a,b) => a.n - b.n)
-              let curLvl = 0
-              sorted.forEach(({ n, v }) => { if (combined >= v) curLvl = n })
-              return (
-                <div style={{ marginTop:12 }}>
-                  <button
-                    onClick={() => setShowRoadmap(p => ({ ...p, sellerTop: !p.sellerTop }))}
-                    style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", borderTop:"1px solid #e0f2fe", marginTop:4 }}
-                  >
-                    <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
-                    <span style={{ fontSize:11, color:"#60a5fa", fontWeight:600 }}>{showRoadmap.sellerTop ? "▲ Chhupao" : "▼ Dikhao"}</span>
-                  </button>
-                  {showRoadmap.sellerTop && (
-                    <div style={{ marginTop:6 }}>
-                      {sorted.map(({ n, v }) => {
-                        const lvlName = names[`level${n}`]   || `Level ${n}`
-                        const reward  = rewards[`level${n}`] || ""
-                        const done    = combined >= v
-                        const current = curLvl === n
-                        return (
-                          <div key={n} style={{
-                            padding:"8px 10px", borderRadius:8, marginBottom:4,
-                            background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
-                            border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
-                          }}>
-                            <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
-                              <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
-                              <div style={{ flex:1, minWidth:0 }}>
-                                <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#1d4ed8" : "#374151", lineHeight:"1.4" }}>
-                                  {lvlName}
-                                </div>
-                                {reward && (
-                                  <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
-                                    {done ? "🎁 " : "💡 "}{reward}
-                                  </div>
-                                )}
-                              </div>
-                              <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
-          </div>
-        )
-      })()}
+      {/* ✅ NOTE: User Wallet aur Direct Seller Wallet ab poori tarah alag-alag
+          level settings use karte hain (admin PPC Settings se) — isliye combined
+          summary hata diya, ab har wallet apna level apne card ke andar dikhayega */}
       
       {/* Wallets Section */}
       {walletData.wallets && (
@@ -540,6 +397,168 @@ export default function PPCWallet({ setPage }) {
                             <span style={{ fontSize:11, color:"#60a5fa", fontWeight:600 }}>{showRoadmap[`${key}_dist`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
                           </button>
                           {showRoadmap[`${key}_dist`] && sortedLevels.map(({ n, v }) => {
+                            const lvlName = levelNames[`level${n}`]   || `Level ${n}`
+                            const reward  = levelRewards[`level${n}`] || ""
+                            const done    = ppc >= v
+                            const current = currentLevel === n
+                            return (
+                              <div key={n} style={{
+                                padding:"8px 10px", borderRadius:8, marginBottom:4,
+                                background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
+                                border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
+                              }}>
+                                <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
+                                  <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
+                                  <div style={{ flex:1, minWidth:0 }}>
+                                    <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#1d4ed8" : "#374151", lineHeight:"1.4" }}>
+                                      {lvlName}
+                                    </div>
+                                    {reward && (
+                                      <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
+                                        {done ? "🎁 " : "💡 "}{reward}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
+
+                    {/* ✅ Seller ke User Wallet mein apna alag level roadmap */}
+                    {key === "userWallet" && walletData.role === "seller" && walletData.userWalletLevelUpThresholds && Object.keys(walletData.userWalletLevelUpThresholds).length > 0 && (() => {
+                      const thresholds   = walletData.userWalletLevelUpThresholds
+                      const levelNames   = walletData.userWalletLevelNames   || {}
+                      const levelRewards = walletData.userWalletLevelRewards || {}
+                      const ppc          = wallet.ppcCount || 0
+                      let currentLevel   = 0
+                      const sortedLevels = Object.entries(thresholds)
+                        .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
+                        .sort((a,b) => a.n - b.n)
+                      sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
+                      const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "User" : `Level ${currentLevel}`)
+                      const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
+                      const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
+                      const nextThreshold    = nextLvl?.v || null
+                      const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
+                      return (
+                        <div style={{ marginBottom:14 }}>
+                          <div style={{ background:"linear-gradient(135deg,#0ea5e9,#2563eb)", borderRadius:10, padding:"10px 14px", marginBottom:10, color:"#fff" }}>
+                            <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
+                            <div style={{ fontSize:16, fontWeight:800 }}>{currentLevelName}</div>
+                          </div>
+                          {nextLevelName ? (
+                            <div style={{ marginBottom:10 }}>
+                              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                                <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
+                                  Next: <span style={{ color:"#0ea5e9" }}>{nextLevelName}</span>
+                                </span>
+                                <span style={{ fontSize:11, fontWeight:700, color:"#0ea5e9" }}>{ppc} / {nextThreshold} PPC</span>
+                              </div>
+                              <div style={{ height:10, background:"#bae6fd", borderRadius:99, overflow:"hidden" }}>
+                                <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#0ea5e9,#2563eb)", borderRadius:99, transition:"width 0.5s ease" }}/>
+                              </div>
+                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
+                                {nextThreshold - ppc} PPC aur chahiye level up ke liye
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600, marginBottom:10 }}>
+                              👑 Maximum level achieve kar liya!
+                            </div>
+                          )}
+                          <button
+                            onClick={() => setShowRoadmap(p => ({ ...p, [`${key}_user`]: !p[`${key}_user`] }))}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
+                          >
+                            <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
+                            <span style={{ fontSize:11, color:"#38bdf8", fontWeight:600 }}>{showRoadmap[`${key}_user`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
+                          </button>
+                          {showRoadmap[`${key}_user`] && sortedLevels.map(({ n, v }) => {
+                            const lvlName = levelNames[`level${n}`]   || `Level ${n}`
+                            const reward  = levelRewards[`level${n}`] || ""
+                            const done    = ppc >= v
+                            const current = currentLevel === n
+                            return (
+                              <div key={n} style={{
+                                padding:"8px 10px", borderRadius:8, marginBottom:4,
+                                background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
+                                border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
+                              }}>
+                                <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
+                                  <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
+                                  <div style={{ flex:1, minWidth:0 }}>
+                                    <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#0369a1" : "#374151", lineHeight:"1.4" }}>
+                                      {lvlName}
+                                    </div>
+                                    {reward && (
+                                      <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
+                                        {done ? "🎁 " : "💡 "}{reward}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
+
+                    {/* ✅ Seller ke apne Direct Seller Wallet mein alag level roadmap */}
+                    {key === "sellerWallet" && walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
+                      const thresholds   = walletData.sellerLevelUpThresholds
+                      const levelNames   = walletData.sellerLevelNames   || {}
+                      const levelRewards = walletData.sellerLevelRewards || {}
+                      const ppc          = wallet.ppcCount || 0
+                      let currentLevel   = 0
+                      const sortedLevels = Object.entries(thresholds)
+                        .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
+                        .sort((a,b) => a.n - b.n)
+                      sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
+                      const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
+                      const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
+                      const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
+                      const nextThreshold    = nextLvl?.v || null
+                      const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
+                      return (
+                        <div style={{ marginBottom:14 }}>
+                          <div style={{ background:"linear-gradient(135deg,#2563eb,#7c3aed)", borderRadius:10, padding:"10px 14px", marginBottom:10, color:"#fff" }}>
+                            <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
+                            <div style={{ fontSize:16, fontWeight:800 }}>{currentLevelName}</div>
+                          </div>
+                          {nextLevelName ? (
+                            <div style={{ marginBottom:10 }}>
+                              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                                <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
+                                  Next: <span style={{ color:"#2563eb" }}>{nextLevelName}</span>
+                                </span>
+                                <span style={{ fontSize:11, fontWeight:700, color:"#2563eb" }}>{ppc} / {nextThreshold} PPC</span>
+                              </div>
+                              <div style={{ height:10, background:"#bfdbfe", borderRadius:99, overflow:"hidden" }}>
+                                <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#2563eb,#7c3aed)", borderRadius:99, transition:"width 0.5s ease" }}/>
+                              </div>
+                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
+                                {nextThreshold - ppc} PPC aur chahiye level up ke liye
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600, marginBottom:10 }}>
+                              👑 Maximum level achieve kar liya!
+                            </div>
+                          )}
+                          <button
+                            onClick={() => setShowRoadmap(p => ({ ...p, [`${key}_seller`]: !p[`${key}_seller`] }))}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
+                          >
+                            <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
+                            <span style={{ fontSize:11, color:"#60a5fa", fontWeight:600 }}>{showRoadmap[`${key}_seller`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
+                          </button>
+                          {showRoadmap[`${key}_seller`] && sortedLevels.map(({ n, v }) => {
                             const lvlName = levelNames[`level${n}`]   || `Level ${n}`
                             const reward  = levelRewards[`level${n}`] || ""
                             const done    = ppc >= v
