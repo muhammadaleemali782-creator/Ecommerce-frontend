@@ -19,7 +19,8 @@ export default function AdminPasswordReset() {
 
     const data = await res.json()
 
-    setRequests(data)
+    // ⭐ FIX: agar server error/401 de (data array na ho), to crash na ho
+    setRequests(Array.isArray(data) ? data : [])
   }
 
   useEffect(() => {
