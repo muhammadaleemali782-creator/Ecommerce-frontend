@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import Navbar from "./components/Navbar"
 import HeroBanner from "./components/HeroBanner"
+import GrowthLoader from "./components/GrowthLoader"
 
 // ── Pages ──
 import Home              from "./pages/Home"
@@ -71,8 +72,10 @@ const Unauth = () => (
 
 function AppContent() {
   const [page, setPage] = useState("home")
+  const [booting, setBooting] = useState(true)
+  const [bootMsg, setBootMsg] = useState("")
   const { cart = [] }          = useStore() || {}
-  const { loggedIn, user, logout } = useAuth() || {}
+  const { loggedIn, user, logout, loading } = useAuth() || {}
   const { registerSetPage, pageBadge = {} } = useNotifications()
   const safeUser = user || {}
   const role     = safeUser?.role || "guest"
@@ -81,6 +84,27 @@ function AppContent() {
   useEffect(() => {
     registerSetPage(setPage)
   }, [registerSetPage])
+
+  /* 🌱 App khulte hi backend ko "jaga" do (Render free-tier cold-start).
+     Jab tak backend reply nahi karta ya 15s ho jate, GrowthLoader dikhta
+     rehta hai — user ko lagta nahi ki app atak gaya hai. */
+  useEffect(() => {
+    let done = false
+    const finish = () => { if (!done) { done = true; setBooting(false) } }
+
+    const slowTimer = setTimeout(() => {
+      setBootMsg("Server thoda sust hai (free hosting), bas thoda aur ruko...")
+    }, 4000)
+
+    // Safety cap — loader kabhi bhi hamesha ke liye stuck nahi rahega
+    const hardTimeout = setTimeout(finish, 15000)
+
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
+      .catch(() => {}) // backend so raha tha, ab wake ho gaya hoga — fail bhi ho to aage badho
+      .finally(finish)
+
+    return () => { clearTimeout(slowTimer); clearTimeout(hardTimeout) }
+  }, [])
 
   /* Auto block / session check */
   useEffect(() => {
@@ -278,6 +302,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
       <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
       {page === "home" && <HeroBanner setPage={setPage} />}
       <main className="p-3 sm:p-6 pb-24 sm:pb-6">
