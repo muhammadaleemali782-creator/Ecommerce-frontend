@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import InlineLoader from "../components/InlineLoader"
 
 /*
   =====================================================
@@ -81,7 +82,7 @@ export default function AdminAnalytics() {
   if (loading) {
     return (
       <div className="bg-white p-4 rounded shadow">
-        Loading analytics...
+        <InlineLoader label="Analytics tayaar ho rahi hai 📊" minHeight={160} />
       </div>
     )
   }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import InlineLoader from "../components/InlineLoader"
 
 export default function DistributorSellers({ distributorId, distributorName }) {
   const { user } = useAuth()
@@ -40,7 +41,7 @@ export default function DistributorSellers({ distributorId, distributorName }) {
       </h1>
 
       {loading ? (
-        <p className="text-gray-500">Loading sellers...</p>
+        <InlineLoader label="Sellers load ho rahe hain 👥" minHeight={120} />
       ) : sellers.length === 0 ? (
         <p className="text-gray-500">
           No sellers found for this distributor

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import InlineLoader from "../components/InlineLoader"
 
 const API = `${import.meta.env.VITE_API_URL}`
 
@@ -234,7 +235,7 @@ export default function AdminServices({ setPage }) {
 
       {/* ══ LIST ══ */}
       {loading ? (
-        <p style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>Loading...</p>
+        <InlineLoader minHeight={140} />
       ) : services.length === 0 ? (
         <div style={{ background: "#fff", borderRadius: 14, padding: 40, textAlign: "center", color: "#94a3b8" }}>
           Koi service add nahi ki hai abhi tak. "➕ Naya Service Add Karo" pe click karo.

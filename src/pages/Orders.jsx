@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
+import InlineLoader from "../components/InlineLoader"
 
 export default function Orders() {
   const { deleteOrder, printInvoice } = useStore()
@@ -85,7 +86,7 @@ export default function Orders() {
   if (loading) {
     return (
       <div className="bg-white p-6 rounded shadow text-center">
-        <h2 className="font-bold text-xl">Loading Orders...</h2>
+        <InlineLoader label="Tumhare orders load ho rahe hain 📦" minHeight={180} />
       </div>
     )
   }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import InlineLoader from "../components/InlineLoader"
 
 export default function MyCommission() {
 
@@ -73,11 +74,7 @@ export default function MyCommission() {
   /* ================= UI ================= */
 
   if (loading)
-    return (
-      <div className="p-6 text-center">
-        Loading commission...
-      </div>
-    )
+    return <InlineLoader label="Commission history load ho rahi hai 💰" minHeight={180} />
 
   if (error)
     return (

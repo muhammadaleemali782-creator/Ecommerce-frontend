@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react"
 import { useAuth } from "../context/AuthContext"
 import { getRoleLabel, getRoleLabelPlural } from "../utils/roleLabels"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import InlineLoader from "../components/InlineLoader"
 
 const STYLE = `
   @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
@@ -224,7 +225,7 @@ function MiniAnalytics({ userId, onClose }) {
   const tl = data?.timeline?.length ? data.timeline : Array.from({length:7},(_,i)=>({label:`D${i+1}`,total:0}))
   return (
     <div style={{ marginLeft:26, marginBottom:6, marginTop:2, background:"#f8fafc", borderRadius:10, border:"1px solid #e2e8f0", padding:"12px 14px" }}>
-      {loading ? <div style={{ textAlign:"center", padding:16, color:"#94a3b8", fontSize:12 }}>⏳ Loading...</div>
+      {loading ? <InlineLoader minHeight={60} />
         : !data ? <div style={{ textAlign:"center", padding:16, color:"#94a3b8", fontSize:12 }}>Koi data nahi</div>
         : <>
           <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:6 }}>
@@ -875,7 +876,7 @@ export default function MyNetwork() {
         </div>
       </div>
       <div style={{padding:"12px"}}>
-        {loading&&<div style={{textAlign:"center",padding:40,color:"#94a3b8"}}><div style={{fontSize:36,marginBottom:8}}>⏳</div><p style={{margin:0,fontSize:13}}>Loading your network...</p></div>}
+        {loading&&<InlineLoader label="Tumhara network load ho raha hai 🌳" minHeight={200} />}
         {error&&<div style={{padding:"12px 14px",background:"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:"1px solid #fecaca"}}>❌ {error}</div>}
         {viewMode==="graph"&&!loading&&(
           <div style={{background:"#fff",borderRadius:14,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",overflow:"hidden"}}>

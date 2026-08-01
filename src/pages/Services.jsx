@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import InlineLoader from "../components/InlineLoader"
 
 const API = `${import.meta.env.VITE_API_URL}`
 
@@ -101,7 +102,7 @@ export default function Services({ setPage }) {
   }
 
   if (loading) {
-    return <p style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>Loading services...</p>
+    return <InlineLoader label="Services load ho rahe hain 🧾" minHeight={160} />
   }
 
   if (services.length === 0) {

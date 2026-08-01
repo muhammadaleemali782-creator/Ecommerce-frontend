@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import InlineLoader from "../components/InlineLoader"
 
 /* =====================================================
    ADMIN WITHDRAWAL MANAGEMENT (MOBILE RESPONSIVE)
@@ -380,9 +381,7 @@ export default function AdminWithdrawalManagement() {
       {/* ============ REWARD REQUESTS LIST ============ */}
       {view === "rewards" && (
         loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-purple-600"></div>
-          </div>
+          <InlineLoader label="Reward requests load ho rahe hain 🎁" minHeight={160} />
         ) : rewardRequests.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-600">
             <p className="text-lg font-semibold mb-2">No reward requests found</p>
@@ -463,9 +462,7 @@ export default function AdminWithdrawalManagement() {
 
       {/* ============ WITHDRAWAL REQUESTS LIST ============ */}
       {view === "withdrawal" && (loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-orange-600"></div>
-        </div>
+        <InlineLoader label="Withdrawal requests load ho rahe hain 💸" minHeight={160} />
       ) : requests.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-600">
           <p className="text-lg font-semibold mb-2">No requests found</p>

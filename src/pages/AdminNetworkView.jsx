@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext"
 import VisualTree from "../admin/VisualTree"
 import { getRoleLabel, getRoleLabelPlural } from "../utils/roleLabels"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import InlineLoader from "../components/InlineLoader"
 
 const RC = {
   admin:       { bg:"#f5f3ff", border:"#7c3aed", text:"#5b21b6", dot:"#7c3aed", icon:"👑", label:"Admin" },
@@ -44,7 +45,7 @@ function InlineAnalytics({ userId, userName, userRole }) {
   return (
     <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"12px 14px",marginTop:2}}>
       {loading ? (
-        <div style={{fontSize:12,color:"#94a3b8",textAlign:"center",padding:"8px"}}>⏳ Loading analytics...</div>
+        <InlineLoader label="Analytics load ho rahi hai..." minHeight={60} />
       ) : !data ? (
         <div style={{fontSize:12,color:"#94a3b8",textAlign:"center",padding:"8px"}}>Koi data nahi</div>
       ) : (
@@ -318,7 +319,7 @@ export default function AdminNetworkView() {
   }
 
   const finalTimeline=analytics?.timeline?.length?analytics.timeline:Array.from({length:7},(_,i)=>({label:`Day ${i+1}`,total:0}))
-  if(loading) return <div className="bg-white p-6 rounded shadow">Loading network...</div>
+  if(loading) return <div className="bg-white p-6 rounded shadow"><InlineLoader label="Poora network tree load ho raha hai 🌳" minHeight={220} /></div>
   if(error)   return <div className="bg-white p-6 rounded shadow text-red-600">{error}</div>
 
   return (

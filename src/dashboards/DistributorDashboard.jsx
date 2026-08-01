@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
+import InlineLoader from "../components/InlineLoader"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Cell } from "recharts"
 
 export default function DistributorDashboard() {
@@ -328,7 +329,7 @@ export default function DistributorDashboard() {
                   ))}
                 </div>
               </div>
-              {loading ? <div style={{textAlign:"center",padding:24,color:"#94a3b8"}}>Loading...</div>
+              {loading ? <InlineLoader minHeight={80} />
               : filteredDl.map(u=>{
                 const rc=roleColors[u.role]||roleColors.user
                 return (
@@ -362,7 +363,7 @@ export default function DistributorDashboard() {
                   </div>
                 ))}
               </div>
-              {loading ? <div style={{textAlign:"center",padding:24,color:"#94a3b8"}}>Loading...</div>
+              {loading ? <InlineLoader minHeight={80} />
               : allOrders.length===0 ? <div style={{background:"#fff",borderRadius:18,padding:32,textAlign:"center",color:"#94a3b8"}}>📭 Koi order nahi</div>
               : allOrders.map(o=>(
                 <div key={o._id} style={{background:"#fff",borderRadius:14,padding:14,boxShadow:"0 1px 6px #0001",borderLeft:`4px solid ${sc(o.status)}`}}>
@@ -726,7 +727,7 @@ export default function DistributorDashboard() {
                 </div>
               ))}
             </div>
-            {loading ? <div style={{textAlign:"center",padding:32,color:"#94a3b8"}}>Loading...</div>
+            {loading ? <InlineLoader minHeight={100} />
             : allOrders.length===0 ? <div style={{textAlign:"center",padding:32,color:"#94a3b8"}}>📭 Koi order nahi abhi tak</div>
             : (
               <table style={{width:"100%",borderCollapse:"collapse"}}>

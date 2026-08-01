@@ -2,6 +2,7 @@ import { useAuth } from "../context/AuthContext"
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import Store from "../pages/Store"
+import InlineLoader from "../components/InlineLoader"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from "recharts"
 
 export default function SellerDashboard() {
@@ -350,7 +351,7 @@ export default function SellerDashboard() {
           {/* ORDERS */}
           {tab==="orders" && (
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {loading ? <div style={{textAlign:"center",padding:32,color:"#94a3b8"}}>Loading...</div>
+              {loading ? <InlineLoader minHeight={100} />
               : orders.length===0 ? (
                 <div style={{background:"#fff",borderRadius:18,padding:32,textAlign:"center",boxShadow:"0 1px 8px #0001"}}>
                   <div style={{fontSize:36,marginBottom:8}}>📭</div>
@@ -695,7 +696,7 @@ export default function SellerDashboard() {
         {tab==="orders" && (
           <div style={{background:"#fff",borderRadius:20,padding:24,boxShadow:"0 2px 12px #0001"}}>
             <div style={{fontWeight:700,fontSize:16,color:"#1e293b",marginBottom:16}}>All Orders</div>
-            {loading ? <div style={{color:"#94a3b8",textAlign:"center",padding:32}}>Loading...</div>
+            {loading ? <InlineLoader minHeight={100} />
             : orders.length===0 ? <div style={{color:"#94a3b8",textAlign:"center",padding:32,fontSize:14}}>📭 Koi order nahi abhi tak</div>
             : (
               <table style={{width:"100%",borderCollapse:"collapse"}}>

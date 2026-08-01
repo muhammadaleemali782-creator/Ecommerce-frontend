@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { getRoleLabel } from "../utils/roleLabels"
+import InlineLoader from "../components/InlineLoader"
 
 export default function MyProfile() {
   const { user: authUser } = useAuth()
@@ -79,7 +80,7 @@ export default function MyProfile() {
   }
 
   if (loading) return (
-    <div className="p-8 text-center text-gray-400 animate-pulse">Loading profile...</div>
+    <InlineLoader label="Profile load ho raha hai 👤" minHeight={200} />
   )
 
   if (!profile) return (

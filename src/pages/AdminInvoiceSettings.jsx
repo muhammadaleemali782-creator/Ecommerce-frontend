@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import InvoiceModal from "../components/InvoiceModal"
+import InlineLoader from "../components/InlineLoader"
 
 /* ── Demo order for preview ── */
 const DEMO_ORDER = {
@@ -331,7 +332,7 @@ export default function AdminInvoiceSettings() {
     </div>
   )
 
-  if(loading)return <div style={{padding:40,textAlign:"center",color:"#64748b"}}>Loading...</div>
+  if(loading)return <InlineLoader minHeight={180} />
 
   const STATUS_TABS=[
     {k:"pending",       l:"🟠 Proforma",      c:"#c2410c"},

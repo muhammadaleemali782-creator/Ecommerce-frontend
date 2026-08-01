@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import InvoiceModal from "../components/InvoiceModal"
+import InlineLoader from "../components/InlineLoader"
 
 const STAGES = [
   { key: "pending",              label: "Order Placed",         icon: "🛒", desc: "Processing"            },
@@ -107,7 +108,7 @@ export default function SellerOrders() {
     rejected:             orders.filter(o => o.status === "rejected").length,
   }
 
-  if (loading) return <div className="p-6 text-gray-400 animate-pulse">Loading orders...</div>
+  if (loading) return <InlineLoader label="Orders load ho rahe hain 📦" minHeight={180} />
 
   return (
     <div className="p-6 space-y-6">
