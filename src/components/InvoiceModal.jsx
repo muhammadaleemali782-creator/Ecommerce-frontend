@@ -513,11 +513,21 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
     setDownloading(true)
     try {
       const node = printRef.current
+      // ⭐ FIX: Phone ki chhoti screen pe invoice table apni poori width
+      // (900px normal / thermalWidth) tak nahi dikh pata tha, aur
+      // html2canvas sirf "jitna screen pe dikh raha tha utna hi" capture
+      // kar raha tha — isliye SELLER details/table columns PDF me cut ho
+      // jaate the. Ab poori natural content width/height explicitly
+      // capture karte hain, chahe screen chhoti ho.
       const canvas = await html2canvas(node, {
         scale: 2,               // sharp/HD output
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
+        width: node.scrollWidth,
+        height: node.scrollHeight,
+        windowWidth: node.scrollWidth,
+        windowHeight: node.scrollHeight,
       })
       const imgData = canvas.toDataURL("image/jpeg", 0.95)
 

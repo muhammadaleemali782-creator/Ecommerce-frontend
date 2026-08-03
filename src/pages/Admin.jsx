@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import AdminAnalytics from "../admin/AdminAnalytics"
 import CreateUser from "../admin/CreateUser"
+import ShareButton from "../components/ShareButton"
 
 export default function Admin({ setPage }) {
   const { user } = useAuth()
@@ -56,10 +57,11 @@ export default function Admin({ setPage }) {
           <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold flex-shrink-0">
             {user.name?.[0] || "A"}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className={`font-bold leading-tight ${isMobile ? "text-lg" : "text-2xl"}`}>Admin Dashboard</h1>
             <p className="text-sm opacity-80 truncate">{user.email}</p>
           </div>
+          <ShareButton compact style={{ background:"rgba(255,255,255,0.2)" }} />
         </div>
 
         {/* Quick stats */}

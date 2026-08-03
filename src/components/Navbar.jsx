@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import NotificationBell from "./NotificationBell"
+import ShareButton from "./ShareButton"
 
 export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMargin = false }) {
   const { loggedIn, logout, user } = useAuth() || {}
@@ -59,7 +60,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
     {
       cat: "📊 Dashboard",
       items: [
-        { label:"Admin Panel",    page:"admin",         color:"#7c3aed" },
         { label:"Network View",   page:"admin-network", color:"#a21caf" },
         { label:"Orders",         page:"admin-orders",  color:"#0f766e" },
       ],
@@ -184,6 +184,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
             <button key={b.page} onClick={() => go(b.page)} style={btnStyle(b.color)}>{b.label}</button>
           ))}
 
+          <ShareButton style={{ padding:"6px 14px", fontSize:12 }} />
+
           {loggedIn && (
             <button onClick={() => go("cart")} style={btnStyle("#ca8a04")}>Cart ({safeCartCount})</button>
           )}
@@ -192,7 +194,9 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
             <button onClick={() => go("login")} style={btnStyle("#1e293b")}>Login</button>
           ) : (
             <>
-              <button onClick={() => go("dashboard")}  style={btnStyle("#4f46e5")}>Dashboard</button>
+              {role !== "admin" && (
+                <button onClick={() => go("dashboard")}  style={btnStyle("#4f46e5")}>Dashboard</button>
+              )}
               <button onClick={() => go("my-profile")} style={btnStyle("#475569")}>👤 My Profile</button>
               <button onClick={() => setShowLogoutConfirm(true)} style={btnStyle("#dc2626")}>🚪 Logout</button>
               {roleBtns.map(b => (
@@ -213,6 +217,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
       <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:noBottomMargin?0:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
         <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EDUCA Store</h1>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <ShareButton compact style={{ background:"rgba(37,99,235,0.1)", color:"#2563eb", width:32, height:32, fontSize:15 }} />
           {loggedIn && (
             <>
               {/* 🔔 Notification Bell — Mobile */}
