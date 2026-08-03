@@ -513,14 +513,8 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
     setDownloading(true)
     try {
       const node = printRef.current
-      // ⭐ FIX: Phone ki chhoti screen pe invoice table apni poori width
-      // (900px normal / thermalWidth) tak nahi dikh pata tha, aur
-      // html2canvas sirf "jitna screen pe dikh raha tha utna hi" capture
-      // kar raha tha — isliye SELLER details/table columns PDF me cut ho
-      // jaate the. Ab poori natural content width/height explicitly
-      // capture karte hain, chahe screen chhoti ho.
-      const canvas = await html2canvas(node, {
-        scale: 2,               // sharp/HD output
+      const captureOpts = {
+        scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -528,7 +522,16 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         height: node.scrollHeight,
         windowWidth: node.scrollWidth,
         windowHeight: node.scrollHeight,
-      })
+      }
+
+      let canvas
+      try {
+        // ⭐ Emoji/icons sahi se render ho (pehle tedhe/cut dikh rahe the)
+        canvas = await html2canvas(node, { ...captureOpts, foreignObjectRendering: true })
+      } catch {
+        // Kuch purane WebView pe ye method fail ho sakta hai — safe fallback
+        canvas = await html2canvas(node, captureOpts)
+      }
       const imgData = canvas.toDataURL("image/jpeg", 0.95)
 
       const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
