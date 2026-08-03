@@ -2,6 +2,7 @@ import { useState, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import AdSlot from "../components/AdSlot"
+import InlineLoader from "../components/InlineLoader"
 
 /* ─── Flip Card Component ─── */
 export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, setPage }) {
@@ -28,6 +29,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
       style={{
         perspective: "1000px",
         cursor: "pointer",
+        height: "100%",
       }}
       onClick={() => setFlipped(f => !f)}
     >
@@ -35,6 +37,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
         style={{
           position: "relative",
           width: "100%",
+          height: "100%",
           transformStyle: "preserve-3d",
           transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
@@ -44,6 +47,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
         <div
           style={{
             position: "relative",
+            height: "100%",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             borderRadius: 16,
@@ -292,7 +296,7 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
 
 /* ─── Main Store Page ─── */
 export default function Store({ setPage }) {
-  const { products = [], addToCart } = useStore()
+  const { products = [], productsLoading, addToCart } = useStore()
   const { user } = useAuth()
 
   const [search, setSearch] = useState("")
@@ -396,7 +400,9 @@ export default function Store({ setPage }) {
       <AdSlot slot="slot1" setPage={setPage} />
 
       {/* ══ PRODUCT GRID ══ */}
-      {visibleProducts.length === 0 ? (
+      {productsLoading ? (
+        <InlineLoader label="Products load ho rahe hain 🛍️" minHeight={200} />
+      ) : visibleProducts.length === 0 ? (
         <div style={{ textAlign: "center", color: "#94a3b8", marginTop: 48, fontSize: 16 }}>
           {products.length === 0
             ? "Abhi koi product available nahi hai"
@@ -406,6 +412,7 @@ export default function Store({ setPage }) {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+          alignItems: "stretch",
           gap: 14,
         }}>
           {visibleProducts.map(product => (

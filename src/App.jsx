@@ -93,7 +93,7 @@ function AppContent() {
     const finish = () => { if (!done) { done = true; setBooting(false) } }
 
     const slowTimer = setTimeout(() => {
-      setBootMsg("Server thoda sust hai (free hosting), bas thoda aur ruko...")
+      setBootMsg("Bas thodi si der aur, achi shuruaat ho rahi hai... 🌱")
     }, 4000)
 
     // Safety cap — loader kabhi bhi hamesha ke liye stuck nahi rahega

@@ -44,6 +44,33 @@ export default function MyProfile() {
 
   useEffect(() => { load() }, [])
 
+  /* ── Share profile + app/website link ── */
+  const handleShare = async () => {
+    const name  = profile.fullName || profile.name || "EDUCA Store"
+    const phone = profile.phone || ""
+    const siteUrl = "https://educa-store.vercel.app/"
+
+    const text =
+      `👋 ${name} ki taraf se!\n` +
+      (phone ? `📞 Contact: ${phone}\n\n` : `\n`) +
+      `🛍️ EDUCA Store — abhi check karo:\n${siteUrl}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "EDUCA Store", text, url: siteUrl })
+      } catch {
+        /* user ne share cancel kar diya — kuch nahi karna */
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text)
+        alert("✅ Link copy ho gaya! Ab kahin bhi paste kar do (WhatsApp, SMS, etc.)")
+      } catch {
+        alert(text)
+      }
+    }
+  }
+
   /* ── Save profile ── */
   const handleSave = async () => {
     try {
@@ -108,10 +135,16 @@ export default function MyProfile() {
         </div>
 
         {/* System ID — read only, clearly shown */}
-        <div className="bg-gray-50 border-b px-6 py-3 flex items-center gap-3">
+        <div className="bg-gray-50 border-b px-6 py-3 flex items-center gap-3 flex-wrap">
           <span className="text-xs text-gray-400 uppercase font-semibold tracking-wide">System ID</span>
           <span className="font-mono font-bold text-blue-700 text-lg">{profile.name}</span>
-          <span className="text-xs text-gray-400 ml-auto">(Change nahi ho sakta)</span>
+          <span className="text-xs text-gray-400 mr-auto hidden sm:inline">(Change nahi ho sakta)</span>
+          <button
+            onClick={handleShare}
+            className="ml-auto sm:ml-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-full transition"
+          >
+            📤 Share App/Website
+          </button>
         </div>
 
         {/* ── Details / Edit Form ── */}

@@ -2,10 +2,11 @@ import { useState, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { ProductCard } from "./Home"
+import InlineLoader from "../components/InlineLoader"
 
 export default function Store({ setPage }) {
   // ✅ FIX: addToCart StoreContext se lo — duplicate local function hataya
-  const { products = [], addToCart } = useStore()
+  const { products = [], productsLoading, addToCart } = useStore()
   const { user } = useAuth()
 
   const [search, setSearch]         = useState("")
@@ -116,7 +117,9 @@ export default function Store({ setPage }) {
       </div>
 
       {/* ══ PRODUCT GRID ══ */}
-      {(!visibleProducts || visibleProducts.length === 0) ? (
+      {productsLoading ? (
+        <InlineLoader label="Products load ho rahe hain 🛍️" minHeight={200} />
+      ) : (!visibleProducts || visibleProducts.length === 0) ? (
         <div className="text-center text-gray-500 mt-12 text-lg">
           {(!products || products.length === 0) ? "No products available right now" : "Koi product nahi mila — search/category change karo"}
         </div>
@@ -124,6 +127,7 @@ export default function Store({ setPage }) {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+          alignItems: "stretch",
           gap: 14,
         }}>
           {visibleProducts.map(product => (

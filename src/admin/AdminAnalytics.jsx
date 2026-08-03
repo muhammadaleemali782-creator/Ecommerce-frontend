@@ -14,7 +14,7 @@ import InlineLoader from "../components/InlineLoader"
   =====================================================
 */
 
-export default function AdminAnalytics() {
+export default function AdminAnalytics({ setPage }) {
   const [tree, setTree] = useState([])
   const [flatUsers, setFlatUsers] = useState([])
   const [openId, setOpenId] = useState(null)
@@ -78,6 +78,10 @@ export default function AdminAnalytics() {
     u => u.role === "seller"
   )
 
+  const users = flatUsers.filter(
+    u => u.role === "user"
+  )
+
   /* ================= LOADING / ERROR ================= */
   if (loading) {
     return (
@@ -99,12 +103,22 @@ export default function AdminAnalytics() {
   return (
     <div className="bg-white p-6 rounded shadow space-y-6">
 
-      <h2 className="text-xl font-bold">
-        Admin Analytics
-      </h2>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-xl font-bold">
+          Admin Analytics
+        </h2>
+        {setPage && (
+          <button
+            onClick={() => setPage("admin-network")}
+            className="text-sm font-semibold text-violet-600 hover:text-violet-800 flex items-center gap-1"
+          >
+            🌐 Full Network Tree dekho →
+          </button>
+        )}
+      </div>
 
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="bg-blue-100 p-4 rounded">
           <p className="text-sm text-gray-600">
             Total Distributors
@@ -122,71 +136,15 @@ export default function AdminAnalytics() {
             {sellers.length}
           </p>
         </div>
-      </div>
 
-      {/* ================= DRILL DOWN ================= */}
-      <div>
-        <h3 className="font-bold mb-3">
-          Distributor → Seller Mapping
-        </h3>
-
-        {distributors.length === 0 ? (
-          <p className="text-gray-500">
-            No distributors created yet
+        <div className="bg-amber-100 p-4 rounded">
+          <p className="text-sm text-gray-600">
+            Total Users
           </p>
-        ) : (
-          distributors.map(d => {
-            const distId = d.id
-
-            const mySellers = flatUsers.filter(
-              u =>
-                u.role === "seller" &&
-                String(u.parentId) === String(distId)
-            )
-
-            return (
-              <div
-                key={distId}
-                className="border rounded mb-2"
-              >
-                <div
-                  className="p-3 cursor-pointer bg-gray-100 flex justify-between items-center"
-                  onClick={() =>
-                    setOpenId(
-                      openId === distId ? null : distId
-                    )
-                  }
-                >
-                  <span className="font-semibold">
-                    {d.name} (Distributor)
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Sellers: {mySellers.length}
-                  </span>
-                </div>
-
-                {openId === distId && (
-                  <div className="p-3 bg-white space-y-1">
-                    {mySellers.length === 0 ? (
-                      <p className="text-gray-500 text-sm">
-                        No sellers under this distributor
-                      </p>
-                    ) : (
-                      mySellers.map(s => (
-                        <div
-                          key={s.id}
-                          className="text-sm border-b py-1 pl-2"
-                        >
-                          • {s.name} (Seller)
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            )
-          })
-        )}
+          <p className="text-2xl font-bold">
+            {users.length}
+          </p>
+        </div>
       </div>
 
     </div>

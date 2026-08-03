@@ -55,23 +55,49 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
     { label:"store",    page:"store",    color:"#3b82f6" },
   ]
 
-  const adminBtns = [
-    { label:"Admin Panel",        page:"admin",                      color:"#7c3aed" },
-    { label:"Network View",       page:"admin-network",              color:"#a21caf" },
-    { label:"Add Product",        page:"admin-add-product",          color:"#ea580c" },
-    { label:"Manage Products",    page:"admin-products",             color:"#dc2626" },
-    { label:"Manage Users",       page:"admin-users",                color:"#1e293b" },
-    { label:"User Requests",      page:"admin-requests",             color:"#db2777" },
-    { label:"Requests History",   page:"admin-requests-history",     color:"#4b5563" },
-    { label:"Password Reset",     page:"admin-password-reset",       color:"#b91c1c" },
-    { label:"💰 PPC Settings",    page:"admin-ppc-settings",         color:"#9333ea" },
-    { label:"💳 Withdrawals",     page:"admin-withdrawal-management",color:"#ea580c" },
-    { label:"📧 Email Settings",  page:"email-settings",             color:"#4f46e5" },
-    { label:"Orders",             page:"admin-orders",               color:"#0f766e" },
-    { label:"🧾 Invoice Settings",page:"admin-invoice-settings",    color:"#0891b2" },
-    { label:"Created Users",      page:"my-users",                   color:"#0d9488" },
-    { label:"☢️ Data Purge",      page:"admin-nuke",                 color:"#7f1d1d" },
+  const adminCategories = [
+    {
+      cat: "📊 Dashboard",
+      items: [
+        { label:"Admin Panel",    page:"admin",         color:"#7c3aed" },
+        { label:"Network View",   page:"admin-network", color:"#a21caf" },
+        { label:"Orders",         page:"admin-orders",  color:"#0f766e" },
+      ],
+    },
+    {
+      cat: "📦 Products",
+      items: [
+        { label:"Add Product",     page:"admin-add-product", color:"#ea580c" },
+        { label:"Manage Products", page:"admin-products",    color:"#dc2626" },
+      ],
+    },
+    {
+      cat: "👥 Users & Requests",
+      items: [
+        { label:"Manage Users",     page:"admin-users",            color:"#1e293b" },
+        { label:"User Requests",    page:"admin-requests",         color:"#db2777" },
+        { label:"Requests History", page:"admin-requests-history", color:"#4b5563" },
+        { label:"Password Reset",   page:"admin-password-reset",   color:"#b91c1c" },
+      ],
+    },
+    {
+      cat: "💰 Finance",
+      items: [
+        { label:"💰 PPC Settings", page:"admin-ppc-settings",          color:"#9333ea" },
+        { label:"💳 Withdrawals",  page:"admin-withdrawal-management", color:"#ea580c" },
+        { label:"🧾 Invoice Settings", page:"admin-invoice-settings",  color:"#0891b2" },
+      ],
+    },
+    {
+      cat: "⚙️ Settings",
+      items: [
+        { label:"📧 Email Settings", page:"email-settings", color:"#4f46e5" },
+        { label:"☢️ Data Purge",     page:"admin-nuke",     color:"#7f1d1d" },
+      ],
+    },
   ]
+  // Flat version — kahin bhi flat list chahiye ho (e.g. desktop dropdown fallback)
+  const adminBtns = adminCategories.flatMap(c => c.items)
 
   const distSellerBtns = [
     { label:"Request User",  page:"raise-request",      color:"#ea580c" },
@@ -230,19 +256,42 @@ export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMar
                   <button onClick={() => go("my-profile")} style={drawerBtnStyle("#475569")}>👤 My Profile</button>
                   <button onClick={() => setShowLogoutConfirm(true)} style={drawerBtnStyle("#dc2626")}>🚪 Logout</button>
                   <div style={{ height:1, background:"#f1f5f9", margin:"4px 0" }} />
-                  {roleBtns.map(b => {
-                    const badge = pageBadge[b.page] || 0
-                    return (
-                      <button key={b.page} onClick={() => go(b.page)} style={{ ...drawerBtnStyle(b.color), position:"relative" }}>
-                        {b.label}
-                        {badge > 0 && (
-                          <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
-                            {badge}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
+                  {role === "admin" ? (
+                    adminCategories.map(group => (
+                      <div key={group.cat}>
+                        <div style={{ fontSize:10, fontWeight:800, color:"#94a3b8", textTransform:"uppercase", letterSpacing:0.5, padding:"8px 10px 4px" }}>
+                          {group.cat}
+                        </div>
+                        {group.items.map(b => {
+                          const badge = pageBadge[b.page] || 0
+                          return (
+                            <button key={b.page} onClick={() => go(b.page)} style={{ ...drawerBtnStyle(b.color), position:"relative" }}>
+                              {b.label}
+                              {badge > 0 && (
+                                <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
+                                  {badge}
+                                </span>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ))
+                  ) : (
+                    roleBtns.map(b => {
+                      const badge = pageBadge[b.page] || 0
+                      return (
+                        <button key={b.page} onClick={() => go(b.page)} style={{ ...drawerBtnStyle(b.color), position:"relative" }}>
+                          {b.label}
+                          {badge > 0 && (
+                            <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
+                              {badge}
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })
+                  )}
                   {orderBtn && (
                     <button onClick={() => go(orderBtn.page)} style={{ ...drawerBtnStyle(orderBtn.color), position:"relative" }}>
                       {orderBtn.label}

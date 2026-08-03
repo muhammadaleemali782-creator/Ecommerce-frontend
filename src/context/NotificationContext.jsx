@@ -19,8 +19,6 @@ export function NotificationProvider({ children }) {
   }, [])
   const [setPageFn,     setSetPageFn]     = useState(null)   // App se setPage register hoga
   const pollRef = useRef(null)
-  const seenIdsRef = useRef(new Set())   // ✅ App wale bridge ke liye — kaunse notif already alert kar chuke
-  const firstFetchRef = useRef(true)     // pehli fetch pe purani sab notifs ke liye phone na baje
 
   /* ── token helper ── */
   const getToken = () => localStorage.getItem("token")
@@ -38,25 +36,11 @@ export function NotificationProvider({ children }) {
       })
       if (!res.ok) return
       const data = await res.json()
-      if (Array.isArray(data)) {
-        setNotifications(data)
-
-        // 📱 Naya unread notif mila to Android app me sound+vibration ke
-        // saath native notification bhi dikhao (sirf app ke andar, jab
-        // window.AndroidNotify available ho — normal web browser me kuch nahi hota)
-        if (window.AndroidNotify && typeof window.AndroidNotify.notify === "function") {
-          const freshUnread = data.filter(n => !n.read && !seenIdsRef.current.has(n._id))
-          if (!firstFetchRef.current) {
-            freshUnread.forEach(n => {
-              try {
-                window.AndroidNotify.notify(n.senderName || "EDUCA Store", n.message || "Naya update aaya hai")
-              } catch {}
-            })
-          }
-          data.forEach(n => seenIdsRef.current.add(n._id))
-        }
-        firstFetchRef.current = false
-      }
+      // NOTE: Android app me sound+vibration wali push notification ab
+      // seedha Firebase (FCM) se aati hai — backend se, chahe app band
+      // ho. Yahan se dobara trigger karna duplicate sound dega, isliye
+      // hata diya gaya hai.
+      if (Array.isArray(data)) setNotifications(data)
     } catch {
       /* silent fail */
     }

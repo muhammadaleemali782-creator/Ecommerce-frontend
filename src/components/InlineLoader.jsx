@@ -12,7 +12,7 @@ import { useEffect, useState } from "react"
 const MESSAGES = [
   "Data la rahe hain, thodi der ruko 🌱",
   "Bas thoda aur, achi cheezein aa rahi hain 😊",
-  "Server jaag raha hai (free hosting) ⏳",
+  "Server jaag raha hai, swagat ki taiyari ⏳",
   "Growth ka data load ho raha hai 📈",
   "Almost there, thoda patience ✨",
   "Team EDUCA tumhare liye laa rahi hai 🤝",

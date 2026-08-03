@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 import { FESTIVAL_GROUPS, getThemeById } from "../data/festiveThemes.js"
 
 const STATUS_META = {
@@ -483,6 +485,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
   const [printMode,setPrintMode]=useState("normal")
   const [thermalWidth,setThermalWidth]=useState("80")
   const [selectedThemeId,setSelectedThemeId]=useState(null)
+  const [downloading,setDownloading]=useState(false)
   const printRef=useRef()
 
   useEffect(()=>{
@@ -499,10 +502,54 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
     load()
   },[])
 
-  // ⭐ MOBILE-SAFE PRINT: iframe/window.open approach mobile browsers pe
-  // unreliable nikla (poora page/modal print ho jata tha, colors bhi gayab).
-  // Sabse reliable tareeka: current page pe hi print CSS se sirf invoice
-  // ko visible rakho, baaki sab hide karo, aur seedha window.print() call karo.
+  // ⭐ RELIABLE PDF: window.print() Android ke OS-level "print service" pe
+  // depend karta tha — kuch phones (jinme "Save as PDF" service disabled/
+  // missing hoti hai) us par atak jaate the ya PDF banti hi nahi thi.
+  // Isliye ab poori PDF seedha JS (html2canvas + jsPDF) se banate hain —
+  // ye har device pe EXACT SAME tareeke se kaam karta hai, koi OS
+  // dependency nahi.
+  const handleDownloadPdf = async () => {
+    if (!printRef.current || downloading) return
+    setDownloading(true)
+    try {
+      const node = printRef.current
+      const canvas = await html2canvas(node, {
+        scale: 2,               // sharp/HD output
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      })
+      const imgData = canvas.toDataURL("image/jpeg", 0.95)
+
+      const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
+      const pxToMm = pdfWidthMm / canvas.width
+      const pdfHeightMm = canvas.height * pxToMm
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [pdfWidthMm, pdfHeightMm],
+      })
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidthMm, pdfHeightMm)
+
+      const fileName = `Invoice-${getInvNo(order._id, order.status)}.pdf`
+
+      if (window.AndroidDownload && typeof window.AndroidDownload.saveBase64Pdf === "function") {
+        // App ke andar — native tarike se seedha Downloads folder me save karo
+        const base64 = pdf.output("datauristring").split(",")[1]
+        window.AndroidDownload.saveBase64Pdf(base64, fileName)
+      } else {
+        // Normal browser — seedha download ho jayega
+        pdf.save(fileName)
+      }
+    } catch (err) {
+      console.error("❌ PDF generate error:", err)
+      alert("PDF banane mein dikkat aayi, dobara try karo.")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   const handlePrint=()=>{
     window.print()
   }
@@ -548,11 +595,19 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
           )}
           <div style={{marginLeft:"auto",display:"flex",gap:8}}>
             {!loading&&(
-              <button onClick={handlePrint}
-                style={{padding:"7px 18px",borderRadius:9,border:"none",background:"#3b82f6",
-                  color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>
-                🖨️ Print / Save
-              </button>
+              <>
+                <button onClick={handleDownloadPdf} disabled={downloading}
+                  style={{padding:"7px 18px",borderRadius:9,border:"none",
+                    background:downloading?"#94a3b8":"#16a34a",
+                    color:"#fff",fontWeight:700,fontSize:12,cursor:downloading?"not-allowed":"pointer"}}>
+                  {downloading?"⏳ Ban raha hai...":"⬇️ Download PDF"}
+                </button>
+                <button onClick={handlePrint}
+                  style={{padding:"7px 18px",borderRadius:9,border:"none",background:"#3b82f6",
+                    color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+                  🖨️ Print
+                </button>
+              </>
             )}
             <button onClick={onClose}
               style={{padding:"7px 14px",borderRadius:9,border:"none",background:"#374151",

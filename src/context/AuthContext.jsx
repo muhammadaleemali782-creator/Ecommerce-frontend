@@ -202,6 +202,20 @@ export function AuthProvider({ children }) {
     if (!user) setLoggedIn(false)
   }, [user])
 
+  /* 📱 App wale background service ke liye token sync karo —
+     jab bhi user login/logout ho ya app khulte hi purana token
+     mile, native side ko bata do taaki notification poll service
+     app band hone par bhi kaam kar sake. */
+  useEffect(() => {
+    if (!window.AndroidAuth) return
+    const token = localStorage.getItem("token")
+    if (loggedIn && token) {
+      window.AndroidAuth.saveToken(token)
+    } else {
+      window.AndroidAuth.clearToken()
+    }
+  }, [loggedIn])
+
   /* 🔥 AUTO UPDATE if another tab/login happens */
   useEffect(() => {
     const syncAuth = () => {

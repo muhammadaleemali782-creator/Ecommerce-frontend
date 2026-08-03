@@ -7,6 +7,7 @@ export const StoreProvider = ({ children }) => {
 
   /* ================= PRODUCTS ================= */
   const [products, setProducts] = useState([])
+  const [productsLoading, setProductsLoading] = useState(true)
 
   /* ================= CART ================= */
   const [cart, setCart] = useState(() => {
@@ -43,6 +44,7 @@ export const StoreProvider = ({ children }) => {
   ===================================================== */
   const fetchProducts = async () => {
     try {
+      setProductsLoading(true)
       const token = localStorage.getItem("token")
       const storedUser = JSON.parse(localStorage.getItem("user"))
 
@@ -80,6 +82,8 @@ export const StoreProvider = ({ children }) => {
 
     } catch (err) {
       console.error("❌ Fetch products error:", err)
+    } finally {
+      setProductsLoading(false)
     }
   }
 
@@ -228,6 +232,7 @@ export const StoreProvider = ({ children }) => {
     <StoreContext.Provider
       value={{
         products,
+        productsLoading,
         cart,
         users,
         networkTree,

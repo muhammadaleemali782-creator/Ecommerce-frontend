@@ -350,7 +350,7 @@ export default function AdminInvoiceSettings() {
         <p style={{margin:"3px 0 0",fontSize:11,opacity:0.7}}>Settings badlo — right side pe live preview turant update hoga</p>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"440px 1fr",gap:14,alignItems:"start"}}>
+      <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr]" style={{gap:14,alignItems:"start"}}>
 
         {/* ════ LEFT — SETTINGS ════ */}
         <div style={{display:"flex",flexDirection:"column",gap:12}}>

@@ -81,7 +81,13 @@ export default function Admin({ setPage }) {
       {/* ── TABS ── */}
       <div className="flex gap-2 bg-gray-100 p-1 rounded-xl overflow-x-auto">
         {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
+          <button key={t.key} onClick={() => {
+              if (t.key === "network") {
+                setPage?.("admin-network")   // 🌐 seedha tree pe le jao
+              } else {
+                setTab(t.key)
+              }
+            }}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
               tab === t.key ? "bg-white shadow text-gray-800" : "text-gray-500"
             }`}>
@@ -109,15 +115,7 @@ export default function Admin({ setPage }) {
       {/* ── OVERVIEW ── */}
       {tab === "overview" && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <AdminAnalytics />
-        </div>
-      )}
-
-      {/* ── NETWORK ── */}
-      {tab === "network" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-sm text-gray-500 mb-3">Full network tree dekho — Network View mein jao</p>
-          <AdminAnalytics />
+          <AdminAnalytics setPage={setPage} />
         </div>
       )}
 
