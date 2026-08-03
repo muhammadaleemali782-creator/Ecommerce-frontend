@@ -487,6 +487,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
   const [selectedThemeId,setSelectedThemeId]=useState(null)
   const [downloading,setDownloading]=useState(false)
   const printRef=useRef()
+  const modalBoxRef=useRef()
 
   useEffect(()=>{
     const load=async()=>{
@@ -511,22 +512,37 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
   const handleDownloadPdf = async () => {
     if (!printRef.current || downloading) return
     setDownloading(true)
+
+    const box = modalBoxRef.current
+    const prevBoxWidth    = box?.style.width
+    const prevBoxMaxWidth = box?.style.maxWidth
+
     try {
       const node = printRef.current
+      const fullWidthPx = printMode === "thermal" ? Number(thermalWidth) * 3.78 : 900
+
+      // ⭐ FIX: html2canvas ke "width/windowWidth" options foreignObjectRendering
+      // ke saath reliably kaam nahi karte (isi wajah se pehle content firse
+      // cut ho raha tha). Sabse pakka tarika: screen pe hi asli DOM ko
+      // thodi der ke liye poori width kar do (chhoti screen pe bhi), capture
+      // karo, phir wapas normal size pe le aao — isse koi cheez cut nahi hogi.
+      if (box) {
+        box.style.width = fullWidthPx + "px"
+        box.style.maxWidth = "none"
+        // reflow ka wait — ek frame kaafi hai
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+      }
+
       const captureOpts = {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
-        width: node.scrollWidth,
-        height: node.scrollHeight,
-        windowWidth: node.scrollWidth,
-        windowHeight: node.scrollHeight,
       }
 
       let canvas
       try {
-        // ⭐ Emoji/icons sahi se render ho (pehle tedhe/cut dikh rahe the)
+        // Emoji/icons sahi se render ho (pehle tedhe/cut dikh rahe the)
         canvas = await html2canvas(node, { ...captureOpts, foreignObjectRendering: true })
       } catch {
         // Kuch purane WebView pe ye method fail ho sakta hai — safe fallback
@@ -559,6 +575,11 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
       console.error("❌ PDF generate error:", err)
       alert("PDF banane mein dikkat aayi, dobara try karo.")
     } finally {
+      // Screen pe wapas normal size restore karo
+      if (box) {
+        box.style.width = prevBoxWidth || ""
+        box.style.maxWidth = prevBoxMaxWidth || ""
+      }
       setDownloading(false)
     }
   }
@@ -577,7 +598,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
       display:"flex",alignItems:"flex-start",justifyContent:"center",padding:12,overflowY:"auto"}}
       onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
 
-      <div style={{width:"100%",maxWidth:printMode==="thermal"?480:900,
+      <div ref={modalBoxRef} style={{width:"100%",maxWidth:printMode==="thermal"?480:900,
         background:"#0f172a",borderRadius:20,overflow:"hidden",boxShadow:"0 40px 100px rgba(0,0,0,0.7)"}}>
 
         {/* TOOLBAR */}
