@@ -516,22 +516,25 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
     const box = modalBoxRef.current
     const prevBoxWidth    = box?.style.width
     const prevBoxMaxWidth = box?.style.maxWidth
+    const node = printRef.current
+    const prevNodeWidth = node?.style.width
 
     try {
-      const node = printRef.current
-      const fullWidthPx = printMode === "thermal" ? Number(thermalWidth) * 3.78 : 900
-
-      // ⭐ FIX: html2canvas ke "width/windowWidth" options foreignObjectRendering
-      // ke saath reliably kaam nahi karte (isi wajah se pehle content firse
-      // cut ho raha tha). Sabse pakka tarika: screen pe hi asli DOM ko
-      // thodi der ke liye poori width kar do (chhoti screen pe bhi), capture
-      // karo, phir wapas normal size pe le aao — isse koi cheez cut nahi hogi.
+      // ⭐ FIX: Guess karne (jaise fixed 900px) se kabhi kabhi invoice ki
+      // ASLI zaroorat ki width usse bhi zyada nikal jaati thi aur content
+      // clip ho jaata tha. Ab browser ko khud calculate karne dete hain ki
+      // is invoice ko poori tarah (bina kuch cut kiye) dikhane ke liye
+      // exactly kitni width chahiye — koi guessing nahi.
       if (box) {
-        box.style.width = fullWidthPx + "px"
+        box.style.width = "2000px"       // pehle khula chhod do
         box.style.maxWidth = "none"
-        // reflow ka wait — ek frame kaafi hai
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
       }
+      node.style.width = "max-content"    // ab content apni asli width le le
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+
+      const neededWidth = Math.ceil(node.getBoundingClientRect().width) + 2
+      node.style.width = neededWidth + "px"   // ab exactly usi width pe lock kar do
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
       const captureOpts = {
         scale: 2,
@@ -540,11 +543,6 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         logging: false,
       }
 
-      // ⭐ Purane "foreignObjectRendering" tareeke se PDF me content
-      // viewport ke hisaab se crop ho raha tha (unreliable nikla). Ab
-      // seedha standard/reliable rendering use karte hain — emoji wali
-      // asli dikkat upar (logo/stage icons) hata di gayi hai isliye
-      // ab is tareeke se bhi sab kuch saaf dikhega.
       const canvas = await html2canvas(node, captureOpts)
       const imgData = canvas.toDataURL("image/jpeg", 0.95)
 
@@ -578,6 +576,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         box.style.width = prevBoxWidth || ""
         box.style.maxWidth = prevBoxMaxWidth || ""
       }
+      if (node) node.style.width = prevNodeWidth || ""
       setDownloading(false)
     }
   }
