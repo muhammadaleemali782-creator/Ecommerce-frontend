@@ -18,6 +18,21 @@ const getInvNo = (id,status) => {
   return `${s}-${(id||"").slice(-8).toUpperCase()}`
 }
 
+/* ⭐ Line-style SVG icons — emoji ki jagah, taaki PDF me hamesha
+   crisp/saaf render ho (fonts/color-emoji ka koi bharosa nahi hota) */
+function StepIcon({ type, color, size=15 }) {
+  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:color,
+    strokeWidth:2.6, strokeLinecap:"round", strokeLinejoin:"round" }
+  if (type==="cart")  return (<svg {...p}><circle cx="9" cy="20" r="1.3" fill={color} stroke="none"/><circle cx="17" cy="20" r="1.3" fill={color} stroke="none"/><path d="M2.5 3h2l2.3 12a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L20.5 7H6"/></svg>)
+  if (type==="check")  return (<svg {...p}><polyline points="4 12.5 9.5 18 20 6"/></svg>)
+  if (type==="flag")  return (<svg {...p}><path d="M5 3v18"/><path d="M5 4.5h12.5l-2.3 4 2.3 4H5"/></svg>)
+  if (type==="cross")  return (<svg {...p}><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>)
+  if (type==="phone")  return (<svg {...p}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2.2Z"/></svg>)
+  if (type==="mail")   return (<svg {...p}><rect x="2.5" y="4.5" width="19" height="15" rx="2.2"/><path d="M2.5 6.5l9.5 7 9.5-7"/></svg>)
+  if (type==="pin")    return (<svg {...p}><path d="M20 10.5c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.5" r="2.6"/></svg>)
+  return null
+}
+
 /* ══════════════════════════════════════
    NORMAL A4 INVOICE
 ══════════════════════════════════════ */
@@ -62,7 +77,6 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
       <div style={{background:headerBg,padding:"28px 32px",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-50,right:-50,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}}/>
         <div style={{position:"absolute",bottom:-70,right:30,width:140,height:140,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
-        <div style={{position:"absolute",top:-20,left:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"relative",zIndex:1}}>
           <div>
@@ -70,7 +84,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
             ) : (
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
-                display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#fff",marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
+                display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#fff",lineHeight:1,marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
                 {(settings?.companyName||"E")[0].toUpperCase()}
               </div>
             )}
@@ -80,16 +94,17 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             {settings?.tagline&&<div style={{color:"rgba(255,255,255,0.75)",fontSize:12,marginTop:3}}>{settings.tagline}</div>}
             {settings?.address&&<div style={{color:"rgba(255,255,255,0.6)",fontSize:11,marginTop:6,maxWidth:280,lineHeight:1.5}}>{settings.address}</div>}
             <div style={{marginTop:6,display:"flex",gap:14,flexWrap:"wrap"}}>
-              {settings?.phone&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11}}>📞 {settings.phone}</span>}
-              {settings?.email&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11}}>✉️ {settings.email}</span>}
+              {settings?.phone&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="rgba(255,255,255,0.75)" size={11}/> {settings.phone}</span>}
+              {settings?.email&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="mail" color="rgba(255,255,255,0.75)" size={11}/> {settings.email}</span>}
             </div>
             {settings?.gst&&<div style={{marginTop:4,color:"rgba(255,255,255,0.6)",fontSize:11,fontFamily:"monospace"}}>GST: {settings.gst}</div>}
           </div>
 
           <div style={{textAlign:"right"}}>
             <div style={{background:meta.badgeBg,color:meta.badgeColor,fontWeight:900,fontSize:11,
-              padding:"4px 16px",borderRadius:99,display:"inline-block",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
-              ● {meta.badge}
+              padding:"5px 16px",borderRadius:99,display:"inline-flex",alignItems:"center",gap:6,marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:meta.badgeColor,display:"inline-block",flexShrink:0}}/>
+              {meta.badge}
             </div>
             <div style={{color:"#fff",fontWeight:900,fontSize:20,marginBottom:4}}>{meta.type}</div>
             <div style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>#{invNo}</div>
@@ -107,9 +122,9 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
       <div style={{background:tc?`${paperBg}cc`:"#f8fafc",borderBottom:`1px solid ${border}`,padding:"16px 32px"}}>
         <div style={{display:"flex",alignItems:"center"}}>
           {[
-            {key:"pending",label:"Order Placed",icon:"1"},
-            {key:"dist_approved",label:"Dist. Approved",icon:"2"},
-            {key:"confirmed",label:"Confirmed",icon:"3"},
+            {key:"pending",label:"Order Placed",icon:"cart"},
+            {key:"dist_approved",label:"Dist. Approved",icon:"check"},
+            {key:"confirmed",label:"Confirmed",icon:"flag"},
           ].map((stage,idx,arr)=>{
             const order2=["pending","dist_approved","confirmed"]
             const curIdx=order.status==="rejected"?-1:order2.indexOf(order.status)
@@ -124,7 +139,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
                     borderColor:order.status==="rejected"?"#fca5a5":isDone?accent:isCur?accent:border,
                     color:order.status==="rejected"?"#dc2626":(isDone||isCur)?"#fff":"#94a3b8",
                     boxShadow:isCur?`0 0 0 4px ${accent}25`:"none"}}>
-                    {order.status==="rejected"?"✕":isDone?"✓":stage.icon}
+                    {order.status==="rejected"
+                      ? <StepIcon type="cross" color="#dc2626" />
+                      : isDone
+                        ? <StepIcon type="check" color="#fff" />
+                        : <StepIcon type={stage.icon} color={isCur?"#fff":"#94a3b8"} />}
                   </div>
                   <div style={{fontSize:10,marginTop:4,fontWeight:isCur?800:500,textAlign:"center",
                     color:isCur?accent:isDone?accent:"#94a3b8"}}>
@@ -139,7 +158,10 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
           })}
           {order.status==="rejected"&&(
             <div style={{marginLeft:12,background:"#fef2f2",borderRadius:8,padding:"4px 14px",
-              fontSize:11,fontWeight:700,color:"#dc2626",border:"1.5px solid #fca5a5"}}>❌ CANCELLED</div>
+              display:"inline-flex",alignItems:"center",gap:6,
+              fontSize:11,fontWeight:700,color:"#dc2626",border:"1.5px solid #fca5a5"}}>
+              <StepIcon type="cross" color="#dc2626" size={11}/> CANCELLED
+            </div>
           )}
         </div>
       </div>
@@ -164,8 +186,8 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:10,textTransform:"uppercase"}}>Bill To</div>
           <div style={{fontWeight:800,fontSize:15,color:"#1e293b"}}>{order.customerName||"—"}</div>
-          {order.phone&&<div style={{fontSize:12,color:"#64748b",marginTop:5}}>📞 {order.phone}</div>}
-          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.5}}>📍 {order.address}</div>}
+          {order.phone&&<div style={{fontSize:12,color:"#64748b",marginTop:5,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={12}/> {order.phone}</div>}
+          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.5,display:"flex",alignItems:"flex-start",gap:5}}><span style={{marginTop:2,flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span>{order.address}</div>}
 
           {/* BEHALF INFO — toggleable by admin */}
           {orderedFor&&(
