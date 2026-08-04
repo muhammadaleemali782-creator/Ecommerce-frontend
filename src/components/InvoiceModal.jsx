@@ -70,8 +70,8 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
             ) : (
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
-                display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
-                🏢
+                display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#fff",marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
+                {(settings?.companyName||"E")[0].toUpperCase()}
               </div>
             )}
             <div style={{color:"#fff",fontWeight:900,fontSize:22,letterSpacing:-0.5}}>
@@ -107,9 +107,9 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
       <div style={{background:tc?`${paperBg}cc`:"#f8fafc",borderBottom:`1px solid ${border}`,padding:"16px 32px"}}>
         <div style={{display:"flex",alignItems:"center"}}>
           {[
-            {key:"pending",label:"Order Placed",icon:"🛒"},
-            {key:"dist_approved",label:"Dist. Approved",icon:"✅"},
-            {key:"confirmed",label:"Confirmed",icon:"🎉"},
+            {key:"pending",label:"Order Placed",icon:"1"},
+            {key:"dist_approved",label:"Dist. Approved",icon:"2"},
+            {key:"confirmed",label:"Confirmed",icon:"3"},
           ].map((stage,idx,arr)=>{
             const order2=["pending","dist_approved","confirmed"]
             const curIdx=order.status==="rejected"?-1:order2.indexOf(order.status)
@@ -540,14 +540,12 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         logging: false,
       }
 
-      let canvas
-      try {
-        // Emoji/icons sahi se render ho (pehle tedhe/cut dikh rahe the)
-        canvas = await html2canvas(node, { ...captureOpts, foreignObjectRendering: true })
-      } catch {
-        // Kuch purane WebView pe ye method fail ho sakta hai — safe fallback
-        canvas = await html2canvas(node, captureOpts)
-      }
+      // ⭐ Purane "foreignObjectRendering" tareeke se PDF me content
+      // viewport ke hisaab se crop ho raha tha (unreliable nikla). Ab
+      // seedha standard/reliable rendering use karte hain — emoji wali
+      // asli dikkat upar (logo/stage icons) hata di gayi hai isliye
+      // ab is tareeke se bhi sab kuch saaf dikhega.
+      const canvas = await html2canvas(node, captureOpts)
       const imgData = canvas.toDataURL("image/jpeg", 0.95)
 
       const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
