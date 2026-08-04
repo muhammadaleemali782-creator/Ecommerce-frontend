@@ -84,8 +84,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
             ) : (
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
-                display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,color:"#fff",lineHeight:1,marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
-                {(settings?.companyName||"E")[0].toUpperCase()}
+                position:"relative",marginBottom:10,border:"2px solid rgba(255,255,255,0.3)"}}>
+                <span style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",
+                  fontSize:24,fontWeight:900,color:"#fff",lineHeight:1}}>
+                  {(settings?.companyName||"E")[0].toUpperCase()}
+                </span>
               </div>
             )}
             <div style={{color:"#fff",fontWeight:900,fontSize:22,letterSpacing:-0.5}}>
@@ -102,9 +105,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
 
           <div style={{textAlign:"right"}}>
             <div style={{background:meta.badgeBg,color:meta.badgeColor,fontWeight:900,fontSize:11,
-              padding:"5px 16px",borderRadius:99,display:"inline-flex",alignItems:"center",gap:6,marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:meta.badgeColor,display:"inline-block",flexShrink:0}}/>
-              {meta.badge}
+              padding:"6px 16px 5px",borderRadius:99,display:"inline-block",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)",
+              position:"relative",whiteSpace:"nowrap"}}>
+              <span style={{display:"inline-block",width:6,height:6,borderRadius:"50%",background:meta.badgeColor,
+                verticalAlign:"middle",marginRight:6,marginTop:-1}}/>
+              <span style={{verticalAlign:"middle",lineHeight:1}}>{meta.badge}</span>
             </div>
             <div style={{color:"#fff",fontWeight:900,fontSize:20,marginBottom:4}}>{meta.type}</div>
             <div style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>#{invNo}</div>
@@ -566,7 +571,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
       }
 
       const canvas = await html2canvas(node, captureOpts)
-      const imgData = canvas.toDataURL("image/jpeg", 0.95)
+      const imgData = canvas.toDataURL("image/png")
 
       const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
       const pxToMm = pdfWidthMm / canvas.width
@@ -577,7 +582,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         unit: "mm",
         format: [pdfWidthMm, pdfHeightMm],
       })
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidthMm, pdfHeightMm)
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidthMm, pdfHeightMm)
 
       const fileName = `Invoice-${getInvNo(order._id, order.status)}.pdf`
 
