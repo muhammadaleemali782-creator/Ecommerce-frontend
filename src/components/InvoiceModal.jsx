@@ -107,9 +107,8 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
 
           <div style={{textAlign:"right"}}>
             <div style={{background:meta.badgeBg,color:meta.badgeColor,fontWeight:900,fontSize:11,
-              padding:"6px 16px",borderRadius:99,display:"inline-flex",alignItems:"center",gap:6,marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:meta.badgeColor,flexShrink:0}}/>
-              <span>{meta.badge}</span>
+              padding:"6px 16px",borderRadius:99,display:"inline-block",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
+              {meta.badge}
             </div>
             <div style={{color:"#fff",fontWeight:900,fontSize:20,marginBottom:4}}>{meta.type}</div>
             <div style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>#{invNo}</div>
@@ -564,7 +563,7 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
       const captureOpts = {
-        scale: 2,
+        scale: 3,   // ⭐ zyada resolution = sharp text/icons, kabhi bhi blur na dikhe
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
