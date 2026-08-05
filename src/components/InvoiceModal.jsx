@@ -86,7 +86,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
                 marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden"}}>
                 <svg width="54" height="54" viewBox="0 0 54 54">
-                  <text x="28" y="26.5" textAnchor="middle" dominantBaseline="central"
+                  <text x="24.4" y="23.35" textAnchor="middle" dominantBaseline="central"
                     fontSize="26" fontWeight="900" fill="#fff" fontFamily="'Segoe UI',Arial,sans-serif">
                     {(settings?.companyName||"E")[0].toUpperCase()}
                   </text>
@@ -106,10 +106,18 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
           </div>
 
           <div style={{textAlign:"right"}}>
-            <div style={{background:meta.badgeBg,color:meta.badgeColor,fontWeight:900,fontSize:11,
-              padding:"6px 16px",borderRadius:99,display:"inline-block",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
-              {meta.badge}
-            </div>
+            {(() => {
+              const badgeW = meta.badge.length * 8.5 + 34
+              return (
+                <svg width={badgeW} height="30" style={{marginBottom:12,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.2))"}}>
+                  <rect x="0" y="0" width={badgeW} height="30" rx="15" fill={meta.badgeBg} />
+                  <text x={badgeW/2} y="15.5" textAnchor="middle" dominantBaseline="central"
+                    fontSize="11" fontWeight="900" fill={meta.badgeColor} fontFamily="'Segoe UI',Arial,sans-serif" letterSpacing="0.3">
+                    {meta.badge}
+                  </text>
+                </svg>
+              )
+            })()}
             <div style={{color:"#fff",fontWeight:900,fontSize:20,marginBottom:4}}>{meta.type}</div>
             <div style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>#{invNo}</div>
             <div style={{marginTop:10,color:"rgba(255,255,255,0.65)",fontSize:11}}>
