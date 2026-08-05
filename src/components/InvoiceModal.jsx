@@ -86,7 +86,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
                 marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden"}}>
                 <svg width="54" height="54" viewBox="0 0 54 54">
-                  <text x="27" y="27" textAnchor="middle" dominantBaseline="central"
+                  <text x="28" y="26.5" textAnchor="middle" dominantBaseline="central"
                     fontSize="26" fontWeight="900" fill="#fff" fontFamily="'Segoe UI',Arial,sans-serif">
                     {(settings?.companyName||"E")[0].toUpperCase()}
                   </text>
