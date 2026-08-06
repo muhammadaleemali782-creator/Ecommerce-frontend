@@ -86,7 +86,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
                 marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden"}}>
                 <svg width="54" height="54" viewBox="0 0 54 54">
-                  <text x="24.4" y="23.35" textAnchor="middle" dominantBaseline="central"
+                  <text x="27" y="27" textAnchor="middle" dominantBaseline="central"
                     fontSize="26" fontWeight="900" fill="#fff" fontFamily="'Segoe UI',Arial,sans-serif">
                     {(settings?.companyName||"E")[0].toUpperCase()}
                   </text>
@@ -111,7 +111,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               return (
                 <svg width={badgeW} height="30" style={{marginBottom:12,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.2))"}}>
                   <rect x="0" y="0" width={badgeW} height="30" rx="15" fill={meta.badgeBg} />
-                  <text x={badgeW/2} y="15.5" textAnchor="middle" dominantBaseline="central"
+                  <text x={badgeW/2} y="15" textAnchor="middle" dominantBaseline="central"
                     fontSize="11" fontWeight="900" fill={meta.badgeColor} fontFamily="'Segoe UI',Arial,sans-serif" letterSpacing="0.3">
                     {meta.badge}
                   </text>
@@ -577,7 +577,17 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         logging: false,
       }
 
-      const canvas = await html2canvas(node, captureOpts)
+      // ⭐ Ab DOM ko genuinely resize karte hain (upar), koi virtual
+      // width-override options nahi de rahe html2canvas ko — isliye
+      // foreignObjectRendering ab safe hai. Isse text-wrap (jaise 2-line
+      // address) ki height bhi asli browser jaisi sahi calculate hogi,
+      // aur emoji/icons bhi crisp render honge.
+      let canvas
+      try {
+        canvas = await html2canvas(node, { ...captureOpts, foreignObjectRendering: true })
+      } catch {
+        canvas = await html2canvas(node, captureOpts)   // safe fallback
+      }
       const imgData = canvas.toDataURL("image/png")
 
       const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
