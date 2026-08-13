@@ -570,13 +570,9 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
       node.style.width = neededWidth + "px"   // ab exactly usi width pe lock kar do
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
-      // ⭐ REAL BUG FIX: sirf width lock karna kaafi nahi tha — height bhi
-      // exactly nikaal kar html2canvas ko batani padegi. Warna jab
-      // `foreignObjectRendering: true` ho aur width/height diye na ho, to
-      // html2canvas element ki apni height ki jagah POORI browser window
-      // (jo yaha ek fixed full-screen modal overlay hai) ki height capture
-      // kar leta hai — isi wajah se invoice ke neeche PDF me bahut saara
-      // khaali white space aa raha tha.
+      // ⭐ Width ki tarah height bhi exactly measure karke html2canvas ko
+      // explicitly batani zaroori hai (neeche captureOpts mein) — taaki
+      // yeh sirf invoice ka asli content capture kare, poori window nahi.
       const neededHeight = Math.ceil(node.getBoundingClientRect().height) + 2
 
       const captureOpts = {
@@ -594,18 +590,22 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
         scrollY: 0,
       }
 
-      // ⭐ Ab DOM ko genuinely resize karte hain (upar) aur exact
-      // width+height dono explicitly de rahe hain — isliye
-      // foreignObjectRendering safe hai aur poori window capture
-      // nahi karega. Isse text-wrap (jaise 2-line address) ki height
-      // bhi asli browser jaisi sahi calculate hogi, aur emoji/icons
-      // bhi crisp render honge.
-      let canvas
-      try {
-        canvas = await html2canvas(node, { ...captureOpts, foreignObjectRendering: true })
-      } catch {
-        canvas = await html2canvas(node, captureOpts)   // safe fallback
-      }
+      // ⭐ ASLI ROOT CAUSE (verified via html2canvas ke apne official GitHub
+      // issue tracker — issue #1754, aaj tak open/unresolved hai):
+      // `foreignObjectRendering: true` mode explicitly diye gaye
+      // width/height/windowWidth/windowHeight ko SILENTLY IGNORE kar deta
+      // hai aur uski jagah poore document window ki asli size use karta
+      // hai — bina koi error diye. Isi wajah se pehle wala fix
+      // (sirf width/height pass karna) kaam nahi kar raha tha: code abhi
+      // bhi pehle foreignObjectRendering try karta tha, jo humare diye
+      // hue dimensions ko nazarandaz karke poori window capture kar leta
+      // tha (invoice ke neeche wo bada khaali white space).
+      //
+      // FIX: foreignObjectRendering ko poori tarah hata diya — plain/
+      // default html2canvas renderer explicitly diye gaye width/height ko
+      // sahi se respect karta hai. Emoji ki jagah pehle se hi custom SVG
+      // icons use ho rahe hain, isliye quality pe koi asar nahi padega.
+      let canvas = await html2canvas(node, captureOpts)
 
       // ⭐ SAFETY NET: agar phir bhi kisi wajah se canvas expected height se
       // lamba nikal aaye (kuch purane Android WebView versions me
