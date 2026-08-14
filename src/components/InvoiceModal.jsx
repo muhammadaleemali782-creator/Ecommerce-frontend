@@ -22,7 +22,8 @@ const getInvNo = (id,status) => {
    crisp/saaf render ho (fonts/color-emoji ka koi bharosa nahi hota) */
 function StepIcon({ type, color, size=15 }) {
   const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:color,
-    strokeWidth:2.6, strokeLinecap:"round", strokeLinejoin:"round" }
+    strokeWidth:2.6, strokeLinecap:"round", strokeLinejoin:"round",
+    style:{display:"block",flexShrink:0} }
   if (type==="cart")  return (<svg {...p}><circle cx="9" cy="20" r="1.3" fill={color} stroke="none"/><circle cx="17" cy="20" r="1.3" fill={color} stroke="none"/><path d="M2.5 3h2l2.3 12a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L20.5 7H6"/></svg>)
   if (type==="check")  return (<svg {...p}><polyline points="4 12.5 9.5 18 20 6"/></svg>)
   if (type==="flag")  return (<svg {...p}><path d="M5 3v18"/><path d="M5 4.5h12.5l-2.3 4 2.3 4H5"/></svg>)
@@ -84,13 +85,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
             ) : (
               <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
-                marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden"}}>
-                <svg width="54" height="54" viewBox="0 0 54 54">
-                  <text x="27" y="27" textAnchor="middle" dominantBaseline="central"
-                    fontSize="26" fontWeight="900" fill="#fff" fontFamily="'Segoe UI',Arial,sans-serif">
-                    {(settings?.companyName||"E")[0].toUpperCase()}
-                  </text>
-                </svg>
+                marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden",
+                display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <span style={{fontSize:26,fontWeight:900,color:"#fff",fontFamily:"'Segoe UI',Arial,sans-serif",lineHeight:1}}>
+                  {(settings?.companyName||"E")[0].toUpperCase()}
+                </span>
               </div>
             )}
             <div style={{color:"#fff",fontWeight:900,fontSize:22,letterSpacing:-0.5}}>
@@ -99,25 +98,21 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             {settings?.tagline&&<div style={{color:"rgba(255,255,255,0.75)",fontSize:12,marginTop:3}}>{settings.tagline}</div>}
             {settings?.address&&<div style={{color:"rgba(255,255,255,0.6)",fontSize:11,marginTop:6,maxWidth:280,lineHeight:1.5}}>{settings.address}</div>}
             <div style={{marginTop:6,display:"flex",gap:14,flexWrap:"wrap"}}>
-              {settings?.phone&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="rgba(255,255,255,0.75)" size={11}/> {settings.phone}</span>}
-              {settings?.email&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="mail" color="rgba(255,255,255,0.75)" size={11}/> {settings.email}</span>}
+              {settings?.phone&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="rgba(255,255,255,0.75)" size={11}/><span>{settings.phone}</span></span>}
+              {settings?.email&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="mail" color="rgba(255,255,255,0.75)" size={11}/><span>{settings.email}</span></span>}
             </div>
             {settings?.gst&&<div style={{marginTop:4,color:"rgba(255,255,255,0.6)",fontSize:11,fontFamily:"monospace"}}>GST: {settings.gst}</div>}
           </div>
 
           <div style={{textAlign:"right"}}>
-            {(() => {
-              const badgeW = meta.badge.length * 8.5 + 34
-              return (
-                <svg width={badgeW} height="30" style={{marginBottom:12,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.2))"}}>
-                  <rect x="0" y="0" width={badgeW} height="30" rx="15" fill={meta.badgeBg} />
-                  <text x={badgeW/2} y="15" textAnchor="middle" dominantBaseline="central"
-                    fontSize="11" fontWeight="900" fill={meta.badgeColor} fontFamily="'Segoe UI',Arial,sans-serif" letterSpacing="0.3">
-                    {meta.badge}
-                  </text>
-                </svg>
-              )
-            })()}
+            <div style={{display:"inline-block",padding:"7px 17px",borderRadius:15,
+              background:meta.badgeBg,marginBottom:12,marginRight:6,
+              boxShadow:"0 2px 6px rgba(0,0,0,0.2)"}}>
+              <span style={{fontSize:11,fontWeight:900,color:meta.badgeColor,
+                fontFamily:"'Segoe UI',Arial,sans-serif",letterSpacing:"0.3px"}}>
+                {meta.badge}
+              </span>
+            </div>
             <div style={{color:"#fff",fontWeight:900,fontSize:20,marginBottom:4}}>{meta.type}</div>
             <div style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>#{invNo}</div>
             <div style={{marginTop:10,color:"rgba(255,255,255,0.65)",fontSize:11}}>
@@ -172,7 +167,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             <div style={{marginLeft:12,background:"#fef2f2",borderRadius:8,padding:"4px 14px",
               display:"inline-flex",alignItems:"center",gap:6,
               fontSize:11,fontWeight:700,color:"#dc2626",border:"1.5px solid #fca5a5"}}>
-              <StepIcon type="cross" color="#dc2626" size={11}/> CANCELLED
+              <StepIcon type="cross" color="#dc2626" size={11}/><span>CANCELLED</span>
             </div>
           )}
         </div>
@@ -198,8 +193,8 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:10,textTransform:"uppercase"}}>Bill To</div>
           <div style={{fontWeight:800,fontSize:15,color:"#1e293b"}}>{order.customerName||"—"}</div>
-          {order.phone&&<div style={{fontSize:12,color:"#64748b",marginTop:5,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={12}/> {order.phone}</div>}
-          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.5,display:"flex",alignItems:"flex-start",gap:5}}><span style={{marginTop:2,flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span>{order.address}</div>}
+          {order.phone&&<div style={{fontSize:12,color:"#64748b",marginTop:5,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={12}/><span>{order.phone}</span></div>}
+          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.5,display:"flex",alignItems:"flex-start",gap:5}}><span style={{display:"flex",alignItems:"center",height:"1.5em",flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span><span>{order.address}</span></div>}
 
           {/* BEHALF INFO — toggleable by admin */}
           {orderedFor&&(
