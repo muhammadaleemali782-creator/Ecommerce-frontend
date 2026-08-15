@@ -83,9 +83,10 @@ export default function Store({ setPage }) {
             onClick={() => setCategory("all")}
             style={{
               padding: "8px 18px", borderRadius: 20, border: "1px solid #e2e8f0",
-              background: category === "all" ? "#1e293b" : "#fff",
+              background: category === "all" ? "#1E3A8A" : "#fff",
               color: category === "all" ? "#fff" : "#475569",
               fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
             }}
           >
             All
@@ -96,9 +97,10 @@ export default function Store({ setPage }) {
               onClick={() => setCategory(c)}
               style={{
                 padding: "8px 18px", borderRadius: 20, border: "1px solid #e2e8f0",
-                background: category === c ? "#1e293b" : "#fff",
+                background: category === c ? "#1E3A8A" : "#fff",
                 color: category === c ? "#fff" : "#475569",
                 fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}
             >
               {c}
@@ -109,11 +111,12 @@ export default function Store({ setPage }) {
 
       {/* ══ FLIP HINT ══ */}
       <div style={{
-        background: "linear-gradient(90deg,#ede9fe,#f0f9ff)",
-        border: "1px solid #ddd6fe",
+        background: "linear-gradient(90deg,#ccfbf1,#eff6ff)",
+        border: "1px solid #99f6e4",
         borderRadius: 10, padding: "8px 14px",
-        fontSize: 12, color: "#7c3aed", fontWeight: 600,
+        fontSize: 12, color: "#0F766E", fontWeight: 600,
         marginBottom: 14, display: "flex", alignItems: "center", gap: 8,
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}>
         💡 Kisi bhi card pe tap karo — flip ho ke poori details dikhegi!
       </div>

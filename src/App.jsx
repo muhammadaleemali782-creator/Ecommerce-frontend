@@ -304,7 +304,6 @@ function AppContent() {
     <div className="min-h-screen bg-gray-100">
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
       <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
-      {page === "home" && <HeroBanner setPage={setPage} />}
       <main className="p-3 sm:p-6 pb-24 sm:pb-6">
         {renderPage()}
       </main>
