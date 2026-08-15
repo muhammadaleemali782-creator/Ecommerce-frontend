@@ -40,6 +40,15 @@ export const StoreProvider = ({ children }) => {
   const [suppressCartPopup, setSuppressCartPopup] = useState(false)
 
   /* =====================================================
+     🔎 SHARED SEARCH / CATEGORY FILTER
+     Navbar ka search box aur Home page ke category tiles isi state ko
+     likhte hain, taaki Store page turant usi search/category ke saath
+     khule — real connection, sirf cosmetic nahi.
+  ===================================================== */
+  const [searchTerm, setSearchTerm] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState("all")
+
+  /* =====================================================
      🔥 FETCH PRODUCTS FROM BACKEND (FINAL FIX)
   ===================================================== */
   const fetchProducts = async () => {
@@ -250,7 +259,11 @@ export const StoreProvider = ({ children }) => {
         fetchUsers,
         fetchProducts,
         suppressCartPopup,
-        setSuppressCartPopup
+        setSuppressCartPopup,
+        searchTerm,
+        setSearchTerm,
+        categoryFilter,
+        setCategoryFilter,
       }}
     >
       {children}

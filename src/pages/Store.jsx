@@ -6,11 +6,13 @@ import InlineLoader from "../components/InlineLoader"
 
 export default function Store({ setPage }) {
   // ✅ FIX: addToCart StoreContext se lo — duplicate local function hataya
-  const { products = [], productsLoading, addToCart } = useStore()
+  const { products = [], productsLoading, addToCart, searchTerm, setSearchTerm, categoryFilter, setCategoryFilter } = useStore()
   const { user } = useAuth()
 
-  const [search, setSearch]         = useState("")
-  const [category, setCategory]     = useState("all")
+  const search = searchTerm
+  const setSearch = setSearchTerm
+  const category = categoryFilter
+  const setCategory = setCategoryFilter
   const [searchOpen, setSearchOpen] = useState(false)
 
   const role = user?.role || "guest"
