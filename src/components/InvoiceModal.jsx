@@ -79,8 +79,8 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{position:"absolute",top:-50,right:-50,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}}/>
         <div style={{position:"absolute",bottom:-70,right:30,width:140,height:140,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
 
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"relative",zIndex:1}}>
-          <div>
+        <div style={{position:"relative",zIndex:1,overflow:"hidden"}}>
+          <div style={{float:"left"}}>
             {settings?.showLogo&&settings?.logo ? (
               <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
             ) : (
@@ -96,15 +96,15 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               {settings?.companyName||"Your Company"}
             </div>
             {settings?.tagline&&<div style={{color:"rgba(255,255,255,0.75)",fontSize:12,marginTop:3}}>{settings.tagline}</div>}
-            {settings?.address&&<div style={{color:"rgba(255,255,255,0.6)",fontSize:11,marginTop:6,maxWidth:280,lineHeight:1.5}}>{settings.address}</div>}
-            <div style={{marginTop:6,display:"flex",gap:14,flexWrap:"wrap"}}>
+            {settings?.address&&<div style={{color:"rgba(255,255,255,0.6)",fontSize:11,marginTop:6,maxWidth:320,lineHeight:1.6}}>{settings.address}</div>}
+            <div style={{marginTop:14,display:"flex",gap:14,flexWrap:"wrap"}}>
               {settings?.phone&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="rgba(255,255,255,0.75)" size={11}/><span>{settings.phone}</span></span>}
               {settings?.email&&<span style={{color:"rgba(255,255,255,0.75)",fontSize:11,display:"inline-flex",alignItems:"center",gap:5}}><StepIcon type="mail" color="rgba(255,255,255,0.75)" size={11}/><span>{settings.email}</span></span>}
             </div>
             {settings?.gst&&<div style={{marginTop:4,color:"rgba(255,255,255,0.6)",fontSize:11,fontFamily:"monospace"}}>GST: {settings.gst}</div>}
           </div>
 
-          <div style={{textAlign:"right"}}>
+          <div style={{float:"right",textAlign:"right"}}>
             <div style={{display:"inline-block",padding:"7px 17px",borderRadius:15,
               background:meta.badgeBg,marginBottom:12,marginRight:6,
               boxShadow:"0 2px 6px rgba(0,0,0,0.2)"}}>
@@ -122,6 +122,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               {order.status==="rejected"&&order.rejectedAt&&<div>Rejected: {fmtDate(order.rejectedAt)}</div>}
             </div>
           </div>
+          <div style={{clear:"both"}}/>
         </div>
       </div>
 
