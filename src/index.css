@@ -43,3 +43,64 @@ img {
   padding:6px 14px;
   border-radius:6px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   EDUCA VEDA design system (ported verbatim from the uploaded
+   redesign) — reveal-on-scroll, gradient text, marquee, sliders.
+═══════════════════════════════════════════════════════════ */
+.text-gradient {
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal-3d {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-3d.active-3d {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.reveal-3d.delay-100 { transition-delay: 0.1s; }
+.reveal-3d.delay-200 { transition-delay: 0.2s; }
+.reveal-3d.delay-300 { transition-delay: 0.3s; }
+
+.ad-marquee-container {
+  display: flex;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+.ad-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: scrollAd 35s linear infinite;
+  padding: 1rem 0;
+}
+.ad-marquee-track:hover { animation-play-state: paused; }
+@keyframes scrollAd {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50%)); }
+}
+
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #7C3AED; cursor: pointer; margin-top: -7px; border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 6px rgba(124, 58, 237, 0.4); transition: transform 0.2s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+input[type=range]::-moz-range-thumb {
+  height: 18px; width: 18px; border-radius: 50%; background: #7C3AED; cursor: pointer;
+  border: 2px solid #FFFFFF; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.4);
+}
+input[type=range]::-moz-range-track { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-3d { opacity: 1; transform: none; transition: none; }
+  .ad-marquee-track { animation: none; }
+}

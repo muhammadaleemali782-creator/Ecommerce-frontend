@@ -1,195 +1,155 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useStore } from "../context/StoreContext"
 import { openFinanceService, openEducation } from "../utils/financeLink"
 
-export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
-  const { loggedIn, logout, user } = useAuth() || {}
-  const safeUser = user || {}
-  const role = safeUser?.role || "guest"
+export default function Navbar({ setPage }) {
+  const { loggedIn, user } = useAuth() || {}
+  const { cart = [], removeFromCart, searchTerm, setSearchTerm } = useStore() || {}
   const safeSetPage = typeof setPage === "function" ? setPage : () => {}
-  const safeCartCount = Number(cartCount) || 0
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
-  const accountRef = useRef(null)
 
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchVal, setSearchVal] = useState(searchTerm || "")
+
+  const cartCount = cart.reduce((sum, i) => sum + (i.qty || 1), 0)
+
+  const closeAll = () => { setSearchOpen(false); setCartOpen(false); setMobileOpen(false) }
+  const toggleSearch = () => { closeAll(); setSearchOpen(true) }
+  const toggleCart = () => { closeAll(); setCartOpen(true) }
+  const toggleMobile = () => { if (mobileOpen) closeAll(); else { closeAll(); setMobileOpen(true) } }
+
+  const go = (page) => { safeSetPage(page); closeAll() }
+  const runSearch = () => { setSearchTerm?.(searchVal); go("store") }
+
+  // ✅ ESC closes active modal/drawer/menu; body scroll locked while one is open
   useEffect(() => {
-    if (!accountOpen) return
-    const onClick = (e) => { if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false) }
-    document.addEventListener("mousedown", onClick)
-    return () => document.removeEventListener("mousedown", onClick)
-  }, [accountOpen])
+    const anyOpen = searchOpen || cartOpen || mobileOpen
+    if (!anyOpen) return
+    const onKey = (e) => { if (e.key === "Escape") closeAll() }
+    document.addEventListener("keydown", onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [searchOpen, cartOpen, mobileOpen])
 
-  const go = (page) => { safeSetPage(page); setMobileMenuOpen(false); setAccountOpen(false) }
-
-  const adminCategories = [
-    { cat: "📊 Dashboard", items: [{ label: "Network View", page: "admin-network" }, { label: "Orders", page: "admin-orders" }] },
-    { cat: "📦 Products", items: [{ label: "Add Product", page: "admin-add-product" }, { label: "Manage Products", page: "admin-products" }] },
-    { cat: "👥 Users & Requests", items: [{ label: "Manage Users", page: "admin-users" }, { label: "User Requests", page: "admin-requests" }, { label: "Requests History", page: "admin-requests-history" }, { label: "Password Reset", page: "admin-password-reset" }] },
-    { cat: "💰 Finance Admin", items: [{ label: "PPC Settings", page: "admin-ppc-settings" }, { label: "Withdrawals", page: "admin-withdrawal-management" }, { label: "Invoice Settings", page: "admin-invoice-settings" }] },
-    { cat: "⚙️ Settings", items: [{ label: "Email Settings", page: "email-settings" }] },
+  const navLinks = [
+    { label: "Ecosystem", action: () => go("home") },
+    { label: "Botanical Science", action: () => go("store") },
+    { label: "2-Yr Consultant Diploma", action: openEducation },
+    { label: "Fintech Vault", action: () => openFinanceService(loggedIn, safeSetPage) },
   ]
-  const distSellerBtns = [
-    { label: "Request User", page: "raise-request" },
-    { label: "My Network", page: "my-network" },
-    { label: "PPC Wallet", page: "ppc-wallet" },
-    { label: "Withdrawal", page: "withdrawal-request" },
-    { label: "Created Users", page: "my-users" },
-  ]
-  const userBtns = [
-    { label: "Request User", page: "raise-request" },
-    { label: "My Network", page: "my-network" },
-  ]
-  let roleBtns = []
-  if (role === "distributor" || role === "seller") roleBtns = distSellerBtns
-  else if (role === "user") roleBtns = userBtns
-  const orderBtn = role === "user" || role === "seller" ? { label: "My Orders", page: "seller-orders" }
-    : role === "distributor" ? { label: "Orders", page: "distributor-orders" } : null
-
-  const AccountMenuBody = () => (
-    <>
-      <button onClick={() => go("my-profile")} className="ev-menu-item">👤 My Profile</button>
-      <div className="ev-menu-divider" />
-      {role === "admin" ? (
-        adminCategories.map(group => (
-          <div key={group.cat}>
-            <div className="ev-menu-group">{group.cat}</div>
-            {group.items.map(b => (
-              <button key={b.page} onClick={() => go(b.page)} className="ev-menu-item">
-                {b.label}
-                {pageBadge[b.page] > 0 && <span className="ev-menu-badge">{pageBadge[b.page]}</span>}
-              </button>
-            ))}
-          </div>
-        ))
-      ) : (
-        roleBtns.map(b => (
-          <button key={b.page} onClick={() => go(b.page)} className="ev-menu-item">
-            {b.label}
-            {pageBadge[b.page] > 0 && <span className="ev-menu-badge">{pageBadge[b.page]}</span>}
-          </button>
-        ))
-      )}
-      {orderBtn && <button onClick={() => go(orderBtn.page)} className="ev-menu-item">{orderBtn.label}</button>}
-      <div className="ev-menu-divider" />
-      <button onClick={() => { logout && logout(); go("home") }} className="ev-menu-item ev-menu-danger">🚪 Logout</button>
-    </>
-  )
 
   return (
     <>
-      <style>{`
-        .ev-root { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .ev-navbar { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-        .ev-logo-box { display:flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; }
-        .ev-logo-icon { background:#1e3a8a; color:#fff; width:36px; height:36px; border-radius:10px; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .ev-logo-text { font-family:'Playfair Display', serif; font-size:22px; font-weight:800; color:#0f172a; letter-spacing:0.5px; }
-        .ev-logo-text .accent { color:#d97706; }
-        .ev-nav-links { display:flex; align-items:center; gap:24px; }
-        .ev-nav-link { font-size:14px; font-weight:600; color:#475569; background:none; border:none; cursor:pointer; transition: color 0.2s; padding:4px 0; }
-        .ev-nav-link:hover { color:#1e3a8a; }
-        .ev-nav-link.teal:hover { color:#0f766e; }
-        .ev-actions { display:flex; align-items:center; gap:12px; }
-        .ev-btn-outline { padding:8px 18px; font-size:13px; font-weight:700; color:#1e3a8a; border:1.5px solid #1e3a8a; border-radius:999px; background:none; cursor:pointer; transition:all 0.2s; }
-        .ev-btn-outline:hover { background:#eff6ff; }
-        .ev-btn-solid { padding:9px 20px; font-size:13px; font-weight:700; color:#fff; background:#1e3a8a; border:none; border-radius:999px; cursor:pointer; box-shadow:0 4px 10px rgba(30,58,138,0.25); transition:all 0.2s; }
-        .ev-btn-solid:hover { background:#1e40af; transform:translateY(-1px); }
-        .ev-cart-btn { position:relative; background:none; border:none; cursor:pointer; color:#475569; font-size:18px; padding:8px; border-radius:8px; }
-        .ev-cart-btn:hover { background:#f1f5f9; color:#1e3a8a; }
-        .ev-cart-badge { position:absolute; top:0; right:0; background:#d97706; color:#fff; font-size:9px; font-weight:800; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; }
-        .ev-avatar-btn { display:flex; align-items:center; gap:6px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:5px 12px 5px 5px; cursor:pointer; }
-        .ev-avatar-circle { width:26px; height:26px; border-radius:50%; background:#1e3a8a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
-        .ev-dropdown { position:absolute; top:calc(100% + 10px); right:0; width:250px; background:#fff; border-radius:16px; box-shadow:0 20px 40px rgba(15,23,42,0.15); border:1px solid #f1f5f9; padding:10px; max-height:70vh; overflow-y:auto; z-index:600; animation: evDrop 0.15s ease; }
-        @keyframes evDrop { from { opacity:0; transform:translateY(-6px);} to { opacity:1; transform:translateY(0);} }
-        .ev-menu-item { display:flex; justify-content:space-between; align-items:center; width:100%; text-align:left; padding:9px 12px; border-radius:9px; background:none; border:none; cursor:pointer; font-size:13px; font-weight:600; color:#334155; }
-        .ev-menu-item:hover { background:#f1f5f9; }
-        .ev-menu-danger { color:#dc2626; }
-        .ev-menu-divider { height:1px; background:#f1f5f9; margin:6px 0; }
-        .ev-menu-group { font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; padding:8px 4px 2px; }
-        .ev-menu-badge { background:#ef4444; color:#fff; font-size:9px; font-weight:800; border-radius:99px; padding:1px 6px; }
-        .ev-mobile-toggle { display:none; background:none; border:none; font-size:22px; color:#1e293b; cursor:pointer; }
-        @media (max-width: 900px) {
-          .ev-nav-links, .ev-actions .ev-btn-outline { display:none; }
-          .ev-mobile-toggle { display:block; }
-        }
-        .ev-mobile-drawer { position:fixed; inset:0; background:#fff; z-index:2000; padding:28px 24px; display:flex; flex-direction:column; gap:20px; }
-        .ev-mobile-link { font-family:'Playfair Display',serif; font-size:22px; font-weight:800; color:#0f172a; background:none; border:none; text-align:left; cursor:pointer; }
-      `}</style>
+      {/* ══ SHARED OVERLAY (z-100) ══ */}
+      <div
+        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] transition-opacity duration-300 ${(searchOpen || cartOpen || mobileOpen) ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={closeAll}
+      />
 
-      <nav className="ev-navbar ev-root">
-        <button className="ev-logo-box" onClick={() => go("home")}>
-          <span className="ev-logo-icon">✧</span>
-          <span className="ev-logo-text">EDUCA <span className="accent">VEDA</span></span>
+      {/* ══ SEARCH MODAL (z-200) ══ */}
+      <div
+        className={`fixed top-20 left-1/2 w-[90%] md:w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl z-[200] p-6 border border-slate-100 flex-col transition-all duration-300 ${searchOpen ? "opacity-100 pointer-events-auto -translate-x-1/2 translate-y-0 flex" : "opacity-0 pointer-events-none -translate-x-1/2 -translate-y-5 hidden"}`}
+      >
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="font-serif font-bold text-xl text-brand-primary">Global Ecosystem Search</h3>
+          <button onClick={closeAll} aria-label="Close search" className="text-slate-400 hover:text-indigo-600 transition w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">✕</button>
+        </div>
+        <input
+          type="text"
+          autoFocus={searchOpen}
+          value={searchVal}
+          onChange={e => setSearchVal(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && runSearch()}
+          placeholder="Search Ayurveda lines, 2-Year Consultant Course..."
+          className="w-full text-sm bg-slate-50 py-3.5 px-5 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition mb-3"
+        />
+      </div>
+
+      {/* ══ CART / FORMULATION REQUEST DRAWER (z-200) — REAL cart data ══ */}
+      <div className={`fixed top-0 right-0 h-full w-[90%] md:w-full max-w-sm bg-white shadow-2xl z-[200] flex flex-col border-l border-slate-100 transition-transform duration-500 ${cartOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+          <h3 className="font-serif font-bold text-xl text-brand-primary">Formulation Requests</h3>
+          <button onClick={closeAll} aria-label="Close cart" className="text-slate-400 hover:text-indigo-600 transition w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">✕</button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6 space-y-3">
+          {cart.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center mt-10">Abhi koi formulation request nahi hai.</p>
+          ) : (
+            cart.map(item => (
+              <div key={item.id || item._id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="flex justify-between items-start gap-2">
+                  <h4 className="font-bold text-sm text-brand-textDark">{item.title || item.productName}</h4>
+                  <button onClick={() => removeFromCart?.(item.id || item._id)} aria-label="Remove" className="text-slate-300 hover:text-red-500 transition text-xs flex-shrink-0">✕</button>
+                </div>
+                <p className="text-[11px] text-indigo-600 mt-0.5">Quantity: {item.qty || 1} Unit{item.qty > 1 ? "s" : ""} • ₹{item.price}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="p-6 border-t border-slate-100 bg-slate-50">
+          <button
+            onClick={() => go(loggedIn ? "checkout" : "login")}
+            disabled={cart.length === 0}
+            className="w-full bg-premium-gradient text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Submit Request
+          </button>
+        </div>
+      </div>
+
+      {/* ══ NAVBAR (z-50) ══ */}
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 px-6 md:px-12 py-4 flex justify-between items-center transition-all rounded-b-2xl">
+        <button onClick={() => go("home")} className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-premium-gradient rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20 flex-shrink-0">
+            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div className="text-left">
+            <h1 className="font-serif text-lg md:text-xl font-bold text-brand-primary tracking-tight leading-none">EDUCA VEDA</h1>
+            <p className="text-[8px] tracking-[0.2em] text-indigo-600 font-extrabold uppercase mt-1">HEALTHTECH &amp; FINTECH NEXUS</p>
+          </div>
         </button>
 
-        <div className="ev-nav-links">
-          <button className="ev-nav-link" onClick={() => go("home")}>Overview</button>
-          <button className="ev-nav-link teal" onClick={() => go("store")}>Ayurveda</button>
-          <button className="ev-nav-link" onClick={openEducation}>Education</button>
-          <button className="ev-nav-link teal" onClick={() => openFinanceService(safeSetPage)}>Wallet</button>
-          <button className="ev-nav-link" onClick={() => openFinanceService(safeSetPage)}>Finance</button>
+        <div className="hidden lg:flex items-center space-x-8 text-sm font-bold text-slate-700">
+          {navLinks.map(l => (
+            <button key={l.label} onClick={l.action} className="hover:text-indigo-600 transition-colors">{l.label}</button>
+          ))}
         </div>
 
-        <div className="ev-actions">
-          {loggedIn && (
-            <button className="ev-cart-btn" onClick={() => go("cart")} aria-label="Cart">
-              <i className="fa-solid fa-cart-shopping"></i>
-              {safeCartCount > 0 && <span className="ev-cart-badge">{safeCartCount > 9 ? "9+" : safeCartCount}</span>}
-            </button>
-          )}
+        <div className="hidden lg:flex items-center space-x-5">
+          <button onClick={toggleSearch} aria-label="Search" className="text-slate-600 hover:text-indigo-600 transition-colors p-1">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </button>
+          <button onClick={toggleCart} aria-label="Formulation requests" className="text-slate-600 hover:text-indigo-600 transition-colors p-1 relative">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">{cartCount > 9 ? "9+" : cartCount}</span>}
+          </button>
+          <button onClick={() => go(loggedIn ? "dashboard" : "login")} className="bg-brand-primary text-white text-xs font-bold px-6 py-3 rounded-full hover:bg-slate-800 transition shadow-md flex items-center gap-1.5">
+            {loggedIn ? "My Portal" : "Portal Access"} ↗
+          </button>
+        </div>
 
-          {!loggedIn ? (
-            <>
-              <button className="ev-btn-outline" onClick={() => go("login")}>Sign In</button>
-              <button className="ev-btn-solid" onClick={() => go("store")}>Launch App</button>
-            </>
-          ) : (
-            <div ref={accountRef} style={{ position: "relative" }}>
-              <button className="ev-avatar-btn" onClick={() => setAccountOpen(o => !o)}>
-                <span className="ev-avatar-circle">{(safeUser.name || safeUser.fullName || "U")[0]?.toUpperCase()}</span>
-              </button>
-              {accountOpen && (
-                <div className="ev-dropdown">
-                  <AccountMenuBody />
-                </div>
-              )}
-            </div>
-          )}
+        <button onClick={toggleMobile} aria-label="Menu" className="lg:hidden text-brand-primary p-2">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
-          <button className="ev-mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
-            <i className="fa-solid fa-bars"></i>
+        {/* ══ MOBILE MENU (z-200, above overlay) ══ */}
+        <div className={`absolute top-[70px] left-4 right-4 bg-white p-5 rounded-3xl shadow-2xl border border-slate-100 lg:hidden z-[200] transition-all duration-300 origin-top ${mobileOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
+          <div className="space-y-3 mb-5">
+            {navLinks.map((l, i) => (
+              <button key={l.label} onClick={l.action} className={`block w-full text-left text-xs font-bold text-slate-800 py-2 ${i < navLinks.length - 1 ? "border-b border-slate-100" : ""}`}>{l.label}</button>
+            ))}
+          </div>
+          <button onClick={() => go(loggedIn ? "dashboard" : "login")} className="w-full bg-premium-gradient text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-lg">
+            {loggedIn ? "My Portal" : "Portal Access"} ↗
           </button>
         </div>
       </nav>
-
-      {mobileMenuOpen && (
-        <div className="ev-mobile-drawer ev-root">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span className="ev-logo-text">EDUCA <span className="accent">VEDA</span></span>
-            <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer" }}><i className="fa-solid fa-xmark"></i></button>
-          </div>
-          <button className="ev-mobile-link" onClick={() => go("home")}>Overview</button>
-          <button className="ev-mobile-link" onClick={() => go("store")}>Ayurveda</button>
-          <button className="ev-mobile-link" onClick={openEducation}>Education</button>
-          <button className="ev-mobile-link" onClick={() => openFinanceService(safeSetPage)}>Wallet</button>
-          <button className="ev-mobile-link" onClick={() => openFinanceService(safeSetPage)}>Finance</button>
-          <div className="ev-menu-divider" />
-          {loggedIn ? (
-            <>
-              <button className="ev-mobile-link" style={{ fontSize: 16 }} onClick={() => go("my-profile")}>My Profile</button>
-              {orderBtn && <button className="ev-mobile-link" style={{ fontSize: 16 }} onClick={() => go(orderBtn.page)}>{orderBtn.label}</button>}
-              {roleBtns.map(b => (
-                <button key={b.page} className="ev-mobile-link" style={{ fontSize: 16 }} onClick={() => go(b.page)}>{b.label}</button>
-              ))}
-              {role === "admin" && adminCategories.flatMap(g => g.items).map(b => (
-                <button key={b.page} className="ev-mobile-link" style={{ fontSize: 16 }} onClick={() => go(b.page)}>{b.label}</button>
-              ))}
-              <button className="ev-btn-solid" style={{ marginTop: 10 }} onClick={() => { logout && logout(); go("home") }}>Logout</button>
-            </>
-          ) : (
-            <button className="ev-btn-solid" style={{ marginTop: 10 }} onClick={() => go("login")}>Sign In</button>
-          )}
-        </div>
-      )}
     </>
   )
 }

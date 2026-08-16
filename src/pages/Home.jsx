@@ -299,227 +299,259 @@ export function ProductCard({ product, showPPC, onAddToCart, onLoginRedirect, se
 }
 
 /* ═══════════════════════════════════════════════════════════
-   EDUCA VEDA REDESIGN — Ayurveda + Education + Finance ecosystem
-   Real data: recent order (agar logged in), real navigation links.
-   Loan Estimator client-side calculator hai (harmless preview tool),
-   iska CTA real Finance service link kholta hai.
+   EDUCA VEDA — ported exactly from uploaded redesign HTML.
+   Botanical Catalog = REAL products (backend se), baaki hero/
+   education/fintech content copy-verbatim hai jaisa diya gaya.
 ═══════════════════════════════════════════════════════════ */
+
+/* ⭐ Reveal-on-scroll — original HTML ke IntersectionObserver ka
+   exact React equivalent (.reveal-3d / .active-3d classes) */
+function useRevealOnScroll() {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active-3d")
+          observer.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.1 })
+    document.querySelectorAll(".reveal-3d").forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+}
+
+function BotanicalCard({ product, onAdd }) {
+  const img = getProductImageSrc(product)
+  return (
+    <div className="w-[15rem] bg-slate-50/80 rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between shrink-0 hover:border-indigo-500 transition">
+      <div>
+        <span className="inline-block px-2 py-0.5 bg-white border border-slate-200 text-indigo-600 text-[9px] font-bold tracking-widest rounded mb-3 uppercase">Ayush Aligned</span>
+        <div className="h-28 bg-white rounded-xl mb-3 flex items-center justify-center text-slate-300 border border-slate-100 shadow-inner font-serif font-bold text-xs overflow-hidden">
+          {img ? <img src={img} alt={product.title} className="w-full h-full object-cover" onError={e => (e.target.style.display = "none")} /> : "BOX NODE"}
+        </div>
+        <h4 className="font-extrabold text-base mb-0.5 text-brand-textDark">{product.title}</h4>
+        <p className="text-[10px] text-indigo-600 uppercase font-bold tracking-wider mb-4">{product.category || "EDUCA"}</p>
+      </div>
+      <button onClick={() => onAdd(product)} className="w-full py-2 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-premium-gradient hover:text-white transition font-bold text-xs shadow-sm">Add to Request</button>
+    </div>
+  )
+}
+
 export default function Store({ setPage }) {
   const safeSetPage = typeof setPage === "function" ? setPage : () => {}
   const { user, loggedIn } = useAuth()
-  const role = user?.role || "guest"
+  const { products = [], addToCart } = useStore()
+  useRevealOnScroll()
 
   const [loanAmount, setLoanAmount] = useState(55000)
   const [tenure, setTenure] = useState(11)
-  const [recentOrder, setRecentOrder] = useState(null)
-  const [orderLoading, setOrderLoading] = useState(false)
 
-  // ⭐ REAL recent order — /api/orders/mine se (sirf seller/user role ke liye backend allow karta hai)
-  useEffect(() => {
-    if (!loggedIn || !(role === "seller" || role === "user")) return
-    setOrderLoading(true)
-    const token = localStorage.getItem("token")
-    fetch(`${import.meta.env.VITE_API_URL}/api/orders/mine`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data) && data.length > 0) setRecentOrder(data[0]) })
-      .catch(e => console.error("Recent order fetch error:", e.message))
-      .finally(() => setOrderLoading(false))
-  }, [loggedIn, role])
-
-  const interestRate = 0.085
-  const monthlyRate = interestRate / 12
+  const monthlyRate = 0.085 / 12
   const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1)
-  const totalRepayable = emi * tenure
-  const totalInterest = totalRepayable - loanAmount
+  const total = emi * tenure
+  const interest = total - loanAmount
 
-  const statusMeta = {
-    pending: { label: "Pending", bg: "#fef3c7", color: "#92400e" },
-    distributor_approved: { label: "Approved", bg: "#dbeafe", color: "#1e40af" },
-    confirmed: { label: "Confirmed", bg: "#d1fae5", color: "#065f46" },
-    rejected: { label: "Rejected", bg: "#fee2e2", color: "#991b1b" },
+  const handleAdd = (product) => {
+    if (!loggedIn) { safeSetPage("login"); return }
+    addToCart(product)
   }
 
-  return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#F8FAFC" }}>
-      <style>{`
-        .ev-h1 { font-family: 'Playfair Display', serif; }
-        .ev-slider { accent-color: #0F766E; }
-        .ev-hero-btn:hover { background: #0d5c56 !important; transform: translateY(-2px); }
-        .ev-cta-btn:hover { background: #0d5c56 !important; }
-        .ev-track-btn:hover { background: #e2e8f0 !important; }
-      `}</style>
+  // ⭐ Marquee ke liye products ko duplicate karo (seamless infinite-loop illusion
+  // ke liye) — jaisa original HTML mein bhi "Duplicates for Loop" comment ke
+  // saath manually kiya gaya tha, ab yeh real product list ke saath dynamic hai.
+  const marqueeProducts = products.length > 0 ? [...products, ...products] : []
 
-      {/* 1. HERO SECTION */}
-      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "64px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "center" }} className="ev-hero-grid">
-        <div>
-          <h1 className="ev-h1" style={{ fontSize: 52, fontWeight: 800, lineHeight: 1.15, marginBottom: 24, color: "#0f172a" }}>
-            Ancient Wisdom.<br />
-            <span style={{ color: "#0F766E" }}>Modern Learning.</span><br />
-            Smarter Finance.
-          </h1>
-          <p style={{ fontSize: 17, color: "#475569", marginBottom: 32, lineHeight: 1.7 }}>
-            Discover authentic Ayurveda, master clinical traditional medicine, manage peerless digital payments,
-            and unlock micro-financing — united inside a single, high-trust digital realm.
+  return (
+    <div>
+      {/* ══════════════ HERO ══════════════ */}
+      <main className="max-w-[1400px] mx-auto px-0 md:px-6 py-8 md:py-16 grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div className="lg:col-span-7 space-y-6 reveal-3d delay-100">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50/80 border border-indigo-100 text-indigo-700 text-xs font-extrabold tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-indigo-600"></span> NEXT-GEN HEALTHTECH &amp; MICROFINANCE
+          </div>
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-[4.2rem] font-bold leading-[1.08] tracking-tight text-brand-primary">
+            Unifying <span className="text-gradient font-serif font-normal italic">Ayurvedic</span><br />
+            Healing &amp; Smart<br />
+            Fintech.
+          </h2>
+          <p className="text-sm md:text-base text-brand-textMuted font-medium max-w-lg leading-relaxed">
+            Bridging ancient classical herbal pharmacopeia with 2-year accredited clinical consultancy education and zero-latency smart contract micro-financing.
           </p>
-          <button
-            className="ev-hero-btn"
-            onClick={() => safeSetPage("store")}
-            style={{ padding: "13px 28px", background: "#0F766E", color: "#fff", fontWeight: 700, borderRadius: 999, border: "none", boxShadow: "0 10px 20px rgba(15,118,110,0.2)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, transition: "all 0.2s" }}
-          >
-            Explore EDUCA VEDA <span>→</span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button onClick={() => safeSetPage("store")} className="bg-premium-gradient text-white px-8 py-4 rounded-full font-extrabold flex justify-center items-center gap-2 shadow-lg shadow-indigo-500/20 hover:opacity-90 transition text-sm">Explore Core Ecosystem →</button>
+            <button onClick={openEducation} className="bg-white border border-slate-200 text-brand-primary px-8 py-4 rounded-full font-bold hover:border-slate-300 transition text-sm shadow-sm">View Consultant Program</button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 pt-6">
+            <div className="border-t border-slate-200 pt-3">
+              <p className="text-[10px] text-brand-textMuted font-bold uppercase">Formulations</p>
+              <p className="font-serif font-bold text-lg text-brand-primary">800+ Remedies</p>
+            </div>
+            <div className="border-t border-slate-200 pt-3">
+              <p className="text-[10px] text-brand-textMuted font-bold uppercase">Diploma Track</p>
+              <p className="font-serif font-bold text-lg text-indigo-600">2-Year Certified</p>
+            </div>
+            <div className="border-t border-slate-200 pt-3">
+              <p className="text-[10px] text-brand-textMuted font-bold uppercase">Disbursement</p>
+              <p className="font-serif font-bold text-lg text-emerald-600">Zero Latency</p>
+            </div>
+          </div>
         </div>
 
-        <div style={{ position: "relative", padding: 32, background: "#fff", borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9", minHeight: 360, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#f0fdfa,#eff6ff)", opacity: 0.6 }} />
-          <div style={{ position: "relative", textAlign: "center" }}>
-            <div style={{ height: 88, width: 88, background: "#D97706", borderRadius: 20, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 24px rgba(217,119,6,0.25)" }}>
-              <span style={{ fontSize: 30, color: "#fff" }}>⬡</span>
+        <div className="lg:col-span-5 reveal-3d delay-200 w-full">
+          <div className="relative w-full bg-dark-card-gradient rounded-[2.5rem] p-6 md:p-8 shadow-2xl border border-slate-800 overflow-hidden text-white">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold mb-8">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> NODE STATUS: <span className="text-white font-bold">Synchronized</span>
             </div>
-            <h3 style={{ fontWeight: 800, fontSize: 19, margin: "0 0 4px", color: "#0f172a" }}>EDUCA CORE</h3>
-            <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Unified Intelligence</p>
+
+            {/* ⚠️ Aapki di hui image "Gemini_Generated_Image_....png" abhi is
+                project mein exist nahi karti — filename same rakha hai, bas
+                is file ko /public folder mein daal dena, turant dikhne lagegi. */}
+            <div className="relative w-full h-[240px] md:h-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-6 group bg-slate-800">
+              <img src="/Gemini_Generated_Image_lcgly9lcgly9lcgl.png" alt="Ayurvedic Medicine & Health" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" onError={e => (e.target.style.display = "none")} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <div className="absolute bottom-3 left-3 right-3 text-center">
+                <span className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md">🌿 Ayurvedic Medicine &amp; Health Hub</span>
+              </div>
+            </div>
+
+            <div className="text-center mb-6">
+              <h4 className="font-serif text-white text-xl font-bold tracking-wide">EDUCA CORE ENGINE</h4>
+              <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase mt-0.5">FRONTEND RENDERED NODE</p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center justify-between backdrop-blur-md">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/30 flex items-center justify-center text-indigo-300 font-bold text-xs">₹</div>
+                <span className="text-xs text-slate-300 font-bold">SMART CONTRACT</span>
+              </div>
+              <span className="text-xs text-white font-extrabold tracking-wide">Zero-Latency</span>
+            </div>
           </div>
         </div>
       </main>
 
-      {/* 2. FOCUS DOMAINS — Ayurveda / Education / Finance real navigation */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px 64px" }}>
-        <span style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6 }}>Pick Your Domain</span>
-        <h2 className="ev-h1" style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", marginBottom: 24 }}>Focus Areas</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
-          <button onClick={() => safeSetPage("store")} style={{ textAlign: "left", background: "#fff", border: "1px solid #f1f5f9", borderRadius: 18, padding: 24, cursor: "pointer", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.06)" }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: "#ccfbf1", color: "#0F766E", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, marginBottom: 14 }}>
-              <i className="fa-solid fa-mortar-pestle"></i>
+      {/* ══════════════ PILLAR 01: AYURVEDIC MEDICINE (REAL products) ══════════════ */}
+      <section className="bg-white py-16 md:py-24 border-y border-slate-200 overflow-hidden -mx-3 sm:-mx-6 px-3 sm:px-6">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="reveal-3d text-center md:text-left mb-10">
+            <h3 className="text-[10px] md:text-xs tracking-[0.2em] font-bold text-indigo-600 uppercase mb-2">Pillar 01 — Ayurvedic Therapeutics &amp; Medicines</h3>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-brand-primary mb-2 tracking-tight">Standardized Botanical Catalog.</h2>
+            <p className="text-sm text-brand-textMuted max-w-2xl mx-auto md:mx-0">Heavy-metal tested, Ayush-aligned classical extracts, drops, syrups, and specialized capsules formulated for professional clinical deployment.</p>
+          </div>
+
+          {marqueeProducts.length === 0 ? (
+            <p className="text-center text-slate-400 text-sm py-10">Abhi koi formulation catalog mein nahi hai.</p>
+          ) : (
+            <div className="ad-marquee-container">
+              <div className="ad-marquee-track gap-5">
+                {marqueeProducts.map((product, i) => (
+                  <BotanicalCard key={`${product.id || product._id}-${i}`} product={product} onAdd={handleAdd} />
+                ))}
+              </div>
             </div>
-            <h4 style={{ fontWeight: 800, fontSize: 16, margin: "0 0 4px", color: "#0f172a" }}>Ayurveda &amp; Medicine</h4>
-            <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Real products — humare store mein abhi available</p>
-          </button>
-          <button onClick={openEducation} style={{ textAlign: "left", background: "#fff", border: "1px solid #f1f5f9", borderRadius: 18, padding: 24, cursor: "pointer", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.06)" }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: "#dbeafe", color: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, marginBottom: 14 }}>
-              <i className="fa-solid fa-graduation-cap"></i>
-            </div>
-            <h4 style={{ fontWeight: 800, fontSize: 16, margin: "0 0 4px", color: "#0f172a" }}>Education</h4>
-            <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Udaan Achievers platform pe khulega ↗</p>
-          </button>
-          <button onClick={() => openFinanceService(safeSetPage)} style={{ textAlign: "left", background: "#fff", border: "1px solid #f1f5f9", borderRadius: 18, padding: 24, cursor: "pointer", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.06)" }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: "#fef3c7", color: "#92400e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, marginBottom: 14 }}>
-              <i className="fa-solid fa-wallet"></i>
-            </div>
-            <h4 style={{ fontWeight: 800, fontSize: 16, margin: "0 0 4px", color: "#0f172a" }}>Finance &amp; Wallet</h4>
-            <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Abhi Services mein configured link khulega</p>
-          </button>
+          )}
         </div>
       </section>
 
-      {/* 3. CONTROL CENTER — REAL recent order (ya generic CTA agar order nahi hai) */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px 64px" }}>
-        <span style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6 }}>Unified Member Portal</span>
-        <h2 className="ev-h1" style={{ fontSize: 26, fontWeight: 800, color: "#0f172a", marginBottom: 24 }}>Personalized Control Center</h2>
+      {/* ══════════════ PILLAR 02: WELLNESS EDUCATION ══════════════ */}
+      <section className="max-w-7xl mx-auto px-0 md:px-6 py-16 md:py-24">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 reveal-3d">
+          <div className="mb-4 md:mb-0">
+            <h3 className="text-[10px] md:text-xs tracking-[0.2em] font-bold text-indigo-600 uppercase mb-2">Pillar 02 — Digital Clinical Learning &amp; Certification</h3>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-brand-primary tracking-tight">Become a Certified Health &amp; Wellness Consultant.</h2>
+          </div>
+          <button onClick={openEducation} className="inline-block text-xs font-bold text-indigo-600 hover:text-brand-primary transition uppercase tracking-widest">Student Portal Node →</button>
+        </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-          <div style={{ background: "#fff", padding: 24, borderRadius: 18, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.06)", border: "1px solid #f1f5f9" }}>
-            {!loggedIn ? (
-              <>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>Get Started</span>
-                <h4 style={{ fontSize: 17, fontWeight: 800, margin: "6px 0 8px", color: "#0f172a" }}>Login karke apna order dekho</h4>
-                <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>Login karne ke baad yahan aapka latest order status dikhega</p>
-                <button onClick={() => safeSetPage("login")} className="ev-cta-btn" style={{ width: "100%", padding: "10px 0", background: "#0F766E", color: "#fff", fontWeight: 700, borderRadius: 12, border: "none", cursor: "pointer" }}>Login Karo</button>
-              </>
-            ) : orderLoading ? (
-              <p style={{ fontSize: 13, color: "#94a3b8" }}>Order load ho raha hai...</p>
-            ) : recentOrder ? (
-              <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>Recent Order</span>
-                  <span style={{
-                    padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 800,
-                    background: (statusMeta[recentOrder.status] || statusMeta.pending).bg,
-                    color: (statusMeta[recentOrder.status] || statusMeta.pending).color,
-                  }}>{(statusMeta[recentOrder.status] || statusMeta.pending).label}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-dark-card-gradient text-white rounded-[2rem] p-7 md:p-8 border border-slate-800 shadow-xl reveal-3d delay-100 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none"></div>
+            <div>
+              <span className="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-black tracking-widest rounded-md mb-6 uppercase">Flagship 2-Year Diploma</span>
+              <h3 className="font-serif font-bold text-2xl mb-3 leading-tight">Health &amp; Wellness Consultant Program</h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-6">Comprehensive curriculum spanning traditional Dravyaguna, anatomy, preventive lifestyle coaching, and clinical practice management.</p>
+            </div>
+            <button onClick={openEducation} className="w-full py-3.5 bg-white text-brand-primary font-bold rounded-xl text-xs uppercase tracking-widest shadow hover:bg-slate-100 transition relative z-10">Enroll &amp; Secure Grant</button>
+          </div>
+
+          <div className="bg-white rounded-[2rem] p-7 md:p-8 border border-slate-200 shadow-sm reveal-3d delay-200 flex flex-col justify-between hover:border-indigo-500 transition">
+            <div>
+              <span className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-[9px] font-black tracking-widest rounded-md mb-6 uppercase">Clinical Practicum</span>
+              <h3 className="font-serif font-bold text-2xl mb-3 text-brand-textDark leading-tight">Clinical Panchakarma Protocols</h3>
+              <p className="text-xs text-brand-textMuted leading-relaxed mb-6">Step-by-step detox therapeutic methodologies, Vamana, Virechana, and pre/post-procedure dietary governance.</p>
+            </div>
+            <button onClick={openEducation} className="w-full py-3.5 bg-slate-100 border border-slate-200 text-brand-textDark font-bold rounded-xl text-xs uppercase tracking-widest hover:border-indigo-500 transition">View Module Outline</button>
+          </div>
+
+          <div className="bg-white rounded-[2rem] p-7 md:p-8 border border-slate-200 shadow-sm reveal-3d delay-300 flex flex-col justify-between hover:border-indigo-500 transition">
+            <div>
+              <span className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-[9px] font-black tracking-widest rounded-md mb-6 uppercase">Career Node</span>
+              <h3 className="font-serif font-bold text-2xl mb-3 text-brand-textDark leading-tight">Medical Communication &amp; Ethics</h3>
+              <p className="text-xs text-brand-textMuted leading-relaxed mb-6">Patient consultation frameworks, electronic case paper documentation, and digital telemedicine regulatory readiness.</p>
+            </div>
+            <button onClick={openEducation} className="w-full py-3.5 bg-slate-100 border border-slate-200 text-brand-textDark font-bold rounded-xl text-xs uppercase tracking-widest hover:border-indigo-500 transition">View Module Outline</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════ PILLAR 04: HEALTH-TECH FINTECH ══════════════ */}
+      <section className="max-w-7xl mx-auto px-0 md:px-6 py-16 md:py-24">
+        <h3 className="text-[10px] md:text-xs tracking-[0.2em] font-bold text-indigo-600 uppercase mb-2 text-center lg:text-left reveal-3d">Pillar 04 — Health-Tech Fintech &amp; Micro-Lending</h3>
+        <h2 className="font-serif text-3xl md:text-4xl font-bold text-brand-primary mb-10 text-center lg:text-left reveal-3d tracking-tight">Zero-Latency Financing for Tuition &amp; Clinics.</h2>
+
+        <div className="grid lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-6 bg-dark-card-gradient rounded-[2.5rem] p-6 md:p-8 border border-slate-800 shadow-2xl relative overflow-hidden reveal-3d delay-100">
+            <div className="absolute -top-16 -right-16 w-56 h-56 bg-indigo-600/20 blur-[60px] rounded-full pointer-events-none"></div>
+
+            <div className="flex justify-between items-center mb-6 relative z-10 border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-white">Smart Micro-Loan Estimator</h3>
+                <p className="text-[11px] text-slate-400">Instant credit evaluation for students &amp; practitioners</p>
+              </div>
+              <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-900/40 border border-indigo-500/30 px-2.5 py-1 rounded backdrop-blur-md">8.5% p.a.</span>
+            </div>
+
+            <div className="space-y-6 relative z-10">
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">REQUIRED AMOUNT</label>
+                  <span className="font-serif text-xl font-bold text-white">₹{loanAmount.toLocaleString("en-IN")}</span>
                 </div>
-                <h4 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 4px", color: "#0f172a" }}>
-                  Order #{(recentOrder._id || "").toString().slice(-6).toUpperCase()}
-                </h4>
-                <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>
-                  {(recentOrder.items || []).length} Item{(recentOrder.items || []).length === 1 ? "" : "s"} • ₹{recentOrder.total || 0}
-                </p>
-                <button onClick={() => safeSetPage("seller-orders")} className="ev-track-btn" style={{ width: "100%", padding: "10px 0", background: "#f1f5f9", color: "#334155", fontWeight: 700, borderRadius: 12, border: "none", cursor: "pointer" }}>Track Order</button>
-              </>
-            ) : (
-              <>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>No Orders Yet</span>
-                <h4 style={{ fontSize: 17, fontWeight: 800, margin: "6px 0 8px", color: "#0f172a" }}>Shopping shuru karo</h4>
-                <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>Abhi tak koi order nahi hai — Ayurveda store dekho</p>
-                <button onClick={() => safeSetPage("store")} className="ev-cta-btn" style={{ width: "100%", padding: "10px 0", background: "#0F766E", color: "#fff", fontWeight: 700, borderRadius: 12, border: "none", cursor: "pointer" }}>Store Kholo</button>
-              </>
-            )}
+                <input type="range" min="10000" max="200000" step="1000" value={loanAmount} onChange={e => setLoanAmount(Number(e.target.value))} />
+                <div className="flex justify-between text-[9px] text-slate-500 mt-1.5 font-bold"><span>₹10K</span><span>₹1L</span><span>₹2L</span></div>
+              </div>
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">TENURE</label>
+                  <span className="font-serif text-xl font-bold text-white">{tenure} Months</span>
+                </div>
+                <input type="range" min="3" max="24" step="1" value={tenure} onChange={e => setTenure(Number(e.target.value))} />
+                <div className="flex justify-between text-[9px] text-slate-500 mt-1.5 font-bold"><span>3 Mo</span><span>12 Mo</span><span>24 Mo</span></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 mt-6 mb-5 pt-4 border-t border-slate-800 bg-white/5 backdrop-blur-md p-4 rounded-2xl relative z-10 text-center">
+              <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">EST. EMI</p><p className="font-serif text-base font-bold text-indigo-400">₹{Math.round(emi).toLocaleString("en-IN")}</p></div>
+              <div className="border-l border-r border-slate-800"><p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">INTEREST</p><p className="font-serif text-base font-bold text-violet-400">₹{Math.round(interest).toLocaleString("en-IN")}</p></div>
+              <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">TOTAL</p><p className="font-serif text-base font-bold text-white">₹{Math.round(total).toLocaleString("en-IN")}</p></div>
+            </div>
+            <button onClick={() => openFinanceService(loggedIn, safeSetPage)} className="w-full bg-white text-brand-primary font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-xl hover:bg-slate-200 transition relative z-10">Instant KYC Verification</button>
+          </div>
+
+          <div className="lg:col-span-6 space-y-4">
+            <button onClick={() => openFinanceService(loggedIn, safeSetPage)} className="w-full text-left bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex gap-4 items-center reveal-3d delay-200 hover:border-indigo-300 transition">
+              <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center shrink-0"><svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg></div>
+              <div><h4 className="font-bold text-sm mb-0.5 text-brand-textDark">Zero-Upfront Consultant Financing</h4><p className="text-xs text-brand-textMuted leading-relaxed">Fund your 2-Year Health Consultant Diploma with automated institutional micro-grants.</p></div>
+            </button>
+            <button onClick={() => openFinanceService(loggedIn, safeSetPage)} className="w-full text-left bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex gap-4 items-center reveal-3d delay-300 hover:border-indigo-300 transition">
+              <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center shrink-0"><svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
+              <div><h4 className="font-bold text-sm mb-0.5 text-brand-textDark">Ayurvedic Pharmacy Working Capital</h4><p className="text-xs text-brand-textMuted leading-relaxed">Instant inventory credit lines for clinical setups to stock classical formulations seamlessly.</p></div>
+            </button>
           </div>
         </div>
       </section>
-
-      {/* 4. INTERACTIVE LOAN ESTIMATOR — client-side calculator (koi fake backend data nahi) */}
-      <section style={{ maxWidth: 700, margin: "0 auto", padding: "0 24px 80px" }}>
-        <div style={{ background: "#fff", padding: 32, borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 10 }}>
-            <h3 className="ev-h1" style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", margin: 0 }}>Interactive Loan Estimator</h3>
-            <span style={{ padding: "5px 12px", background: "#fef3c7", color: "#92400e", fontSize: 13, fontWeight: 800, borderRadius: 10 }}>APR: 8.5% p.a.</span>
-          </div>
-
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <label style={{ fontSize: 12, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Required Amount</label>
-              <span style={{ fontWeight: 800, fontSize: 16, color: "#1e3a8a" }}>₹{loanAmount.toLocaleString()}</span>
-            </div>
-            <input type="range" min="10000" max="200000" step="5000" value={loanAmount}
-              onChange={e => setLoanAmount(Number(e.target.value))}
-              className="ev-slider" style={{ width: "100%", height: 6, borderRadius: 8, cursor: "pointer" }} />
-          </div>
-
-          <div style={{ marginBottom: 36 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <label style={{ fontSize: 12, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Repayment Tenure</label>
-              <span style={{ fontWeight: 800, fontSize: 16, color: "#1e3a8a" }}>{tenure} Months</span>
-            </div>
-            <input type="range" min="3" max="24" step="1" value={tenure}
-              onChange={e => setTenure(Number(e.target.value))}
-              className="ev-slider" style={{ width: "100%", height: 6, borderRadius: 8, cursor: "pointer" }} />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28, paddingTop: 24, borderTop: "1px solid #f1f5f9" }}>
-            <div>
-              <p style={{ fontSize: 10.5, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 4px" }}>Est. EMI</p>
-              <p className="ev-h1" style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: 0 }}>₹{Math.round(emi).toLocaleString()}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: 10.5, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 4px" }}>Total Interest</p>
-              <p className="ev-h1" style={{ fontSize: 20, fontWeight: 800, color: "#d97706", margin: 0 }}>₹{Math.round(totalInterest).toLocaleString()}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: 10.5, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 4px" }}>Total Repayable</p>
-              <p className="ev-h1" style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: 0 }}>₹{Math.round(totalRepayable).toLocaleString()}</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => openFinanceService(safeSetPage)}
-            className="ev-cta-btn"
-            style={{ width: "100%", padding: "15px 0", background: "#0F766E", color: "#fff", fontWeight: 800, fontSize: 16, borderRadius: 14, border: "none", cursor: "pointer", boxShadow: "0 10px 20px rgba(15,118,110,0.2)" }}
-          >
-            Proceed with Instant Verification
-          </button>
-          <p style={{ fontSize: 11.5, color: "#94a3b8", textAlign: "center", marginTop: 10 }}>
-            * Yeh sirf ek estimate calculator hai. Verification ke liye aap humare finance partner ke page pe redirect honge.
-          </p>
-        </div>
-      </section>
-
-      <style>{`
-        @media (max-width: 860px) {
-          .ev-hero-grid { grid-template-columns: 1fr !important; text-align: center; }
-        }
-      `}</style>
     </div>
   )
 }
