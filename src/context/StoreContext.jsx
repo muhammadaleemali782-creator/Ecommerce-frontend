@@ -68,6 +68,12 @@ export const StoreProvider = ({ children }) => {
         return
       }
 
+      const contentType = res.headers.get("content-type") || ""
+      if (!contentType.includes("application/json")) {
+        console.warn("⚠️ Non-JSON response received for products")
+        return
+      }
+
       const data = await res.json()
 
       if (!Array.isArray(data)) {

@@ -1,45 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+}
 
 * {
   box-sizing: border-box;
 }
 
 html, body, #root {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
 }
 
 body {
   margin: 0;
+  background-color: #121813;
+  background-image: 
+    radial-gradient(ellipse at 80% 15%, rgba(42, 60, 42, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 75%, rgba(28, 42, 29, 0.45) 0%, transparent 60%),
+    linear-gradient(180deg, #101511 0%, #141c15 50%, #0e140f 100%);
+  background-attachment: fixed;
+  color: #e5e9df;
 }
 
-/* ── Scroll smoothness ──
-   Touch scroll ke time repaint/jank kam karne ke liye — GPU ko
-   composite layers use karne ka hint deta hai bina overuse kiye. */
-img {
-  content-visibility: auto;
+/* ── Custom Luxury MOSS Scrollbar ── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
 }
-* {
-  -webkit-tap-highlight-color: transparent;
+::-webkit-scrollbar-track {
+  background: #0f1510;
+}
+::-webkit-scrollbar-thumb {
+  background: #3e4e37;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5d7051;
 }
 
+/* ── MOSS Botanical Glass & Olive Button Styles ── */
+.moss-panel {
+  background: rgba(23, 31, 24, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+}
 
+.moss-card {
+  background: #172118;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.moss-card:hover {
+  border-color: rgba(142, 168, 120, 0.3);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+}
+
+.btn-moss-pill {
+  background: #5c6c49;
+  color: #f2f5ed;
+  transition: all 0.25s ease;
+}
+.btn-moss-pill:hover {
+  background: #6d8057;
+  color: #ffffff;
+}
+
+.btn-moss-outline {
+  border: 1px solid rgba(142, 168, 120, 0.3);
+  color: #d1dac5;
+  background: rgba(23, 31, 24, 0.6);
+}
+.btn-moss-outline:hover {
+  background: rgba(92, 108, 73, 0.2);
+  border-color: rgba(142, 168, 120, 0.6);
+  color: #ffffff;
+}
+
+.moss-gold-text {
+  color: #d8dfcd;
+}
+
+.moss-accent-text {
+  color: #8fa878;
+}
+
+/* ── 3D Cube Transition & Brandkit Theme (animate + brandkit + emil-design-eng) ── */
 @keyframes fade {
-  from {opacity:0; transform:translateY(20px)}
+  from {opacity:0; transform:translateY(15px)}
   to {opacity:1; transform:translateY(0)}
 }
 .animate-fade {
-  animation: fade 0.6s ease;
+  animation: fade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn{
-  background:#2563eb;
-  color:white;
-  padding:6px 14px;
-  border-radius:6px;
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2.4s ease-in-out infinite;
+}
+
+/* ── Physical Roll Transition (Left to Right / Right to Left) ── */
+.roll-transition {
+  transition: transform 0.85s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.55s ease;
+  will-change: transform, opacity;
+}
+
+/* ── Cinematic Zoom-In & Title Glide Down (PagerScreen / Shared Element) ── */
+@keyframes heroZoomIn {
+  0% {
+    transform: scale(1.18);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-hero-zoom {
+  animation: heroZoomIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes titleGlideDown {
+  0% {
+    transform: translateY(-28px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-title-glide {
+  animation: titleGlideDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes contentSlideUp {
+  0% {
+    transform: translateY(35px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-content-slide-up {
+  animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* ── Apple-Grade Cinematic Dossier Portal Transitions (Pure GPU 60/120fps) ── */
+@keyframes appleSheetEnter {
+  0% {
+    transform: translate3d(0, 48px, 0) scale3d(0.96, 0.96, 1);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+    opacity: 1;
+  }
+}
+
+@keyframes appleSheetExit {
+  0% {
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 36px, 0) scale3d(0.96, 0.96, 1);
+    opacity: 0;
+  }
+}
+
+.animate-apple-sheet {
+  animation: appleSheetEnter 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
 }

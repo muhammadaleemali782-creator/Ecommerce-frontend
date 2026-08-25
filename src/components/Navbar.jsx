@@ -1,356 +1,260 @@
-import { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import NotificationBell from "./NotificationBell"
-import ShareButton from "./ShareButton"
 
-export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMargin = false }) {
+export default function Navbar({ setPage, cartCount, pageBadge = {}, noBottomMargin = true }) {
   const { loggedIn, logout, user } = useAuth() || {}
   const safeUser = user || {}
   const role = safeUser?.role || "guest"
   const safeSetPage = typeof setPage === "function" ? setPage : () => {}
   const safeCartCount = Number(cartCount) || 0
-  const isBlocked = safeUser?.isBlocked || false
-  const isDeleted = safeUser?.isDeleted || false
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [activeTab, setActiveTab] = useState("home")
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // ✅ Lock body scroll when menu is open, so drawer height stays correct
-  useEffect(() => {
-    if (menuOpen) {
-      const prevOverflow = document.body.style.overflow
-      const prevHeight = document.body.style.height
-      document.body.style.overflow = "hidden"
-      document.body.style.height = "100%"
-      return () => {
-        document.body.style.overflow = prevOverflow
-        document.body.style.height = prevHeight
-      }
+  const go = (page, sectionId) => {
+    setActiveTab(page)
+    safeSetPage(page)
+    setMobileMenuOpen(false)
+    if (sectionId) {
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: "smooth" })
+      }, 100)
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
-  }, [menuOpen])
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [winSize, setWinSize] = useState({ w: window.innerWidth, h: window.innerHeight })
-
-  useEffect(() => {
-    const check = () => {
-      setIsMobile(window.innerWidth < 768)
-      setWinSize({ w: window.innerWidth, h: window.innerHeight })
-    }
-    window.addEventListener("resize", check)
-    return () => window.removeEventListener("resize", check)
-  }, [])
-
-  const go = (page) => { safeSetPage(page); setMenuOpen(false) }
-
-  if (loggedIn && (isBlocked || isDeleted)) {
-    return (
-      <header style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"#fef2f2", padding:"12px 16px", marginBottom:16, borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)" }}>
-        <span style={{ fontWeight:700, color:"#dc2626" }}>Account Disabled</span>
-        <button onClick={() => { logout && logout(); go("login") }} style={{ padding:"6px 14px", borderRadius:6, background:"#dc2626", color:"#fff", border:"none", cursor:"pointer", fontSize:13, fontWeight:600 }}>Logout</button>
-      </header>
-    )
   }
-
-  const publicBtns = [
-    { label:"home",     page:"home",     color:"#3b82f6" },
-    { label:"services", page:"services", color:"#3b82f6" },
-    { label:"store",    page:"store",    color:"#3b82f6" },
-  ]
-
-  const adminCategories = [
-    {
-      cat: "📊 Dashboard",
-      items: [
-        { label:"Network View",   page:"admin-network", color:"#a21caf" },
-        { label:"Orders",         page:"admin-orders",  color:"#0f766e" },
-      ],
-    },
-    {
-      cat: "📦 Products",
-      items: [
-        { label:"Add Product",     page:"admin-add-product", color:"#ea580c" },
-        { label:"Manage Products", page:"admin-products",    color:"#dc2626" },
-      ],
-    },
-    {
-      cat: "👥 Users & Requests",
-      items: [
-        { label:"Manage Users",     page:"admin-users",            color:"#1e293b" },
-        { label:"User Requests",    page:"admin-requests",         color:"#db2777" },
-        { label:"Requests History", page:"admin-requests-history", color:"#4b5563" },
-        { label:"Password Reset",   page:"admin-password-reset",   color:"#b91c1c" },
-      ],
-    },
-    {
-      cat: "💰 Finance",
-      items: [
-        { label:"💰 PPC Settings", page:"admin-ppc-settings",          color:"#9333ea" },
-        { label:"💳 Withdrawals",  page:"admin-withdrawal-management", color:"#ea580c" },
-        { label:"🧾 Invoice Settings", page:"admin-invoice-settings",  color:"#0891b2" },
-      ],
-    },
-    {
-      cat: "⚙️ Settings",
-      items: [
-        { label:"📧 Email Settings", page:"email-settings", color:"#4f46e5" },
-        { label:"☢️ Data Purge",     page:"admin-nuke",     color:"#7f1d1d" },
-      ],
-    },
-  ]
-  // Flat version — kahin bhi flat list chahiye ho (e.g. desktop dropdown fallback)
-  const adminBtns = adminCategories.flatMap(c => c.items)
-
-  const distSellerBtns = [
-    { label:"Request User",  page:"raise-request",      color:"#ea580c" },
-    { label:"My Network",    page:"my-network",         color:"#7c3aed" },
-    { label:"💰 PPC Wallet", page:"ppc-wallet",         color:"#9333ea" },
-    { label:"💸 Withdrawal", page:"withdrawal-request", color:"#16a34a" },
-    { label:"Created Users", page:"my-users",           color:"#0d9488" },
-  ]
-
-  const userBtns = [
-    { label:"Request User", page:"raise-request", color:"#ea580c" },
-    { label:"My Network",   page:"my-network",    color:"#7c3aed" },
-  ]
-
-  const bottomNav = loggedIn ? [
-    { label:"Home",    page:"home",    icon:"🏠" },
-    { label:"Store",   page:"store",   icon:"🛒" },
-    ...(role === "admin"
-      ? [{ label:"Network", page:"admin-network", icon:"🌐" }, { label:"Orders", page:"admin-orders", icon:"📦" }]
-      : [{ label:"Network", page:"my-network",    icon:"🌐" }, { label:"Orders", page: role === "user" || role === "seller" ? "seller-orders" : "distributor-orders", icon:"📦" }]
-    ),
-    { label:"Profile", page:"my-profile", icon:"👤" },
-  ] : [
-    { label:"Home",  page:"home",  icon:"🏠" },
-    { label:"Store", page:"store", icon:"🛒" },
-    { label:"Login", page:"login", icon:"👤" },
-  ]
-
-  let roleBtns = []
-  if (role === "admin")                               roleBtns = adminBtns
-  else if (role === "distributor" || role === "seller") roleBtns = distSellerBtns
-  else if (role === "user")                           roleBtns = userBtns
-
-  const orderBtn = role === "user" || role === "seller"
-    ? { label:"My Orders", page:"seller-orders",      color:"#1e40af" }
-    : role === "distributor"
-    ? { label:"Orders",    page:"distributor-orders", color:"#166534" }
-    : null
-
-  const btnStyle = (color) => ({
-    padding:"4px 12px", borderRadius:6, background:color, color:"#fff",
-    border:"none", cursor:"pointer", fontSize:13, fontWeight:600, textTransform:"uppercase"
-  })
-
-  /* ── Button with notification badge ── */
-  const BtnBadge = ({ label, page: pg, color }) => {
-    const badge = pageBadge[pg] || 0
-    return (
-      <button
-        onClick={() => go(pg)}
-        style={{ ...btnStyle(color), position:"relative" }}
-      >
-        {label}
-        {badge > 0 && (
-          <span style={{
-            position:"absolute", top:-6, right:-6,
-            background:"#ef4444", color:"#fff",
-            fontSize:9, fontWeight:800,
-            borderRadius:"50%", minWidth:16, height:16,
-            display:"flex", alignItems:"center", justifyContent:"center",
-            padding:"0 2px", border:"2px solid #fff",
-            pointerEvents:"none"
-          }}>
-            {badge > 9 ? "9+" : badge}
-          </span>
-        )}
-      </button>
-    )
-  }
-
-  const drawerBtnStyle = (color) => ({
-    padding:"10px 14px", borderRadius:8, background:color+"15", color,
-    border:`1px solid ${color}30`, cursor:"pointer", fontSize:13,
-    fontWeight:600, textAlign:"left", width:"100%", textTransform:"uppercase"
-  })
 
   return (
-    <>
-      {/* ─── DESKTOP NAVBAR ─── */}
-      <header style={{ display:isMobile?"none":"flex", justifyContent:"space-between", alignItems:"center", background:"#fff", padding:"16px", borderRadius:8, boxShadow:"0 2px 8px rgba(0,0,0,0.08)", marginBottom:noBottomMargin?0:24, flexWrap:"wrap", gap:8 }}>
-        <h1 style={{ fontWeight:800, fontSize:18, cursor:"pointer", margin:0, color:"#1e293b" }} onClick={() => go("home")}>EDUCA Store</h1>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
-          {publicBtns.map(b => (
-            <button key={b.page} onClick={() => go(b.page)} style={btnStyle(b.color)}>{b.label}</button>
-          ))}
+    <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-md text-white select-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        
+        {/* Left Iconic Yellow NatGeo Style Frame Logo - EDUCA VEDA */}
+        <div
+          className="flex items-center gap-2.5 cursor-pointer select-none group"
+          onClick={() => go("home")}
+        >
+          <div className="w-5 h-7 border-[2.5px] border-[#fbbf24] flex items-center justify-center bg-transparent group-hover:bg-[#fbbf24]/15 group-hover:shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all duration-300 rounded-[1px]" />
+          <div className="flex flex-col justify-center">
+            <span className="font-sans text-sm sm:text-base font-black uppercase tracking-[0.22em] leading-none text-white group-hover:text-[#fbbf24] transition-colors">
+              EDUCA VEDA
+            </span>
+          </div>
+        </div>
 
-          <ShareButton style={{ padding:"6px 14px", fontSize:12 }} />
+        {/* Center NatGeo Navigation Links (Desktop) */}
+        <nav className="hidden lg:flex items-center gap-6 text-[11px] font-bold uppercase tracking-[0.15em] text-[#bbb]">
+          <button
+            onClick={() => go("home")}
+            className={"relative py-4 transition-colors hover:text-white cursor-pointer " + (activeTab === "home" ? "text-white font-black" : "")}
+          >
+            HOME
+            {activeTab === "home" && <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#fbbf24] shadow-[0_0_8px_#fbbf24]" />}
+          </button>
 
-          {loggedIn && (
-            <button onClick={() => go("cart")} style={btnStyle("#ca8a04")}>Cart ({safeCartCount})</button>
-          )}
+          <button
+            onClick={() => go("home", "billboard-ayurved")}
+            className="py-4 transition-colors hover:text-white cursor-pointer"
+          >
+            EDUCA HEALTH
+          </button>
 
-          {!loggedIn ? (
-            <button onClick={() => go("login")} style={btnStyle("#1e293b")}>Login</button>
+          <button
+            onClick={() => go("home", "billboard-rogsetu")}
+            className="py-4 transition-colors hover:text-white cursor-pointer"
+          >
+            EDUCA ROGSETU & WELLNESS
+          </button>
+
+          <button
+            onClick={() => go("home", "billboard-gurukul")}
+            className="py-4 transition-colors hover:text-white cursor-pointer"
+          >
+            EDUCA GURUKUL
+          </button>
+
+          <button
+            onClick={() => go("home", "billboard-banking")}
+            className="py-4 transition-colors hover:text-white cursor-pointer"
+          >
+            EDUCA FINANCE
+          </button>
+
+          <button
+            onClick={() => go("store")}
+            className={"relative py-4 transition-colors hover:text-white cursor-pointer " + (activeTab === "store" ? "text-white font-black" : "")}
+          >
+            STORE
+            {activeTab === "store" && <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#fbbf24] shadow-[0_0_8px_#fbbf24]" />}
+          </button>
+        </nav>
+
+        {/* Desktop Right Actions */}
+        <div className="hidden lg:flex items-center gap-3">
+          {loggedIn && <NotificationBell isMobile={false} />}
+
+          {/* Sleek Minimalist Luxury SHOP Button */}
+          <button
+            onClick={() => go("store")}
+            className="relative group overflow-hidden px-4 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.16] active:scale-95 border border-white/15 text-white text-[11px] font-bold uppercase tracking-[0.14em] shadow-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+          >
+            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">
+              ✦
+            </span>
+            <span>SHOP</span>
+            {safeCartCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-emerald-400 text-black text-[9px] font-black">
+                {safeCartCount}
+              </span>
+            )}
+          </button>
+
+          {loggedIn ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => go(role === "admin" ? "admin" : "dashboard")}
+                className="w-8 h-8 rounded-full bg-[#181818] flex items-center justify-center text-xs font-bold text-[#fbbf24] hover:scale-105 transition-transform cursor-pointer"
+                title={safeUser?.name || "Dashboard"}
+              >
+                {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
+              </button>
+              <button
+                onClick={logout}
+                className="text-[10px] uppercase font-bold text-slate-400 hover:text-white px-2.5 py-1.5 rounded-md bg-[#141414] hover:bg-red-950/40 transition-colors cursor-pointer"
+              >
+                LOGOUT
+              </button>
+            </div>
           ) : (
-            <>
-              {role !== "admin" && (
-                <button onClick={() => go("dashboard")}  style={btnStyle("#4f46e5")}>Dashboard</button>
-              )}
-              <button onClick={() => go("my-profile")} style={btnStyle("#475569")}>👤 My Profile</button>
-              <button onClick={() => setShowLogoutConfirm(true)} style={btnStyle("#dc2626")}>🚪 Logout</button>
-              {roleBtns.map(b => (
-                <BtnBadge key={b.page} label={b.label} page={b.page} color={b.color} />
-              ))}
-              {orderBtn && (
-                <BtnBadge label={orderBtn.label} page={orderBtn.page} color={orderBtn.color} />
-              )}
-              <button onClick={() => setShowLogoutConfirm(true)} style={btnStyle("#dc2626")}>Logout</button>
-              {/* 🔔 Bell — ekdum right side, last item */}
-              <NotificationBell isMobile={false} />
-            </>
-          )}
-        </div>
-      </header>
-
-      {/* ─── MOBILE TOP BAR ─── */}
-      <header style={{ display:isMobile?"flex":"none", alignItems:"center", justifyContent:"space-between", background:"#fff", boxShadow:"0 2px 8px rgba(0,0,0,0.06)", marginBottom:noBottomMargin?0:16, padding:"10px 16px", position:"sticky", top:0, zIndex:100 }}>
-        <h1 style={{ fontWeight:800, fontSize:15, color:"#1e293b", cursor:"pointer", margin:0 }} onClick={() => go("home")}>EDUCA Store</h1>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <ShareButton compact style={{ background:"rgba(37,99,235,0.1)", color:"#2563eb", width:32, height:32, fontSize:15 }} />
-          {loggedIn && (
-            <>
-              {/* 🔔 Notification Bell — Mobile */}
-              <NotificationBell isMobile={true} />
-              <button onClick={() => go("cart")} style={{ fontSize:20, background:"none", border:"none", cursor:"pointer", position:"relative" }}>
-              🛒
-              {safeCartCount > 0 && (
-                <span style={{ position:"absolute", top:-4, right:-6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:700, borderRadius:"50%", width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>{safeCartCount}</span>
-              )}
+            <button
+              onClick={() => go("login")}
+              className="px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white hover:text-black text-white text-[11px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer"
+            >
+              SIGN IN
             </button>
-            </>
           )}
-          <button onClick={() => setMenuOpen(p => !p)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:22, padding:4 }}>
-            {menuOpen ? "✕" : "☰"}
+        </div>
+
+        {/* Mobile Right: Hamburger Icon */}
+        <div className="flex lg:hidden items-center gap-2">
+          {loggedIn && <NotificationBell isMobile={true} />}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="w-10 h-10 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-90 flex items-center justify-center text-white transition-all cursor-pointer"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
         </div>
-      </header>
 
-      {/* ─── MOBILE DRAWER ─── */}
-      {menuOpen && (
-        <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, zIndex:200, display:"flex", flexDirection:"column" }}>
-          <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.4)" }} onClick={() => setMenuOpen(false)} />
-          <div style={{ position:"absolute", top:0, right:0, bottom:0, width:"min(260px, 85vw)", maxWidth:260, background:"#fff", boxShadow:"-4px 0 24px rgba(0,0,0,0.15)", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      </div>
 
-            <div style={{ padding:"16px", borderBottom:"1px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0 }}>
-              <span style={{ fontWeight:800, fontSize:15, color:"#1e293b" }}>Menu</span>
-              <button onClick={() => setMenuOpen(false)} style={{ background:"none", border:"none", fontSize:18, cursor:"pointer", color:"#64748b" }}>✕</button>
+      {/* Mobile Dropdown Drawer (Numbers Completely Removed) */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#0a0c0b]/98 backdrop-blur-2xl px-5 py-5 flex flex-col gap-3.5 text-xs font-bold uppercase tracking-wider animate-fadeIn shadow-2xl border-b border-white/10">
+          
+          {/* Redesigned Explore Shop Button */}
+          <button
+            onClick={() => go("store")}
+            className="relative group overflow-hidden w-full py-3.5 px-4 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:scale-[0.98] border border-white/15 text-white text-xs font-bold uppercase tracking-[0.16em] shadow-[0_8px_25px_rgba(0,0,0,0.6)] transition-all duration-200 flex items-center justify-between cursor-pointer"
+          >
+            <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/15 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
+            
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                🛍️
+              </span>
+              <span className="font-sans font-bold">EXPLORE SHOP</span>
             </div>
 
-            <div style={{ padding:"12px", paddingBottom:"100px", display:"flex", flexDirection:"column", gap:6, flex:"1 1 auto", minHeight:0, overflowY:"auto", WebkitOverflowScrolling:"touch" }}>
-              {publicBtns.map(b => (
-                <button key={b.page} onClick={() => go(b.page)} style={drawerBtnStyle(b.color)}>
-                  {b.label.charAt(0).toUpperCase() + b.label.slice(1)}
+            <div className="flex items-center gap-2">
+              {safeCartCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[9.5px] font-black">
+                  {safeCartCount} ITEMS
+                </span>
+              )}
+              <svg className="w-4 h-4 stroke-[2.2] text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </button>
+
+          {/* Clean Menu Items (Zero Numbers) */}
+          <div className="flex flex-col gap-1 pt-1">
+            <button
+              onClick={() => go("home")}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-white/5 text-[#fbbf24] flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <span>HOME</span>
+              <span className="text-sm font-bold opacity-40">➔</span>
+            </button>
+            <button
+              onClick={() => go("home", "billboard-ayurved")}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <span>EDUCA HEALTH</span>
+              <span className="text-sm font-bold opacity-40">➔</span>
+            </button>
+            <button
+              onClick={() => go("home", "billboard-rogsetu")}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <span>EDUCA ROGSETU & WELLNESS</span>
+              <span className="text-sm font-bold opacity-40">➔</span>
+            </button>
+            <button
+              onClick={() => go("home", "billboard-gurukul")}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <span>EDUCA GURUKUL</span>
+              <span className="text-sm font-bold opacity-40">➔</span>
+            </button>
+            <button
+              onClick={() => go("home", "billboard-banking")}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <span>EDUCA FINANCE</span>
+              <span className="text-sm font-bold opacity-40">➔</span>
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-white/[0.08]">
+            {loggedIn ? (
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  onClick={() => go(role === "admin" ? "admin" : "dashboard")}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <span>👤 {safeUser?.name || "DASHBOARD"}</span>
                 </button>
-              ))}
-
-              {loggedIn && (
-                <>
-                  <div style={{ height:1, background:"#f1f5f9", margin:"4px 0" }} />
-                  <button onClick={() => go("dashboard")}  style={drawerBtnStyle("#4f46e5")}>📊 Dashboard</button>
-                  <button onClick={() => go("my-profile")} style={drawerBtnStyle("#475569")}>👤 My Profile</button>
-                  <button onClick={() => setShowLogoutConfirm(true)} style={drawerBtnStyle("#dc2626")}>🚪 Logout</button>
-                  <div style={{ height:1, background:"#f1f5f9", margin:"4px 0" }} />
-                  {role === "admin" ? (
-                    adminCategories.map(group => (
-                      <div key={group.cat}>
-                        <div style={{ fontSize:10, fontWeight:800, color:"#94a3b8", textTransform:"uppercase", letterSpacing:0.5, padding:"8px 10px 4px" }}>
-                          {group.cat}
-                        </div>
-                        {group.items.map(b => {
-                          const badge = pageBadge[b.page] || 0
-                          return (
-                            <button key={b.page} onClick={() => go(b.page)} style={{ ...drawerBtnStyle(b.color), position:"relative" }}>
-                              {b.label}
-                              {badge > 0 && (
-                                <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
-                                  {badge}
-                                </span>
-                              )}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    ))
-                  ) : (
-                    roleBtns.map(b => {
-                      const badge = pageBadge[b.page] || 0
-                      return (
-                        <button key={b.page} onClick={() => go(b.page)} style={{ ...drawerBtnStyle(b.color), position:"relative" }}>
-                          {b.label}
-                          {badge > 0 && (
-                            <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
-                              {badge}
-                            </span>
-                          )}
-                        </button>
-                      )
-                    })
-                  )}
-                  {orderBtn && (
-                    <button onClick={() => go(orderBtn.page)} style={{ ...drawerBtnStyle(orderBtn.color), position:"relative" }}>
-                      {orderBtn.label}
-                      {(pageBadge[orderBtn.page] || 0) > 0 && (
-                        <span style={{ marginLeft:6, background:"#ef4444", color:"#fff", fontSize:9, fontWeight:800, borderRadius:99, padding:"1px 6px" }}>
-                          {pageBadge[orderBtn.page]}
-                        </span>
-                      )}
-                    </button>
-                  )}
-                </>
-              )}
-
-              {!loggedIn && (
-                <button onClick={() => go("login")} style={{ ...btnStyle("#1e293b"), width:"100%", padding:"10px 14px", borderRadius:8, textAlign:"left" }}>Login</button>
-              )}
-            </div>
-
+                <button
+                  onClick={logout}
+                  className="py-2.5 px-4 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  LOGOUT
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => go("login")}
+                className="w-full py-3 rounded-xl bg-white text-black hover:bg-slate-200 font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+              >
+                <span>SIGN IN TO ACCOUNT</span>
+                <span>➔</span>
+              </button>
+            )}
           </div>
+
         </div>
       )}
-
-      {/* ─── MOBILE BOTTOM NAV ─── */}
-      <nav style={{ display:isMobile?"flex":"none", position:"fixed", bottom:0, left:0, right:0, background:"#fff", borderTop:"1px solid #e2e8f0", zIndex:50 }}>
-        {bottomNav.map(item => (
-          <button key={item.page} onClick={() => go(item.page)}
-            style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"8px 4px", background:"none", border:"none", cursor:"pointer", gap:2 }}>
-            <span style={{ fontSize:18 }}>{item.icon}</span>
-            <span style={{ fontSize:9, color:"#64748b", fontWeight:600, textTransform:"uppercase" }}>{item.label}</span>
-          </button>
-        ))}
-      </nav>
-
-      {/* ✅ Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.5)" }} onClick={() => setShowLogoutConfirm(false)} />
-          <div style={{ position:"relative", background:"#fff", borderRadius:16, padding:"24px", width:"min(320px, 85vw)", boxShadow:"0 10px 40px rgba(0,0,0,0.2)", textAlign:"center" }}>
-            <div style={{ fontSize:40, marginBottom:10 }}>🚪</div>
-            <div style={{ fontSize:16, fontWeight:800, color:"#1e293b", marginBottom:6 }}>Logout karna hai?</div>
-            <div style={{ fontSize:13, color:"#94a3b8", marginBottom:20 }}>Aap dobara login kar ke wapas aa sakte ho</div>
-            <div style={{ display:"flex", gap:10 }}>
-              <button onClick={() => setShowLogoutConfirm(false)}
-                style={{ flex:1, padding:"12px 0", borderRadius:10, border:"1.5px solid #e2e8f0", background:"#fff", color:"#64748b", fontWeight:700, fontSize:14, cursor:"pointer" }}>
-                Cancel
-              </button>
-              <button onClick={() => { setShowLogoutConfirm(false); setMenuOpen(false); logout && logout(); go("home") }}
-                style={{ flex:1, padding:"12px 0", borderRadius:10, border:"none", background:"#dc2626", color:"#fff", fontWeight:700, fontSize:14, cursor:"pointer" }}>
-                Yes, Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </header>
   )
 }

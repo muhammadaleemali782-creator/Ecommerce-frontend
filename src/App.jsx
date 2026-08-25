@@ -301,11 +301,11 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white">
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
       <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
       {page === "home" && <HeroBanner setPage={setPage} />}
-      <main className="p-3 sm:p-6 pb-24 sm:pb-6">
+      <main className={page === "home" ? "w-full p-0 m-0 overflow-hidden" : "p-2 sm:p-6 pb-28 sm:pb-12 max-w-[1400px] mx-auto"}>
         {renderPage()}
       </main>
     </div>
