@@ -118,12 +118,12 @@ export default function Orders() {
             <div style={{ flex:1 }}>
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
                 <div>
-                  <div style={{ fontSize:13, fontWeight:800, color:"#1e293b", fontFamily:"monospace" }}>
-                    🆔 {o.name}
+                  <div style={{ fontSize:14, fontWeight:800, color:"#1e293b" }}>
+                    {o.fullName || o.name}
                   </div>
-                  {o.fullName && o.fullName !== o.name && (
-                    <div style={{ fontSize:11.5, fontWeight:700, color:"#475569", marginTop:2 }}>
-                      👤 {o.fullName}
+                  {o.name && o.name !== o.fullName && (
+                    <div style={{ fontSize:11, fontWeight:700, color:"#0284c7", fontFamily:"monospace", marginTop:2 }}>
+                      🆔 {o.name}
                     </div>
                   )}
                 </div>

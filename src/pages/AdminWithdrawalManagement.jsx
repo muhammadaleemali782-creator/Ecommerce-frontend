@@ -403,8 +403,15 @@ export default function AdminWithdrawalManagement() {
                   isDark ? "border-white/[0.06]" : "border-stone-100"
                 }`}>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className={`font-black text-base ${isDark ? "text-white" : "text-stone-900"}`}>{rc.userId?.name || "Unknown User"}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`font-black text-base ${isDark ? "text-white" : "text-stone-900"}`}>
+                        {rc.userId?.fullName || rc.userId?.name || "Unknown User"}
+                      </span>
+                      {rc.userId?.name && rc.userId.name !== rc.userId.fullName && (
+                        <span className="font-mono text-xs font-bold text-sky-500">
+                          🆔 {rc.userId.name}
+                        </span>
+                      )}
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
                         isDark ? "bg-white/[0.06] text-stone-300" : "bg-stone-100 text-stone-700 border border-stone-200"
                       }`}>
@@ -510,19 +517,21 @@ export default function AdminWithdrawalManagement() {
                     isDark ? "border-white/[0.06]" : "border-stone-100"
                   }`}>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`font-black text-base ${isDark ? "text-white" : "text-stone-900"}`}>{req.userId?.name || "Unknown User"}</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`font-black text-base ${isDark ? "text-white" : "text-stone-900"}`}>
+                          {req.userId?.fullName || req.userId?.name || "Unknown User"}
+                        </span>
+                        {req.userId?.name && req.userId.name !== req.userId.fullName && (
+                          <span className="font-mono text-xs font-bold text-sky-500">
+                            🆔 {req.userId.name}
+                          </span>
+                        )}
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
                           isDark ? "bg-white/[0.06] text-stone-300" : "bg-stone-100 text-stone-700 border border-stone-200"
                         }`}>
                           {req.userRole}
                         </span>
                       </div>
-                      {req.userId?.fullName && req.userId.fullName !== req.userId?.name && (
-                        <div className={`text-xs font-bold ${isDark ? "text-amber-300/90" : "text-amber-800"}`}>
-                          👤 {req.userId.fullName}
-                        </div>
-                      )}
                       <div className={`text-xs mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                         📧 {req.userId?.email} · 📞 {req.userId?.phone || "N/A"}
                       </div>

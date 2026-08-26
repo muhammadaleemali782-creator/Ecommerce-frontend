@@ -149,12 +149,12 @@ export default function SellerOrders() {
                 <div>
                   <p className="font-mono text-xs text-gray-400">#{order._id.slice(-6)}</p>
                   <p className="font-bold text-lg">₹{fmt(order.total)}</p>
-                  <div className="text-sm font-bold text-gray-800">
-                    🆔 {order.customerName || "Customer"}
+                  <div className="text-base font-bold text-gray-900">
+                    {order.customerFullName || order.userId?.fullName || order.customerName || "Customer"}
                   </div>
-                  {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
-                    <div className="text-xs font-semibold text-gray-600">
-                      👤 {order.customerFullName || order.userId?.fullName}
+                  {order.customerName && order.customerName !== (order.customerFullName || order.userId?.fullName) && (
+                    <div className="text-xs font-mono font-semibold text-sky-600">
+                      🆔 {order.customerName}
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-0.5">📞 {order.phone || "—"}</p>
@@ -166,7 +166,9 @@ export default function SellerOrders() {
                 </div>
                 <div className="text-right text-xs text-gray-400">
                   {new Date(order.createdAt).toLocaleDateString("en-IN")}
-                  <div className="mt-1">Distributor: {order.distributorId?.name || "—"} {order.distributorId?.fullName ? `(${order.distributorId.fullName})` : ''}</div>
+                  <div className="mt-1 font-medium text-stone-600">
+                    Dist: {order.distributorId?.fullName || order.distributorId?.name || "—"} {order.distributorId?.name && order.distributorId?.fullName ? `(🆔 ${order.distributorId.name})` : ''}
+                  </div>
                   {/* 🧾 Invoice Button */}
                   <button onClick={() => setInvoice(order)}
                     style={{ marginTop:8, padding:"5px 12px", borderRadius:8, border:"1px solid #e2e8f0",

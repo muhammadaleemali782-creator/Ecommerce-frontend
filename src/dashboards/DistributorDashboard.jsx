@@ -123,11 +123,14 @@ export default function DistributorDashboard({ setPage }) {
         <div style={{background:"linear-gradient(135deg,#16a34a,#0d9488)",padding:"20px 16px 28px",borderRadius:"0 0 28px 28px"}}>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
             <div style={{width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:700,color:"#fff",flexShrink:0}}>
-              {user.name?.[0]||"D"}
+              {(user.fullName || user.name || "D")[0].toUpperCase()}
             </div>
             <div>
               <div style={{color:"rgba(255,255,255,0.7)",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Distributor Central</div>
-              <div style={{color:"#fff",fontWeight:700,fontSize:17}}>{user.name}</div>
+              <div style={{color:"#fff",fontWeight:700,fontSize:17}}>{user.fullName || user.name}</div>
+              {user.name && user.name !== user.fullName && (
+                <div style={{color:"rgba(255,255,255,0.85)",fontSize:11,fontWeight:600,fontFamily:"monospace"}}>🆔 {user.name}</div>
+              )}
             </div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -416,9 +419,12 @@ export default function DistributorDashboard({ setPage }) {
       <div style={{width:260,flexShrink:0,display:"flex",flexDirection:"column",gap:16}}>
         <div style={{background:"linear-gradient(135deg,#16a34a,#0d9488)",borderRadius:20,padding:20,color:"#fff",boxShadow:"0 4px 20px #16a34a30"}}>
           <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,fontWeight:700,marginBottom:12}}>
-            {user.name?.[0]||"D"}
+            {(user.fullName || user.name || "D")[0].toUpperCase()}
           </div>
-          <div style={{fontWeight:700,fontSize:18}}>{user.name}</div>
+          <div style={{fontWeight:700,fontSize:18}}>{user.fullName || user.name}</div>
+          {user.name && user.name !== user.fullName && (
+            <div style={{opacity:0.9,fontSize:12,fontFamily:"monospace",marginTop:2}}>🆔 {user.name}</div>
+          )}
           <div style={{opacity:0.75,fontSize:12,marginTop:2}}>Distributor</div>
         </div>
 

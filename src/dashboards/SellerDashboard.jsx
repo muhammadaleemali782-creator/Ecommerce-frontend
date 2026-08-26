@@ -126,15 +126,18 @@ export default function SellerDashboard({ setPage }) {
         <div style={{background:"linear-gradient(135deg,#2563eb,#4f46e5)",padding:"20px 16px 24px",borderRadius:"0 0 28px 28px"}}>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
             <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"#fff",flexShrink:0}}>
-              {user.name?.[0]||"S"}
+              {(user.fullName || user.name || "S")[0].toUpperCase()}
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{color:"rgba(255,255,255,0.75)",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
                 {isUser?"User":"Seller"} Dashboard
               </div>
               <div style={{color:"#fff",fontWeight:700,fontSize:16,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                {user.name}
+                {user.fullName || user.name}
               </div>
+              {user.name && user.name !== user.fullName && (
+                <div style={{color:"rgba(255,255,255,0.85)",fontSize:11,fontWeight:600,fontFamily:"monospace"}}>🆔 {user.name}</div>
+              )}
             </div>
           </div>
 
@@ -455,9 +458,12 @@ export default function SellerDashboard({ setPage }) {
         {/* Profile card */}
         <div style={{background:"linear-gradient(135deg,#2563eb,#4f46e5)",borderRadius:20,padding:20,color:"#fff",boxShadow:"0 4px 20px #2563eb30"}}>
           <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:700,marginBottom:12}}>
-            {user.name?.[0]||"S"}
+            {(user.fullName || user.name || "S")[0].toUpperCase()}
           </div>
-          <div style={{fontWeight:700,fontSize:18}}>{user.name}</div>
+          <div style={{fontWeight:700,fontSize:18}}>{user.fullName || user.name}</div>
+          {user.name && user.name !== user.fullName && (
+            <div style={{opacity:0.9,fontSize:12,fontFamily:"monospace",marginTop:2}}>🆔 {user.name}</div>
+          )}
           <div style={{opacity:0.75,fontSize:12,marginTop:2,textTransform:"capitalize"}}>{user.role}</div>
         </div>
 
