@@ -66,7 +66,7 @@ export const REALMS = [
     category: "Medicine Seekhein & Consultant Banein",
     date: "CERTIFIED COURSE · LOW FEES",
     rating: "9.9",
-    desktopImg: "/gurukul_retro_book.jpg",
+    desktopImg: "/gurukul_desktop_learn.jpg",
     mobileImg: "/gurukul_retro_book.jpg",
     accentColor: "#818cf8",
     bgGradient: "from-indigo-950/80 via-[#0a1026]/95 to-[#050505]",
@@ -135,41 +135,41 @@ export function ProductCard({
   const rating = item.rating || 5;
 
   return (
-    <div className="group relative bg-[#121212] rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col justify-between">
-      <div className="relative aspect-square w-full overflow-hidden bg-black/40">
+    <div className="group relative bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col justify-between">
+      <div className="relative aspect-square w-full overflow-hidden bg-gray-50">
         <img
           src={image}
           alt={name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-bold text-[#fbbf24] uppercase">
+        <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-gray-900/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
           {category}
         </div>
       </div>
 
-      <div className="p-4 flex flex-col justify-between flex-1">
+      <div className="p-3.5 flex flex-col justify-between flex-1">
         <div>
-          <div className="flex items-center gap-1 text-amber-400 text-xs mb-1">
+          <div className="flex items-center gap-0.5 text-amber-500 text-xs mb-1">
             {"★".repeat(Math.min(5, Math.floor(rating)))}
-            <span className="text-[10px] text-slate-400 ml-1">({rating})</span>
+            <span className="text-[10px] text-gray-400 ml-1">({rating})</span>
           </div>
-          <h4 className="text-sm font-bold text-white line-clamp-1 group-hover:text-[#fbbf24] transition-colors">
+          <h4 className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-gray-700 transition-colors">
             {name}
           </h4>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-base font-black text-[#fbbf24]">₹{price}</span>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-base font-black text-gray-900">₹{price}</span>
             {item.mrp && item.mrp > price && (
-              <span className="text-xs text-slate-500 line-through">₹{item.mrp}</span>
+              <span className="text-xs text-gray-400 line-through">₹{item.mrp}</span>
             )}
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-3 flex items-center gap-2">
           {handleAdd && (
             <button
               onClick={() => handleAdd(item)}
-              className="flex-1 py-2 px-3 bg-[#fbbf24] text-black font-black text-xs uppercase tracking-wider rounded-xl hover:bg-amber-400 active:scale-95 transition-all shadow-md cursor-pointer"
+              className="flex-1 py-2 px-3 bg-gray-900 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-gray-800 active:scale-95 transition-all shadow-sm cursor-pointer"
             >
               Add to Cart {cartQty > 0 ? `(${cartQty})` : ""}
             </button>
@@ -177,7 +177,7 @@ export function ProductCard({
           {onBuyNow && (
             <button
               onClick={() => onBuyNow(item)}
-              className="py-2 px-3 bg-white/10 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              className="py-2 px-3 bg-gray-100 text-gray-700 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-gray-200 active:scale-95 transition-all cursor-pointer"
             >
               Buy
             </button>
@@ -799,7 +799,7 @@ export default function Home({ setPage }) {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto w-full flex items-center justify-between gap-6">
-            <div className="max-w-md lg:max-w-lg bg-black/75 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl">
+            <div className="max-w-md lg:max-w-lg backdrop-blur-lg p-6 sm:p-7 relative shadow-2xl border border-white/10" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.82) 0%, rgba(15,15,15,0.75) 50%, rgba(0,0,0,0.68) 100%)' }}>
               <div className="absolute top-0 left-0 w-20 h-1.5 bg-[#fbbf24]" />
               <div className="space-y-2.5 pt-1.5">
                 <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-black uppercase tracking-tight text-white leading-none">
@@ -834,11 +834,11 @@ export default function Home({ setPage }) {
           style={{ backgroundImage: "url(" + REALMS[1].desktopImg + ")" }}
         >
           <div className="relative z-10 max-w-7xl mx-auto w-full flex justify-end">
-            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-black/80 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl mr-0 lg:mr-4">
-              <div className="absolute top-0 left-0 w-20 h-1.5 bg-[#fbbf24]" />
+            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-[#0a1520]/90 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl mr-0 lg:mr-4 border border-sky-900/30">
+              <div className="absolute top-0 left-0 w-20 h-1.5 bg-gradient-to-r from-orange-400 via-red-500 to-amber-500" />
               <div className="space-y-2.5 pt-1">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-none">
-                  EDUCA ROGSETU & <span className="text-[#fbbf24]">WELLNESS CONSULTANT</span>
+                  EDUCA ROGSETU & <span className="bg-gradient-to-r from-orange-400 via-red-500 to-amber-500 bg-clip-text text-transparent">WELLNESS CONSULTANT</span>
                 </h2>
                 <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-slate-400 font-bold">
                   {REALMS[1].category}
@@ -849,10 +849,10 @@ export default function Home({ setPage }) {
                 <div className="pt-3 flex justify-end">
                   <button
                     onClick={() => setActiveModal("five-elements")}
-                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white hover:text-[#fbbf24] transition-colors group cursor-pointer"
+                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white hover:text-orange-400 transition-colors group cursor-pointer"
                   >
                     <span>READ MORE</span>
-                    <span className="w-3.5 h-3.5 bg-[#fbbf24] text-black flex items-center justify-center text-[9px] group-hover:translate-x-1 transition-transform">■</span>
+                    <span className="w-3.5 h-3.5 bg-orange-500 text-black flex items-center justify-center text-[9px] group-hover:translate-x-1 transition-transform">■</span>
                   </button>
                 </div>
               </div>
@@ -866,7 +866,7 @@ export default function Home({ setPage }) {
           style={{ backgroundImage: "url(" + REALMS[2].desktopImg + ")" }}
         >
           <div className="relative z-10 max-w-7xl mx-auto w-full flex justify-start">
-            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-black/85 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl ml-0 lg:ml-4">
+            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-[#0c0e1e]/90 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl ml-0 lg:ml-4 border border-indigo-900/30">
               <div className="absolute top-0 left-0 w-20 h-1.5 bg-[#fbbf24]" />
               <div className="space-y-2.5 pt-1">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-none">
@@ -898,7 +898,7 @@ export default function Home({ setPage }) {
           style={{ backgroundImage: "url(" + REALMS[3].desktopImg + ")" }}
         >
           <div className="relative z-10 max-w-7xl mx-auto w-full flex justify-end">
-            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-black/85 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl mr-0 lg:mr-4">
+            <div className="w-full max-w-sm sm:max-w-md lg:max-w-[440px] bg-[#141210]/90 backdrop-blur-md p-6 sm:p-7 relative shadow-2xl mr-0 lg:mr-4 border border-amber-900/25">
               <div className="absolute top-0 left-0 w-20 h-1.5 bg-[#fbbf24]" />
               <div className="space-y-2.5 pt-1">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-none">
