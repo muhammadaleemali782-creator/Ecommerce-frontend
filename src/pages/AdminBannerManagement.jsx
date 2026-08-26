@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useTheme } from "../context/ThemeContext"
 
 const API = `${import.meta.env.VITE_API_URL}`
 
@@ -11,6 +12,7 @@ const PAGE_OPTIONS = [
 ]
 
 export default function AdminBannerManagement({ setPage }) {
+  const { isDark } = useTheme()
   const [banners, setBanners] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -171,27 +173,35 @@ export default function AdminBannerManagement({ setPage }) {
   }[p] || p)
 
   return (
-    <div className="space-y-6 select-none max-w-5xl mx-auto">
+    <div className={`space-y-6 select-none max-w-5xl mx-auto transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
       
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+        isDark ? "bg-[#121814] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-300 border border-pink-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ HERO & PROMOTIONS ENGINE
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             Marketing Banners & Ad Placements
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
             Manage high-impact hero media, responsive video ads, and in-app promotional banners.
           </p>
         </div>
 
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="px-5 py-3 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
+          className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
         >
           ➕ Add New Banner
         </button>
@@ -199,15 +209,21 @@ export default function AdminBannerManagement({ setPage }) {
 
       {/* ── CREATE / EDIT MODAL FORM ── */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 shadow-2xl space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-            <h3 className="font-black text-base text-white uppercase flex items-center gap-2">
+        <form onSubmit={handleSubmit} className={`rounded-3xl border p-5 sm:p-7 shadow-2xl space-y-5 ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+        }`}>
+          <div className={`flex items-center justify-between pb-3 border-b ${
+            isDark ? "border-white/[0.06]" : "border-stone-100"
+          }`}>
+            <h3 className={`font-black text-base uppercase flex items-center gap-2 ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
               <span>{editing ? "✏️" : "➕"}</span> {editing ? "Edit Banner Placement" : "Create New Promotion Banner"}
             </h3>
             <button
               type="button"
               onClick={resetForm}
-              className="text-stone-400 hover:text-white text-xs font-bold uppercase"
+              className="text-stone-400 hover:text-stone-600 dark:hover:text-white text-xs font-bold uppercase cursor-pointer"
             >
               ✕ Close
             </button>
@@ -215,13 +231,17 @@ export default function AdminBannerManagement({ setPage }) {
 
           <div className="space-y-4 text-xs">
             <div>
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
                 Target Ad Placement Location
               </label>
               <select
                 value={form.placement}
                 onChange={e => setForm(f => ({ ...f, placement: e.target.value }))}
-                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-bold focus:outline-none focus:border-[#fbbf24]"
+                className={`w-full p-3 rounded-xl font-bold border focus:outline-none ${
+                  isDark ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]" : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 shadow-sm"
+                }`}
               >
                 <option value="hero">🖼️ Top Hero Banner (Full width main banner)</option>
                 <option value="slot1">📱 Vertical Slot 1 (Under search bar)</option>
@@ -231,19 +251,27 @@ export default function AdminBannerManagement({ setPage }) {
             </div>
 
             {/* Desktop Media */}
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-2">
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300">
+            <div className={`p-4 rounded-2xl border space-y-2 ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
                 Desktop / Default Media (Image / GIF / Video) {editing ? "(Choose new to replace)" : "*"}
               </label>
               <input
                 type="file"
                 accept="image/*,video/*"
                 onChange={onFileChange}
-                className="w-full p-2 bg-[#121814] text-xs text-stone-300 rounded-xl border border-white/10 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-xs file:font-bold"
+                className={`w-full p-2 text-xs rounded-xl border file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold ${
+                  isDark
+                    ? "bg-[#121814] text-stone-300 border-white/10 file:bg-white/10 file:text-white"
+                    : "bg-white text-stone-700 border-stone-300 file:bg-stone-200 file:text-stone-900"
+                }`}
               />
 
               {preview && (
-                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-48">
+                <div className="mt-2 rounded-xl overflow-hidden border border-stone-300 dark:border-white/10 max-h-48">
                   {preview.type === "video" ? (
                     <video src={preview.url} muted autoPlay loop playsInline className="w-full max-h-48 object-cover" />
                   ) : (
@@ -253,7 +281,7 @@ export default function AdminBannerManagement({ setPage }) {
               )}
 
               {!preview && editing?.media && (
-                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-48">
+                <div className="mt-2 rounded-xl overflow-hidden border border-stone-300 dark:border-white/10 max-h-48">
                   {editing.mediaType === "video" ? (
                     <video src={`${API}${editing.media}`} muted autoPlay loop playsInline className="w-full max-h-48 object-cover" />
                   ) : (
@@ -264,19 +292,27 @@ export default function AdminBannerManagement({ setPage }) {
             </div>
 
             {/* Mobile Media */}
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-2">
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300">
+            <div className={`p-4 rounded-2xl border space-y-2 ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
                 Mobile-Specific Media (Optional - Portrait / 9:16)
               </label>
               <input
                 type="file"
                 accept="image/*,video/*"
                 onChange={onFileChangeMobile}
-                className="w-full p-2 bg-[#121814] text-xs text-stone-300 rounded-xl border border-white/10 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-xs file:font-bold"
+                className={`w-full p-2 text-xs rounded-xl border file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold ${
+                  isDark
+                    ? "bg-[#121814] text-stone-300 border-white/10 file:bg-white/10 file:text-white"
+                    : "bg-white text-stone-700 border-stone-300 file:bg-stone-200 file:text-stone-900"
+                }`}
               />
 
               {previewMobile && (
-                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-40 w-32">
+                <div className="mt-2 rounded-xl overflow-hidden border border-stone-300 dark:border-white/10 max-h-40 w-32">
                   {previewMobile.type === "video" ? (
                     <video src={previewMobile.url} muted autoPlay loop playsInline className="w-full max-h-40 object-cover" />
                   ) : (
@@ -287,7 +323,7 @@ export default function AdminBannerManagement({ setPage }) {
 
               {!previewMobile && !form.removeMobileMedia && editing?.mediaMobile && (
                 <div className="mt-2 flex items-center gap-3">
-                  <div className="rounded-xl overflow-hidden border border-white/10 max-h-40 w-32">
+                  <div className="rounded-xl overflow-hidden border border-stone-300 dark:border-white/10 max-h-40 w-32">
                     {editing.mediaTypeMobile === "video" ? (
                       <video src={`${API}${editing.mediaMobile}`} muted autoPlay loop playsInline className="w-full max-h-40 object-cover" />
                     ) : (
@@ -297,7 +333,7 @@ export default function AdminBannerManagement({ setPage }) {
                   <button
                     type="button"
                     onClick={() => setForm(f => ({ ...f, removeMobileMedia: true, mediaMobile: null }))}
-                    className="text-xs text-red-400 font-bold hover:underline cursor-pointer"
+                    className="text-xs text-red-500 font-bold hover:underline cursor-pointer"
                   >
                     ✕ Remove Mobile Media
                   </button>
@@ -308,64 +344,84 @@ export default function AdminBannerManagement({ setPage }) {
             {/* Text Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Heading (Optional)
                 </label>
                 <input
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Festival Mega Sale"
-                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Badge / Eyebrow Text (Optional)
                 </label>
                 <input
                   value={form.eyebrow}
                   onChange={e => setForm(f => ({ ...f, eyebrow: e.target.value }))}
                   placeholder="e.g. ⭐ 4.8/5 Rating · 50% OFF"
-                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
                 Subheading / Description (Optional)
               </label>
               <input
                 value={form.subtitle}
                 onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
                 placeholder="e.g. Claim exclusive discounts and rewards today"
-                className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                }`}
               />
             </div>
 
             {/* Button & Link */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   CTA Button Label (Optional)
                 </label>
                 <input
                   value={form.buttonText}
                   onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))}
                   placeholder="e.g. Shop Now"
-                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Link Type
                 </label>
                 <select
                   value={form.linkType}
                   onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))}
-                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 >
                   <option value="internal">📱 Internal Route (In-App)</option>
                   <option value="external">🔗 External URL</option>
@@ -373,14 +429,18 @@ export default function AdminBannerManagement({ setPage }) {
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Destination Target
                 </label>
                 {form.linkType === "internal" ? (
                   <select
                     value={form.buttonLink}
                     onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
-                    className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                    className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    }`}
                   >
                     <option value="">— Select internal page —</option>
                     {PAGE_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
@@ -390,7 +450,9 @@ export default function AdminBannerManagement({ setPage }) {
                     value={form.buttonLink}
                     onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
                     placeholder="https://example.com/promo"
-                    className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                    className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    }`}
                   />
                 )}
               </div>
@@ -399,13 +461,17 @@ export default function AdminBannerManagement({ setPage }) {
             {/* Alignment & Order & Overlay */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-2">
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Text Alignment
                 </label>
                 <select
                   value={form.align}
                   onChange={e => setForm(f => ({ ...f, align: e.target.value }))}
-                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 >
                   <option value="left">⬅️ Left Aligned</option>
                   <option value="center">⏺️ Center Aligned</option>
@@ -413,34 +479,44 @@ export default function AdminBannerManagement({ setPage }) {
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
                   Display Order
                 </label>
                 <input
                   type="number"
                   value={form.order}
                   onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
-                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full p-2.5 rounded-xl border focus:outline-none ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-stone-300 font-bold cursor-pointer pt-4">
+              <label className={`flex items-center gap-2 font-bold cursor-pointer pt-4 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
                 <input
                   type="checkbox"
                   checked={form.overlay}
                   onChange={e => setForm(f => ({ ...f, overlay: e.target.checked }))}
-                  className="rounded border-white/20 bg-black/50 text-[#fbbf24]"
+                  className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-amber-500"
                 />
                 Apply Dark Gradient Overlay
               </label>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4 border-t border-white/[0.06]">
+          <div className={`flex gap-2 pt-4 border-t ${
+            isDark ? "border-white/[0.06]" : "border-stone-100"
+          }`}>
             <button
               type="button"
               onClick={resetForm}
-              className="flex-1 py-3 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
+              className={`flex-1 py-3 rounded-xl font-bold text-xs uppercase cursor-pointer ${
+                isDark ? "bg-white/[0.08] hover:bg-white/15 text-stone-300" : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+              }`}
             >
               Cancel
             </button>
@@ -461,10 +537,12 @@ export default function AdminBannerManagement({ setPage }) {
           Loading active marketing banners...
         </div>
       ) : banners.length === 0 ? (
-        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+        <div className={`p-12 text-center rounded-3xl border ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+        }`}>
           <span className="text-3xl block mb-2">🎬</span>
-          <h3 className="text-sm font-bold text-white uppercase">No Banners Deployed</h3>
-          <p className="text-xs text-stone-400 mt-1">Click "Add New Banner" above to publish your first promotion.</p>
+          <h3 className={`text-sm font-bold uppercase ${isDark ? "text-white" : "text-stone-900"}`}>No Banners Deployed</h3>
+          <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>Click "Add New Banner" above to publish your first promotion.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -473,12 +551,16 @@ export default function AdminBannerManagement({ setPage }) {
             return (
               <div
                 key={b._id}
-                className={`bg-[#111713] rounded-3xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md ${
+                className={`rounded-3xl border p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all shadow-md ${
+                  isDark ? "bg-[#111713] border-white/[0.08] hover:border-white/20" : "bg-white border-stone-200 hover:border-stone-300 shadow-sm"
+                } ${
                   b.isActive ? "opacity-100" : "opacity-50"
                 }`}
               >
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="w-24 h-16 rounded-2xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                  <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 ${
+                    isDark ? "bg-black/40 border-white/10" : "bg-stone-100 border-stone-200"
+                  }`}>
                     {b.mediaType === "video" ? (
                       <video src={`${API}${b.media}`} muted className="w-full h-full object-cover" />
                     ) : (
@@ -491,19 +573,21 @@ export default function AdminBannerManagement({ setPage }) {
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase border ${badge.bg}`}>
                         {badge.emoji} {badge.label}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-stone-300 border border-white/10 text-[9px] font-mono font-bold uppercase">
+                      <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold uppercase ${
+                        isDark ? "bg-white/[0.06] text-stone-300 border-white/10" : "bg-stone-100 text-stone-700 border-stone-200"
+                      }`}>
                         {placementLabel(b.placement)}
                       </span>
-                      <h3 className="font-bold text-sm text-white truncate">
+                      <h3 className={`font-bold text-sm truncate ${isDark ? "text-white" : "text-stone-900"}`}>
                         {b.title || "(No heading title)"}
                       </h3>
                     </div>
 
-                    <div className="text-xs text-stone-400 truncate mt-1">
+                    <div className={`text-xs truncate mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                       {b.subtitle || "—"}
                     </div>
 
-                    <div className="text-[10px] font-mono text-[#fbbf24] mt-1">
+                    <div className="text-[10px] font-mono text-amber-600 dark:text-[#fbbf24] mt-1">
                       Priority Order: {b.order} {b.buttonText && `· CTA: "${b.buttonText}"`}
                     </div>
                   </div>
@@ -514,8 +598,8 @@ export default function AdminBannerManagement({ setPage }) {
                     onClick={() => toggleActive(b)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border ${
                       b.isActive
-                        ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
-                        : "bg-stone-500/15 text-stone-400 border-stone-500/30 hover:bg-stone-500/25"
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                        : "bg-stone-500/15 text-stone-600 dark:text-stone-400 border-stone-500/30 hover:bg-stone-500/25"
                     }`}
                   >
                     {b.isActive ? "🟢 Active" : "⚪ Hidden"}
@@ -523,14 +607,16 @@ export default function AdminBannerManagement({ setPage }) {
 
                   <button
                     onClick={() => openEdit(b)}
-                    className="px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer ${
+                      isDark ? "bg-white/[0.08] hover:bg-white/15 text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-800"
+                    }`}
                   >
                     ✏️ Edit
                   </button>
 
                   <button
                     onClick={() => handleDelete(b._id)}
-                    className="px-3 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold uppercase cursor-pointer"
                   >
                     🗑️
                   </button>

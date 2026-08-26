@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react"
+import { useTheme } from "../context/ThemeContext"
 
 export default function AdminProductList() {
+  const { isDark } = useTheme()
   const [products, setProducts]   = useState([])
   const [users, setUsers]         = useState([])
   const [loading, setLoading]     = useState(false)
@@ -194,21 +196,31 @@ export default function AdminProductList() {
   }, [users, userSearch])
 
   return (
-    <div className="space-y-6 select-none">
+    <div className={`space-y-6 select-none transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
       
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+        isDark
+          ? "bg-[#121814] border-white/[0.08]"
+          : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ INVENTORY & PERMISSIONS
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             Product Management & User Assignment
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
-            Total Available Products: <span className="text-white font-bold">{products.length}</span> · Total Registered Users: <span className="text-white font-bold">{users.length}</span>
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
+            Total Available Products: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{products.length}</span> · Total Registered Users: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{users.length}</span>
           </p>
         </div>
 
@@ -218,7 +230,11 @@ export default function AdminProductList() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search products..."
-            className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-stone-500 focus:outline-none focus:border-[#fbbf24] transition-colors"
+            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
+              isDark
+                ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+            }`}
           />
         </div>
       </div>
@@ -232,10 +248,16 @@ export default function AdminProductList() {
 
       {/* ── EMPTY STATE ── */}
       {!loading && filteredProducts.length === 0 && (
-        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+        <div className={`p-12 text-center rounded-3xl border ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+        }`}>
           <span className="text-3xl block mb-2">🍃</span>
-          <h3 className="text-sm font-bold text-white uppercase">No Products Found</h3>
-          <p className="text-xs text-stone-400 mt-1">Try another search keyword or create products first.</p>
+          <h3 className={`text-sm font-bold uppercase ${isDark ? "text-white" : "text-stone-900"}`}>
+            No Products Found
+          </h3>
+          <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+            Try another search keyword or create products first.
+          </p>
         </div>
       )}
 
@@ -251,7 +273,11 @@ export default function AdminProductList() {
           return (
             <div
               key={p._id}
-              className="bg-[#111713] p-4 sm:p-5 rounded-2xl border border-white/[0.08] hover:border-white/15 transition-all flex flex-col justify-between space-y-4"
+              className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+                isDark
+                  ? "bg-[#111713] border-white/[0.08] hover:border-white/15"
+                  : "bg-white border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-md"
+              }`}
             >
               <div>
                 {/* Top Info */}
@@ -260,18 +286,24 @@ export default function AdminProductList() {
                     <img
                       src={image}
                       alt={title}
-                      className="w-12 h-12 rounded-xl object-cover border border-white/10 bg-black/40 shrink-0"
+                      className={`w-12 h-12 rounded-xl object-cover border shrink-0 ${
+                        isDark ? "border-white/10 bg-black/40" : "border-stone-200 bg-stone-100"
+                      }`}
                     />
                     <div className="min-w-0">
-                      <h3 className="text-sm font-black text-white line-clamp-1 leading-tight">
+                      <h3 className={`text-sm font-black line-clamp-1 leading-tight ${
+                        isDark ? "text-white" : "text-stone-900"
+                      }`}>
                         {title}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-black text-[#fbbf24]">
+                        <span className="text-xs font-black text-amber-600 dark:text-[#fbbf24]">
                           ₹{Number(price).toLocaleString("en-IN")}
                         </span>
                         {p.category && (
-                          <span className="px-2 py-0.5 rounded-md bg-white/[0.06] text-stone-300 text-[9px] font-bold uppercase">
+                          <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ${
+                            isDark ? "bg-white/[0.06] text-stone-300" : "bg-stone-100 text-stone-700 border border-stone-200"
+                          }`}>
                             {p.category}
                           </span>
                         )}
@@ -280,29 +312,33 @@ export default function AdminProductList() {
                   </div>
 
                   {selectedArr.length > 0 && (
-                    <span className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold font-mono shrink-0">
+                    <span className="px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-500/30 text-[10px] font-bold font-mono shrink-0">
                       {selectedArr.length} selected
                     </span>
                   )}
                 </div>
 
                 {/* User Select Controls */}
-                <div className="mt-4 pt-3 border-t border-white/[0.06]">
+                <div className={`mt-4 pt-3 border-t ${
+                  isDark ? "border-white/[0.06]" : "border-stone-100"
+                }`}>
                   <div className="flex items-center justify-between gap-2 mb-2 text-xs">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
+                    <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                      isDark ? "text-stone-400" : "text-stone-500"
+                    }`}>
                       Assign / Revoke Users:
                     </span>
                     <div className="flex items-center gap-2 text-[10.5px]">
                       <button
                         onClick={() => selectAll(p._id)}
-                        className="text-sky-400 hover:text-sky-300 font-bold cursor-pointer"
+                        className="text-sky-500 dark:text-sky-400 hover:underline font-bold cursor-pointer"
                       >
                         Select All
                       </button>
-                      <span className="text-white/20">•</span>
+                      <span className={isDark ? "text-white/20" : "text-stone-300"}>•</span>
                       <button
                         onClick={() => clearAll(p._id)}
-                        className="text-stone-400 hover:text-stone-200 font-bold cursor-pointer"
+                        className={`${isDark ? "text-stone-400 hover:text-stone-200" : "text-stone-500 hover:text-stone-700"} font-bold cursor-pointer`}
                       >
                         Clear
                       </button>
@@ -310,14 +346,18 @@ export default function AdminProductList() {
                   </div>
 
                   {/* Users Checkbox Rail */}
-                  <div className="max-h-36 overflow-y-auto rounded-xl bg-black/40 border border-white/[0.08] p-2 space-y-1 no-scrollbar">
+                  <div className={`max-h-36 overflow-y-auto rounded-xl border p-2 space-y-1 no-scrollbar ${
+                    isDark ? "bg-black/40 border-white/[0.08]" : "bg-stone-50 border-stone-200"
+                  }`}>
                     {filteredUsers.map(u => {
                       const checked = isChecked(p._id, u._id)
                       return (
                         <label
                           key={u._id}
                           className={`flex items-center justify-between p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
-                            checked ? "bg-white/[0.08] text-white" : "hover:bg-white/[0.03] text-stone-300"
+                            checked
+                              ? isDark ? "bg-white/[0.08] text-white" : "bg-amber-50 text-stone-900 font-bold"
+                              : isDark ? "hover:bg-white/[0.03] text-stone-300" : "hover:bg-stone-100 text-stone-700"
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
@@ -325,17 +365,17 @@ export default function AdminProductList() {
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggle(p._id, u._id)}
-                              className="rounded border-white/20 bg-black/50 text-[#fbbf24] focus:ring-0 cursor-pointer"
+                              className="rounded border-stone-300 dark:border-white/20 text-[#fbbf24] focus:ring-0 cursor-pointer"
                             />
                             <span className="truncate font-medium">{u.name}</span>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <span className={`text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded ${
                               u.role === "distributor"
-                                ? "bg-sky-500/20 text-sky-300"
+                                ? "bg-sky-500/15 text-sky-600 dark:text-sky-300"
                                 : u.role === "seller"
-                                ? "bg-emerald-500/20 text-emerald-300"
-                                : "bg-white/10 text-stone-300"
+                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
+                                : "bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-stone-300"
                             }`}>
                               {u.role}
                             </span>
@@ -349,24 +389,30 @@ export default function AdminProductList() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-white/[0.06] flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <div className={`pt-3 border-t flex items-center gap-2 flex-wrap sm:flex-nowrap ${
+                isDark ? "border-white/[0.06]" : "border-stone-100"
+              }`}>
                 <button
                   onClick={() => addToUsers(p._id)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
                 >
                   ➕ Add to Users
                 </button>
 
                 <button
                   onClick={() => removeFromUsers(p._id)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 border ${
+                    isDark
+                      ? "bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border-amber-500/30"
+                      : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
+                  }`}
                 >
                   ✕ Remove
                 </button>
 
                 <button
                   onClick={() => deleteProduct(p._id)}
-                  className="py-2 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
+                  className="py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
                   title="Permanent Delete"
                 >
                   🗑️
@@ -380,4 +426,5 @@ export default function AdminProductList() {
 
     </div>
   )
-}
+}
+

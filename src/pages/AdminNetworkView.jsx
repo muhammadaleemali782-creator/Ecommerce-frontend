@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import VisualTree from "../admin/VisualTree"
 import { getRoleLabel, getRoleLabelPlural } from "../utils/roleLabels"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
@@ -298,6 +299,7 @@ function SubUsersList({ subtree, allSubs }) {
 
 export default function AdminNetworkView() {
   const { user } = useAuth()
+  const { isDark } = useTheme()
   const [treeData,       setTreeData]       = useState([])
   const [loading,        setLoading]        = useState(true)
   const [error,          setError]          = useState(null)
@@ -313,7 +315,7 @@ export default function AdminNetworkView() {
   const [cpMsg,          setCpMsg]          = useState("")
 
   if (!user||user.role!=="admin") return (
-    <div className="p-6 bg-red-950/40 border border-red-500/30 rounded-3xl text-red-300 font-bold text-sm">
+    <div className="p-6 bg-red-500/15 border border-red-500/30 rounded-3xl text-red-600 dark:text-red-300 font-bold text-sm">
       ❌ Restricted: Super Admin access required.
     </div>
   )
@@ -371,32 +373,42 @@ export default function AdminNetworkView() {
   const finalTimeline=analytics?.timeline?.length?analytics.timeline:Array.from({length:7},(_,i)=>({label:`Day ${i+1}`,total:0}))
 
   if(loading) return (
-    <div className="bg-[#111713] p-12 rounded-3xl border border-white/[0.08] text-center">
+    <div className={`p-12 rounded-3xl border text-center ${
+      isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+    }`}>
       <InlineLoader label="Loading enterprise network topology..." minHeight={220} />
     </div>
   )
 
   if(error) return (
-    <div className="bg-red-950/40 p-6 rounded-3xl border border-red-500/30 text-red-300 font-bold text-xs">
+    <div className="bg-red-500/15 p-6 rounded-3xl border border-red-500/30 text-red-600 dark:text-red-300 font-bold text-xs">
       {error}
     </div>
   )
 
   return (
-    <div className="space-y-6 select-none max-w-6xl mx-auto">
+    <div className={`space-y-6 select-none max-w-6xl mx-auto transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
       
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+        isDark ? "bg-[#121814] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ GENEALOGY TOPOLOGY TREE
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             Network Hierarchy & Downstream Tree
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
             Click any network node to inspect sales performance, assign new parent links, or view level depths.
           </p>
         </div>
@@ -405,7 +417,9 @@ export default function AdminNetworkView() {
           <button
             onClick={()=>setShowLines(p=>!p)}
             className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
-              showLines ? "bg-white/10 text-white border-white/20" : "bg-black/40 text-stone-500 border-white/10"
+              showLines
+                ? isDark ? "bg-white/10 text-white border-white/20" : "bg-stone-900 text-white border-stone-900"
+                : isDark ? "bg-black/40 text-stone-500 border-white/10" : "bg-stone-100 text-stone-600 border-stone-300"
             }`}
           >
             Topology Lines: {showLines ? "ON" : "OFF"}
@@ -414,9 +428,11 @@ export default function AdminNetworkView() {
       </div>
 
       {/* ── VISUAL TREE CANVAS ── */}
-      <div className="bg-[#111713] rounded-3xl border border-white/[0.08] overflow-x-auto p-4 sm:p-6 shadow-2xl min-h-[300px]">
+      <div className={`rounded-3xl border overflow-x-auto p-4 sm:p-6 shadow-2xl min-h-[300px] ${
+        isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
         {treeData.length===0?(
-          <div className="text-center py-16 text-stone-500 text-xs font-mono">No nodes registered in network.</div>
+          <div className={`text-center py-16 text-xs font-mono ${isDark ? "text-stone-500" : "text-stone-400"}`}>No nodes registered in network.</div>
         ):(
           <VisualTree
             data={treeData}
@@ -428,23 +444,29 @@ export default function AdminNetworkView() {
 
       {/* ── SELECTED NODE DETAILS INSPECTOR ── */}
       {selectedUser && (
-        <div className="bg-[#111713] rounded-3xl border border-indigo-500/30 p-5 sm:p-7 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+        <div className={`rounded-3xl border p-5 sm:p-7 shadow-2xl space-y-6 ${
+          isDark ? "bg-[#111713] border-indigo-500/30" : "bg-white border-indigo-200 shadow-lg"
+        }`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${
+            isDark ? "border-white/[0.06]" : "border-stone-100"
+          }`}>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-black text-white">{selectedUser.name}</h2>
+                <h2 className={`text-lg font-black ${isDark ? "text-white" : "text-stone-900"}`}>{selectedUser.name}</h2>
                 <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${getRC(selectedUser.role).bg} ${getRC(selectedUser.role).text} ${getRC(selectedUser.role).border}`}>
                   {getRC(selectedUser.role).icon} {getRC(selectedUser.role).label}
                 </span>
               </div>
-              {cpMsg && <p className="text-xs font-bold text-emerald-300 mt-1">{cpMsg}</p>}
+              {cpMsg && <p className="text-xs font-bold text-emerald-600 dark:text-emerald-300 mt-1">{cpMsg}</p>}
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
               <select
                 value={range}
                 onChange={e=>setRange(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white font-bold text-xs focus:outline-none"
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs border focus:outline-none ${
+                  isDark ? "bg-black/40 border-white/10 text-white" : "bg-stone-50 border-stone-300 text-stone-900 shadow-sm"
+                }`}
               >
                 <option value="today">📅 Today</option>
                 <option value="week">📅 This Week</option>
@@ -462,7 +484,9 @@ export default function AdminNetworkView() {
 
               <button
                 onClick={()=>{setSelectedUser(null);setAnalytics(null);setCpMsg("")}}
-                className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-400 hover:text-white text-xs font-bold flex items-center justify-center cursor-pointer"
+                className={`w-8 h-8 rounded-xl text-xs font-bold flex items-center justify-center cursor-pointer ${
+                  isDark ? "bg-white/[0.08] hover:bg-white/15 text-stone-400 hover:text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-950"
+                }`}
               >
                 ✕
               </button>
@@ -471,12 +495,16 @@ export default function AdminNetworkView() {
 
           {/* Change Parent Dialog */}
           {changingParent && (
-            <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex flex-col sm:flex-row items-center gap-3">
-              <span className="text-xs font-bold text-indigo-300 whitespace-nowrap">Target Parent Node:</span>
+            <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-center gap-3 ${
+              isDark ? "bg-indigo-950/40 border-indigo-500/30" : "bg-indigo-50 border-indigo-200"
+            }`}>
+              <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">Target Parent Node:</span>
               <select
                 value={newParentId}
                 onChange={e=>setNewParentId(e.target.value)}
-                className="w-full sm:flex-1 p-2 bg-[#121814] text-white text-xs font-bold rounded-xl border border-white/10 focus:outline-none"
+                className={`w-full sm:flex-1 p-2 text-xs font-bold rounded-xl border focus:outline-none ${
+                  isDark ? "bg-[#121814] text-white border-white/10" : "bg-white text-stone-900 border-stone-300"
+                }`}
               >
                 <option value="">— Root Node (Direct Admin) —</option>
                 {allUsers.filter(u=>String(u._id)!==String(selectedUser.id||selectedUser._id)).map(u=>(
@@ -501,13 +529,13 @@ export default function AdminNetworkView() {
             <div className="space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label:"Orders Fulfilled", val:analytics.ordersCount??0, color:"text-sky-300", bg:"bg-sky-950/30 border-sky-500/20" },
-                  { label:"Gross Sales", val:`₹${Number(analytics.totalSales??0).toLocaleString()}`, color:"text-emerald-300", bg:"bg-emerald-950/30 border-emerald-500/20" },
-                  { label:"Downstream Users", val:analytics.subUsersCount??0, color:"text-purple-300", bg:"bg-purple-950/30 border-purple-500/20" },
-                  { label:"Inventory Count", val:analytics.assignedProducts?.length??0, color:"text-amber-300", bg:"bg-amber-950/30 border-amber-500/20" },
+                  { label:"Orders Fulfilled", val:analytics.ordersCount??0, color:"text-sky-600 dark:text-sky-300", bg: isDark ? "bg-sky-950/30 border-sky-500/20" : "bg-sky-50 border-sky-200" },
+                  { label:"Gross Sales", val:`₹${Number(analytics.totalSales??0).toLocaleString()}`, color:"text-emerald-600 dark:text-emerald-300", bg: isDark ? "bg-emerald-950/30 border-emerald-500/20" : "bg-emerald-50 border-emerald-200" },
+                  { label:"Downstream Users", val:analytics.subUsersCount??0, color:"text-purple-600 dark:text-purple-300", bg: isDark ? "bg-purple-950/30 border-purple-500/20" : "bg-purple-50 border-purple-200" },
+                  { label:"Inventory Count", val:analytics.assignedProducts?.length??0, color:"text-amber-600 dark:text-amber-300", bg: isDark ? "bg-amber-950/30 border-amber-500/20" : "bg-amber-50 border-amber-200" },
                 ].map((card,i)=>(
                   <div key={i} className={`p-4 rounded-2xl border ${card.bg}`}>
-                    <div className="text-[10px] font-mono uppercase text-stone-400 font-bold">{card.label}</div>
+                    <div className={`text-[10px] font-mono uppercase font-bold ${isDark ? "text-stone-400" : "text-stone-500"}`}>{card.label}</div>
                     <div className={`text-xl font-black mt-1 ${card.color}`}>{card.val}</div>
                   </div>
                 ))}
@@ -524,17 +552,21 @@ export default function AdminNetworkView() {
               />
 
               {/* Sales Graph */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] space-y-3">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+              <div className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${
+                isDark ? "bg-black/40 border-white/[0.08]" : "bg-stone-50 border-stone-200"
+              }`}>
+                <div className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                  isDark ? "text-white" : "text-stone-900"
+                }`}>
                   📈 Lifetime Sales Trajectory
                 </div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={finalTimeline}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}/>
                       <XAxis dataKey="label" tick={{fontSize:9, fill:"#78716c"}}/>
                       <YAxis tick={{fontSize:9, fill:"#78716c"}}/>
-                      <Tooltip contentStyle={{background:"#121814", borderColor:"rgba(255,255,255,0.1)", fontSize:11, borderRadius:8}}/>
+                      <Tooltip contentStyle={{background: isDark ? "#121814" : "#ffffff", borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)", fontSize:11, borderRadius:8, color: isDark ? "#ffffff" : "#000000"}}/>
                       <Line type="monotone" dataKey="total" stroke="#38bdf8" strokeWidth={2.5} dot={false}/>
                     </LineChart>
                   </ResponsiveContainer>

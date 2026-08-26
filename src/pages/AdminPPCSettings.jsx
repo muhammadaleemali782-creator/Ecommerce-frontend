@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react"
+import { useTheme } from "../context/ThemeContext"
 
 export default function AdminPPCSettings() {
-  
+  const { isDark } = useTheme()
   const [loading, setLoading] = useState(false)
   const [settings, setSettings] = useState(null)
   const [message, setMessage] = useState({ type: "", text: "" })
@@ -282,20 +283,28 @@ export default function AdminPPCSettings() {
   }
   
   return (
-    <div className="space-y-6 select-none max-w-5xl mx-auto">
+    <div className={`space-y-6 select-none max-w-5xl mx-auto transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
       
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+        isDark ? "bg-[#121814] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#fbbf24]/10 text-amber-600 dark:text-[#fbbf24] border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ COMMISSION & LEVEL ENGINE
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             PPC Calibration & Reward Settings
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
             Configure base valuation, commission distribution algorithms, thresholds, and tier milestone rewards.
           </p>
         </div>
@@ -303,42 +312,58 @@ export default function AdminPPCSettings() {
 
       {/* ── DISTRIBUTION QUICK CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-[#111713] border border-emerald-500/30 p-4 rounded-2xl">
+        <div className={`p-4 rounded-2xl border transition-colors ${
+          isDark ? "bg-[#111713] border-emerald-500/30" : "bg-white border-emerald-300 shadow-sm"
+        }`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">💚</span>
-            <h3 className="font-bold text-xs text-emerald-400 uppercase tracking-wider">Direct Seller</h3>
+            <h3 className="font-bold text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Direct Seller</h3>
           </div>
-          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.directRate || 50}%</span> of generated PPC value</p>
+          <p className={`text-xs ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+            Receives <span className={`font-black ${isDark ? "text-white" : "text-stone-900"}`}>{formData.directRate || 50}%</span> of generated PPC value
+          </p>
         </div>
 
-        <div className="bg-[#111713] border border-sky-500/30 p-4 rounded-2xl">
+        <div className={`p-4 rounded-2xl border transition-colors ${
+          isDark ? "bg-[#111713] border-sky-500/30" : "bg-white border-sky-300 shadow-sm"
+        }`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">💙</span>
-            <h3 className="font-bold text-xs text-sky-400 uppercase tracking-wider">Parent Seller</h3>
+            <h3 className="font-bold text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider">Parent Seller</h3>
           </div>
-          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.parentRate || 25}%</span> of generated PPC value</p>
+          <p className={`text-xs ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+            Receives <span className={`font-black ${isDark ? "text-white" : "text-stone-900"}`}>{formData.parentRate || 25}%</span> of generated PPC value
+          </p>
         </div>
 
-        <div className="bg-[#111713] border border-purple-500/30 p-4 rounded-2xl">
+        <div className={`p-4 rounded-2xl border transition-colors ${
+          isDark ? "bg-[#111713] border-purple-500/30" : "bg-white border-purple-300 shadow-sm"
+        }`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">💜</span>
-            <h3 className="font-bold text-xs text-purple-400 uppercase tracking-wider">Distributor</h3>
+            <h3 className="font-bold text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wider">Distributor</h3>
           </div>
-          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.distributorRate || 25}%</span> of generated PPC value</p>
+          <p className={`text-xs ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+            Receives <span className={`font-black ${isDark ? "text-white" : "text-stone-900"}`}>{formData.distributorRate || 25}%</span> of generated PPC value
+          </p>
         </div>
       </div>
 
       {/* ── SETTINGS FORM ── */}
-      <div className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 shadow-xl">
-        <h2 className="text-lg font-black text-white uppercase tracking-tight mb-4 flex items-center gap-2">
+      <div className={`rounded-3xl border p-5 sm:p-7 shadow-xl ${
+        isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
+        <h2 className={`text-lg font-black uppercase tracking-tight mb-4 flex items-center gap-2 ${
+          isDark ? "text-white" : "text-stone-900"
+        }`}>
           <span>⚙️</span> Financial & Threshold Parameters
         </h2>
 
         {message.text && (
           <div className={`p-4 rounded-2xl mb-6 text-xs font-bold border flex items-center gap-2 ${
             message.type === "success"
-              ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30"
-              : "bg-red-950/60 text-red-300 border-red-500/30"
+              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+              : "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30"
           }`}>
             <span>{message.type === "success" ? "✅" : "❌"}</span>
             {message.text}
@@ -348,15 +373,21 @@ export default function AdminPPCSettings() {
         <form onSubmit={handleSubmit} className="space-y-8">
           
           {/* Section 1: Base PPC & Withdrawal */}
-          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
-            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="text-[#fbbf24]">💰</span> Base PPC Valuation & Payout Constraints
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+          }`}>
+            <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
+              <span className="text-amber-500">💰</span> Base PPC Valuation & Payout Constraints
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1.5">
-                  1 PPC Value (₹) <span className="text-red-400">*</span>
+                <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-400" : "text-stone-600"
+                }`}>
+                  1 PPC Value (₹) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -365,15 +396,19 @@ export default function AdminPPCSettings() {
                   value={formData.basePPCValue}
                   onChange={(e) => setFormData({ ...formData, basePPCValue: e.target.value })}
                   required
-                  className="w-full px-4 py-2.5 bg-[#121814] text-white font-mono font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                   placeholder="40"
                 />
-                <p className="text-[10px] text-stone-500 mt-1">Base rupee exchange value per PPC point</p>
+                <p className="text-[10px] text-stone-400 mt-1">Base rupee exchange value per PPC point</p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1.5">
-                  Minimum Withdrawal Limit (₹) <span className="text-red-400">*</span>
+                <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-400" : "text-stone-600"
+                }`}>
+                  Minimum Withdrawal Limit (₹) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -382,23 +417,29 @@ export default function AdminPPCSettings() {
                   value={formData.minimumWithdrawal}
                   onChange={(e) => setFormData({ ...formData, minimumWithdrawal: e.target.value })}
                   required
-                  className="w-full px-4 py-2.5 bg-[#121814] text-white font-mono font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                   placeholder="100"
                 />
-                <p className="text-[10px] text-stone-500 mt-1">Minimum wallet balance required to request bank payout</p>
+                <p className="text-[10px] text-stone-400 mt-1">Minimum wallet balance required to request bank payout</p>
               </div>
             </div>
           </div>
 
           {/* Section 2: Distribution Rates */}
-          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
-            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="text-emerald-400">📊</span> Standard Order Distribution Percentages
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+          }`}>
+            <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
+              <span className="text-emerald-500">📊</span> Standard Order Distribution Percentages
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1.5">
                   Direct Seller (%)
                 </label>
                 <input
@@ -408,13 +449,15 @@ export default function AdminPPCSettings() {
                   value={formData.directRate}
                   onChange={(e) => setFormData({ ...formData, directRate: e.target.value })}
                   required
-                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-emerald-500/30 rounded-xl focus:outline-none focus:border-emerald-400"
+                  className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-emerald-500/30 focus:border-emerald-400" : "bg-white text-stone-900 border-emerald-300 focus:border-emerald-500 shadow-sm"
+                  }`}
                   placeholder="50"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-sky-400 mb-1.5">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-1.5">
                   Parent Seller (%)
                 </label>
                 <input
@@ -424,13 +467,15 @@ export default function AdminPPCSettings() {
                   value={formData.parentRate}
                   onChange={(e) => setFormData({ ...formData, parentRate: e.target.value })}
                   required
-                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-sky-500/30 rounded-xl focus:outline-none focus:border-sky-400"
+                  className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-sky-500/30 focus:border-sky-400" : "bg-white text-stone-900 border-sky-300 focus:border-sky-500 shadow-sm"
+                  }`}
                   placeholder="25"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1.5">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1.5">
                   Distributor (%)
                 </label>
                 <input
@@ -440,13 +485,15 @@ export default function AdminPPCSettings() {
                   value={formData.distributorRate}
                   onChange={(e) => setFormData({ ...formData, distributorRate: e.target.value })}
                   required
-                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-purple-500/30 rounded-xl focus:outline-none focus:border-purple-400"
+                  className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-purple-500/30 focus:border-purple-400" : "bg-white text-stone-900 border-purple-300 focus:border-purple-500 shadow-sm"
+                  }`}
                   placeholder="25"
                 />
               </div>
             </div>
 
-            <div className="text-[11px] p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/20 text-amber-300 flex items-center justify-between">
+            <div className="text-[11px] p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-between">
               <span>⚠️ Must sum to exactly 100%</span>
               <span className="font-mono font-bold">
                 Current Total: {(Number(formData.directRate || 0) + Number(formData.parentRate || 0) + Number(formData.distributorRate || 0))}%
@@ -455,19 +502,23 @@ export default function AdminPPCSettings() {
           </div>
 
           {/* Section 3: Direct User Order Distribution */}
-          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+          }`}>
             <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                <span className="text-sky-400">👤</span> User Direct Sale Split (%)
+              <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+                isDark ? "text-white" : "text-stone-900"
+              }`}>
+                <span className="text-sky-500">👤</span> User Direct Sale Split (%)
               </h3>
-              <p className="text-xs text-stone-400 mt-1">
+              <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-600"}`}>
                 When a plain customer makes a purchase directly without an intermediary seller.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1.5">
                   Parent Seller / Sponsor (%)
                 </label>
                 <input
@@ -477,13 +528,15 @@ export default function AdminPPCSettings() {
                   value={formData.userOrderDirectRate}
                   onChange={(e) => setFormData({ ...formData, userOrderDirectRate: e.target.value })}
                   required
-                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                   placeholder="50"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1.5">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1.5">
                   Distributor (%)
                 </label>
                 <input
@@ -493,7 +546,9 @@ export default function AdminPPCSettings() {
                   value={formData.userOrderDistributorRate}
                   onChange={(e) => setFormData({ ...formData, userOrderDistributorRate: e.target.value })}
                   required
-                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                   placeholder="50"
                 />
               </div>
@@ -501,41 +556,51 @@ export default function AdminPPCSettings() {
           </div>
 
           {/* Section 4: Distributor Level Up Settings */}
-          <div className="p-5 rounded-2xl bg-[#121814] border border-purple-500/30 space-y-4">
-            <h3 className="text-sm font-black text-purple-300 uppercase tracking-wider flex items-center gap-2">
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-[#121814] border-purple-500/30" : "bg-purple-50/40 border-purple-200"
+          }`}>
+            <h3 className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
               <span>🏆</span> Distributor Level Hierarchy & Thresholds
             </h3>
 
             <div className="space-y-3">
               {[0, 1, 2, 3, 4].map(lvl => (
-                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
+                <div key={lvl} className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
+                  isDark ? "bg-black/40 border-white/[0.04]" : "bg-white border-purple-100 shadow-sm"
+                }`}>
                   <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1">
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
                       Level {lvl} Title
                     </label>
                     <input
                       type="text"
                       value={formData[`level${lvl}Name`] || ""}
                       onChange={e => setFormData({ ...formData, [`level${lvl}Name`]: e.target.value })}
-                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-purple-400"
+                      className={`w-full p-2 text-xs border rounded-lg focus:outline-none focus:border-purple-400 ${
+                        isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                      }`}
                       placeholder={`Level ${lvl} Title`}
                     />
                   </div>
                   {lvl > 0 ? (
                     <div>
-                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                      <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-400" : "text-stone-600"
+                      }`}>
                         PPC Threshold for Level {lvl}
                       </label>
                       <input
                         type="number"
                         value={formData[`level${lvl}Threshold`] || ""}
                         onChange={e => setFormData({ ...formData, [`level${lvl}Threshold`]: e.target.value })}
-                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-purple-400"
+                        className={`w-full p-2 text-xs font-mono border rounded-lg focus:outline-none focus:border-purple-400 ${
+                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                        }`}
                         placeholder="e.g. 100"
                       />
                     </div>
                   ) : (
-                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                    <div className="text-[11px] text-stone-400 flex items-center pt-4">
                       Initial starting rank (0 threshold)
                     </div>
                   )}
@@ -545,16 +610,18 @@ export default function AdminPPCSettings() {
 
             {/* Distributor Rewards */}
             <div className="pt-2 border-t border-purple-500/20 space-y-2">
-              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">🎁 Level Milestone Rewards</h4>
+              <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">🎁 Level Milestone Rewards</h4>
               {[1, 2, 3, 4].map(n => (
                 <div key={n} className="flex items-center gap-3 text-xs">
-                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
+                  <span className={`font-bold min-w-[70px] ${isDark ? "text-stone-400" : "text-stone-600"}`}>Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`level${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`level${n}Reward`]: e.target.value }))}
                     placeholder={`e.g. 🎁 ₹${[500, 1500, 3000, 10000][n-1]} bonus credit`}
-                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-emerald-500/30 rounded-lg focus:outline-none focus:border-emerald-400"
+                    className={`flex-1 p-2 text-xs border rounded-lg focus:outline-none focus:border-emerald-400 ${
+                      isDark ? "bg-black/40 text-white border-emerald-500/30" : "bg-white text-stone-900 border-emerald-300"
+                    }`}
                   />
                 </div>
               ))}
@@ -562,41 +629,51 @@ export default function AdminPPCSettings() {
           </div>
 
           {/* Section 5: Seller Level Up Settings */}
-          <div className="p-5 rounded-2xl bg-[#121814] border border-sky-500/30 space-y-4">
-            <h3 className="text-sm font-black text-sky-300 uppercase tracking-wider flex items-center gap-2">
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-[#121814] border-sky-500/30" : "bg-sky-50/40 border-sky-200"
+          }`}>
+            <h3 className="text-sm font-black text-sky-700 dark:text-sky-300 uppercase tracking-wider flex items-center gap-2">
               <span>🛍️</span> Seller Direct Wallet Level Hierarchy
             </h3>
 
             <div className="space-y-3">
               {[0, 1, 2, 3, 4].map(lvl => (
-                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
+                <div key={lvl} className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
+                  isDark ? "bg-black/40 border-white/[0.04]" : "bg-white border-sky-100 shadow-sm"
+                }`}>
                   <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400 mb-1">
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-1">
                       Seller Level {lvl} Title
                     </label>
                     <input
                       type="text"
                       value={formData[`sellerLevel${lvl}Name`] || ""}
                       onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Name`]: e.target.value })}
-                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-sky-400"
+                      className={`w-full p-2 text-xs border rounded-lg focus:outline-none focus:border-sky-400 ${
+                        isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                      }`}
                       placeholder={`Seller Level ${lvl} Title`}
                     />
                   </div>
                   {lvl > 0 ? (
                     <div>
-                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                      <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-400" : "text-stone-600"
+                      }`}>
                         PPC Threshold for Seller Level {lvl}
                       </label>
                       <input
                         type="number"
                         value={formData[`sellerLevel${lvl}Threshold`] || ""}
                         onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Threshold`]: e.target.value })}
-                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-sky-400"
+                        className={`w-full p-2 text-xs font-mono border rounded-lg focus:outline-none focus:border-sky-400 ${
+                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                        }`}
                         placeholder="e.g. 50"
                       />
                     </div>
                   ) : (
-                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                    <div className="text-[11px] text-stone-400 flex items-center pt-4">
                       Initial starting rank (0 threshold)
                     </div>
                   )}
@@ -606,16 +683,18 @@ export default function AdminPPCSettings() {
 
             {/* Seller Rewards */}
             <div className="pt-2 border-t border-sky-500/20 space-y-2">
-              <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider">🎁 Seller Milestone Rewards</h4>
+              <h4 className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">🎁 Seller Milestone Rewards</h4>
               {[1, 2, 3, 4].map(n => (
                 <div key={n} className="flex items-center gap-3 text-xs">
-                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
+                  <span className={`font-bold min-w-[70px] ${isDark ? "text-stone-400" : "text-stone-600"}`}>Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`sellerLevel${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`sellerLevel${n}Reward`]: e.target.value }))}
                     placeholder={`e.g. 🎁 ₹${[250, 750, 1500, 5000][n-1]} bonus credit`}
-                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-sky-500/30 rounded-lg focus:outline-none focus:border-sky-400"
+                    className={`flex-1 p-2 text-xs border rounded-lg focus:outline-none focus:border-sky-400 ${
+                      isDark ? "bg-black/40 text-white border-sky-500/30" : "bg-white text-stone-900 border-sky-300"
+                    }`}
                   />
                 </div>
               ))}
@@ -623,41 +702,51 @@ export default function AdminPPCSettings() {
           </div>
 
           {/* Section 6: User Wallet Level Up Settings */}
-          <div className="p-5 rounded-2xl bg-[#121814] border border-pink-500/30 space-y-4">
-            <h3 className="text-sm font-black text-pink-300 uppercase tracking-wider flex items-center gap-2">
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-[#121814] border-pink-500/30" : "bg-pink-50/40 border-pink-200"
+          }`}>
+            <h3 className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-wider flex items-center gap-2">
               <span>👤</span> User Wallet Level Hierarchy & Rewards
             </h3>
 
             <div className="space-y-3">
               {[0, 1, 2, 3, 4].map(lvl => (
-                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
+                <div key={lvl} className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
+                  isDark ? "bg-black/40 border-white/[0.04]" : "bg-white border-pink-100 shadow-sm"
+                }`}>
                   <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-pink-400 mb-1">
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1">
                       User Level {lvl} Title
                     </label>
                     <input
                       type="text"
                       value={formData[`userWalletLevel${lvl}Name`] || ""}
                       onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Name`]: e.target.value })}
-                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-pink-400"
+                      className={`w-full p-2 text-xs border rounded-lg focus:outline-none focus:border-pink-400 ${
+                        isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                      }`}
                       placeholder={`User Level ${lvl} Title`}
                     />
                   </div>
                   {lvl > 0 ? (
                     <div>
-                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                      <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-400" : "text-stone-600"
+                      }`}>
                         PPC Threshold for User Level {lvl}
                       </label>
                       <input
                         type="number"
                         value={formData[`userWalletLevel${lvl}Threshold`] || ""}
                         onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Threshold`]: e.target.value })}
-                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-pink-400"
+                        className={`w-full p-2 text-xs font-mono border rounded-lg focus:outline-none focus:border-pink-400 ${
+                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                        }`}
                         placeholder="e.g. 50"
                       />
                     </div>
                   ) : (
-                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                    <div className="text-[11px] text-stone-400 flex items-center pt-4">
                       Initial starting rank (0 threshold)
                     </div>
                   )}
@@ -667,16 +756,18 @@ export default function AdminPPCSettings() {
 
             {/* User Rewards */}
             <div className="pt-2 border-t border-pink-500/20 space-y-2">
-              <h4 className="text-xs font-bold text-pink-400 uppercase tracking-wider">🎁 User Milestone Rewards</h4>
+              <h4 className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider">🎁 User Milestone Rewards</h4>
               {[1, 2, 3, 4].map(n => (
                 <div key={n} className="flex items-center gap-3 text-xs">
-                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
+                  <span className={`font-bold min-w-[70px] ${isDark ? "text-stone-400" : "text-stone-600"}`}>Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`userWalletLevel${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`userWalletLevel${n}Reward`]: e.target.value }))}
                     placeholder={`e.g. 🎁 ₹${[250, 750, 1500, 5000][n-1]} bonus credit`}
-                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-pink-500/30 rounded-lg focus:outline-none focus:border-pink-400"
+                    className={`flex-1 p-2 text-xs border rounded-lg focus:outline-none focus:border-pink-400 ${
+                      isDark ? "bg-black/40 text-white border-pink-500/30" : "bg-white text-stone-900 border-pink-300"
+                    }`}
                   />
                 </div>
               ))}
@@ -689,7 +780,7 @@ export default function AdminPPCSettings() {
             disabled={loading}
             className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 ${
               loading
-                ? "bg-stone-800 text-stone-500 cursor-not-allowed border border-white/10"
+                ? "bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed border border-stone-300 dark:border-white/10"
                 : "bg-emerald-600 hover:bg-emerald-500 text-white"
             }`}
           >
@@ -701,39 +792,55 @@ export default function AdminPPCSettings() {
       
       {/* ── ACTIVE SETTINGS SNAPSHOT ── */}
       {settings && (
-        <div className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 space-y-4">
-          <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className={`rounded-3xl border p-5 sm:p-7 space-y-4 ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+        }`}>
+          <h2 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             <span>⚡</span> Active Deployed Parameters
           </h2>
           
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
-              <p className="text-[10px] font-mono text-stone-400 uppercase">Base PPC</p>
-              <p className="text-lg font-black text-[#fbbf24] mt-0.5">₹{settings.basePPCValue}</p>
+            <div className={`p-3.5 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <p className={`text-[10px] font-mono uppercase ${isDark ? "text-stone-400" : "text-stone-500"}`}>Base PPC</p>
+              <p className="text-lg font-black text-amber-600 dark:text-[#fbbf24] mt-0.5">₹{settings.basePPCValue}</p>
             </div>
             
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
-              <p className="text-[10px] font-mono text-emerald-400 uppercase">Direct Rate</p>
-              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.direct}%</p>
+            <div className={`p-3.5 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 uppercase">Direct Rate</p>
+              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>{settings.distributionRates?.direct}%</p>
             </div>
             
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
-              <p className="text-[10px] font-mono text-sky-400 uppercase">Parent Rate</p>
-              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.parent}%</p>
+            <div className={`p-3.5 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <p className="text-[10px] font-mono text-sky-600 dark:text-sky-400 uppercase">Parent Rate</p>
+              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>{settings.distributionRates?.parent}%</p>
             </div>
             
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
-              <p className="text-[10px] font-mono text-purple-400 uppercase">Distributor</p>
-              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.distributor}%</p>
+            <div className={`p-3.5 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Distributor</p>
+              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>{settings.distributionRates?.distributor}%</p>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
-              <p className="text-[10px] font-mono text-amber-400 uppercase">Min Withdraw</p>
-              <p className="text-lg font-black text-white mt-0.5">₹{settings.minimumWithdrawal}</p>
+            <div className={`p-3.5 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <p className="text-[10px] font-mono text-amber-600 dark:text-amber-400 uppercase">Min Withdraw</p>
+              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>₹{settings.minimumWithdrawal}</p>
             </div>
           </div>
           
-          <div className="text-[10px] font-mono text-stone-500 pt-2 border-t border-white/[0.04]">
+          <div className={`text-[10px] font-mono pt-2 border-t ${
+            isDark ? "text-stone-500 border-white/[0.04]" : "text-stone-400 border-stone-100"
+          }`}>
             Last updated: {new Date(settings.updatedAt).toLocaleString("en-IN")}
           </div>
         </div>

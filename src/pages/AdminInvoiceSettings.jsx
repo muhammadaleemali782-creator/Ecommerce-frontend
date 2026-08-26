@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import InvoiceModal from "../components/InvoiceModal"
 import InlineLoader from "../components/InlineLoader"
+import { useTheme } from "../context/ThemeContext"
 
 /* ── Demo order for preview ── */
 const DEMO_ORDER = {
@@ -159,12 +160,11 @@ function LivePreview({ settings, previewStatus }) {
 }
 
 export default function AdminInvoiceSettings() {
+  const { isDark } = useTheme()
   const [form, setForm] = useState({
-    companyName:"", tagline:"", address:"", phone:"", email:"",
-    gst:"", footer:"Thank you for your business!", logo:"",
-    themeColor:"#1e293b", showLogo:false, terms:"",
-    showBehalfInfo: true,
-    customFields: [],
+    companyName: "", tagline: "", address: "", phone: "", email: "", gst: "",
+    logo: "", showLogo: true, themeColor: "#1e293b",
+    footer: "", terms: "", showBehalfInfo: true, customFields: []
   })
   const [saving,setSaving]   = useState(false)
   const [saved,setSaved]     = useState(false)
@@ -198,34 +198,36 @@ export default function AdminInvoiceSettings() {
     const reader=new FileReader()
     reader.onload=(ev)=>{
       const b64=ev.target.result
-      setForm(p=>({...p,logo:b64,showLogo:true}))
       setLogoPreview(b64)
+      setForm(p=>({...p,logo:b64,showLogo:true}))
     }
     reader.readAsDataURL(file)
   }
 
   const handleSave=async()=>{
-    try{
-      setSaving(true)
+    try {
+      setSaving(true);setSaved(false)
       const token=localStorage.getItem("token")
       const res=await fetch(`${import.meta.env.VITE_API_URL}/api/invoice-settings`,{
-        method:"POST",
-        headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},
+        method:"PUT",
+        headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},
         body:JSON.stringify(form)
       })
-      if(res.ok){setSaved(true);setTimeout(()=>setSaved(false),2500)}
-      else{const d=await res.json();alert("Error: "+d.message)}
-    }catch(e){alert("Save failed: "+e.message)}
+      if(res.ok){setSaved(true);setTimeout(()=>setSaved(false),3000)}
+      else alert("Failed to save settings")
+    } catch { alert("Network error saving settings") }
     finally{setSaving(false)}
   }
 
   const addCustomField=()=>{
-    if(!newField.label.trim()||!newField.value.trim()){alert("Both Label and Value are required");return}
+    if(!newField.label.trim()||!newField.value.trim()){alert("Please enter both label and value");return}
     setForm(p=>({...p,customFields:[...p.customFields,{...newField,id:Date.now()}]}))
     setNewField({label:"",value:"",position:"top"})
   }
 
-  const removeCustomField=(id)=>setForm(p=>({...p,customFields:p.customFields.filter(f=>(f.id||f.label)!==(id))}))
+  const removeCustomField=(id)=>{
+    setForm(p=>({...p,customFields:p.customFields.filter(f=>(f.id||f.label)!==id)}))
+  }
 
   const moveField=(id,dir)=>{
     const arr=[...form.customFields]
@@ -239,10 +241,14 @@ export default function AdminInvoiceSettings() {
 
   const inp=(label,key,type="text",ph="")=>(
     <div>
-      <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">{label}</label>
+      <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+        isDark ? "text-stone-300" : "text-stone-700"
+      }`}>{label}</label>
       <input type={type} value={form[key]||""} placeholder={ph}
         onChange={e=>setForm(p=>({...p,[key]:e.target.value}))}
-        className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 text-xs focus:outline-none focus:border-[#fbbf24] font-medium"
+        className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-medium ${
+          isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+        }`}
       />
     </div>
   )
@@ -257,20 +263,28 @@ export default function AdminInvoiceSettings() {
   ]
 
   return (
-    <div className="space-y-6 select-none max-w-6xl mx-auto">
+    <div className={`space-y-6 select-none max-w-6xl mx-auto transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
 
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+        isDark ? "bg-[#121814] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ INVOICE & TAX ENGINE
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
             Invoice Customization & Header Settings
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
             Configure company branding, GST, custom fields, and real-time live preview for downloadable invoices.
           </p>
         </div>
@@ -278,7 +292,7 @@ export default function AdminInvoiceSettings() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-3 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap disabled:opacity-50"
+          className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap disabled:opacity-50"
         >
           {saved ? "✅ Saved Successfully!" : saving ? "Saving..." : "💾 Save Invoice Settings"}
         </button>
@@ -290,8 +304,10 @@ export default function AdminInvoiceSettings() {
         <div className="space-y-5">
 
           {/* Company Info */}
-          <div className="bg-[#111713] p-5 sm:p-6 rounded-3xl border border-white/[0.08] space-y-3.5 shadow-md">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#fbbf24] flex items-center gap-2">
+          <div className={`p-5 sm:p-6 rounded-3xl border space-y-3.5 shadow-md ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-[#fbbf24] flex items-center gap-2">
               <span>🏢</span> Corporate Entity Information
             </h2>
             <div className="space-y-3">
@@ -307,17 +323,23 @@ export default function AdminInvoiceSettings() {
           </div>
 
           {/* Logo */}
-          <div className="bg-[#111713] p-5 sm:p-6 rounded-3xl border border-white/[0.08] space-y-3.5 shadow-md">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#fbbf24] flex items-center gap-2">
+          <div className={`p-5 sm:p-6 rounded-3xl border space-y-3.5 shadow-md ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-[#fbbf24] flex items-center gap-2">
               <span>🖼️</span> Brand Logo & Display
             </h2>
-            <div className="flex gap-2 p-1 bg-black/40 rounded-xl border border-white/10">
+            <div className={`flex gap-2 p-1 rounded-xl border ${
+              isDark ? "bg-black/40 border-white/10" : "bg-stone-100 border-stone-200"
+            }`}>
               {[{k:"upload",l:"📁 Upload File"},{k:"url",l:"🔗 Remote URL"}].map(t=>(
                 <button
                   key={t.k}
                   onClick={()=>setLogoMode(t.k)}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    logoMode===t.k ? "bg-white text-black font-black" : "text-stone-400 hover:text-white"
+                    logoMode===t.k
+                      ? isDark ? "bg-white text-black font-black" : "bg-stone-900 text-white font-black"
+                      : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
                   }`}
                 >
                   {t.l}
@@ -329,21 +351,25 @@ export default function AdminInvoiceSettings() {
               <div>
                 <div
                   onClick={()=>logoRef.current?.click()}
-                  className="border-2 border-dashed border-white/15 rounded-2xl p-4 text-center cursor-pointer bg-black/30 hover:border-[#fbbf24] transition-all"
+                  className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all ${
+                    isDark
+                      ? "border-white/15 bg-black/30 hover:border-[#fbbf24]"
+                      : "border-stone-300 bg-stone-50 hover:border-amber-500"
+                  }`}
                 >
                   <div className="text-2xl mb-1">📁</div>
-                  <div className="text-xs font-bold text-white">Click to upload company logo</div>
-                  <div className="text-[10px] text-stone-500 font-mono mt-1">PNG, JPG, SVG · Max 500KB</div>
+                  <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>Click to upload company logo</div>
+                  <div className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-500" : "text-stone-400"}`}>PNG, JPG, SVG · Max 500KB</div>
                   <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden"/>
                 </div>
 
                 {logoPreview && logoPreview.startsWith("data:") && (
-                  <div className="mt-3 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl flex items-center gap-3">
+                  <div className="mt-3 p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl flex items-center gap-3">
                     <img src={logoPreview} alt="Logo" className="max-h-10 max-w-16 rounded bg-white p-1"/>
-                    <div className="flex-1 text-xs font-bold text-emerald-300">✅ Logo loaded</div>
+                    <div className="flex-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">✅ Logo loaded</div>
                     <button
                       onClick={()=>{setForm(p=>({...p,logo:"",showLogo:false}));setLogoPreview("")}}
-                      className="px-2.5 py-1 rounded-lg bg-red-950/50 text-red-300 border border-red-500/30 text-xs font-bold cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold cursor-pointer"
                     >
                       🗑️
                     </button>
@@ -357,42 +383,54 @@ export default function AdminInvoiceSettings() {
                   value={form.logo.startsWith?.("data:")?"":form.logo||""}
                   onChange={e=>{setForm(p=>({...p,logo:e.target.value}));setLogoPreview(e.target.value)}}
                   placeholder="https://yoursite.com/logo.png"
-                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 text-xs focus:outline-none focus:border-[#fbbf24] font-medium"
+                  className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-medium ${
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  }`}
                 />
               </div>
             )}
 
-            <label className="flex items-center gap-2 text-stone-300 font-bold text-xs cursor-pointer pt-1">
+            <label className={`flex items-center gap-2 font-bold text-xs cursor-pointer pt-1 ${
+              isDark ? "text-stone-300" : "text-stone-700"
+            }`}>
               <input
                 type="checkbox"
                 checked={!!form.showLogo}
                 onChange={e=>setForm(p=>({...p,showLogo:e.target.checked}))}
-                className="rounded border-white/20 bg-black/50 text-[#fbbf24]"
+                className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-amber-500"
               />
               Display logo on invoice headers
             </label>
           </div>
 
           {/* Theme + Footer */}
-          <div className="bg-[#111713] p-5 sm:p-6 rounded-3xl border border-white/[0.08] space-y-3.5 shadow-md">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#fbbf24] flex items-center gap-2">
+          <div className={`p-5 sm:p-6 rounded-3xl border space-y-3.5 shadow-md ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-[#fbbf24] flex items-center gap-2">
               <span>🎨</span> Theme Palette & Terms
             </h2>
 
             <div>
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">Header Accent Color</label>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>Header Accent Color</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={form.themeColor||"#1e293b"}
                   onChange={e=>setForm(p=>({...p,themeColor:e.target.value}))}
-                  className="w-10 h-9 p-1 rounded-xl bg-black/40 border border-white/10 cursor-pointer"
+                  className={`w-10 h-9 p-1 rounded-xl border cursor-pointer ${
+                    isDark ? "bg-black/40 border-white/10" : "bg-stone-50 border-stone-300"
+                  }`}
                 />
                 <input
                   type="text"
                   value={form.themeColor||"#1e293b"}
                   onChange={e=>setForm(p=>({...p,themeColor:e.target.value}))}
-                  className="flex-1 p-2 bg-black/40 text-white text-xs font-mono rounded-xl border border-white/10"
+                  className={`flex-1 p-2 text-xs font-mono rounded-xl border ${
+                    isDark ? "bg-black/40 text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-300"
+                  }`}
                 />
                 <div className="flex gap-1">
                   {["#1e293b","#065f46","#7c3aed","#dc2626","#1e40af","#92400e","#0f766e"].map(c=>(
@@ -408,45 +446,61 @@ export default function AdminInvoiceSettings() {
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">Footer Note</label>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>Footer Note</label>
               <textarea
                 value={form.footer||""}
                 onChange={e=>setForm(p=>({...p,footer:e.target.value}))}
                 rows={2}
-                className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 text-xs focus:outline-none"
+                className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
+                  isDark ? "bg-black/40 text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-300"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">Terms & Conditions</label>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>Terms & Conditions</label>
               <textarea
                 value={form.terms||""}
                 onChange={e=>setForm(p=>({...p,terms:e.target.value}))}
                 rows={2}
-                className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 text-xs focus:outline-none"
+                className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
+                  isDark ? "bg-black/40 text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-300"
+                }`}
               />
             </div>
           </div>
 
           {/* Custom Fields */}
-          <div className="bg-[#111713] p-5 sm:p-6 rounded-3xl border border-white/[0.08] space-y-3.5 shadow-md">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#fbbf24] flex items-center gap-2">
+          <div className={`p-5 sm:p-6 rounded-3xl border space-y-3.5 shadow-md ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-[#fbbf24] flex items-center gap-2">
               <span>➕</span> Custom Header / Footer Fields
             </h2>
 
-            <div className="p-3 bg-black/40 rounded-2xl border border-white/[0.06] space-y-2.5">
+            <div className={`p-3 rounded-2xl border space-y-2.5 ${
+              isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+            }`}>
               <div className="grid grid-cols-2 gap-2">
                 <input
                   value={newField.label}
                   onChange={e=>setNewField(p=>({...p,label:e.target.value}))}
                   placeholder="Label (e.g. PO No.)"
-                  className="p-2 bg-[#121814] text-white text-xs rounded-xl border border-white/10"
+                  className={`p-2 text-xs rounded-xl border ${
+                    isDark ? "bg-[#121814] text-white border-white/10" : "bg-white text-stone-900 border-stone-300"
+                  }`}
                 />
                 <input
                   value={newField.value}
                   onChange={e=>setNewField(p=>({...p,value:e.target.value}))}
                   placeholder="Value (e.g. PO-2026-01)"
-                  className="p-2 bg-[#121814] text-white text-xs rounded-xl border border-white/10"
+                  className={`p-2 text-xs rounded-xl border ${
+                    isDark ? "bg-[#121814] text-white border-white/10" : "bg-white text-stone-900 border-stone-300"
+                  }`}
                 />
               </div>
 
@@ -454,14 +508,18 @@ export default function AdminInvoiceSettings() {
                 <select
                   value={newField.position}
                   onChange={e=>setNewField(p=>({...p,position:e.target.value}))}
-                  className="flex-1 p-2 bg-[#121814] text-white text-xs font-bold rounded-xl border border-white/10"
+                  className={`flex-1 p-2 text-xs font-bold rounded-xl border ${
+                    isDark ? "bg-[#121814] text-white border-white/10" : "bg-white text-stone-900 border-stone-300"
+                  }`}
                 >
                   <option value="top">🔼 Above Items Table</option>
                   <option value="bottom">🔽 Below Items Table</option>
                 </select>
                 <button
                   onClick={addCustomField}
-                  className="px-4 py-2 rounded-xl bg-white text-black font-black text-xs uppercase cursor-pointer"
+                  className={`px-4 py-2 rounded-xl font-black text-xs uppercase cursor-pointer ${
+                    isDark ? "bg-white text-black" : "bg-stone-900 text-white"
+                  }`}
                 >
                   Add Field
                 </button>
@@ -471,20 +529,22 @@ export default function AdminInvoiceSettings() {
             {form.customFields.map((f)=>{
               const fid=f.id||f.label
               return (
-                <div key={fid} className="flex items-center gap-2 p-2.5 bg-black/40 rounded-xl border border-white/[0.06] text-xs">
+                <div key={fid} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${
+                  isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+                }`}>
                   <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                    f.position==="bottom" ? "bg-purple-500/20 text-purple-300" : "bg-sky-500/20 text-sky-300"
+                    f.position==="bottom" ? "bg-purple-500/20 text-purple-600 dark:text-purple-300" : "bg-sky-500/20 text-sky-600 dark:text-sky-300"
                   }`}>
                     {f.position==="bottom" ? "↓ Bot" : "↑ Top"}
                   </span>
                   <div className="flex-1 truncate">
-                    <span className="font-bold text-white">{f.label}:</span>
-                    <span className="text-stone-400 ml-1.5">{f.value}</span>
+                    <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{f.label}:</span>
+                    <span className={`ml-1.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>{f.value}</span>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={()=>moveField(fid,"up")} className="p-1 rounded bg-white/10 text-stone-300 text-[10px]">↑</button>
-                    <button onClick={()=>moveField(fid,"down")} className="p-1 rounded bg-white/10 text-stone-300 text-[10px]">↓</button>
-                    <button onClick={()=>removeCustomField(fid)} className="p-1 rounded bg-red-950 text-red-300 text-[10px]">✕</button>
+                    <button onClick={()=>moveField(fid,"up")} className={`p-1 rounded text-[10px] ${isDark ? "bg-white/10 text-stone-300" : "bg-stone-200 text-stone-700"}`}>↑</button>
+                    <button onClick={()=>moveField(fid,"down")} className={`p-1 rounded text-[10px] ${isDark ? "bg-white/10 text-stone-300" : "bg-stone-200 text-stone-700"}`}>↓</button>
+                    <button onClick={()=>removeCustomField(fid)} className="p-1 rounded bg-red-500/20 text-red-600 dark:text-red-300 text-[10px]">✕</button>
                   </div>
                 </div>
               )
@@ -494,31 +554,41 @@ export default function AdminInvoiceSettings() {
 
         {/* ════ RIGHT — LIVE PREVIEW ════ */}
         <div className="sticky top-20">
-          <div className="bg-[#111713] rounded-3xl border border-white/[0.08] overflow-hidden shadow-2xl space-y-0">
-            <div className="p-4 bg-black/60 border-b border-white/[0.08] flex items-center justify-between">
+          <div className={`rounded-3xl border overflow-hidden shadow-2xl space-y-0 ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <div className={`p-4 border-b flex items-center justify-between ${
+              isDark ? "bg-black/60 border-white/[0.08]" : "bg-stone-50 border-stone-200"
+            }`}>
               <div>
-                <div className="font-bold text-xs text-white uppercase">👁️ Real-Time Invoice Rendering</div>
-                <div className="text-[10px] text-stone-400 font-mono mt-0.5">Live synchronizing with editor inputs</div>
+                <div className={`font-bold text-xs uppercase ${isDark ? "text-white" : "text-stone-900"}`}>👁️ Real-Time Invoice Rendering</div>
+                <div className={`text-[10px] font-mono mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>Live synchronizing with editor inputs</div>
               </div>
 
               <button
                 onClick={()=>setFullPreview({...DEMO_ORDER,status:previewStatus})}
-                className="px-3.5 py-1.5 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold uppercase cursor-pointer hover:bg-sky-500/30"
+                className="px-3.5 py-1.5 rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-500/30 text-xs font-bold uppercase cursor-pointer hover:bg-sky-500/30"
               >
                 🔍 Full Preview
               </button>
             </div>
 
             {/* Status tabs */}
-            <div className="flex border-b border-white/[0.08] overflow-x-auto no-scrollbar">
+            <div className={`flex border-b overflow-x-auto no-scrollbar ${
+              isDark ? "border-white/[0.08]" : "border-stone-200"
+            }`}>
               {STATUS_TABS.map(s=>(
                 <button
                   key={s.k}
                   onClick={()=>setPreviewStatus(s.k)}
                   className={`flex-1 py-2 px-3 text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all border-b-2 ${
                     previewStatus===s.k
-                      ? "border-[#fbbf24] text-white bg-white/[0.04]"
-                      : "border-transparent text-stone-500 hover:text-stone-300"
+                      ? isDark
+                        ? "border-[#fbbf24] text-white bg-white/[0.04]"
+                        : "border-amber-500 text-stone-900 bg-amber-500/10"
+                      : isDark
+                        ? "border-transparent text-stone-500 hover:text-stone-300"
+                        : "border-transparent text-stone-400 hover:text-stone-700"
                   }`}
                 >
                   {s.l}
@@ -526,7 +596,7 @@ export default function AdminInvoiceSettings() {
               ))}
             </div>
 
-            <div className="p-4 bg-[#0a0d0b]">
+            <div className={`p-4 ${isDark ? "bg-[#0a0d0b]" : "bg-stone-100"}`}>
               <LivePreview settings={form} previewStatus={previewStatus}/>
             </div>
           </div>
