@@ -12,6 +12,9 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("all")
   const [tab, setTab] = useState("active") // "active" | "deleted"
   const [refreshKey, setRefreshKey] = useState(0)
+  const [editModal, setEditModal] = useState(null) // user object being edited
+  const [editForm, setEditForm] = useState({ fullName: "", name: "", phone: "", address: "" })
+  const [editSaving, setEditSaving] = useState(false)
 
   /* ================= LOAD USERS ================= */
   const loadUsers = async () => {
@@ -217,6 +220,45 @@ export default function AdminUsers() {
     } catch (err) {
       console.error("Reset password error:", err)
       alert("Something went wrong")
+    }
+  }
+
+  /* ================= EDIT USER PROFILE ================= */
+  const handleOpenEdit = (user) => {
+    setEditModal(user)
+    setEditForm({
+      fullName: user.fullName || "",
+      name:     user.name     || "",
+      phone:    user.phone    || "",
+      address:  user.address  || ""
+    })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editModal) return
+    try {
+      setEditSaving(true)
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/admin/update/${editModal._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editForm)
+      })
+      const data = await res.json()
+      if (res.ok) {
+        alert("✅ User profile updated successfully!")
+        setEditModal(null)
+        if (selectedUser && selectedUser._id === editModal._id) {
+          setSelectedUser(prev => ({ ...prev, ...editForm }))
+        }
+        await loadUsers()
+      } else {
+        alert("❌ " + (data.msg || data.message || "Update failed"))
+      }
+    } catch (err) {
+      alert("Error: " + err.message)
+    } finally {
+      setEditSaving(false)
     }
   }
 
@@ -573,14 +615,130 @@ export default function AdminUsers() {
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedUser(null)}
-              className={`mt-5 w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                isDark ? "bg-white/[0.08] hover:bg-white/15 text-white" : "bg-stone-900 hover:bg-stone-800 text-white"
-              }`}
-            >
-              Close Details
-            </button>
+            <div className="flex gap-2 mt-5">
+              <button
+                onClick={() => {
+                  const u = selectedUser
+                  setSelectedUser(null)
+                  handleOpenEdit(u)
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                ✏️ Edit Profile
+              </button>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  isDark ? "bg-white/[0.08] hover:bg-white/15 text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                }`}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT USER MODAL ── */}
+      {editModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className={`border rounded-3xl shadow-2xl w-full max-w-md p-6 relative select-none space-y-4 ${
+            isDark ? "bg-[#121814] border-white/[0.12] text-white" : "bg-white border-stone-200 text-stone-900"
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✏️</span>
+                <h3 className="text-base font-black uppercase">Edit User Profile</h3>
+              </div>
+              <button
+                onClick={() => setEditModal(null)}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm cursor-pointer ${
+                  isDark ? "bg-white/[0.08] hover:bg-white/15 text-stone-300" : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                }`}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className={`text-xs ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+              Update real full name, system ID handle, phone, and address for <b>{editModal.email}</b>.
+            </p>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 text-stone-400">
+                  👤 Real Full Name
+                </label>
+                <input
+                  value={editForm.fullName}
+                  onChange={e => setEditForm({ ...editForm, fullName: e.target.value })}
+                  placeholder="e.g. Muhammad Aleem Ali"
+                  className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 text-stone-400">
+                  🆔 System ID / Username
+                </label>
+                <input
+                  value={editForm.name}
+                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                  placeholder="e.g. DB001"
+                  className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-mono ${
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 text-stone-400">
+                  📞 Phone Number
+                </label>
+                <input
+                  value={editForm.phone}
+                  onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                  placeholder="e.g. 9876543210"
+                  className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 text-stone-400">
+                  📍 Address
+                </label>
+                <input
+                  value={editForm.address}
+                  onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                  placeholder="e.g. City, State, Pincode"
+                  className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setEditModal(null)}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-xs uppercase cursor-pointer ${
+                  isDark ? "bg-white/[0.08] hover:bg-white/15 text-stone-300" : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={editSaving}
+                onClick={handleSaveEdit}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider cursor-pointer disabled:opacity-50"
+              >
+                {editSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           </div>
         </div>
       )}

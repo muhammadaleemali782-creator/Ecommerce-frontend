@@ -297,12 +297,9 @@ export default function AdminOrders() {
                       {order.userId?.name ? (
                         <div>
                           <div className="font-bold font-mono text-sky-500 dark:text-sky-400">{order.userId.name}</div>
-                          {order.userId.fullName && order.userId.fullName !== order.userId.name && (
-                            <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
-                              👤 {order.userId.fullName}
-                            </div>
-                          )}
-                          <div className="text-[10px] text-stone-400 mt-0.5">Customer</div>
+                          <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
+                            👤 {order.userId.fullName || order.userId.name}
+                          </div>
                         </div>
                       ) : <span className="text-stone-400">—</span>}
                     </td>
@@ -312,12 +309,9 @@ export default function AdminOrders() {
                       {order.sellerId?.name ? (
                         <div>
                           <div className="font-bold font-mono text-emerald-600 dark:text-emerald-400">{order.sellerId.name}</div>
-                          {order.sellerId.fullName && order.sellerId.fullName !== order.sellerId.name && (
-                            <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
-                              👤 {order.sellerId.fullName}
-                            </div>
-                          )}
-                          <div className="text-[10px] text-stone-400 mt-0.5">Seller</div>
+                          <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
+                            👤 {order.sellerId.fullName || order.sellerId.name}
+                          </div>
                           {order.onBehalfOfId && (
                             <div className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20">
                               {order.placedByName} {order.placedByFullName && `(${order.placedByFullName})`} → {order.onBehalfOfName} {order.onBehalfOfFullName && `(${order.onBehalfOfFullName})`}
@@ -332,12 +326,9 @@ export default function AdminOrders() {
                       {order.distributorId?.name ? (
                         <div>
                           <div className="font-bold font-mono text-violet-500 dark:text-violet-400">{order.distributorId.name}</div>
-                          {order.distributorId.fullName && order.distributorId.fullName !== order.distributorId.name && (
-                            <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
-                              👤 {order.distributorId.fullName}
-                            </div>
-                          )}
-                          <div className="text-[10px] text-stone-400 mt-0.5">Distributor</div>
+                          <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
+                            👤 {order.distributorId.fullName || order.distributorId.name}
+                          </div>
                         </div>
                       ) : <span className="text-stone-400">—</span>}
                     </td>

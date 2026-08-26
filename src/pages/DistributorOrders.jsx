@@ -343,12 +343,9 @@ export default function DistributorOrders() {
                               <div style={{ fontWeight:700, fontSize:12, color:"#1d4ed8", fontFamily:"monospace" }}>
                                 {order.userId?.name || "—"}
                               </div>
-                              {order.userId?.fullName && order.userId.fullName !== order.userId.name && (
-                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                  👤 {order.userId.fullName}
-                                </div>
-                              )}
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>user</div>
+                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                👤 {order.userId?.fullName || order.userId?.name}
+                              </div>
                             </div>
                           ) : (
                             <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>
@@ -362,12 +359,9 @@ export default function DistributorOrders() {
                               <div style={{ fontWeight:700, fontSize:12, color:"#15803d", fontFamily:"monospace" }}>
                                 {order.sellerId?.name || "—"}
                               </div>
-                              {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
-                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                  👤 {order.sellerId.fullName}
-                                </div>
-                              )}
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>seller</div>
+                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                👤 {order.sellerId?.fullName || order.sellerId?.name}
+                              </div>
                               {/* Behalf chain — sirf yahan dikhao */}
                               {order.onBehalfOfId && (
                                 <div style={{ marginTop:4, fontSize:9, background:"#fff7ed", color:"#92400e", border:"1px solid #fde68a", borderRadius:4, padding:"2px 6px", display:"inline-block" }}>
@@ -387,13 +381,8 @@ export default function DistributorOrders() {
                               <div style={{ fontWeight:700, fontSize:12, color:"#7c3aed", fontFamily:"monospace" }}>
                                 {order.distributorId?.name || "—"}
                               </div>
-                              {order.distributorId?.fullName && order.distributorId.fullName !== order.distributorId.name && (
-                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                  👤 {order.distributorId.fullName}
-                                </div>
-                              )}
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>
-                                {order.distributorId?.systemId || "distributor"}
+                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                👤 {order.distributorId?.fullName || order.distributorId?.name}
                               </div>
                             </div>
                           ) : (
