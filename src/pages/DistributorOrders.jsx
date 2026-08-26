@@ -200,14 +200,33 @@ export default function DistributorOrders() {
               <span style={{ fontSize:9, background:"#f0fdf4", color:"#15803d", borderRadius:3, padding:"1px 5px", fontWeight:700 }}>Seller</span>
               <b>{order.sellerId?.role === "user" ? (order.sellerId?.name ? order.sellerId.name + "'s Seller" : "—") : (order.sellerId?.name || "—")}</b>
             </div>
+            {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
+              <div style={{ fontSize:10, fontWeight:600, color:"#475569", marginLeft:4 }}>
+                👤 {order.sellerId.fullName}
+              </div>
+            )}
             {order.userId && (
-              <div style={{ display:"flex", alignItems:"center", gap:4, marginTop:3 }}>
-                <span style={{ fontSize:9, background:"#eff6ff", color:"#1d4ed8", borderRadius:3, padding:"1px 5px", fontWeight:700 }}>User</span>
-                <span style={{ fontSize:11, color:"#1d4ed8", fontWeight:600 }}>{order.userId?.name || "—"}</span>
+              <div style={{ marginTop:4 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                  <span style={{ fontSize:9, background:"#eff6ff", color:"#1d4ed8", borderRadius:3, padding:"1px 5px", fontWeight:700 }}>User</span>
+                  <span style={{ fontSize:11, color:"#1d4ed8", fontWeight:600 }}>{order.userId?.name || "—"}</span>
+                </div>
+                {order.userId.fullName && order.userId.fullName !== order.userId.name && (
+                  <div style={{ fontSize:10, fontWeight:600, color:"#475569", marginLeft:4 }}>
+                    👤 {order.userId.fullName}
+                  </div>
+                )}
               </div>
             )}
           </div>
-          <div><span style={{ color:"#94a3b8" }}>Customer: </span><b>{order.customerName || "—"}</b></div>
+          <div>
+            <span style={{ color:"#94a3b8" }}>Customer: </span><b>{order.customerName || "—"}</b>
+            {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
+              <div style={{ fontSize:10, fontWeight:600, color:"#475569" }}>
+                👤 {order.customerFullName || order.userId?.fullName}
+              </div>
+            )}
+          </div>
           <div><span style={{ color:"#94a3b8" }}>Amount: </span><b style={{ color:"#16a34a" }}>₹{order.total?.toLocaleString()}</b></div>
           <div><span style={{ color:"#94a3b8" }}>Phone: </span>{order.phone || "—"}</div>
         </div>
@@ -321,9 +340,14 @@ export default function DistributorOrders() {
                         <td style={{ padding:"12px 14px" }}>
                           {order.userId && order.userId.role === "user" ? (
                             <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#1d4ed8" }}>
+                              <div style={{ fontWeight:700, fontSize:12, color:"#1d4ed8", fontFamily:"monospace" }}>
                                 {order.userId?.name || "—"}
                               </div>
+                              {order.userId?.fullName && order.userId.fullName !== order.userId.name && (
+                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                  👤 {order.userId.fullName}
+                                </div>
+                              )}
                               <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>user</div>
                             </div>
                           ) : (
@@ -335,14 +359,19 @@ export default function DistributorOrders() {
                         <td style={{ padding:"12px 14px" }}>
                           {order.sellerId && order.sellerId.role === "seller" ? (
                             <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#15803d" }}>
+                              <div style={{ fontWeight:700, fontSize:12, color:"#15803d", fontFamily:"monospace" }}>
                                 {order.sellerId?.name || "—"}
                               </div>
+                              {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
+                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                  👤 {order.sellerId.fullName}
+                                </div>
+                              )}
                               <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>seller</div>
                               {/* Behalf chain — sirf yahan dikhao */}
                               {order.onBehalfOfId && (
                                 <div style={{ marginTop:4, fontSize:9, background:"#fff7ed", color:"#92400e", border:"1px solid #fde68a", borderRadius:4, padding:"2px 6px", display:"inline-block" }}>
-                                  {order.placedByName} → {order.onBehalfOfName}
+                                  {order.placedByName} {order.placedByFullName && `(${order.placedByFullName})`} → {order.onBehalfOfName} {order.onBehalfOfFullName && `(${order.onBehalfOfFullName})`}
                                 </div>
                               )}
                             </div>
@@ -355,9 +384,14 @@ export default function DistributorOrders() {
                         <td style={{ padding:"12px 14px" }}>
                           {order.distributorId ? (
                             <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#7c3aed" }}>
+                              <div style={{ fontWeight:700, fontSize:12, color:"#7c3aed", fontFamily:"monospace" }}>
                                 {order.distributorId?.name || "—"}
                               </div>
+                              {order.distributorId?.fullName && order.distributorId.fullName !== order.distributorId.name && (
+                                <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
+                                  👤 {order.distributorId.fullName}
+                                </div>
+                              )}
                               <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>
                                 {order.distributorId?.systemId || "distributor"}
                               </div>
@@ -369,7 +403,12 @@ export default function DistributorOrders() {
 
                         {/* CUSTOMER */}
                         <td style={{ padding:"12px 14px" }}>
-                          <div style={{ fontWeight:600, fontSize:12 }}>{order.customerName || "—"}</div>
+                          <div style={{ fontWeight:700, fontSize:12, color:"#1e293b" }}>{order.customerName || "—"}</div>
+                          {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
+                            <div style={{ fontWeight:600, fontSize:11, color:"#475569", marginTop:1 }}>
+                              👤 {order.customerFullName || order.userId?.fullName}
+                            </div>
+                          )}
                           <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>{order.phone || ""}</div>
                           {order.address && (
                             <div style={{ fontSize:9, color:"#cbd5e1", marginTop:1, maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
