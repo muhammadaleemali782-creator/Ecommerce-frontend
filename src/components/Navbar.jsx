@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useEffect } from "react"
+import React, { useState, useCallback, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import NotificationBell from "./NotificationBell"
 
@@ -251,8 +251,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
       {/* Left Sidebar Panel */}
       <div
-        className={`fixed top-0 left-0 h-full z-[70] lg:hidden w-[82vw] max-w-[320px] bg-[#090c0a] border-r border-white/[0.08] flex flex-col transition-transform duration-300 ease-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 right-0 h-full z-[70] lg:hidden w-[82vw] max-w-[320px] bg-[#090c0a] border-l border-white/[0.08] flex flex-col transition-transform duration-300 ease-out ${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ willChange: "transform" }}
       >
