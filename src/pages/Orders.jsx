@@ -51,19 +51,23 @@ export default function Orders() {
           return
         }
 
-        // 🔥 Format backend orders to match old UI
+        // 🔥 Format backend orders to match UI
         const formatted = data.map(o => ({
           id: o._id,
           name: o.customerName || "Customer",
+          fullName: o.customerFullName || o.userId?.fullName || o.fullName || "",
           total: o.total || 0,
-          date: o.createdAt ? new Date(o.createdAt).toLocaleString() : "-",
+          date: o.createdAt ? new Date(o.createdAt).toLocaleString("en-IN", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "-",
           status: o.status || "pending",
           items: o.items || [],
           // ⭐ On behalf of fields
-          placedByName:   o.placedByName   || null,
-          placedByRole:   o.placedByRole   || null,
-          onBehalfOfName: o.onBehalfOfName || null,
-          onBehalfOfRole: o.onBehalfOfRole || null,
+          placedByName:       o.placedByName       || null,
+          placedByFullName:   o.placedByFullName   || null,
+          placedByRole:       o.placedByRole       || null,
+          onBehalfOfName:     o.onBehalfOfName     || null,
+          onBehalfOfFullName: o.onBehalfOfFullName || null,
+          onBehalfOfRole:     o.onBehalfOfRole     || null,
+          rawOrder: o
         }))
 
         console.log("✅ FORMATTED ORDERS =", formatted)
@@ -112,24 +116,35 @@ export default function Orders() {
         {orders.map(o => (
           <div key={o.id} style={{ background:"#f8fafc", borderRadius:10, padding:"14px 16px", border:"1.5px solid #e8eef4", display:"flex", gap:12, alignItems:"flex-start" }}>
             <div style={{ flex:1 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                <b style={{ fontSize:14, color:"#1e293b" }}>{o.name}</b>
-                <span style={{ fontSize:14, fontWeight:800, color:"#16a34a" }}>₹{Number(o.total).toLocaleString()}</span>
-                <span style={{ fontSize:11, padding:"2px 8px", borderRadius:99, fontWeight:700,
-                  background: o.status==="confirmed"?"#dcfce7":o.status==="rejected"?"#fee2e2":o.status==="pending"?"#fffbeb":"#e0e7ff",
-                  color:      o.status==="confirmed"?"#15803d":o.status==="rejected"?"#dc2626":o.status==="pending"?"#92400e":"#3730a3"
-                }}>{o.status}</span>
+              <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:800, color:"#1e293b", fontFamily:"monospace" }}>
+                    🆔 {o.name}
+                  </div>
+                  {o.fullName && o.fullName !== o.name && (
+                    <div style={{ fontSize:11.5, fontWeight:700, color:"#475569", marginTop:2 }}>
+                      👤 {o.fullName}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginLeft:"auto" }}>
+                  <span style={{ fontSize:14, fontWeight:800, color:"#16a34a" }}>₹{Number(o.total).toLocaleString()}</span>
+                  <span style={{ fontSize:11, padding:"2px 8px", borderRadius:99, fontWeight:700,
+                    background: o.status==="confirmed"?"#dcfce7":o.status==="rejected"?"#fee2e2":o.status==="pending"?"#fffbeb":"#e0e7ff",
+                    color:      o.status==="confirmed"?"#15803d":o.status==="rejected"?"#dc2626":o.status==="pending"?"#92400e":"#3730a3"
+                  }}>{o.status}</span>
+                </div>
               </div>
-              <div style={{ fontSize:11, color:"#94a3b8", marginTop:3 }}>{o.date}</div>
+              <div style={{ fontSize:11, color:"#94a3b8", marginTop:4 }}>{o.date}</div>
 
               {/* ⭐ On behalf of attribution */}
               {o.onBehalfOfName && (
                 <div style={{ marginTop:7, padding:"6px 10px", background:"#fffbeb", borderRadius:7, border:"1px solid #fcd34d", fontSize:11, color:"#92400e", lineHeight:1.5 }}>
-                  📋 <strong>{o.placedByName}</strong> ({o.placedByRole}) ne <strong>{o.onBehalfOfName}</strong> ({o.onBehalfOfRole}) ke liye order lagaya
+                  📋 <strong>{o.placedByName}</strong> ({o.placedByRole}) ne <strong>{o.onBehalfOfName}</strong> {o.onBehalfOfFullName && `(${o.onBehalfOfFullName})`} ({o.onBehalfOfRole}) ke liye order lagaya
                 </div>
               )}
 
-              <button onClick={() => printInvoice?.(o)}
+              <button onClick={() => printInvoice?.(o.rawOrder || o)}
                 style={{ marginTop:8, fontSize:11, color:"#3b82f6", background:"#eff6ff", border:"1px solid #bfdbfe", borderRadius:6, padding:"4px 12px", cursor:"pointer", fontWeight:600 }}>
                 📄 Invoice Download
               </button>

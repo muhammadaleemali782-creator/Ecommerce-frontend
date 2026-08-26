@@ -314,19 +314,54 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         style={{ willChange: "transform" }}
       >
         {/* Sidebar Header */}
-        <div className={`flex items-center justify-between px-4 h-14 border-b shrink-0 ${
+        <div className={`flex items-center justify-between px-3.5 h-14 border-b shrink-0 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => go("home")}>
-            <div className={`w-[12px] h-[18px] border-[2px] rounded-[1px] ${
-              isDark ? "border-[#fbbf24]" : "border-amber-600"
-            }`} />
-            <span className={`text-[11px] font-black uppercase tracking-[0.18em] ${
-              isDark ? "text-[#fbbf24]" : "text-amber-700"
-            }`}>
-              EDUCA VEDA
-            </span>
-          </div>
+          {loggedIn ? (
+            <div className="flex items-center gap-2 min-w-0 pr-1 cursor-pointer" onClick={() => go("my-profile")}>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${
+                role === "admin" ? "bg-amber-400/20 text-amber-500 border-amber-500/40" :
+                role === "distributor" ? "bg-sky-400/20 text-sky-500 border-sky-500/40" :
+                role === "seller" ? "bg-emerald-400/20 text-emerald-500 border-emerald-500/40" :
+                "bg-violet-400/20 text-violet-500 border-violet-500/40"
+              }`}>
+                {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
+              </div>
+              <div className="min-w-0 text-left">
+                <div className="flex items-center gap-1.5 leading-tight">
+                  <span className={`text-[11px] font-black uppercase font-mono tracking-tight truncate max-w-[100px] ${
+                    isDark ? "text-[#fbbf24]" : "text-amber-700"
+                  }`}>
+                    {safeUser?.name || "User"}
+                  </span>
+                  <span className={`text-[7.5px] font-mono font-black uppercase px-1 py-0.2 rounded border shrink-0 ${
+                    role === "admin" ? "bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30" :
+                    role === "distributor" ? "bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/30" :
+                    role === "seller" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30" :
+                    "bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/30"
+                  }`}>
+                    {role}
+                  </span>
+                </div>
+                <div className={`text-[9.5px] font-bold truncate max-w-[125px] ${
+                  isDark ? "text-stone-300" : "text-stone-600"
+                }`}>
+                  {safeUser?.fullName || safeUser?.name}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => go("home")}>
+              <div className={`w-[12px] h-[18px] border-[2px] rounded-[1px] ${
+                isDark ? "border-[#fbbf24]" : "border-amber-600"
+              }`} />
+              <span className={`text-[11px] font-black uppercase tracking-[0.18em] ${
+                isDark ? "text-[#fbbf24]" : "text-amber-700"
+              }`}>
+                EDUCA VEDA
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <button

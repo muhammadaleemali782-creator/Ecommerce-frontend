@@ -518,6 +518,11 @@ export default function AdminWithdrawalManagement() {
                           {req.userRole}
                         </span>
                       </div>
+                      {req.userId?.fullName && req.userId.fullName !== req.userId?.name && (
+                        <div className={`text-xs font-bold ${isDark ? "text-amber-300/90" : "text-amber-800"}`}>
+                          👤 {req.userId.fullName}
+                        </div>
+                      )}
                       <div className={`text-xs mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                         📧 {req.userId?.email} · 📞 {req.userId?.phone || "N/A"}
                       </div>

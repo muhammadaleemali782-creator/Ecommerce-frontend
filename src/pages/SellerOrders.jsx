@@ -149,16 +149,24 @@ export default function SellerOrders() {
                 <div>
                   <p className="font-mono text-xs text-gray-400">#{order._id.slice(-6)}</p>
                   <p className="font-bold text-lg">₹{fmt(order.total)}</p>
-                  <p className="text-sm text-gray-500">{order.customerName} · {order.phone}</p>
+                  <div className="text-sm font-bold text-gray-800">
+                    🆔 {order.customerName || "Customer"}
+                  </div>
+                  {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
+                    <div className="text-xs font-semibold text-gray-600">
+                      👤 {order.customerFullName || order.userId?.fullName}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500 mt-0.5">📞 {order.phone || "—"}</p>
                   {order.onBehalfOfName && (
                     <div style={{ marginTop:5, padding:"4px 10px", background:"#fffbeb", borderRadius:6, border:"1px solid #fcd34d", fontSize:11, color:"#92400e" }}>
-                      📋 <strong>{order.placedByName}</strong> ({order.placedByRole}) ne <strong>{order.onBehalfOfName}</strong> ({order.onBehalfOfRole}) ke liye lagaya
+                      📋 <strong>{order.placedByName}</strong> ({order.placedByRole}) ne <strong>{order.onBehalfOfName}</strong> {order.onBehalfOfFullName && `(${order.onBehalfOfFullName})`} ({order.onBehalfOfRole}) ke liye lagaya
                     </div>
                   )}
                 </div>
                 <div className="text-right text-xs text-gray-400">
                   {new Date(order.createdAt).toLocaleDateString("en-IN")}
-                  <div className="mt-1">Distributor: {order.distributorId?.name || "—"}</div>
+                  <div className="mt-1">Distributor: {order.distributorId?.name || "—"} {order.distributorId?.fullName ? `(${order.distributorId.fullName})` : ''}</div>
                   {/* 🧾 Invoice Button */}
                   <button onClick={() => setInvoice(order)}
                     style={{ marginTop:8, padding:"5px 12px", borderRadius:8, border:"1px solid #e2e8f0",

@@ -196,10 +196,17 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
 
         {/* BILL TO */}
         <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
-          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:10,textTransform:"uppercase"}}>Bill To</div>
-          <div style={{fontWeight:800,fontSize:15,color:"#1e293b"}}>{order.customerName||"—"}</div>
-          {order.phone&&<div style={{fontSize:12,color:"#64748b",marginTop:5,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={12}/> {order.phone}</div>}
-          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.5,display:"flex",alignItems:"flex-start",gap:5}}><span style={{marginTop:2,flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span>{order.address}</div>}
+          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Bill To / Buyer</div>
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
+            ID: {order.customerName || order.userId?.name || "Customer"}
+          </div>
+          {(order.customerFullName || order.userId?.fullName || (order.customerName && order.customerName !== order.userId?.name)) && (
+            <div style={{fontWeight:700,fontSize:12,color:"#475569",marginTop:2}}>
+              👤 {order.customerFullName || order.userId?.fullName || order.customerName}
+            </div>
+          )}
+          {order.phone&&<div style={{fontSize:11.5,color:"#64748b",marginTop:4,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={11}/> {order.phone}</div>}
+          {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.4,display:"flex",alignItems:"flex-start",gap:5}}><span style={{marginTop:2,flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span>{order.address}</div>}
 
           {/* BEHALF INFO — toggleable by admin */}
           {orderedFor&&(
@@ -209,16 +216,22 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
                 <div style={{fontSize:9,fontWeight:800,color:accent,letterSpacing:"0.06em",marginBottom:3,textTransform:"uppercase"}}>
                   📦 Ordered For
                 </div>
-                <div style={{fontWeight:700,fontSize:13,color:"#1e293b"}}>{orderedFor.name}</div>
-                <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize"}}>{orderedFor.role}</div>
+                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b",fontFamily:"monospace"}}>ID: {orderedFor.name}</div>
+                {orderedFor.fullName && orderedFor.fullName !== orderedFor.name && (
+                  <div style={{fontWeight:600,fontSize:11,color:"#475569"}}>👤 {orderedFor.fullName}</div>
+                )}
+                <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize",marginTop:1}}>{orderedFor.role}</div>
               </div>
               <div style={{background:tc?`${accent}10`:"#f0fdf4",borderRadius:8,padding:"8px 10px",
                 border:`1px solid ${tc?.accent||"#86efac"}50`}}>
                 <div style={{fontSize:9,fontWeight:800,color:accent,letterSpacing:"0.06em",marginBottom:3,textTransform:"uppercase"}}>
                   ✍️ Placed By
                 </div>
-                <div style={{fontWeight:700,fontSize:13,color:"#1e293b"}}>{placedBy.name}</div>
-                <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize"}}>{placedBy.role}</div>
+                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b",fontFamily:"monospace"}}>ID: {placedBy.name}</div>
+                {placedBy.fullName && placedBy.fullName !== placedBy.name && (
+                  <div style={{fontWeight:600,fontSize:11,color:"#475569"}}>👤 {placedBy.fullName}</div>
+                )}
+                <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize",marginTop:1}}>{placedBy.role}</div>
               </div>
             </div>
           )}
@@ -227,11 +240,14 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         {/* SELLER */}
         <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Seller</div>
-          <div style={{fontWeight:700,fontSize:13,color:"#1e293b"}}>{order.sellerId?.name||"—"}</div>
+          <div style={{fontWeight:700,fontSize:13,color:"#1e293b",fontFamily:"monospace"}}>ID: {order.sellerId?.name||"—"}</div>
+          {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
+            <div style={{fontWeight:600,fontSize:11.5,color:"#475569",marginTop:2}}>👤 {order.sellerId.fullName}</div>
+          )}
           <div style={{fontSize:10,color:"#64748b",marginTop:2}}>{order.sellerId?.email||""}</div>
           {order.userId&&(
             <div style={{marginTop:6,fontSize:11,background:"#eff6ff",borderRadius:6,padding:"4px 8px",color:"#1d4ed8",display:"inline-block"}}>
-              via: {order.userId?.name}
+              via: {order.userId?.name} {order.userId?.fullName && `(${order.userId.fullName})`}
             </div>
           )}
         </div>
@@ -243,7 +259,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             ["Invoice No.",invNo],
             ["Order ID","#"+(order._id?.slice(-8)||"—")],
             ["Date",fmtDate(order.createdAt)],
-            order.distributorId&&["Distributor",order.distributorId?.name],
+            order.distributorId&&["Distributor",`${order.distributorId?.name}${order.distributorId?.fullName ? ` (${order.distributorId.fullName})` : ''}`],
           ].filter(Boolean).map(([k,v])=>(
             <div key={k} style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:5}}>
               <span style={{color:"#94a3b8"}}>{k}</span>
@@ -392,17 +408,20 @@ function ThermalInvoice({ order, settings, invNo, meta, thermalWidth }) {
       ))}
       {divider}
       <div style={{fontWeight:700,fontSize:9,textDecoration:"underline"}}>BILL TO:</div>
-      <div style={{fontWeight:700}}>{order.customerName||"—"}</div>
+      <div style={{fontWeight:700}}>ID: {order.customerName||order.userId?.name||"—"}</div>
+      {(order.customerFullName || order.userId?.fullName || (order.customerName && order.customerName !== order.userId?.name)) && (
+        <div style={{fontSize:9,color:"#333"}}>Name: {order.customerFullName || order.userId?.fullName || order.customerName}</div>
+      )}
       {order.phone&&<div style={{fontSize:9}}>Ph: {order.phone}</div>}
       {order.address&&<div style={{fontSize:9}}>Addr: {order.address}</div>}
       {showBehalf&&order.onBehalfOfId&&<>
-        <div style={{fontSize:9}}>FOR: {order.onBehalfOfName} ({order.onBehalfOfRole})</div>
-        <div style={{fontSize:9}}>BY : {order.placedByName} ({order.placedByRole})</div>
+        <div style={{fontSize:9,marginTop:2}}>FOR: {order.onBehalfOfName} {order.onBehalfOfFullName ? `(${order.onBehalfOfFullName})` : ''} ({order.onBehalfOfRole})</div>
+        <div style={{fontSize:9}}>BY : {order.placedByName} {order.placedByFullName ? `(${order.placedByFullName})` : ''} ({order.placedByRole})</div>
       </>}
       {divider}
       <div style={{fontSize:9}}>
-        <div>Seller: {order.sellerId?.name||"—"}</div>
-        {order.distributorId&&<div>Dist : {order.distributorId?.name}</div>}
+        <div>Seller: {order.sellerId?.name||"—"} {order.sellerId?.fullName ? `(${order.sellerId.fullName})` : ''}</div>
+        {order.distributorId&&<div>Dist : {order.distributorId?.name} {order.distributorId?.fullName ? `(${order.distributorId.fullName})` : ''}</div>}
         <div>Order: #{order._id?.slice(-6)}</div>
       </div>
       {divider}
@@ -537,135 +556,152 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
     load()
   },[])
 
-  // ⭐ RELIABLE PDF: window.print() Android ke OS-level "print service" pe
-  // depend karta tha — kuch phones (jinme "Save as PDF" service disabled/
-  // missing hoti hai) us par atak jaate the ya PDF banti hi nahi thi.
-  // Isliye ab poori PDF seedha JS (html2canvas + jsPDF) se banate hain —
-  // ye har device pe EXACT SAME tareeke se kaam karta hai, koi OS
-  // dependency nahi.
-  const handleDownloadPdf = async () => {
-    if (!printRef.current || downloading) return
-    setDownloading(true)
-
-    const box = modalBoxRef.current
-    const prevBoxWidth    = box?.style.width
-    const prevBoxMaxWidth = box?.style.maxWidth
+  /* ── Ultra-Reliable High-Resolution Canvas Snapshot Engine ── */
+  const renderCleanCanvas = async () => {
     const node = printRef.current
-    const prevNodeWidth = node?.style.width
+    if (!node) return null
+
+    // Target width: Normal A4 standard = 794px @ 96DPI, Thermal = 380px/480px
+    const targetWidth = printMode === "thermal" ? (thermalWidth === "58" ? 340 : 420) : 794
+
+    // Create an isolated sandbox container off-screen to avoid mobile screen zoom, viewport distortion, or CSS clipping
+    const sandbox = document.createElement("div")
+    sandbox.style.position = "fixed"
+    sandbox.style.left = "-9999px"
+    sandbox.style.top = "0"
+    sandbox.style.width = targetWidth + "px"
+    sandbox.style.zIndex = "-9999"
+    sandbox.style.background = "#ffffff"
+    sandbox.style.overflow = "visible"
+
+    const clone = node.cloneNode(true)
+    clone.style.width = targetWidth + "px"
+    clone.style.maxWidth = "none"
+    clone.style.minWidth = targetWidth + "px"
+    clone.style.margin = "0"
+    clone.style.boxShadow = "none"
+    clone.style.borderRadius = "0"
+    clone.style.transform = "none"
+
+    sandbox.appendChild(clone)
+    document.body.appendChild(sandbox)
 
     try {
-      // ⭐ FIX: Guess karne (jaise fixed 900px) se kabhi kabhi invoice ki
-      // ASLI zaroorat ki width usse bhi zyada nikal jaati thi aur content
-      // clip ho jaata tha. Ab browser ko khud calculate karne dete hain ki
-      // is invoice ko poori tarah (bina kuch cut kiye) dikhane ke liye
-      // exactly kitni width chahiye — koi guessing nahi.
-      if (box) {
-        box.style.width = "2000px"       // pehle khula chhod do
-        box.style.maxWidth = "none"
-      }
-      node.style.width = "max-content"    // ab content apni asli width le le
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+      // Brief pause to ensure fonts and layout engine have settled
+      await new Promise(r => setTimeout(r, 150))
 
-      const neededWidth = Math.ceil(node.getBoundingClientRect().width) + 2
-      node.style.width = neededWidth + "px"   // ab exactly usi width pe lock kar do
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+      const neededHeight = Math.ceil(clone.scrollHeight || clone.offsetHeight || 1000)
 
-      // ⭐ Width ki tarah height bhi exactly measure karke html2canvas ko
-      // explicitly batani zaroori hai (neeche captureOpts mein) — taaki
-      // yeh sirf invoice ka asli content capture kare, poori window nahi.
-      const neededHeight = Math.ceil(node.getBoundingClientRect().height) + 2
-
-      const captureOpts = {
-        scale: 3,   // ⭐ zyada resolution = sharp text/icons, kabhi bhi blur na dikhe
+      const canvas = await html2canvas(clone, {
+        scale: 2.5, // 300 DPI high clarity, ultra crisp text on mobile & retina
         useCORS: true,
+        allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
-        width: neededWidth,        // ⭐ exact content width — window ki nahi
-        height: neededHeight,      // ⭐ exact content height — window ki nahi
-        windowWidth: neededWidth,
+        width: targetWidth,
+        height: neededHeight,
+        windowWidth: targetWidth,
         windowHeight: neededHeight,
-        x: 0,
-        y: 0,
         scrollX: 0,
         scrollY: 0,
+      })
+
+      return { canvas, targetWidth, neededHeight }
+    } finally {
+      if (document.body.contains(sandbox)) {
+        document.body.removeChild(sandbox)
       }
+    }
+  }
 
-      // ⭐ ASLI ROOT CAUSE (verified via html2canvas ke apne official GitHub
-      // issue tracker — issue #1754, aaj tak open/unresolved hai):
-      // `foreignObjectRendering: true` mode explicitly diye gaye
-      // width/height/windowWidth/windowHeight ko SILENTLY IGNORE kar deta
-      // hai aur uski jagah poore document window ki asli size use karta
-      // hai — bina koi error diye. Isi wajah se pehle wala fix
-      // (sirf width/height pass karna) kaam nahi kar raha tha: code abhi
-      // bhi pehle foreignObjectRendering try karta tha, jo humare diye
-      // hue dimensions ko nazarandaz karke poori window capture kar leta
-      // tha (invoice ke neeche wo bada khaali white space).
-      //
-      // FIX: foreignObjectRendering ko poori tarah hata diya — plain/
-      // default html2canvas renderer explicitly diye gaye width/height ko
-      // sahi se respect karta hai. Emoji ki jagah pehle se hi custom SVG
-      // icons use ho rahe hain, isliye quality pe koi asar nahi padega.
-      let canvas = await html2canvas(node, captureOpts)
+  /* ── 1. PDF Download ── */
+  const handleDownloadPdf = async () => {
+    if (downloading) return
+    setDownloading(true)
 
-      // ⭐ SAFETY NET: agar phir bhi kisi wajah se canvas expected height se
-      // lamba nikal aaye (kuch purane Android WebView versions me
-      // foreignObjectRendering abhi bhi thoda unpredictable ho sakta hai),
-      // to PDF banane se pehle hi extra neeche ka blank hissa kaat do —
-      // taaki user ko kabhi bhi khaali white PDF na mile.
-      const expectedCanvasHeight = Math.ceil(neededHeight * (canvas.width / neededWidth))
-      if (canvas.height > expectedCanvasHeight + 20) {
-        const trimmed = document.createElement("canvas")
-        trimmed.width = canvas.width
-        trimmed.height = expectedCanvasHeight
-        trimmed.getContext("2d").drawImage(canvas, 0, 0)
-        canvas = trimmed
-      }
+    try {
+      const res = await renderCleanCanvas()
+      if (!res?.canvas) throw new Error("Canvas render failed")
 
-      const imgData = canvas.toDataURL("image/png")
+      const { canvas } = res
+      const imgData = canvas.toDataURL("image/png", 1.0)
 
-      const pdfWidthMm  = printMode === "thermal" ? Number(thermalWidth) : 210 // A4 width
+      const pdfWidthMm = printMode === "thermal" ? (thermalWidth === "58" ? 58 : 80) : 210
       const pxToMm = pdfWidthMm / canvas.width
       const pdfHeightMm = canvas.height * pxToMm
 
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [pdfWidthMm, pdfHeightMm],
+        format: [pdfWidthMm, Math.max(pdfHeightMm, 50)],
       })
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidthMm, pdfHeightMm)
 
       const fileName = `Invoice-${getInvNo(order._id, order.status)}.pdf`
 
       if (window.AndroidDownload && typeof window.AndroidDownload.saveBase64Pdf === "function") {
-        // App ke andar — native tarike se seedha Downloads folder me save karo
         const base64 = pdf.output("datauristring").split(",")[1]
         window.AndroidDownload.saveBase64Pdf(base64, fileName)
       } else {
-        // Normal browser — seedha download ho jayega
         pdf.save(fileName)
       }
     } catch (err) {
-      console.error("❌ PDF generate error:", err)
-      alert("PDF banane mein dikkat aayi, dobara try karo.")
+      console.error("❌ PDF download error:", err)
+      alert("PDF download mein dikkat aayi. Image format download try kar rahe hain...")
+      handleDownloadImage()
     } finally {
-      // Screen pe wapas normal size restore karo
-      if (box) {
-        box.style.width = prevBoxWidth || ""
-        box.style.maxWidth = prevBoxMaxWidth || ""
-      }
-      if (node) node.style.width = prevNodeWidth || ""
       setDownloading(false)
     }
   }
 
-  const handlePrint=()=>{
+  /* ── 2. HD Image Download (Mobile 100% Reliable) ── */
+  const handleDownloadImage = async () => {
+    if (downloading) return
+    setDownloading(true)
+
+    try {
+      const res = await renderCleanCanvas()
+      if (!res?.canvas) throw new Error("Canvas render failed")
+
+      const fileName = `Invoice-${getInvNo(order._id, order.status)}.png`
+
+      res.canvas.toBlob((blob) => {
+        if (!blob) {
+          const imgData = res.canvas.toDataURL("image/png", 1.0)
+          const a = document.createElement("a")
+          a.href = imgData
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          return
+        }
+
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = fileName
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 2000)
+      }, "image/png", 1.0)
+    } catch (err) {
+      console.error("❌ Image download error:", err)
+      alert("Image generate karne mein dikkat aayi, kripya screenshot lein ya dobara try karein.")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const handlePrint = () => {
     window.print()
   }
 
-  if(!order)return null
-  const meta=STATUS_META[order.status]||STATUS_META.pending
-  const invNo=getInvNo(order._id,order.status)
-  const activeTheme=selectedThemeId?getThemeById(selectedThemeId):null
+  if (!order) return null
+  const meta = STATUS_META[order.status] || STATUS_META.pending
+  const invNo = getInvNo(order._id, order.status)
+  const activeTheme = selectedThemeId ? getThemeById(selectedThemeId) : null
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:9999,
@@ -701,17 +737,23 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
               ))}
             </div>
           )}
-          <div style={{marginLeft:"auto",display:"flex",gap:8}}>
+          <div style={{marginLeft:"auto",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
             {!loading&&(
               <>
                 <button onClick={handleDownloadPdf} disabled={downloading}
-                  style={{padding:"7px 18px",borderRadius:9,border:"none",
+                  style={{padding:"7px 14px",borderRadius:9,border:"none",
                     background:downloading?"#94a3b8":"#16a34a",
                     color:"#fff",fontWeight:700,fontSize:12,cursor:downloading?"not-allowed":"pointer"}}>
-                  {downloading?"⏳ Ban raha hai...":"⬇️ Download PDF"}
+                  {downloading?"⏳ Generating...":"📄 PDF"}
+                </button>
+                <button onClick={handleDownloadImage} disabled={downloading}
+                  style={{padding:"7px 14px",borderRadius:9,border:"none",
+                    background:downloading?"#94a3b8":"#0284c7",
+                    color:"#fff",fontWeight:700,fontSize:12,cursor:downloading?"not-allowed":"pointer"}}>
+                  🖼️ HD Image
                 </button>
                 <button onClick={handlePrint}
-                  style={{padding:"7px 18px",borderRadius:9,border:"none",background:"#3b82f6",
+                  style={{padding:"7px 14px",borderRadius:9,border:"none",background:"#3b82f6",
                     color:"#fff",fontWeight:700,fontSize:12,cursor:"pointer"}}>
                   🖨️ Print
                 </button>
