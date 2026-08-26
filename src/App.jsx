@@ -301,7 +301,10 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white">
+    <div
+      className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white"
+      style={{ overflowX: "hidden", maxWidth: "100vw" }}
+    >
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
       <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
       {page === "home" && <HeroBanner setPage={setPage} />}

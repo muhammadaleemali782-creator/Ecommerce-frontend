@@ -339,8 +339,8 @@ export default function Home({ setPage }) {
 
   return (
     <div
-      className="w-full bg-black text-white font-sans selection:bg-[#fbbf24] selection:text-black overflow-hidden"
-      onMouseMove={handleMouseMove}
+      className="w-full bg-black text-white font-sans selection:bg-[#fbbf24] selection:text-black"
+      style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >
       {/* ══════════════════════════════════════════════════════════
           MOBILE VIEW: INFINITE 3D ARC WHEEL CAROUSEL
@@ -358,10 +358,14 @@ export default function Home({ setPage }) {
         {REALMS.map((r, idx) => (
           <div
             key={r.id}
-            className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-out pointer-events-none ${
-              idx === activeIndex ? "opacity-100 scale-105" : "opacity-0 scale-100"
+            className={`absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none transition-opacity duration-400 ${
+              idx === activeIndex ? "opacity-100" : "opacity-0"
             }`}
-            style={{ backgroundImage: `url(${r.mobileImg})` }}
+            style={{
+              backgroundImage: `url(${r.mobileImg})`,
+              willChange: "opacity",
+              contain: "strict",
+            }}
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${r.bgGradient}`} />
           </div>
@@ -423,15 +427,14 @@ export default function Home({ setPage }) {
                     if (isCenter) triggerCardOpen();
                     else setActiveIndex(idx);
                   }}
-                  className={`absolute top-0 w-[270px] h-[380px] sm:h-[400px] rounded-3xl shadow-2xl cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none ${
-                    "overflow-hidden bg-white text-black flex flex-col justify-between"
-                  }`}
+                  className={`absolute top-0 w-[270px] h-[380px] sm:h-[400px] rounded-3xl shadow-2xl cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] select-none ${"overflow-hidden bg-white text-black flex flex-col justify-between"}`}
                   style={{
                     transform: transformStyle,
                     zIndex: zIndexStyle,
                     opacity: opacityStyle,
                     transformOrigin: "center bottom",
                     perspective: "1200px",
+                    willChange: "transform, opacity",
                   }}
                 >
                   {/* Top Artwork Image (Smooth Apple Aperture) */}
@@ -476,7 +479,7 @@ export default function Home({ setPage }) {
                       }}
                       className="w-full mt-3 py-2.5 bg-black text-[#fbbf24] font-black text-xs uppercase tracking-widest rounded-xl hover:bg-[#1a1a1a] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer group"
                     >
-                      <span>VIEW DOSSIER</span>
+                      <span>MORE INFO</span>
                       <span className="group-hover:translate-x-1 transition-transform">➔</span>
                     </button>
                   </div>
@@ -547,15 +550,16 @@ export default function Home({ setPage }) {
           
           {/* Dynamic Ambient Background Matching Active Card Color & Atmosphere */}
           <div
-            className="absolute inset-0 bg-cover bg-center transition-all duration-700 pointer-events-none opacity-40 scale-105"
-            style={{ backgroundImage: `url(${currentRealm.mobileImg})` }}
+            className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-35"
+            style={{ backgroundImage: `url(${currentRealm.mobileImg})`, contain: "strict" }}
           />
           <div
-            className={"absolute inset-0 bg-gradient-to-b " + currentRealm.bgGradient + " transition-all duration-700 pointer-events-none"}
+            className={"absolute inset-0 bg-gradient-to-b " + currentRealm.bgGradient + " pointer-events-none"}
           />
+          {/* Ambient color tint — simple, no blur (blur-110px kills mobile GPU) */}
           <div
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] rounded-full blur-[110px] pointer-events-none transition-colors duration-700"
-            style={{ backgroundColor: currentRealm.ambientGlow }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: `radial-gradient(ellipse at 50% 30%, ${currentRealm.ambientGlow} 0%, transparent 70%)` }}
           />
 
           {/* 🌟 SCROLL-HIDE CLEAN HEADER (NO 02/04 BADGE) */}
@@ -569,7 +573,7 @@ export default function Home({ setPage }) {
             <button
               onClick={triggerCardClose}
               aria-label="Close Dossier"
-              className="w-10 h-10 rounded-full bg-white/[0.08] hover:bg-white/[0.18] active:scale-90 backdrop-blur-xl text-white flex items-center justify-center transition-all duration-300 shadow-[0_8px_20px_rgba(0,0,0,0.4)] cursor-pointer group"
+              className="w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 active:scale-90 text-white flex items-center justify-center transition-all duration-200 shadow-lg cursor-pointer group"
             >
               <svg className="w-4 h-4 stroke-[2.2] group-hover:rotate-90 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
