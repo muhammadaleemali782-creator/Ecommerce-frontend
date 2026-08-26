@@ -25,6 +25,12 @@ export default function TeamActivityRadar({ setPage }) {
   const [savingNote, setSavingNote] = useState(false)
   const [noteMsg, setNoteMsg] = useState("")
 
+  // WhatsApp Dual Selector state
+  const [waModalMember, setWaModalMember] = useState(null)
+  const [waType, setWaType] = useState("personal") // "personal" | "business"
+  const [customWaNumber, setCustomWaNumber] = useState("")
+  const [waTemplate, setWaTemplate] = useState("followup")
+
   const token = localStorage.getItem("token")
 
   const loadRadar = useCallback(async () => {
@@ -100,27 +106,48 @@ export default function TeamActivityRadar({ setPage }) {
     }
   }
 
-  // Quick WhatsApp Trigger
+  // Open WhatsApp Dual Selector Modal
   const sendWhatsApp = (member) => {
-    if (!member.phone) {
-      alert("Is member ka phone number registered nahi hai.")
-      return
-    }
-    const cleanPhone = member.phone.replace(/[^0-9]/g, "")
+    setWaModalMember(member)
+    setCustomWaNumber(member.phone || "")
+    setWaType("personal")
+    setWaTemplate("followup")
+  }
+
+  const handleLaunchWhatsApp = async () => {
+    if (!waModalMember) return
+    const targetNumber = waType === "personal" ? (waModalMember.phone || "") : (customWaNumber || waModalMember.phone || "")
+    const cleanPhone = targetNumber.replace(/[^0-9]/g, "")
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
 
-    let msg = `Namaste ${member.fullName || member.name} ji! 👋
-`
-    if (member.activityStatus === "follow_up_needed" || member.activityStatus === "dormant") {
-      msg += `Humne notice kiya aapne pichle ${member.daysInactive || "kuch"} dino se EDUCA VEDA me order nahi lagaya hai. Koi product guidance ya order help chahiye toh batayein!
-
-🛍️ Store Link: https://educa-store.vercel.app/`
+    let msg = `Namaste ${waModalMember.fullName || waModalMember.name} ji! 👋\n\n`
+    if (waTemplate === "followup") {
+      msg += `Humne notice kiya aapne pichle ${waModalMember.daysInactive || "kuch"} dino se EDUCA VEDA me order nahi lagaya hai. Koi product guidance ya support chahiye toh batayein!\n\n🛍️ Store Link: https://educa-store.vercel.app/`
+    } else if (waTemplate === "offer") {
+      msg += `🎉 EDUCA VEDA par naye offers aur special products live ho gaye hain! Apne clients ke orders lagane ke liye store visit karein:\n\n🛍️ Store Link: https://educa-store.vercel.app/`
     } else {
-      msg += `EDUCA VEDA me aapka swagat hai! Kaise chal raha hai aapka business? Kisi help ki zarurat ho toh batayein.`
+      msg += `Kaise chal raha hai aapka business? Kisi bhi training, customer query ya order placement me help chahiye toh turant connect karein!`
     }
 
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
     window.open(url, "_blank")
+
+    // Automatically log a follow-up remark
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          memberId: waModalMember._id,
+          note: `WhatsApp message sent via ${waType === "personal" ? "Personal WhatsApp" : "Business WhatsApp"} (${targetNumber})`,
+          contactMethod: "whatsapp",
+          status: "follow_up_taken"
+        })
+      })
+      loadRadar()
+    } catch (err) {}
+
+    setWaModalMember(null)
   }
 
   if (loading) {
@@ -385,6 +412,102 @@ export default function TeamActivityRadar({ setPage }) {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── WHATSAPP DUAL-NUMBER & TEMPLATE MODAL ── */}
+      {waModalMember && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
+            isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 border-white/[0.08]">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2">
+                  💬 Send WhatsApp Follow-Up
+                </h3>
+                <p className="text-xs font-mono text-green-500 mt-0.5">{waModalMember.fullName || waModalMember.name} (🆔 {waModalMember.name})</p>
+              </div>
+              <button
+                onClick={() => setWaModalMember(null)}
+                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Choose Number: Personal vs Business */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-400">Select WhatsApp Number:</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWaType("personal")}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    waType === "personal"
+                      ? "border-green-500 bg-green-500/15 text-green-600 dark:text-green-300 ring-2 ring-green-500/30 font-bold"
+                      : isDark ? "border-white/[0.08] bg-stone-800" : "border-stone-200 bg-stone-50"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-mono tracking-wider opacity-75">🟢 Personal WhatsApp</div>
+                  <div className="text-xs font-bold mt-1">{waModalMember.phone || "No phone"}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWaType("business")}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    waType === "business"
+                      ? "border-emerald-500 bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-2 ring-emerald-500/30 font-bold"
+                      : isDark ? "border-white/[0.08] bg-stone-800" : "border-stone-200 bg-stone-50"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-mono tracking-wider opacity-75">💼 Business WhatsApp</div>
+                  <div className="text-xs font-bold mt-1">Alternate / Pro</div>
+                </button>
+              </div>
+
+              {waType === "business" && (
+                <div className="pt-1">
+                  <input
+                    type="text"
+                    placeholder="Enter Business WhatsApp number (e.g. 9876543210)"
+                    value={customWaNumber}
+                    onChange={(e) => setCustomWaNumber(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                      isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
+                    }`}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Template Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-400">Choose Message Template:</label>
+              <select
+                value={waTemplate}
+                onChange={(e) => setWaTemplate(e.target.value)}
+                className={`w-full px-3 py-2 rounded-xl border text-xs ${
+                  isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                }`}
+              >
+                <option value="followup">🔥 Re-engagement & Order Guidance Follow-Up</option>
+                <option value="offer">🎉 New Product & Offer Announcement</option>
+                <option value="general">🤝 General Support & Relationship Check</option>
+              </select>
+            </div>
+
+            {/* Launch Button */}
+            <div className="pt-3 border-t border-white/[0.08]">
+              <button
+                onClick={handleLaunchWhatsApp}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-lg hover:from-emerald-400 hover:to-green-500 flex items-center justify-center gap-2 uppercase tracking-wider"
+              >
+                <span>💬 Open WhatsApp & Save Remark</span>
+                <span>➔</span>
+              </button>
             </div>
           </div>
         </div>

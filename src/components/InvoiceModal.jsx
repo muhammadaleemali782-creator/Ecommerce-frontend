@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 import { FESTIVAL_GROUPS, getThemeById } from "../data/festiveThemes.js"
+import EducaLogo from "./EducaLogo"
 
 const STATUS_META = {
   pending:       { type:"PROFORMA INVOICE",        badge:"PENDING",   badgeBg:"#fff7ed", badgeColor:"#c2410c", watermark:"PROFORMA"    },
@@ -80,21 +81,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"relative",zIndex:1}}>
           <div>
-            {settings?.showLogo&&settings?.logo ? (
-              <img src={settings.logo} alt="logo" style={{height:54,marginBottom:10,borderRadius:10,background:"rgba(255,255,255,0.9)",padding:4}}/>
-            ) : (
-              <div style={{width:54,height:54,borderRadius:14,background:"rgba(255,255,255,0.18)",
-                marginBottom:10,border:"2px solid rgba(255,255,255,0.3)",overflow:"hidden"}}>
-                <svg width="54" height="54" viewBox="0 0 54 54">
-                  <text x="27" y="27" textAnchor="middle" dominantBaseline="central"
-                    fontSize="26" fontWeight="900" fill="#fff" fontFamily="'Segoe UI',Arial,sans-serif">
-                    {(settings?.companyName||"E")[0].toUpperCase()}
-                  </text>
-                </svg>
-              </div>
-            )}
+            <div style={{marginBottom:10}}>
+              <EducaLogo size={56} color="#fbbf24" />
+            </div>
             <div style={{color:"#fff",fontWeight:900,fontSize:22,letterSpacing:-0.5}}>
-              {settings?.companyName||"Your Company"}
+              {settings?.companyName||"EDUCA VEDA"}
             </div>
             {settings?.tagline&&<div style={{color:"rgba(255,255,255,0.75)",fontSize:12,marginTop:3}}>{settings.tagline}</div>}
             {settings?.address&&<div style={{color:"rgba(255,255,255,0.6)",fontSize:11,marginTop:6,maxWidth:280,lineHeight:1.5}}>{settings.address}</div>}

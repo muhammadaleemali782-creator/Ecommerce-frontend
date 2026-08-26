@@ -2,8 +2,9 @@ import React, { useState, useCallback, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import NotificationBell from "./NotificationBell"
+import EducaLogo from "./EducaLogo"
 
-export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
+export default function Navbar({ setPage, currentPage = "home", cartCount, pageBadge = {} }) {
   const { loggedIn, logout, user } = useAuth() || {}
   const { theme, toggleTheme, isDark } = useTheme()
   const safeUser = user || {}
@@ -53,8 +54,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       label: "ADMIN",
       color: isDark ? "text-amber-400" : "text-amber-700",
       links: [
-        { label: "ADMIN PANEL", pg: "admin", accent: true },
-        { label: "👑 ROYALTY POOL", pg: "admin-royalty", accent: true },
+        { label: "ADMIN PANEL", pg: "admin" },
+        { label: "👑 ROYALTY POOL", pg: "admin-royalty" },
         { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
         { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "PRODUCTS", pg: "admin-products" },
@@ -68,7 +69,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         { label: "BANNERS", pg: "admin-banners" },
         { label: "SERVICES", pg: "admin-services" },
         { label: "NETWORK VIEW", pg: "admin-network" },
-        { label: "NUKE DATA ⚠", pg: "admin-nuke", danger: true },
+        { label: "NUKE DATA ⚠", pg: "admin-nuke" },
         { label: "INVOICE SETTINGS", pg: "admin-invoice-settings" },
       ]
     },
@@ -77,7 +78,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-sky-400" : "text-sky-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
-        { label: "👑 ROYALTY CLUB", pg: "distributor-royalty", accent: true },
+        { label: "👑 ROYALTY CLUB", pg: "distributor-royalty" },
         { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
         { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "MY ORDERS", pg: "distributor-orders" },
@@ -122,23 +123,30 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   const currentRoleData = loggedIn ? (roleNavItems[role] || roleNavItems.user) : null
 
   // ── Desktop Ribbon Nav Button ──
-  const RibbonBtn = ({ label, pg, section, badge }) => (
-    <button
-      onClick={() => go(pg, section)}
-      className={`relative px-3 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer whitespace-nowrap border ${
-        isDark
-          ? "bg-white/[0.04] hover:bg-white/[0.12] text-slate-300 hover:text-white border-transparent hover:border-white/10"
-          : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-black border-stone-200"
-      }`}
-    >
-      {label}
-      {badge && (
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 text-black text-[8px] font-black flex items-center justify-center leading-none">
-          {badge}
-        </span>
-      )}
-    </button>
-  )
+  const RibbonBtn = ({ label, pg, section, badge }) => {
+    const isActive = currentPage === pg
+    return (
+      <button
+        onClick={() => go(pg, section)}
+        className={`relative px-3 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
+          isActive
+            ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black border-amber-300 font-black shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105"
+            : isDark
+              ? "bg-white/[0.04] hover:bg-white/[0.12] text-slate-300 hover:text-white border-transparent hover:border-white/10"
+              : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-black border-stone-200"
+        }`}
+      >
+        {label}
+        {badge && (
+          <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[8px] font-black flex items-center justify-center leading-none ${
+            isActive ? "bg-black text-amber-300" : "bg-emerald-400 text-black"
+          }`}>
+            {badge}
+          </span>
+        )}
+      </button>
+    )
+  }
 
   return (
     <>
@@ -155,13 +163,11 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
           {/* ── Logo (Left) ── */}
           <div
-            className="flex items-center gap-2 cursor-pointer group shrink-0 z-20"
+            className="flex items-center gap-2.5 cursor-pointer group shrink-0 z-20"
             onClick={() => go("home")}
           >
-            <div className={`w-[14px] h-[22px] border-[2.5px] rounded-[1px] transition-all duration-200 ${
-              isDark ? "border-[#fbbf24] group-hover:bg-[#fbbf24]/15" : "border-amber-600 group-hover:bg-amber-100"
-            }`} />
-            <span className={`text-[11px] sm:text-[12px] font-black uppercase tracking-[0.18em] transition-colors whitespace-nowrap leading-none ${
+            <EducaLogo size={32} />
+            <span className={`text-[12px] sm:text-[13px] font-black uppercase tracking-[0.18em] transition-colors whitespace-nowrap leading-none ${
               isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
             }`}>
               EDUCA VEDA
@@ -396,66 +402,76 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         {/* Sidebar Scroll Content */}
         <div className="flex-1 overflow-y-auto overscroll-contain py-2 no-scrollbar">
 
-          {/* Public Links */}
-          <div className="px-2 pb-2">
-            <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${
-              isDark ? "text-white/30" : "text-stone-400"
-            }`}>
-              NAVIGATE
-            </div>
-            {publicLinks.map((link, i) => (
-              <button
-                key={i}
-                onClick={() => go(link.pg, link.section)}
-                className={`w-full text-left py-3 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group ${
-                  isDark
-                    ? "hover:bg-white/[0.07] text-slate-200 hover:text-white"
-                    : "hover:bg-stone-100 text-stone-800 hover:text-black"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  {link.label}
-                  {link.badge && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-emerald-400 text-black text-[8px] font-black">
-                      {link.badge}
-                    </span>
-                  )}
-                </span>
-                <span className={`text-sm transition-colors ${
-                  isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
-                }`}>›</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Role-Based Links */}
-          {loggedIn && currentRoleData && (
-            <div className={`px-2 pt-1 border-t ${
-              isDark ? "border-white/[0.06]" : "border-stone-200"
-            }`}>
-              <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${currentRoleData.color}`}>
-                {currentRoleData.label}
+            {/* Public Links */}
+            <div className="px-2 pb-2">
+              <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${
+                isDark ? "text-white/30" : "text-stone-400"
+              }`}>
+                NAVIGATE
               </div>
-              {currentRoleData.links.map((link, i) => (
-                <button
-                  key={i}
-                  onClick={() => go(link.pg)}
-                  className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group ${
-                    link.danger
-                      ? "text-red-400 hover:text-red-300 hover:bg-red-950/20"
-                      : link.accent
-                      ? isDark ? "text-amber-400 hover:text-amber-300 hover:bg-amber-950/20" : "text-amber-700 hover:text-amber-900 hover:bg-amber-50"
-                      : isDark ? "text-slate-300 hover:text-white hover:bg-white/[0.07]" : "text-stone-700 hover:text-black hover:bg-stone-100"
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  <span className={`text-sm transition-colors ${
-                    isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
-                  }`}>›</span>
-                </button>
-              ))}
+              {publicLinks.map((link, i) => {
+                const isActive = currentPage === link.pg
+                return (
+                  <button
+                    key={i}
+                    onClick={() => go(link.pg, link.section)}
+                    className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 text-[11px] uppercase tracking-wider group ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
+                        : isDark
+                          ? "hover:bg-white/[0.07] text-slate-200 hover:text-white font-bold"
+                          : "hover:bg-stone-100 text-stone-800 hover:text-black font-bold"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {link.label}
+                      {link.badge && (
+                        <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-black ${
+                          isActive ? "bg-black text-amber-300" : "bg-emerald-400 text-black"
+                        }`}>
+                          {link.badge}
+                        </span>
+                      )}
+                    </span>
+                    <span className={`text-sm ${
+                      isActive ? "text-black font-black" : isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
+                    }`}>›</span>
+                  </button>
+                )
+              })}
             </div>
-          )}
+
+            {/* Role-Based Links */}
+            {loggedIn && currentRoleData && (
+              <div className={`px-2 pt-1 border-t ${
+                isDark ? "border-white/[0.06]" : "border-stone-200"
+              }`}>
+                <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${currentRoleData.color}`}>
+                  {currentRoleData.label}
+                </div>
+                {currentRoleData.links.map((link, i) => {
+                  const isActive = currentPage === link.pg
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => go(link.pg)}
+                      className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 text-[11px] uppercase tracking-wider group ${
+                        isActive
+                          ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
+                          : isDark
+                            ? "text-slate-300 hover:text-white hover:bg-white/[0.07] font-bold"
+                            : "text-stone-700 hover:text-black hover:bg-stone-100 font-bold"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <span className={`text-sm ${
+                        isActive ? "text-black font-black" : isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
+                      }`}>›</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
         </div>
 
         {/* Sidebar Footer: View Profile & Logout Actions */}

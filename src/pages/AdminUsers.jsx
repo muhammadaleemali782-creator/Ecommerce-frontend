@@ -196,6 +196,30 @@ export default function AdminUsers() {
     }
   }
 
+  /* ================= UNLOCK SECURITY LOCK ================= */
+  const unlockSecurityLock = async (id) => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) return
+      setActionLoading(id)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/unlock-security/${id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+      })
+      if (res.ok) {
+        alert("✅ Security lock successfully reset & account unlocked!")
+        await loadUsers()
+        setSelectedUser(null)
+      } else {
+        alert("Failed to unlock account")
+      }
+    } catch (err) {
+      alert("Failed to unlock account")
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   /* ================= RESET PASSWORD ================= */
   const resetPassword = async (id) => {
     try {
@@ -596,6 +620,24 @@ export default function AdminUsers() {
                 </span>
               </div>
               <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
+                <span className={isDark ? "text-stone-400" : "text-stone-500"}>📱 Active Device:</span>
+                <span className="font-bold text-sky-500">{selectedUser.lastActiveDevice || "Android / iOS Device"}</span>
+              </div>
+              <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
+                <span className={isDark ? "text-stone-400" : "text-stone-500"}>🌐 Login IP:</span>
+                <span className="font-mono text-[11px]">{selectedUser.lastLoginIP || "—"}</span>
+              </div>
+              <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
+                <span className={isDark ? "text-stone-400" : "text-stone-500"}>🔒 Security Status:</span>
+                {selectedUser.lockUntil && new Date(selectedUser.lockUntil) > new Date() ? (
+                  <span className="text-red-500 font-bold">🔒 Password Locked</span>
+                ) : selectedUser.isDormantLocked ? (
+                  <span className="text-orange-500 font-bold">🔒 Inactive (3+ Months)</span>
+                ) : (
+                  <span className="text-emerald-500 font-bold">🟢 Clear / Safe</span>
+                )}
+              </div>
+              <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
                 <span className={isDark ? "text-stone-400" : "text-stone-500"}>📅 Joined Date:</span>
                 <span className="font-bold">
                   {selectedUser.createdAt
@@ -615,7 +657,17 @@ export default function AdminUsers() {
               </div>
             </div>
 
-            <div className="flex gap-2 mt-5">
+            {/* Unlock Security Button if locked */}
+            {((selectedUser.lockUntil && new Date(selectedUser.lockUntil) > new Date()) || selectedUser.isDormantLocked) && (
+              <button
+                onClick={() => unlockSecurityLock(selectedUser._id)}
+                className="w-full mt-3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-wider transition-colors"
+              >
+                🔓 Unlock Security Lock
+              </button>
+            )}
+
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={() => {
                   const u = selectedUser

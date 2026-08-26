@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import EducaLogo from "../components/EducaLogo";
 
 // ══════════════════════════════════════════════════════════
 // ANIMATED INTERACTIVE EYE ICON COMPONENT (Emil Kowalski Style)
@@ -308,22 +309,22 @@ export default function Login({ setPage }) {
       {/* Main Obsidian Stealth Glass Card */}
       <div className="relative z-10 w-full max-w-[410px] bg-[#0c100e]/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-[0_30px_90px_rgba(0,0,0,0.95)] flex flex-col gap-5 border border-white/[0.08] transition-all duration-300">
         
-        {/* Sleek Minimalist Header */}
-        <div className="flex flex-col items-center text-center gap-1.5">
-          <div className="w-9 h-9 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center shadow-inner mb-1">
-            <span className="text-sm text-emerald-400 font-serif">✦</span>
+        {/* Sleek Minimalist Header with Official Logo */}
+        <div className="flex flex-col items-center text-center gap-2">
+          <div className="mb-1">
+            <EducaLogo size={46} />
           </div>
           
-          <span className="text-[9.5px] font-mono font-bold tracking-[0.25em] text-slate-400 uppercase">
+          <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-amber-400 uppercase">
             EDUCA VEDA · PORTAL
           </span>
           
-          <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-white">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             Sign in to your account
           </h2>
           
           <p className="text-[11.5px] text-slate-400 max-w-xs leading-relaxed">
-            Manage your rasayana orders, clinical protocols, and sovereign wallet.
+            Manage your rasayana orders, team network, and sovereign PPC wallet.
           </p>
         </div>
 

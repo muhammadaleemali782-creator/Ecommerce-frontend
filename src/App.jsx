@@ -331,7 +331,7 @@ function AppContent() {
       style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
-      <Navbar setPage={setPage} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
+      <Navbar setPage={setPage} currentPage={page} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
       {page === "home" && <HeroBanner setPage={setPage} />}
       <main className={page === "home" || page === "store" ? "w-full p-0 m-0 overflow-hidden" : "p-2 sm:p-6 pb-28 sm:pb-12 max-w-[1400px] mx-auto"}>
         {renderPage()}

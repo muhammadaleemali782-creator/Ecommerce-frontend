@@ -584,6 +584,32 @@ export default function PPCWallet({ setPage }) {
                   </div>
                 </div>
 
+                {/* 🧮 Clear Arithmetic "Plus Equation" Box */}
+                <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 border border-amber-300 rounded-xl p-4 mb-4 shadow-xs">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800 mb-2">
+                    🧮 PPC UNIFIED REWARD CALCULATION FORMULA
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono font-bold">
+                    <div className="px-3 py-2 rounded-xl bg-sky-100 text-sky-800 border border-sky-300 flex items-center gap-1.5">
+                      <span>🛒 Direct User Sales:</span>
+                      <strong className="text-sm">{walletData.wallets?.userWallet?.ppcCount || 0} PPC</strong>
+                    </div>
+                    <span className="text-xl font-black text-amber-600">+</span>
+                    <div className="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5">
+                      <span>👥 Downline Team Sales:</span>
+                      <strong className="text-sm">{walletData.wallets?.sellerWallet?.ppcCount || 0} PPC</strong>
+                    </div>
+                    <span className="text-xl font-black text-amber-600">=</span>
+                    <div className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black border border-amber-300 flex items-center gap-1.5 shadow-sm">
+                      <span>🌟 Total Combined:</span>
+                      <strong className="text-sm">{ppc} PPC</strong>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-900 mt-2.5 font-medium leading-relaxed">
+                    💡 <strong>Spasht Niyam:</strong> Aap chahein toh apni poori PPC target Direct User sales se complete karein ya Downline Team sales se — dono ka PPC ek sath judkar aapka reward unlock karta hai!
+                  </p>
+                </div>
+
                 {/* Current Level Banner */}
                 <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 rounded-xl p-4 mb-4 text-white">
                   <div className="text-[11px] opacity-80 uppercase font-mono tracking-wider">Current Level Status</div>
