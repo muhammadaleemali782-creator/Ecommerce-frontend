@@ -308,30 +308,26 @@ body.light-theme {
   scrollbar-width: none !important;  /* Firefox */
 }
 
-/* ── 3D Card Flip Animations (GPU Composited) ── */
+/* ── 3D Card Flip Animations (Ultra-Smooth GPU Accelerated for 2GB+ RAM) ── */
 .perspective-1000 {
   perspective: 1000px;
-  /* Promote to its own GPU layer */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000px;
 }
 .preserve-3d {
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
-  /* Force GPU composite layer for 60fps flip */
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 .backface-hidden {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  /* Ensure GPU rasterization */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 .rotate-y-180 {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translate3d(0, 0, 0);
+  -webkit-transform: rotateY(180deg) translate3d(0, 0, 0);
 }
 
 /* ── Smooth Scroll (Native) ── */

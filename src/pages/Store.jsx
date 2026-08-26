@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 
 // Fallback Curated Formulations (non-exported const fixes Vite HMR Fast Refresh)
 const DEFAULT_AYURVEDIC_PRODUCTS = [
@@ -127,17 +128,15 @@ const DEFAULT_AYURVEDIC_PRODUCTS = [
 ]
 
 export default function Store({ setPage }) {
+  const { isDark } = useTheme()
   const { products = [], addToCart, cart = [] } = useStore() || {}
   const { user } = useAuth() || {}
 
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("all")
-  const [sortBy, setSortBy] = useState("popular")
+  const [sortBy, setSortBy] = useState("rating")
   const [flippedCardId, setFlippedCardId] = useState(null)
   const [addedToast, setAddedToast] = useState(null)
-
-  const role = user?.role || "guest"
-  const showPPC = role === "distributor" || role === "seller"
 
   // Merge backend products with fallback list if backend is empty
   const allProducts = useMemo(() => {
@@ -172,8 +171,8 @@ export default function Store({ setPage }) {
       list.sort((a, b) => (b.price || 0) - (a.price || 0))
     } else if (sortBy === "rating") {
       list.sort((a, b) => (b.rating || 5) - (a.rating || 5))
-    } else {
-      list.sort((a, b) => (b.reviews || 100) - (a.reviews || 100))
+    } else if (sortBy === "newest") {
+      list.reverse()
     }
 
     return list
@@ -186,10 +185,10 @@ export default function Store({ setPage }) {
     setAddedToast(product.title || product.name || "Product")
     setTimeout(() => {
       setAddedToast(null)
-    }, 2500)
+    }, 2200)
   }, [addToCart])
 
-  // Toggle card flip state
+  // Toggle card flip state smoothly
   const toggleFlip = useCallback((productId, e) => {
     if (e) e.stopPropagation()
     setFlippedCardId(prev => (prev === productId ? null : productId))
@@ -201,21 +200,23 @@ export default function Store({ setPage }) {
   }, [cart])
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-stone-900 selection:bg-amber-100 selection:text-amber-900 pb-16">
+    <div className={`min-h-screen transition-colors duration-200 pb-16 select-none ${
+      isDark ? "bg-[#0d120e] text-white" : "bg-[#fcfbf9] text-stone-900"
+    }`}>
       
       {/* ── Toast Notification for Added Item ── */}
       {addedToast && (
-        <div className="fixed bottom-5 right-5 z-50 animate-apple-sheet bg-stone-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-3 max-w-[90vw]">
+        <div className="fixed bottom-5 right-5 z-50 bg-stone-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/15 flex items-center gap-3 max-w-[90vw]">
           <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-black shrink-0">
             ✓
           </span>
           <div className="text-xs truncate">
             <span className="font-bold text-white block truncate">{addedToast}</span>
-            <span className="text-stone-400 text-[10px]">Cart me add ho gaya</span>
+            <span className="text-stone-400 text-[10px]">Added to Cart</span>
           </div>
           <button
             onClick={() => setPage && setPage("cart")}
-            className="ml-2 px-2.5 py-1 bg-white/15 hover:bg-white/25 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shrink-0"
+            className="ml-2 px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shrink-0"
           >
             CART ➔
           </button>
@@ -223,26 +224,34 @@ export default function Store({ setPage }) {
       )}
 
       {/* ── Top Header & Apothecary Title ── */}
-      <section className="bg-gradient-to-b from-stone-100/90 via-stone-50 to-[#FAFAF8] pt-6 sm:pt-8 pb-6 border-b border-stone-200/70">
+      <section className={`pt-6 sm:pt-8 pb-6 border-b transition-colors ${
+        isDark
+          ? "bg-[#111713] border-white/[0.08]"
+          : "bg-white border-stone-200 shadow-sm"
+      }`}>
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                   <span>✦</span>
                   <span>100% AYUSH CERTIFIED</span>
                 </span>
-                <span className="text-[11px] font-semibold text-stone-500">
+                <span className={`text-[11px] font-semibold ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                   Pure Ayurvedic Formulations
                 </span>
               </div>
               
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-stone-950 tracking-tight">
+              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight uppercase ${
+                isDark ? "text-white" : "text-stone-900"
+              }`}>
                 Ayurvedic Formulations & Apothecary
               </h1>
               
-              <p className="mt-1 text-xs sm:text-sm text-stone-600 font-medium">
+              <p className={`mt-1 text-xs sm:text-sm font-medium ${
+                isDark ? "text-stone-400" : "text-stone-600"
+              }`}>
                 Natural herbal products crafted for vitality, immunity, and daily wellness.
               </p>
             </div>
@@ -251,7 +260,7 @@ export default function Store({ setPage }) {
             {totalCartCount > 0 && (
               <button
                 onClick={() => setPage && setPage("cart")}
-                className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-stone-950 hover:bg-stone-900 text-white shadow-md active:scale-95 transition-all cursor-pointer text-xs font-bold shrink-0"
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md active:scale-95 transition-all cursor-pointer text-xs font-black shrink-0 uppercase tracking-wider"
               >
                 <span>🛍️ CART ({totalCartCount})</span>
                 <span>➔</span>
@@ -260,49 +269,48 @@ export default function Store({ setPage }) {
           </div>
 
           {/* ── Search & Filter Controls ── */}
-          <div className="mt-5 pt-4 border-t border-stone-200/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <div className={`mt-5 pt-4 border-t flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 ${
+            isDark ? "border-white/[0.06]" : "border-stone-100"
+          }`}>
             
             {/* Search Input */}
             <div className="relative flex-1">
-              <svg
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-              </svg>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">🔍</span>
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all shadow-sm"
+                placeholder="Search herbal products, ingredients, doshas..."
+                className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none border transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:bg-white shadow-sm"
+                }`}
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center text-[10px] font-bold cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-200 dark:bg-white/10 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px] font-bold cursor-pointer"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            {/* Sort Select */}
+            {/* Sort Select (Most Popular removed, clean sort options) */}
             <div className="flex items-center gap-1.5 shrink-0">
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2.5 rounded-xl border border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all cursor-pointer shadow-sm"
+                className={`w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
+                    : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 shadow-sm"
+                }`}
               >
-                <option value="popular">Most Popular</option>
-                <option value="rating">Top Rated (★ 5.0)</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
+                <option value="rating">★ Top Rated Formulations</option>
+                <option value="price-low">💰 Price: Low to High</option>
+                <option value="price-high">💎 Price: High to Low</option>
+                <option value="newest">✨ Newest Arrivals</option>
               </select>
             </div>
           </div>
@@ -316,10 +324,12 @@ export default function Store({ setPage }) {
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 cursor-pointer ${
                     isSelected
-                      ? "bg-stone-950 text-white shadow-sm scale-[1.02]"
-                      : "bg-white text-stone-600 hover:bg-stone-100 border border-stone-200 hover:text-stone-900"
+                      ? "bg-amber-500 text-stone-950 font-black shadow-sm"
+                      : isDark
+                        ? "bg-white/[0.06] text-stone-300 hover:bg-white/10 border border-white/10"
+                        : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 shadow-xs"
                   }`}
                 >
                   {label}
@@ -331,19 +341,21 @@ export default function Store({ setPage }) {
         </div>
       </section>
 
-      {/* ── Main Catalog Grid (2 Columns Mobile, 3-5 Desktop) ── */}
+      {/* ── Main Catalog Grid (2 Columns Mobile, 3 Tablet, 4 Desktop) ── */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6">
         
         {/* Count and Reset */}
         <div className="flex items-center justify-between mb-4">
-          <div className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-500">
-            Showing <span className="text-stone-950 font-black">{visibleProducts.length}</span> Products
-            {category !== "all" && <span> in <span className="text-amber-800 font-bold">{category}</span></span>}
+          <div className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${
+            isDark ? "text-stone-400" : "text-stone-500"
+          }`}>
+            Showing <span className={`font-black ${isDark ? "text-white" : "text-stone-950"}`}>{visibleProducts.length}</span> Products
+            {category !== "all" && <span> in <span className="text-amber-600 dark:text-amber-400 font-bold">{category}</span></span>}
           </div>
           {(category !== "all" || search) && (
             <button
               onClick={() => { setCategory("all"); setSearch("") }}
-              className="text-[11px] font-bold text-amber-700 hover:text-amber-900 transition-colors underline cursor-pointer"
+              className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
@@ -352,22 +364,24 @@ export default function Store({ setPage }) {
 
         {/* Empty State */}
         {visibleProducts.length === 0 ? (
-          <div className="text-center py-20 px-4 bg-white rounded-2xl border border-stone-200 max-w-md mx-auto shadow-sm">
+          <div className={`text-center py-20 px-4 rounded-3xl border max-w-md mx-auto shadow-sm ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
             <div className="text-4xl mb-3">🍃</div>
-            <h3 className="text-base font-bold text-stone-900">Koi Product Nahi Mila</h3>
-            <p className="text-xs text-stone-500 mt-1">
+            <h3 className={`text-base font-bold uppercase ${isDark ? "text-white" : "text-stone-900"}`}>Koi Product Nahi Mila</h3>
+            <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
               Doosra keyword ya category choose karke dekhein.
             </p>
             <button
               onClick={() => { setCategory("all"); setSearch("") }}
-              className="mt-4 px-4 py-2 bg-stone-950 text-white text-xs font-bold rounded-xl"
+              className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer shadow-sm"
             >
-              Show All
+              Show All Products
             </button>
           </div>
         ) : (
-          /* Responsive 2-Column Mobile, 3-Col Tablet, 4-5 Col Desktop */
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+          /* Responsive 2-Column Mobile, 3-Col Tablet, 4-Col Desktop */
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {visibleProducts.map(product => {
               const productId = product.id || product._id || product.title
               const isFlipped = flippedCardId === productId
@@ -382,7 +396,6 @@ export default function Store({ setPage }) {
               const desc = product.description || product.desc || "Pure botanical formulation for vitality."
               const dosha = product.dosha || "Tridosha Balance"
               const ingredients = product.ingredients || (product.category ? [product.category] : ["Ayurvedic Herbs"])
-              const benefits = product.benefits || "Supports holistic vitality & immunity."
 
               const cartItem = (cart || []).find(c => (c.id || c._id || c.productId) === productId)
               const cartQty = cartItem ? cartItem.qty : 0
@@ -391,31 +404,39 @@ export default function Store({ setPage }) {
                 <div
                   key={productId}
                   className="perspective-1000 w-full min-h-[310px] sm:min-h-[360px] relative select-none"
+                  style={{ contain: "content" }}
                 >
                   <div
-                    className={`preserve-3d relative w-full h-full duration-500 transition-transform cursor-pointer rounded-2xl ${
+                    className={`preserve-3d relative w-full h-full rounded-2xl ${
                       isFlipped ? "rotate-y-180" : ""
                     }`}
-                    style={{ willChange: "transform", minHeight: "inherit" }}
+                    style={{ minHeight: "inherit" }}
                   >
                     
                     {/* ════════ FRONT SIDE OF CARD ════════ */}
                     <div
-                      onClick={(e) => toggleFlip(productId, e)}
-                      className="backface-hidden absolute inset-0 w-full h-full bg-white rounded-2xl border border-stone-200/90 overflow-hidden shadow-sm hover:shadow-md hover:border-amber-500/40 transition-all flex flex-col justify-between"
+                      className={`backface-hidden absolute inset-0 w-full h-full rounded-2xl border transition-colors flex flex-col justify-between ${
+                        isDark
+                          ? "bg-[#111713] border-white/[0.08] hover:border-white/20 shadow-md"
+                          : "bg-white border-stone-200 hover:border-stone-300 shadow-sm"
+                      }`}
                     >
                       {/* Image Container */}
-                      <div className="relative aspect-square w-full bg-stone-100 overflow-hidden">
+                      <div
+                        onClick={(e) => toggleFlip(productId, e)}
+                        className="relative aspect-square w-full rounded-t-2xl overflow-hidden bg-stone-100 dark:bg-stone-900 cursor-pointer group"
+                      >
                         <img
                           src={image}
                           alt={title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"
+                          decoding="async"
                         />
 
                         {/* Top Badges */}
-                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
-                          <span className="px-2 py-0.5 rounded-md bg-stone-950/85 backdrop-blur-md text-[8.5px] sm:text-[9.5px] font-black text-white uppercase tracking-wider shadow-sm">
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start pointer-events-none">
+                          <span className="px-2 py-0.5 rounded-md bg-stone-950/90 text-[8.5px] sm:text-[9.5px] font-black text-white uppercase tracking-wider shadow-sm">
                             {tag}
                           </span>
                           {discountPct > 0 && (
@@ -425,36 +446,51 @@ export default function Store({ setPage }) {
                           )}
                         </div>
 
-                        {/* Flip Hint Icon */}
+                        {/* Flip Hint Button */}
                         <button
                           onClick={(e) => toggleFlip(productId, e)}
-                          title="Tap to see details"
-                          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 hover:bg-white text-stone-800 flex items-center justify-center text-xs shadow-sm transition-transform active:scale-90"
+                          title="Tap to see herbal ingredients & dosha details"
+                          className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-white/95 hover:bg-white text-stone-900 text-[9.5px] sm:text-[10.5px] font-black shadow-md flex items-center gap-1 cursor-pointer transition-transform active:scale-90"
                         >
-                          ℹ️
+                          <span>ℹ️</span>
+                          <span className="hidden sm:inline">Details</span>
                         </button>
                       </div>
 
                       {/* Content */}
                       <div className="p-2.5 sm:p-3.5 flex flex-col justify-between flex-1">
                         <div>
-                          {/* Rating */}
-                          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-amber-500 mb-1">
-                            <span>★</span>
-                            <span className="font-bold text-stone-900">{rating}</span>
-                            <span className="text-stone-400 text-[9px] sm:text-[10px]">({reviews})</span>
+                          {/* Rating & Tap to Flip Prompt */}
+                          <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs mb-1">
+                            <div className="flex items-center gap-1 text-amber-500 font-bold">
+                              <span>★</span>
+                              <span className={isDark ? "text-white" : "text-stone-900"}>{rating}</span>
+                              <span className="text-stone-400 text-[9px] sm:text-[10px]">({reviews})</span>
+                            </div>
+                            <span
+                              onClick={(e) => toggleFlip(productId, e)}
+                              className="text-[9px] font-mono font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                            >
+                              Details ➔
+                            </span>
                           </div>
 
                           {/* Title */}
-                          <h3 className="text-xs sm:text-sm font-bold text-stone-950 line-clamp-2 leading-tight">
+                          <h3 className={`text-xs sm:text-sm font-bold line-clamp-2 leading-tight ${
+                            isDark ? "text-white" : "text-stone-950"
+                          }`}>
                             {title}
                           </h3>
                         </div>
 
                         {/* Price & Add to Cart */}
-                        <div className="mt-2.5 pt-2 border-t border-stone-100">
+                        <div className={`mt-2.5 pt-2 border-t ${
+                          isDark ? "border-white/[0.06]" : "border-stone-100"
+                        }`}>
                           <div className="flex items-baseline gap-1.5 mb-2">
-                            <span className="text-sm sm:text-base font-black text-stone-950">
+                            <span className={`text-sm sm:text-base font-black ${
+                              isDark ? "text-white" : "text-stone-950"
+                            }`}>
                               ₹{Number(price).toLocaleString("en-IN")}
                             </span>
                             {mrp > price && (
@@ -469,8 +505,10 @@ export default function Store({ setPage }) {
                             onClick={(e) => handleAddToCart(product, e)}
                             className={`w-full py-2 px-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95 cursor-pointer ${
                               cartQty > 0
-                                ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                                : "bg-stone-950 text-white hover:bg-stone-800"
+                                ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                                : isDark
+                                  ? "bg-amber-500 hover:bg-amber-400 text-stone-950"
+                                  : "bg-stone-950 hover:bg-stone-800 text-white"
                             }`}
                           >
                             <span>{cartQty > 0 ? `ADDED (${cartQty}) +` : "ADD TO CART"}</span>
@@ -480,20 +518,26 @@ export default function Store({ setPage }) {
                       </div>
                     </div>
 
-                    {/* ════════ BACK SIDE OF CARD (3D FLIP DETAILS) ════════ */}
+                    {/* ════════ BACK SIDE OF CARD (FAST ULTRA-SMOOTH FLIP DETAILS) ════════ */}
                     <div
                       onClick={(e) => toggleFlip(productId, e)}
-                      className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-stone-900 text-white rounded-2xl p-3 sm:p-4 border border-stone-800 shadow-xl flex flex-col justify-between overflow-y-auto no-scrollbar"
+                      className={`backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl p-3 sm:p-4 border shadow-xl flex flex-col justify-between cursor-pointer ${
+                        isDark ? "bg-[#141b16] border-amber-500/30 text-white" : "bg-stone-900 border-stone-800 text-white"
+                      }`}
                     >
                       <div>
-                        {/* Back Header */}
+                        {/* Back Header with Prominent Return Button */}
                         <div className="flex items-center justify-between gap-2 border-b border-stone-800 pb-2 mb-2">
-                          <span className="text-[9px] font-black uppercase tracking-widest text-amber-400">
-                            FORMULATION DOSSIER
+                          <span className="text-[9px] font-mono font-black uppercase tracking-widest text-amber-400">
+                            🌿 FORMULATION DOSSIER
                           </span>
-                          <span className="text-xs text-stone-400 hover:text-white">
-                            ✕ Flip
-                          </span>
+                          <button
+                            onClick={(e) => toggleFlip(productId, e)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>↩</span>
+                            <span>Photo</span>
+                          </button>
                         </div>
 
                         {/* Title */}
@@ -501,17 +545,17 @@ export default function Store({ setPage }) {
                           {title}
                         </h4>
 
-                        {/* Dosha */}
+                        {/* Dosha Tag */}
                         <div className="mt-1.5 px-2 py-1 rounded-md bg-stone-800 text-[9px] sm:text-[10px] font-bold text-amber-300">
                           Dosha: {dosha}
                         </div>
 
                         {/* Description */}
-                        <p className="mt-2 text-[10px] sm:text-xs text-stone-300 line-clamp-3 leading-relaxed">
+                        <p className="mt-2 text-[10.5px] sm:text-xs text-stone-300 line-clamp-3 leading-relaxed">
                           {desc}
                         </p>
 
-                        {/* Botanicals */}
+                        {/* Botanicals List */}
                         {ingredients && ingredients.length > 0 && (
                           <div className="mt-2">
                             <div className="text-[9px] font-bold text-stone-400 uppercase">Botanicals:</div>
@@ -529,13 +573,19 @@ export default function Store({ setPage }) {
                         )}
                       </div>
 
-                      {/* Back Footer Actions */}
+                      {/* Back Footer Actions with explicit Return & Add To Cart */}
                       <div className="pt-2 mt-2 border-t border-stone-800 flex items-center gap-2">
                         <button
-                          onClick={(e) => handleAddToCart(product, e)}
-                          className="flex-1 py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                          onClick={(e) => toggleFlip(productId, e)}
+                          className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-[10px] font-black uppercase tracking-wider cursor-pointer whitespace-nowrap"
                         >
-                          ADD TO CART ₹{Number(price).toLocaleString("en-IN")}
+                          ↩ Photo
+                        </button>
+                        <button
+                          onClick={(e) => handleAddToCart(product, e)}
+                          className="flex-1 py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer truncate shadow-md"
+                        >
+                          ADD ₹{Number(price).toLocaleString("en-IN")}
                         </button>
                       </div>
 
