@@ -5,7 +5,7 @@ import Store from "../pages/Store"
 import InlineLoader from "../components/InlineLoader"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from "recharts"
 
-export default function SellerDashboard() {
+export default function SellerDashboard({ setPage }) {
   const { user } = useAuth()
   const { products = [] } = useStore()
   const [orders, setOrders]     = useState([])
@@ -124,18 +124,27 @@ export default function SellerDashboard() {
 
         {/* ── Top Header ── */}
         <div style={{background:"linear-gradient(135deg,#2563eb,#4f46e5)",padding:"20px 16px 24px",borderRadius:"0 0 28px 28px"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"#fff",flexShrink:0}}>
-              {user.name?.[0]||"S"}
-            </div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{color:"rgba(255,255,255,0.75)",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
-                {isUser?"User":"Seller"} Dashboard
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0,flex:1}}>
+              <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"#fff",flexShrink:0}}>
+                {user.name?.[0]||"S"}
               </div>
-              <div style={{color:"#fff",fontWeight:700,fontSize:16,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                {user.name}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{color:"rgba(255,255,255,0.75)",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
+                  {isUser?"User":"Seller"} Dashboard
+                </div>
+                <div style={{color:"#fff",fontWeight:700,fontSize:16,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {user.name}
+                </div>
               </div>
             </div>
+
+            <button
+              onClick={() => setPage && setPage("my-profile")}
+              style={{padding:"8px 14px",borderRadius:12,background:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",textTransform:"uppercase",letterSpacing:0.5,flexShrink:0}}
+            >
+              👤 Profile ➔
+            </button>
           </div>
 
           {/* Quick stat pills */}
@@ -459,6 +468,12 @@ export default function SellerDashboard() {
           </div>
           <div style={{fontWeight:700,fontSize:18}}>{user.name}</div>
           <div style={{opacity:0.75,fontSize:12,marginTop:2,textTransform:"capitalize"}}>{user.role}</div>
+          <button
+            onClick={() => setPage && setPage("my-profile")}
+            style={{marginTop:12,width:"100%",padding:"8px 12px",borderRadius:10,background:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5}}
+          >
+            👤 My Profile ➔
+          </button>
         </div>
 
         {/* Quick stats */}

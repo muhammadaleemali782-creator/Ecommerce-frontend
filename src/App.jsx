@@ -200,8 +200,8 @@ function AppContent() {
         // ── DASHBOARD ──
         case "dashboard":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (role === "seller" || role === "user") return <SellerDashboard />
-          if (role === "distributor") return <DistributorDashboard />
+          if (role === "seller" || role === "user") return <SellerDashboard setPage={setPage} />
+          if (role === "distributor") return <DistributorDashboard setPage={setPage} />
           if (role === "admin") return <Admin setPage={setPage} />
           return <Home />
 

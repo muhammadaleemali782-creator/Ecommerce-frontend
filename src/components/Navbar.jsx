@@ -210,8 +210,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
             </div>
           </div>
 
-          {/* ── DESKTOP RIGHT: Theme Toggle + Bell + Profile + Auth ── */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0 z-20">
+          {/* ── DESKTOP RIGHT: Theme Toggle + Bell + Auth ── */}
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0 z-20">
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
@@ -228,33 +228,11 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
 
             {loggedIn && <NotificationBell isMobile={false} />}
 
-            {/* Profile Button (Always Visible) */}
-            <button
-              onClick={() => go(loggedIn ? "my-profile" : "login")}
-              className={`px-3 py-1.5 rounded-full border flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 ${
-                isDark
-                  ? "bg-white/[0.08] hover:bg-white/[0.15] border-white/15 text-white"
-                  : "bg-stone-100 hover:bg-stone-200 border-stone-300 text-stone-900"
-              }`}
-              title={loggedIn ? "View My Profile" : "Sign In / Profile"}
-            >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                !loggedIn ? "bg-stone-500/20 text-stone-400" :
-                role === "admin" ? "bg-amber-400/20 text-amber-400" :
-                role === "distributor" ? "bg-sky-400/20 text-sky-400" :
-                role === "seller" ? "bg-emerald-400/20 text-emerald-400" :
-                "bg-violet-400/20 text-violet-400"
-              }`}>
-                {loggedIn && safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
-              </span>
-              <span>{loggedIn ? (safeUser?.name ? safeUser.name.split(" ")[0] : "Profile") : "Profile"}</span>
-            </button>
-
             {loggedIn ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => go(role === "admin" ? "admin" : "dashboard")}
-                  className={`px-2.5 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider hover:scale-105 transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider hover:scale-105 transition-all cursor-pointer ${
                     isDark
                       ? "bg-[#1a1a1a] border-[#fbbf24]/40 text-[#fbbf24]"
                       : "bg-amber-50 border-amber-400 text-amber-900 shadow-xs"
@@ -285,8 +263,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
             )}
           </div>
 
-          {/* ── MOBILE RIGHT: Theme Toggle + Bell + Profile + Hamburger ── */}
-          <div className="flex lg:hidden items-center gap-1.5 z-20">
+          {/* ── MOBILE RIGHT: Theme Toggle + Bell + Hamburger ── */}
+          <div className="flex lg:hidden items-center gap-2 z-20">
             {/* Mobile Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -298,24 +276,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isDark ? "☀️" : "🌙"}
-            </button>
-
-            {/* Mobile Direct Profile Button */}
-            <button
-              onClick={() => go(loggedIn ? "my-profile" : "login")}
-              className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-black transition-all cursor-pointer active:scale-95 ${
-                loggedIn
-                  ? isDark
-                    ? "bg-[#1a1a1a] border-[#fbbf24]/50 text-[#fbbf24]"
-                    : "bg-amber-50 border-amber-400 text-amber-800 shadow-xs"
-                  : isDark
-                    ? "bg-white/[0.07] border-white/10 text-white"
-                    : "bg-stone-100 border-stone-300 text-stone-700 shadow-xs"
-              }`}
-              title={loggedIn ? "My Profile" : "Sign In / Profile"}
-              aria-label="Profile"
-            >
-              {loggedIn && safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
             </button>
 
             {loggedIn && <NotificationBell isMobile={true} />}
@@ -391,6 +351,58 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
               ✕
             </button>
           </div>
+        </div>
+
+        {/* ── VIP PROFILE SHORTCUT (Prominent at top of Drawer) ── */}
+        <div className={`p-3 border-b ${
+          isDark ? "bg-black/30 border-white/[0.06]" : "bg-stone-50 border-stone-100"
+        }`}>
+          {loggedIn ? (
+            <div
+              onClick={() => go("my-profile")}
+              className={`p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition-all active:scale-98 ${
+                isDark
+                  ? "bg-[#141c16] hover:bg-[#18231b] border-amber-500/30 text-white shadow-sm"
+                  : "bg-white hover:bg-stone-50 border-amber-300 text-stone-900 shadow-xs"
+              }`}
+            >
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-black shrink-0 border ${
+                role === "admin" ? "bg-amber-400/20 text-amber-500 border-amber-500/40" :
+                role === "distributor" ? "bg-sky-400/20 text-sky-500 border-sky-500/40" :
+                role === "seller" ? "bg-emerald-400/20 text-emerald-500 border-emerald-500/40" :
+                "bg-violet-400/20 text-violet-500 border-violet-500/40"
+              }`}>
+                {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-black truncate">{safeUser?.fullName || safeUser?.name || "My Profile"}</div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className={`text-[8.5px] font-mono font-black uppercase px-1.5 py-0.5 rounded ${
+                    role === "admin" ? "bg-amber-500/20 text-amber-600 dark:text-amber-300" :
+                    role === "distributor" ? "bg-sky-500/20 text-sky-600 dark:text-sky-300" :
+                    role === "seller" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300" :
+                    "bg-violet-500/20 text-violet-600 dark:text-violet-300"
+                  }`}>
+                    {role}
+                  </span>
+                  <span className="text-[9.5px] font-bold text-amber-600 dark:text-amber-400">View Profile ➔</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => go("login")}
+              className={`w-full p-3 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-between cursor-pointer ${
+                isDark ? "bg-amber-500 text-black border-amber-500 shadow-sm" : "bg-stone-900 text-white border-stone-800 shadow-sm"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <span>👤</span>
+                <span>Sign In / Profile</span>
+              </span>
+              <span>➔</span>
+            </button>
+          )}
         </div>
 
         {/* Sidebar Scroll Content */}
