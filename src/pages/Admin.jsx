@@ -124,6 +124,14 @@ export default function Admin({ setPage }) {
           tag: "ARCHIVE",
           accent: isDark ? "from-purple-500/20 to-transparent text-purple-300 border-purple-500/30" : "from-purple-500/10 to-purple-500/5 text-purple-800 border-purple-300",
         },
+        {
+          id: "my-profile",
+          title: "Admin Profile & Credentials",
+          desc: "Update admin account name, phone, password and security details",
+          icon: "👤",
+          tag: "PROFILE",
+          accent: isDark ? "from-violet-500/20 to-transparent text-violet-300 border-violet-500/30" : "from-violet-500/10 to-violet-500/5 text-violet-800 border-violet-300",
+        },
       ]
     },
     {
@@ -262,7 +270,18 @@ export default function Admin({ setPage }) {
             </div>
 
             {/* Top Quick Actions */}
-            <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0 flex-wrap">
+              <button
+                onClick={() => setPage?.("my-profile")}
+                className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+                  isDark
+                    ? "bg-white/[0.06] hover:bg-white/[0.12] text-amber-300 border-white/10"
+                    : "bg-white hover:bg-stone-100 text-amber-800 border-stone-200 shadow-sm"
+                }`}
+              >
+                <span>👤 My Profile</span>
+              </button>
+
               <button
                 onClick={() => setPage?.("store")}
                 className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
