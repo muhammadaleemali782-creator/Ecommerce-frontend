@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+/* Fonts now loaded via <link> in index.html (eliminates render-blocking @import) */
 
 @tailwind base;
 @tailwind components;
@@ -11,6 +11,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Remove tap flash on mobile */
 }
 
 html, body, #root {
@@ -27,13 +28,15 @@ html, body, #root {
 body {
   margin: 0;
   background-color: #121813;
-  background-image: 
+  background-image:
     radial-gradient(ellipse at 80% 15%, rgba(42, 60, 42, 0.35) 0%, transparent 60%),
     radial-gradient(ellipse at 20% 75%, rgba(28, 42, 29, 0.45) 0%, transparent 60%),
     linear-gradient(180deg, #101511 0%, #141c15 50%, #0e140f 100%);
-  background-attachment: fixed;
+  /* REMOVED: background-attachment: fixed; — causes full-page repaint on every scroll frame (huge GPU stall) */
+  background-attachment: scroll;
   color: #e5e9df;
 }
+
 
 /* ── Custom Luxury MOSS Scrollbar ── */
 ::-webkit-scrollbar {
@@ -266,21 +269,55 @@ body {
   scrollbar-width: none !important;  /* Firefox */
 }
 
-/* ── 3D Card Flip Animations ── */
+/* ── 3D Card Flip Animations (GPU Composited) ── */
 .perspective-1000 {
   perspective: 1000px;
+  /* Promote to its own GPU layer */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 .preserve-3d {
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
+  will-change: transform;
+  /* Force GPU composite layer for 60fps flip */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .backface-hidden {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Ensure GPU rasterization */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
 
+/* ── Smooth Scroll (Native) ── */
+html {
+  scroll-behavior: smooth;
+}
 
+/* ── Respect user reduced-motion preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
 
+/* ── GPU Accelerate sticky/fixed elements ── */
+header, .sticky {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ── Smooth mobile touch scroll for all overflow containers ── */
+[class*="overflow"] {
+  -webkit-overflow-scrolling: touch;
+}

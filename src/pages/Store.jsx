@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 
-// Fallback Curated Formulations (for offline/demo mode, 100% schema compatible with real backend products)
-export const DEFAULT_AYURVEDIC_PRODUCTS = [
+// Fallback Curated Formulations (non-exported const fixes Vite HMR Fast Refresh)
+const DEFAULT_AYURVEDIC_PRODUCTS = [
   {
     id: "himalayan-shilajit-gold",
     title: "Pure Shilajit Rasayana Resin",
@@ -180,20 +180,20 @@ export default function Store({ setPage }) {
   }, [allProducts, search, category, sortBy])
 
   // Handle Add To Cart with instant micro-toast
-  const handleAddToCart = (product, e) => {
+  const handleAddToCart = useCallback((product, e) => {
     if (e) e.stopPropagation()
     if (addToCart) addToCart(product)
     setAddedToast(product.title || product.name || "Product")
     setTimeout(() => {
       setAddedToast(null)
     }, 2500)
-  }
+  }, [addToCart])
 
   // Toggle card flip state
-  const toggleFlip = (productId, e) => {
+  const toggleFlip = useCallback((productId, e) => {
     if (e) e.stopPropagation()
     setFlippedCardId(prev => (prev === productId ? null : productId))
-  }
+  }, [])
 
   // Cart total count
   const totalCartCount = useMemo(() => {
@@ -396,6 +396,7 @@ export default function Store({ setPage }) {
                     className={`preserve-3d relative w-full h-full duration-500 transition-transform cursor-pointer rounded-2xl ${
                       isFlipped ? "rotate-y-180" : ""
                     }`}
+                    style={{ willChange: "transform", minHeight: "inherit" }}
                   >
                     
                     {/* ════════ FRONT SIDE OF CARD ════════ */}

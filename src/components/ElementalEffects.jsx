@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+﻿import React, { useEffect, useRef } from "react";
 
 export default function ElementalEffects() {
   const canvasRef = useRef(null);
@@ -8,70 +8,64 @@ export default function ElementalEffects() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animationFrameId;
+    let isVisible = true;
+
+    // Reduce particles on mobile to save GPU
+    const isMobile = window.innerWidth < 768;
+    const NUM_PARTICLES = isMobile ? 28 : 55;
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize, { passive: true });
 
-    // Particle systems anchored near relative percentage positions:
-    // Thumb/Prithvi (Tree & floating glowing spores/leaves): x: ~80%, y: ~52%
-    // Index/Agni (Dancing Fire flames & embers): x: ~65%, y: ~28%
-    // Middle/Akasha (Cosmic Earth orb glow & rotating stardust): x: ~48%, y: ~28%
-    // Ring/Vayu (Rising swirling mist/air smoke): x: ~32%, y: ~28%
-    // Pinky/Jala-Prithvi (Amber glowing core & crystal particles): x: ~16%, y: ~48%
+    // Pause animation when canvas is off-screen (saves battery + GPU)
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisible = entry.isIntersecting; },
+      { threshold: 0.1 }
+    );
+    observer.observe(canvas);
 
     const particles = [];
-    const NUM_PARTICLES = 70;
 
     function resetParticle(p) {
-      const type = Math.floor(Math.random() * 5); // 0: Fire, 1: Smoke/Air, 2: Cosmos/Globe, 3: Spore/Leaf, 4: Amber/Water
+      const type = Math.floor(Math.random() * 5);
       p.type = type;
       p.life = 0;
       p.maxLife = 40 + Math.random() * 50;
       p.size = 1.5 + Math.random() * 3;
 
       if (type === 0) {
-        // Fire on Ring finger tip (Agni)
-        p.baseX = 0.65;
-        p.baseY = 0.28;
+        p.baseX = 0.65; p.baseY = 0.28;
         p.vx = (Math.random() - 0.5) * 0.7;
         p.vy = -(1.2 + Math.random() * 1.5);
-        p.color = Math.random() > 0.4 ? "rgba(255, 100, 20," : "rgba(255, 210, 50,";
+        p.r = 255; p.g = 100; p.b = 20;
       } else if (type === 1) {
-        // Swirling Smoke / Air (Vayu)
-        p.baseX = 0.32;
-        p.baseY = 0.28;
+        p.baseX = 0.32; p.baseY = 0.28;
         p.vx = (Math.random() - 0.5) * 1.1;
         p.vy = -(0.7 + Math.random() * 1.1);
-        p.color = "rgba(180, 220, 255,";
+        p.r = 180; p.g = 220; p.b = 255;
       } else if (type === 2) {
-        // Cosmic stardust around Earth orb (Akasha)
-        p.baseX = 0.48;
-        p.baseY = 0.28;
+        p.baseX = 0.48; p.baseY = 0.28;
         const angle = Math.random() * Math.PI * 2;
         const dist = 5 + Math.random() * 18;
         p.ox = Math.cos(angle) * dist;
         p.oy = Math.sin(angle) * dist;
         p.vx = -Math.sin(angle) * 0.6;
         p.vy = Math.cos(angle) * 0.6;
-        p.color = "rgba(100, 220, 255,";
+        p.r = 100; p.g = 220; p.b = 255;
       } else if (type === 3) {
-        // Tree / Spores / Floating leaves (Prithvi)
-        p.baseX = 0.80;
-        p.baseY = 0.50;
+        p.baseX = 0.80; p.baseY = 0.50;
         p.vx = (Math.random() - 0.4) * 0.8;
         p.vy = -(0.4 + Math.random() * 0.8);
-        p.color = Math.random() > 0.5 ? "rgba(120, 240, 100," : "rgba(230, 210, 80,";
+        p.r = 120; p.g = 240; p.b = 100;
       } else {
-        // Amber orb on pinky (Jala)
-        p.baseX = 0.16;
-        p.baseY = 0.48;
+        p.baseX = 0.16; p.baseY = 0.48;
         p.vx = (Math.random() - 0.5) * 0.5;
         p.vy = -(0.3 + Math.random() * 0.5);
-        p.color = "rgba(255, 170, 40,";
+        p.r = 255; p.g = 170; p.b = 40;
       }
 
       p.x = p.baseX * canvas.width + (p.ox || (Math.random() - 0.5) * 14);
@@ -80,36 +74,41 @@ export default function ElementalEffects() {
     }
 
     for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push(resetParticle({}));
+      const p = resetParticle({});
+      p.life = Math.floor(Math.random() * p.maxLife);
+      particles.push(p);
     }
 
+    // shadowBlur set ONCE globally (per-particle setting is very expensive)
+    ctx.shadowBlur = isMobile ? 0 : 6;
+
     const render = () => {
+      animationFrameId = requestAnimationFrame(render);
+      if (!isVisible) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((p) => {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         p.life++;
         p.x += p.vx;
         p.y += p.vy;
 
         if (p.type === 1) {
-          // Swirling wave motion for air
           p.x += Math.sin(p.life * 0.1) * 0.8;
         }
 
-        const alpha = Math.max(0, 1 - p.life / p.maxLife);
+        const alpha = Math.max(0, (1 - p.life / p.maxLife) * 0.75);
+        const size = Math.max(0.1, p.size * (1 - p.life / (p.maxLife * 1.5)));
+
+        ctx.shadowColor = `rgba(${p.r},${p.g},${p.b},1)`;
+        ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * (1 - p.life / (p.maxLife * 1.5)), 0, Math.PI * 2);
-        ctx.fillStyle = p.color + alpha * 0.75 + ")";
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = p.color + "1)";
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
         ctx.fill();
 
-        if (p.life >= p.maxLife) {
-          resetParticle(p);
-        }
-      });
-
-      animationFrameId = requestAnimationFrame(render);
+        if (p.life >= p.maxLife) resetParticle(p);
+      }
     };
 
     render();
@@ -117,6 +116,7 @@ export default function ElementalEffects() {
     return () => {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
     };
   }, []);
 
