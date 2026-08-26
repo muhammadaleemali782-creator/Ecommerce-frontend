@@ -13,10 +13,12 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
   const safeCartCount = Number(cartCount) || 0
   const [ribbonOpen, setRibbonOpen] = useState(false)   // desktop ribbon toggle
   const [sidebarOpen, setSidebarOpen] = useState(false) // mobile sidebar
+  const [activeSection, setActiveSection] = useState(null)
 
   // Close sidebar on route change
   const go = useCallback((pg, sectionId) => {
     safeSetPage(pg)
+    setActiveSection(sectionId || null)
     setSidebarOpen(false)
     setRibbonOpen(false)
     if (sectionId) {
@@ -124,7 +126,9 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
 
   // ── Desktop Ribbon Nav Button ──
   const RibbonBtn = ({ label, pg, section, badge }) => {
-    const isActive = currentPage === pg
+    const isActive = section
+      ? (activeSection === section && currentPage === pg)
+      : (!section && activeSection === null && currentPage === pg)
     return (
       <button
         onClick={() => go(pg, section)}
@@ -410,7 +414,9 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                 NAVIGATE
               </div>
               {publicLinks.map((link, i) => {
-                const isActive = currentPage === link.pg
+                const isActive = link.section
+                  ? (activeSection === link.section && currentPage === link.pg)
+                  : (!link.section && activeSection === null && currentPage === link.pg)
                 return (
                   <button
                     key={i}

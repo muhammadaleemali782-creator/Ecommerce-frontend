@@ -588,11 +588,11 @@ export default function Login({ setPage }) {
       </div>
 
       {/* ══════════════════════════════════════════════════════════
-          EDUCA ID SSO KEYRING RESOLVER MODAL
+          REAL EDUCA MAIL SSO KEYRING RESOLVER MODAL
       ══════════════════════════════════════════════════════════ */}
       {showEducaSSO && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
-          <div className="relative max-w-md w-full bg-[#0d120f]/95 border border-white/10 p-6 rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.95)] flex flex-col gap-4">
+          <div className="relative max-w-md w-full bg-[#0c100e] border border-white/10 p-6 rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.95)] flex flex-col gap-4 text-white">
             
             <button
               onClick={() => setShowEducaSSO(false)}
@@ -602,109 +602,84 @@ export default function Login({ setPage }) {
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
-                ✦
-              </div>
+              <EducaLogo size={32} />
               <div>
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Educa Sovereign Keyring
+                  Continue with EDUCA Mail
                 </h3>
-                <p className="text-[10px] font-mono text-slate-400">
-                  Federated Credential Resolver
+                <p className="text-[10px] font-mono text-amber-400">
+                  Single Sign-On (SSO) Portal
                 </p>
               </div>
             </div>
 
-            {ssoStage === "scanning" && (
-              <div className="py-8 flex flex-col items-center justify-center gap-3 text-center">
-                <div className="w-10 h-10 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
-                <p className="text-xs text-slate-400">
-                  Detecting saved @educaveda.com profiles...
-                </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                const mailInput = e.target.educaMailInput.value
+                const passInput = e.target.educaPassInput?.value
+                if (!mailInput) return
+                try {
+                  setError("")
+                  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/educa-sso`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ identifier: mailInput.trim(), password: passInput ? passInput.trim() : undefined })
+                  })
+                  const data = await res.json()
+                  if (res.ok && data.token) {
+                    localStorage.setItem("token", data.token)
+                    localStorage.setItem("user", JSON.stringify(data.user))
+                    window.location.reload()
+                  } else {
+                    setError(data.message || "EDUCA Mail authentication failed")
+                  }
+                } catch (err) {
+                  setError("EDUCA Mail connection error")
+                }
+              }}
+              className="space-y-3 pt-2"
+            >
+              <div>
+                <label className="text-[10px] font-mono text-stone-300 font-bold block mb-1">
+                  EDUCA Mail Address / System ID:
+                </label>
+                <input
+                  name="educaMailInput"
+                  type="text"
+                  required
+                  placeholder="name@educaveda.com ya DS001"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
               </div>
-            )}
 
-            {ssoStage === "discovered" && (
-              <div className="space-y-3 pt-1">
-                <span className="text-[9.5px] font-mono font-medium text-slate-400 uppercase tracking-wider block">
-                  Select identity:
-                </span>
-
-                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                  {discoveredProfiles.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => authenticateWithEducaProfile(p)}
-                      className="w-full p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] border border-white/5 transition-all flex items-center justify-between text-left group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{p.avatar}</span>
-                        <div>
-                          <h4 className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
-                            {p.name}
-                          </h4>
-                          <span className="text-[10px] font-mono text-slate-400 block">
-                            {p.email}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-slate-300 text-[8.5px] font-mono font-bold">
-                        {p.role}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
-                  <span className="text-[9.5px] font-mono text-slate-400">
-                    Or enter Educa mail:
-                  </span>
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      placeholder="user@educaveda.com"
-                      value={customEducaEmail}
-                      onChange={(e) => setCustomEducaEmail(e.target.value)}
-                      className="flex-1 py-2 px-3 rounded-xl bg-black/40 border border-white/10 text-white text-xs outline-none focus:border-emerald-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!customEducaEmail) return;
-                        authenticateWithEducaProfile({
-                          id: "custom-" + Date.now(),
-                          name: customEducaEmail.split("@")[0].toUpperCase(),
-                          email: customEducaEmail,
-                          role: "USER",
-                          fallbackEmail: "admin@gmail.com",
-                          lastActive: "Just now",
-                          avatar: "👤"
-                        });
-                      }}
-                      className="px-4 py-2 bg-white text-black font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors cursor-pointer"
-                    >
-                      Verify
-                    </button>
-                  </div>
-                </div>
+              <div>
+                <label className="text-[10px] font-mono text-stone-300 font-bold block mb-1">
+                  Password:
+                </label>
+                <input
+                  name="educaPassInput"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
               </div>
-            )}
 
-            {ssoStage === "authenticating" && (
-              <div className="py-8 flex flex-col items-center justify-center gap-3 text-center">
-                <div className="w-10 h-10 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
-                <p className="text-xs text-slate-400">Establishing secure session...</p>
-              </div>
-            )}
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>⚡ Sign In with EDUCA Mail</span>
+                <span>➔</span>
+              </button>
+            </form>
 
-            {ssoStage === "success" && (
-              <div className="py-6 flex flex-col items-center justify-center gap-2 text-center text-emerald-400">
-                <span className="text-3xl">✓</span>
-                <h4 className="text-sm font-bold text-white">Authenticated</h4>
-                <p className="text-xs text-slate-400 font-mono">Redirecting...</p>
-              </div>
-            )}
-
+            <div className="text-center pt-1 border-t border-white/[0.08]">
+              <p className="text-[10px] text-stone-400">
+                Aapke phone me EDUCA Mail app install hone par 1-click automatic identity detection active rehta hai.
+              </p>
+            </div>
           </div>
         </div>
       )}
