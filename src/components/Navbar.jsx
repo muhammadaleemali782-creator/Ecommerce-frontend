@@ -46,7 +46,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     { label: "GURUKUL", pg: "home", section: "billboard-gurukul" },
     { label: "FINANCE", pg: "home", section: "billboard-banking" },
     { label: "SHOP", pg: "store", badge: safeCartCount > 0 ? safeCartCount : null },
-    { label: "MY PROFILE", pg: "my-profile" },
   ]
 
   const roleNavItems = {
@@ -55,7 +54,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-amber-400" : "text-amber-700",
       links: [
         { label: "ADMIN PANEL", pg: "admin", accent: true },
-        { label: "MY PROFILE", pg: "my-profile" },
         { label: "PRODUCTS", pg: "admin-products" },
         { label: "ALL USERS", pg: "admin-users" },
         { label: "ALL ORDERS", pg: "admin-orders" },
@@ -76,7 +74,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-sky-400" : "text-sky-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
-        { label: "MY PROFILE", pg: "my-profile" },
         { label: "MY ORDERS", pg: "distributor-orders" },
         { label: "MY TEAM", pg: "my-users" },
         { label: "MY NETWORK", pg: "my-network" },
@@ -93,7 +90,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-emerald-400" : "text-emerald-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
-        { label: "MY PROFILE", pg: "my-profile" },
         { label: "MY ORDERS", pg: "seller-orders" },
         { label: "MY TEAM", pg: "my-users" },
         { label: "COIN WALLET", pg: "coin-wallet" },
@@ -108,7 +104,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       label: "MY ACCOUNT",
       color: isDark ? "text-violet-400" : "text-violet-700",
       links: [
-        { label: "MY PROFILE", pg: "my-profile" },
         { label: "MY ORDERS", pg: "orders" },
         { label: "COIN WALLET", pg: "coin-wallet" },
         { label: "RAISE REQUEST", pg: "raise-request" },
@@ -470,47 +465,31 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           )}
         </div>
 
-        {/* Sidebar Footer: Profile & Auth Actions */}
+        {/* Sidebar Footer: Dashboard & Logout Actions */}
         <div className={`px-3 py-3 border-t shrink-0 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
           {loggedIn ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => go("my-profile")}
-                  className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-[11px] flex items-center gap-2.5 transition-colors cursor-pointer ${
-                    isDark ? "bg-white/[0.07] hover:bg-white/[0.12] text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-900"
-                  }`}
-                >
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${
-                    role === "admin" ? "bg-amber-400/20 text-amber-500" :
-                    role === "distributor" ? "bg-sky-400/20 text-sky-500" :
-                    role === "seller" ? "bg-emerald-400/20 text-emerald-500" :
-                    "bg-violet-400/20 text-violet-500"
-                  }`}>
-                    {safeUser?.name ? safeUser.name[0].toUpperCase() : "U"}
-                  </span>
-                  <div className="text-left truncate">
-                    <div className="text-[10px] font-black truncate max-w-[110px]">{safeUser?.name || "My Profile"}</div>
-                    <div className="text-[8px] opacity-60 uppercase font-mono">{role} · Profile ➔</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => go(role === "admin" ? "admin" : "dashboard")}
-                  className="py-2.5 px-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 font-bold text-[10px] transition-colors cursor-pointer uppercase font-mono"
-                  title="Open Dashboard"
-                >
-                  {role === "admin" ? "Admin" : "Dash"}
-                </button>
-                <button
-                  onClick={logout}
-                  className="py-2.5 px-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-[10px] transition-colors cursor-pointer uppercase"
-                  title="Logout"
-                >
-                  OUT
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => go(role === "admin" ? "admin" : "dashboard")}
+                className={`flex-1 py-3 px-3 rounded-xl font-black text-xs transition-colors cursor-pointer uppercase flex items-center justify-center gap-2 border ${
+                  isDark
+                    ? "bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/30 text-[#fbbf24]"
+                    : "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900 shadow-xs"
+                }`}
+                title="Open Dashboard"
+              >
+                <span>{role === "admin" ? "⚙️ ADMIN PANEL" : "📊 DASHBOARD"}</span>
+                <span>➔</span>
+              </button>
+              <button
+                onClick={logout}
+                className="py-3 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black text-xs transition-colors cursor-pointer uppercase border border-red-500/20"
+                title="Logout"
+              >
+                OUT
+              </button>
             </div>
           ) : (
             <button
