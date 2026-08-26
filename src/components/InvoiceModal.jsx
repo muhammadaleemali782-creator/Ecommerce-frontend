@@ -195,16 +195,21 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:`1px solid ${border}`}}>
 
         {/* BILL TO */}
-        <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
-          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Bill To / Buyer</div>
-          <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
-            ID: {order.customerName || order.userId?.name || "Customer"}
+        <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
+          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Bill To / Buyer</div>
+          
+          {/* Real Customer Name */}
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+            {order.customerFullName || order.userId?.fullName || order.customerName || "Customer"}
           </div>
-          {(order.customerFullName || order.userId?.fullName || (order.customerName && order.customerName !== order.userId?.name)) && (
-            <div style={{fontWeight:700,fontSize:12,color:"#475569",marginTop:2}}>
-              👤 {order.customerFullName || order.userId?.fullName || order.customerName}
+
+          {/* System ID ONLY if distinct from customer name */}
+          {order.userId?.name && order.userId.name !== (order.customerFullName || order.customerName) && (
+            <div style={{fontSize:11,fontWeight:700,color:"#0284c7",fontFamily:"monospace",marginTop:2}}>
+              🆔 ID: {order.userId.name}
             </div>
           )}
+
           {order.phone&&<div style={{fontSize:11.5,color:"#64748b",marginTop:4,display:"flex",alignItems:"center",gap:5}}><StepIcon type="phone" color="#64748b" size={11}/> {order.phone}</div>}
           {order.address&&<div style={{fontSize:11,color:"#64748b",marginTop:4,lineHeight:1.4,display:"flex",alignItems:"flex-start",gap:5}}><span style={{marginTop:2,flexShrink:0}}><StepIcon type="pin" color="#64748b" size={11}/></span>{order.address}</div>}
 
@@ -216,9 +221,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
                 <div style={{fontSize:9,fontWeight:800,color:accent,letterSpacing:"0.06em",marginBottom:3,textTransform:"uppercase"}}>
                   📦 Ordered For
                 </div>
-                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b",fontFamily:"monospace"}}>ID: {orderedFor.name}</div>
+                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b"}}>
+                  {orderedFor.fullName || orderedFor.name}
+                </div>
                 {orderedFor.fullName && orderedFor.fullName !== orderedFor.name && (
-                  <div style={{fontWeight:600,fontSize:11,color:"#475569"}}>👤 {orderedFor.fullName}</div>
+                  <div style={{fontWeight:600,fontSize:10.5,color:"#64748b",fontFamily:"monospace"}}>ID: {orderedFor.name}</div>
                 )}
                 <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize",marginTop:1}}>{orderedFor.role}</div>
               </div>
@@ -227,9 +234,11 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
                 <div style={{fontSize:9,fontWeight:800,color:accent,letterSpacing:"0.06em",marginBottom:3,textTransform:"uppercase"}}>
                   ✍️ Placed By
                 </div>
-                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b",fontFamily:"monospace"}}>ID: {placedBy.name}</div>
+                <div style={{fontWeight:700,fontSize:12.5,color:"#1e293b"}}>
+                  {placedBy.fullName || placedBy.name}
+                </div>
                 {placedBy.fullName && placedBy.fullName !== placedBy.name && (
-                  <div style={{fontWeight:600,fontSize:11,color:"#475569"}}>👤 {placedBy.fullName}</div>
+                  <div style={{fontWeight:600,fontSize:10.5,color:"#64748b",fontFamily:"monospace"}}>ID: {placedBy.name}</div>
                 )}
                 <div style={{fontSize:10,color:"#64748b",textTransform:"capitalize",marginTop:1}}>{placedBy.role}</div>
               </div>
@@ -238,32 +247,45 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         </div>
 
         {/* SELLER */}
-        <div style={{padding:"20px 24px",borderRight:`1px solid ${border}`}}>
-          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Seller</div>
-          <div style={{fontWeight:700,fontSize:13,color:"#1e293b",fontFamily:"monospace"}}>ID: {order.sellerId?.name||"—"}</div>
-          {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
-            <div style={{fontWeight:600,fontSize:11.5,color:"#475569",marginTop:2}}>👤 {order.sellerId.fullName}</div>
+        <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
+          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
+          
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+            {order.sellerId?.fullName || order.sellerId?.name || "—"}
+          </div>
+
+          {order.sellerId?.name && (
+            <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
+              🆔 ID: {order.sellerId.name}
+            </div>
           )}
-          <div style={{fontSize:10,color:"#64748b",marginTop:2}}>{order.sellerId?.email||""}</div>
-          {order.userId&&(
-            <div style={{marginTop:6,fontSize:11,background:"#eff6ff",borderRadius:6,padding:"4px 8px",color:"#1d4ed8",display:"inline-block"}}>
-              via: {order.userId?.name} {order.userId?.fullName && `(${order.userId.fullName})`}
+
+          <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>{order.sellerId?.email||""}</div>
+          
+          {order.userId && order.userId?.name !== order.sellerId?.name && (
+            <div style={{marginTop:6,fontSize:10.5,background:"#eff6ff",borderRadius:6,padding:"3px 7px",color:"#1d4ed8",display:"inline-block"}}>
+              via: {order.userId?.fullName || order.userId?.name}
             </div>
           )}
         </div>
 
         {/* ORDER DETAILS */}
-        <div style={{padding:"20px 24px"}}>
-          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Order Details</div>
+        <div style={{padding:"18px 22px"}}>
+          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Order Details</div>
           {[
-            ["Invoice No.",invNo],
-            ["Order ID","#"+(order._id?.slice(-8)||"—")],
-            ["Date",fmtDate(order.createdAt)],
-            order.distributorId&&["Distributor",`${order.distributorId?.name}${order.distributorId?.fullName ? ` (${order.distributorId.fullName})` : ''}`],
+            ["Invoice No.", invNo],
+            ["Order ID", "#" + (order._id?.slice(-8) || "—")],
+            ["Date", fmtDate(order.createdAt)],
+            order.distributorId && [
+              "Distributor",
+              order.distributorId?.fullName
+                ? `${order.distributorId.fullName} (${order.distributorId.name})`
+                : order.distributorId?.name || "Distributor"
+            ],
           ].filter(Boolean).map(([k,v])=>(
-            <div key={k} style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:5}}>
-              <span style={{color:"#94a3b8"}}>{k}</span>
-              <span style={{fontWeight:700,color:"#1e293b",fontFamily:k.includes("No.")||k==="Order ID"?"monospace":"inherit",fontSize:k.includes("No.")?"10px":"11px"}}>{v}</span>
+            <div key={k} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:11,marginBottom:5}}>
+              <span style={{color:"#94a3b8",flexShrink:0}}>{k}</span>
+              <span style={{fontWeight:700,color:"#1e293b",textAlign:"right",fontFamily:k.includes("No.")||k==="Order ID"?"monospace":"inherit",fontSize:k.includes("No.")?"10px":"11px"}}>{v}</span>
             </div>
           ))}
         </div>
@@ -408,20 +430,20 @@ function ThermalInvoice({ order, settings, invNo, meta, thermalWidth }) {
       ))}
       {divider}
       <div style={{fontWeight:700,fontSize:9,textDecoration:"underline"}}>BILL TO:</div>
-      <div style={{fontWeight:700}}>ID: {order.customerName||order.userId?.name||"—"}</div>
-      {(order.customerFullName || order.userId?.fullName || (order.customerName && order.customerName !== order.userId?.name)) && (
-        <div style={{fontSize:9,color:"#333"}}>Name: {order.customerFullName || order.userId?.fullName || order.customerName}</div>
+      <div style={{fontWeight:800,fontSize:10}}>{order.customerFullName || order.userId?.fullName || order.customerName || "—"}</div>
+      {order.userId?.name && order.userId.name !== (order.customerFullName || order.customerName) && (
+        <div style={{fontSize:9,color:"#444",fontFamily:"monospace"}}>ID: {order.userId.name}</div>
       )}
       {order.phone&&<div style={{fontSize:9}}>Ph: {order.phone}</div>}
       {order.address&&<div style={{fontSize:9}}>Addr: {order.address}</div>}
       {showBehalf&&order.onBehalfOfId&&<>
-        <div style={{fontSize:9,marginTop:2}}>FOR: {order.onBehalfOfName} {order.onBehalfOfFullName ? `(${order.onBehalfOfFullName})` : ''} ({order.onBehalfOfRole})</div>
-        <div style={{fontSize:9}}>BY : {order.placedByName} {order.placedByFullName ? `(${order.placedByFullName})` : ''} ({order.placedByRole})</div>
+        <div style={{fontSize:9,marginTop:2}}>FOR: {order.onBehalfOfFullName || order.onBehalfOfName} {order.onBehalfOfFullName && order.onBehalfOfFullName !== order.onBehalfOfName ? `(${order.onBehalfOfName})` : ''} ({order.onBehalfOfRole})</div>
+        <div style={{fontSize:9}}>BY : {order.placedByFullName || order.placedByName} {order.placedByFullName && order.placedByFullName !== order.placedByName ? `(${order.placedByName})` : ''} ({order.placedByRole})</div>
       </>}
       {divider}
       <div style={{fontSize:9}}>
-        <div>Seller: {order.sellerId?.name||"—"} {order.sellerId?.fullName ? `(${order.sellerId.fullName})` : ''}</div>
-        {order.distributorId&&<div>Dist : {order.distributorId?.name} {order.distributorId?.fullName ? `(${order.distributorId.fullName})` : ''}</div>}
+        <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName ? `(${order.sellerId.name})` : ''}</div>
+        {order.distributorId&&<div>Dist : {order.distributorId?.fullName || order.distributorId?.name} {order.distributorId?.name && order.distributorId?.fullName ? `(${order.distributorId.name})` : ''}</div>}
         <div>Order: #{order._id?.slice(-6)}</div>
       </div>
       {divider}
