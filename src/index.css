@@ -38,22 +38,50 @@ body {
 }
 
 
-/* ── Custom Luxury MOSS Scrollbar ── */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+/* ── Custom Luxury MOSS Scrollbar (Desktop only) ── */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0f1510;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3e4e37;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5d7051;
+  }
 }
-::-webkit-scrollbar-track {
-  background: #0f1510;
+
+@media (max-width: 768px) {
+  /* Complete removal of scrollbars on mobile to prevent white lines or gutters */
+  *::-webkit-scrollbar,
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
 }
-::-webkit-scrollbar-thumb {
-  background: #3e4e37;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background-clip: content-box;
+
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #5d7051;
+.scrollbar-none,
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 /* ── MOSS Botanical Glass & Olive Button Styles ── */

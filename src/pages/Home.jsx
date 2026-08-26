@@ -596,13 +596,11 @@ export default function Home({ setPage }) {
           {/* Main Scrollable Stage */}
           <div
             onScroll={handleDossierScroll}
-            className="relative z-30 flex-1 overflow-y-auto overflow-x-hidden px-5 pt-16 pb-6 space-y-4 scrollbar-none"
+            className="relative z-30 flex-1 overflow-y-auto overflow-x-hidden px-5 pt-16 pb-6 space-y-4 no-scrollbar"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMoveTouch}
-            onMouseUp={handleMouseUp}
           >
             {/* ── 3D CIRCULAR ORBITING CAROUSEL (STAGGER 1) ── */}
             <div
