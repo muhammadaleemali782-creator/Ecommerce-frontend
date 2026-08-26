@@ -534,178 +534,10 @@ export default function PPCWallet({ setPage }) {
                       )
                     })()}
 
-                    {/* ✅ Seller ke User Wallet mein apna alag level roadmap */}
-                    {key === "userWallet" && walletData.role === "seller" && walletData.userWalletLevelUpThresholds && Object.keys(walletData.userWalletLevelUpThresholds).length > 0 && (() => {
-                      const thresholds   = walletData.userWalletLevelUpThresholds
-                      const levelNames   = walletData.userWalletLevelNames   || {}
-                      const levelRewards = walletData.userWalletLevelRewards || {}
-                      const ppc          = wallet.ppcCount || 0
-                      let currentLevel   = 0
-                      const sortedLevels = Object.entries(thresholds)
-                        .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
-                        .sort((a,b) => a.n - b.n)
-                      sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
-                      const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "User" : `Level ${currentLevel}`)
-                      const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
-                      const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-                      const nextThreshold    = nextLvl?.v || null
-                      const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
-                      return (
-                        <div style={{ marginBottom:14 }}>
-                          <div style={{ background:"linear-gradient(135deg,#0ea5e9,#2563eb)", borderRadius:10, padding:"10px 14px", marginBottom:10, color:"#fff" }}>
-                            <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
-                            <div style={{ fontSize:16, fontWeight:800 }}>{currentLevelName}</div>
-                          </div>
-                          {nextLevelName ? (
-                            <div style={{ marginBottom:10 }}>
-                              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                                <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
-                                  Next: <span style={{ color:"#0ea5e9" }}>{nextLevelName}</span>
-                                </span>
-                                <span style={{ fontSize:11, fontWeight:700, color:"#0ea5e9" }}>{ppc} / {nextThreshold} PPC</span>
-                              </div>
-                              <div style={{ height:10, background:"#bae6fd", borderRadius:99, overflow:"hidden" }}>
-                                <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#0ea5e9,#2563eb)", borderRadius:99, transition:"width 0.5s ease" }}/>
-                              </div>
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
-                                {nextThreshold - ppc} PPC aur chahiye level up ke liye
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600, marginBottom:10 }}>
-                              👑 Maximum level achieve kar liya!
-                            </div>
-                          )}
-                          <button
-                            onClick={() => setShowRoadmap(p => ({ ...p, [`${key}_user`]: !p[`${key}_user`] }))}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
-                          >
-                            <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
-                            <span style={{ fontSize:11, color:"#38bdf8", fontWeight:600 }}>{showRoadmap[`${key}_user`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
-                          </button>
-                          {showRoadmap[`${key}_user`] && sortedLevels.map(({ n, v }) => {
-                            const lvlName = levelNames[`level${n}`]   || `Level ${n}`
-                            const reward  = levelRewards[`level${n}`] || ""
-                            const done    = ppc >= v
-                            const current = currentLevel === n
-                            return (
-                              <div key={n} style={{
-                                padding:"8px 10px", borderRadius:8, marginBottom:4,
-                                background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
-                                border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
-                              }}>
-                                <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
-                                  <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
-                                  <div style={{ flex:1, minWidth:0 }}>
-                                    <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#0369a1" : "#374151", lineHeight:"1.4" }}>
-                                      {lvlName}
-                                    </div>
-                                    {reward && (
-                                      <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
-                                        {done ? "🎁 " : "💡 "}{reward}
-                                      </div>
-                                    )}
-                                    {done && (
-                                      <ClaimButton walletType="userWalletAsSeller" level={n} />
-                                    )}
-                                  </div>
-                                  <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )
-                    })()}
-
-                    {/* ✅ Seller ke apne Direct Seller Wallet mein alag level roadmap */}
-                    {key === "sellerWallet" && walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
-                      const thresholds   = walletData.sellerLevelUpThresholds
-                      const levelNames   = walletData.sellerLevelNames   || {}
-                      const levelRewards = walletData.sellerLevelRewards || {}
-                      const ppc          = wallet.ppcCount || 0
-                      let currentLevel   = 0
-                      const sortedLevels = Object.entries(thresholds)
-                        .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
-                        .sort((a,b) => a.n - b.n)
-                      sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
-                      const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
-                      const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
-                      const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-                      const nextThreshold    = nextLvl?.v || null
-                      const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
-                      return (
-                        <div style={{ marginBottom:14 }}>
-                          <div style={{ background:"linear-gradient(135deg,#2563eb,#7c3aed)", borderRadius:10, padding:"10px 14px", marginBottom:10, color:"#fff" }}>
-                            <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
-                            <div style={{ fontSize:16, fontWeight:800 }}>{currentLevelName}</div>
-                          </div>
-                          {nextLevelName ? (
-                            <div style={{ marginBottom:10 }}>
-                              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                                <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
-                                  Next: <span style={{ color:"#2563eb" }}>{nextLevelName}</span>
-                                </span>
-                                <span style={{ fontSize:11, fontWeight:700, color:"#2563eb" }}>{ppc} / {nextThreshold} PPC</span>
-                              </div>
-                              <div style={{ height:10, background:"#bfdbfe", borderRadius:99, overflow:"hidden" }}>
-                                <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#2563eb,#7c3aed)", borderRadius:99, transition:"width 0.5s ease" }}/>
-                              </div>
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
-                                {nextThreshold - ppc} PPC aur chahiye level up ke liye
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600, marginBottom:10 }}>
-                              👑 Maximum level achieve kar liya!
-                            </div>
-                          )}
-                          <button
-                            onClick={() => setShowRoadmap(p => ({ ...p, [`${key}_seller`]: !p[`${key}_seller`] }))}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
-                          >
-                            <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
-                            <span style={{ fontSize:11, color:"#60a5fa", fontWeight:600 }}>{showRoadmap[`${key}_seller`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
-                          </button>
-                          {showRoadmap[`${key}_seller`] && sortedLevels.map(({ n, v }) => {
-                            const lvlName = levelNames[`level${n}`]   || `Level ${n}`
-                            const reward  = levelRewards[`level${n}`] || ""
-                            const done    = ppc >= v
-                            const current = currentLevel === n
-                            return (
-                              <div key={n} style={{
-                                padding:"8px 10px", borderRadius:8, marginBottom:4,
-                                background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
-                                border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
-                              }}>
-                                <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
-                                  <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
-                                  <div style={{ flex:1, minWidth:0 }}>
-                                    <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#1d4ed8" : "#374151", lineHeight:"1.4" }}>
-                                      {lvlName}
-                                    </div>
-                                    {reward && (
-                                      <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
-                                        {done ? "🎁 " : "💡 "}{reward}
-                                      </div>
-                                    )}
-                                    {done && (
-                                      <ClaimButton walletType="sellerWalletAsSeller" level={n} />
-                                    )}
-                                  </div>
-                                  <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )
-                    })()}
-
                     {wallet.withdrawable && wallet.ppcCount > 0 && (
                       <button
                         onClick={() => setPage("withdrawal-request")}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mt-2"
                       >
                         Request Withdrawal
                       </button>
@@ -715,6 +547,114 @@ export default function PPCWallet({ setPage }) {
               </div>
             ))}
           </div>
+
+          {/* ⭐ UNIFIED DIRECT SELLER REWARD ROADMAP */}
+          {walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
+            const thresholds = walletData.sellerLevelUpThresholds
+            const levelNames = walletData.sellerLevelNames || {}
+            const levelRewards = walletData.sellerLevelRewards || {}
+            const ppc = walletData.totalSellerPPC !== undefined
+              ? walletData.totalSellerPPC
+              : ((walletData.wallets?.userWallet?.ppcCount || 0) + (walletData.wallets?.sellerWallet?.ppcCount || 0))
+            
+            let currentLevel = 0
+            const sortedLevels = Object.entries(thresholds)
+              .map(([k, v]) => ({ n: parseInt(k.replace("level", "")), v }))
+              .sort((a, b) => a.n - b.n)
+            sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
+            const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Direct Seller" : `Level ${currentLevel}`)
+            const nextLvl = sortedLevels.find(l => l.n > currentLevel)
+            const nextLevelName = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
+            const nextThreshold = nextLvl?.v || null
+            const progress = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
+
+            return (
+              <div className="bg-white rounded-2xl shadow-md p-6 border border-amber-200/60 mt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-mono text-[10px] font-bold uppercase mb-1">
+                      🌟 Unified Seller Progression
+                    </div>
+                    <h3 className="text-lg font-black text-gray-900">Direct Seller Achievement Rewards</h3>
+                    <p className="text-xs text-gray-500">User orders + Team seller orders dono ka PPC ek sath judkar milestones unlock karta hai!</p>
+                  </div>
+                  <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black text-right shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider block">Combined Total</span>
+                    <span className="text-lg font-black">{ppc} PPC</span>
+                  </div>
+                </div>
+
+                {/* Current Level Banner */}
+                <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 rounded-xl p-4 mb-4 text-white">
+                  <div className="text-[11px] opacity-80 uppercase font-mono tracking-wider">Current Level Status</div>
+                  <div className="text-xl font-black">{currentLevelName}</div>
+                </div>
+
+                {/* Progress Bar */}
+                {nextLevelName ? (
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs font-bold mb-1.5">
+                      <span className="text-gray-700">Next Target: <strong className="text-indigo-600">{nextLevelName}</strong></span>
+                      <span className="text-indigo-600 font-mono">{ppc} / {nextThreshold} PPC</span>
+                    </div>
+                    <div className="h-3 bg-indigo-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 to-amber-400 rounded-full transition-all duration-500"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-1.5">
+                      🎉 Sirf <strong>{nextThreshold - ppc} PPC</strong> aur chahiye <strong>{nextLevelName}</strong> reward unlock karne ke liye!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-800 font-bold mb-4">
+                    👑 Congratulations! Aapne sabhi maximum milestone levels complete kar liye hain!
+                  </div>
+                )}
+
+                {/* All 4 Level Milestone Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+                  {sortedLevels.map(({ n, v }) => {
+                    const lvlName = levelNames[`level${n}`] || `Level ${n}`
+                    const reward = levelRewards[`level${n}`] || ""
+                    const done = ppc >= v
+                    const current = currentLevel === n
+
+                    return (
+                      <div
+                        key={n}
+                        className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 ${
+                          current ? "bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-400/30" :
+                          done ? "bg-emerald-50/50 border-emerald-300" : "bg-gray-50 border-gray-200 opacity-80"
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between text-xs font-bold mb-1">
+                            <span className={done ? "text-emerald-700" : current ? "text-indigo-700" : "text-gray-700"}>
+                              {done ? "✅ " : current ? "🔵 " : "⭕ "}{lvlName}
+                            </span>
+                            <span className="font-mono text-[10px] text-gray-500">{v} PPC</span>
+                          </div>
+                          {reward && (
+                            <p className={`text-xs mt-1 ${done ? "text-emerald-600 font-bold" : "text-gray-600"}`}>
+                              {done ? "🎁 " : "💡 "}{reward}
+                            </p>
+                          )}
+                        </div>
+
+                        {done && (
+                          <div className="pt-1">
+                            <ClaimButton walletType="sellerWalletAsSeller" level={n} />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
       

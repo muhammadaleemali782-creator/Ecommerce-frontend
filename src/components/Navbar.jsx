@@ -54,6 +54,9 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-amber-400" : "text-amber-700",
       links: [
         { label: "ADMIN PANEL", pg: "admin", accent: true },
+        { label: "👑 ROYALTY POOL", pg: "admin-royalty", accent: true },
+        { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
+        { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "PRODUCTS", pg: "admin-products" },
         { label: "ALL USERS", pg: "admin-users" },
         { label: "ALL ORDERS", pg: "admin-orders" },
@@ -74,6 +77,9 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-sky-400" : "text-sky-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
+        { label: "👑 ROYALTY CLUB", pg: "distributor-royalty", accent: true },
+        { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
+        { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "MY ORDERS", pg: "distributor-orders" },
         { label: "MY TEAM", pg: "my-users" },
         { label: "MY NETWORK", pg: "my-network" },
@@ -90,6 +96,8 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
       color: isDark ? "text-emerald-400" : "text-emerald-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
+        { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
+        { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "MY ORDERS", pg: "seller-orders" },
         { label: "MY TEAM", pg: "my-users" },
         { label: "COIN WALLET", pg: "coin-wallet" },

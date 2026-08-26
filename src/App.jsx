@@ -43,6 +43,10 @@ import PPCWallet                from "./pages/PPCWallet"
 import WithdrawalRequest        from "./pages/WithdrawalRequest"
 import AdminPPCSettings         from "./pages/AdminPPCSettings"
 import AdminWithdrawalManagement from "./pages/AdminWithdrawalManagement"
+import PPCStatement             from "./pages/PPCStatement"
+import AdminRoyaltyManagement   from "./pages/AdminRoyaltyManagement"
+import DistributorRoyalty       from "./pages/DistributorRoyalty"
+import TeamActivityRadar        from "./pages/TeamActivityRadar"
 
 // ── Profile ──
 import MyProfile from "./pages/MyProfile"
@@ -168,6 +172,26 @@ function AppContent() {
         case "ppc-wallet":
           if (!loggedIn) return <Login setPage={setPage} />
           return <PPCWallet setPage={setPage} />
+
+        case "ppc-statement":
+          if (!loggedIn) return <Login setPage={setPage} />
+          if (!["distributor","seller","admin"].includes(role)) return <Home />
+          return <PPCStatement setPage={setPage} />
+
+        case "team-activity":
+          if (!loggedIn) return <Login setPage={setPage} />
+          if (!["distributor","seller","admin"].includes(role)) return <Home />
+          return <TeamActivityRadar setPage={setPage} />
+
+        case "distributor-royalty":
+          if (!loggedIn) return <Login setPage={setPage} />
+          if (role !== "distributor") return <Home />
+          return <DistributorRoyalty setPage={setPage} />
+
+        case "admin-royalty":
+          if (!loggedIn) return <Login setPage={setPage} />
+          if (role !== "admin") return <Unauth />
+          return <AdminRoyaltyManagement setPage={setPage} />
 
         case "withdrawal-request":
           if (!loggedIn) return <Login setPage={setPage} />
