@@ -347,12 +347,10 @@ export default function Home({ setPage }) {
       ══════════════════════════════════════════════════════════ */}
       <div
         className="flex md:hidden relative w-full h-[calc(100dvh-56px)] overflow-hidden flex-col justify-between select-none"
+        style={{ touchAction: "pan-y", contain: "layout style paint", willChange: "transform" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMoveTouch}
-        onMouseUp={handleMouseUp}
       >
         {/* 🌟 ACCURATE DYNAMIC AMBIENT BACKGROUND MATCHING ACTIVE FRONT CARD */}
         {REALMS.map((r, idx) => (
@@ -608,11 +606,11 @@ export default function Home({ setPage }) {
           >
             {/* ── 3D CIRCULAR ORBITING CAROUSEL (STAGGER 1) ── */}
             <div
-              className="relative w-full h-[330px] flex items-center justify-center pt-2 select-none overflow-visible"
+              className="relative w-full h-[300px] flex items-center justify-center pt-2 select-none overflow-hidden"
               style={{ perspective: "1100px" }}
             >
               <div
-                className="relative w-full max-w-[280px] h-[310px] flex items-center justify-center"
+                className="relative w-full max-w-[280px] h-[280px] flex items-center justify-center"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {REALMS.map((realm, idx) => {
@@ -624,7 +622,7 @@ export default function Home({ setPage }) {
                   const angleDeg = rawOffset * 75 - dragAngleOffset;
                   const angleRad = (angleDeg * Math.PI) / 180;
 
-                  const translateX = Math.sin(angleRad) * 165;
+                  const translateX = Math.sin(angleRad) * 150;
                   const translateZ = Math.cos(angleRad) * 110 - 110;
                   const rotateY = -angleDeg * 0.85;
                   const scale = Math.max(0.68, 0.72 + 0.28 * Math.cos(angleRad));
@@ -638,24 +636,23 @@ export default function Home({ setPage }) {
                       onClick={() => {
                         if (!isFront) setActiveIndex(idx);
                       }}
-                      className="absolute w-[230px] sm:w-[250px] h-[310px] cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98]"
+                      className="absolute w-[200px] sm:w-[220px] h-[270px] cursor-pointer active:scale-[0.98]"
                       style={{
                         transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                         zIndex,
                         opacity,
                         transformStyle: "preserve-3d",
-                        filter: isFront ? "none" : "brightness(0.55) blur(0.6px)",
+                        filter: isFront ? "none" : "brightness(0.55)",
                         pointerEvents: Math.abs(rawOffset) > 1 ? "none" : "auto",
+                        transition: "transform 0.45s cubic-bezier(0.23,1,0.32,1), opacity 0.45s ease",
+                        willChange: "transform, opacity",
                       }}
                     >
-                      {/* Full-Bleed Photographic Glass Plate */}
-                      <div className="relative w-full h-full rounded-[22px] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.95),0_10px_25px_rgba(0,0,0,0.7)] bg-black group">
-                        
-                        {/* Artwork */}
+                      <div className="relative w-full h-full rounded-[20px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] bg-black">
                         <img
                           src={realm.mobileImg}
                           alt={realm.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          className="w-full h-full object-cover"
                           loading="eager"
                         />
 
@@ -730,7 +727,7 @@ export default function Home({ setPage }) {
                 {currentRealm.pills.map((pill, pIdx) => (
                   <span
                     key={pIdx}
-                    className="px-2.5 py-0.5 bg-white/[0.06] backdrop-blur-md text-slate-200 text-[9px] font-bold font-mono rounded-full uppercase tracking-wider"
+                    className="px-2.5 py-0.5 bg-white/[0.08] text-slate-200 text-[9px] font-bold font-mono rounded-full uppercase tracking-wider"
                   >
                     {pill}
                   </span>
@@ -742,15 +739,11 @@ export default function Home({ setPage }) {
                 {currentRealm.items.map((item, iIdx) => (
                   <div
                     key={iIdx}
-                    className="p-1 rounded-2xl bg-white/[0.04] border border-white/5 shadow-md"
+                    className="p-2 rounded-2xl bg-white/[0.06] border border-white/[0.07] flex flex-col items-center text-center"
                   >
-                    <div className="bg-black/60 backdrop-blur-md p-2 rounded-[12px] flex flex-col items-center text-center h-full justify-between">
-                      <span className="text-xl mb-1">{item.icon}</span>
-                      <div>
-                        <span className="text-[9.5px] font-bold text-white line-clamp-1 block">{item.name}</span>
-                        <span className="text-[8px] font-medium text-slate-400 line-clamp-1 mt-0.5 block">{item.role}</span>
-                      </div>
-                    </div>
+                    <span className="text-lg mb-1">{item.icon}</span>
+                    <span className="text-[9px] font-bold text-white line-clamp-1 block">{item.name}</span>
+                    <span className="text-[8px] font-medium text-slate-400 line-clamp-1 mt-0.5 block">{item.role}</span>
                   </div>
                 ))}
               </div>
