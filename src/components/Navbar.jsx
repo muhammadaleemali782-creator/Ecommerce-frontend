@@ -348,58 +348,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           </div>
         </div>
 
-        {/* ── VIP PROFILE SHORTCUT (Prominent at top of Drawer) ── */}
-        <div className={`p-3 border-b ${
-          isDark ? "bg-black/30 border-white/[0.06]" : "bg-stone-50 border-stone-100"
-        }`}>
-          {loggedIn ? (
-            <div
-              onClick={() => go("my-profile")}
-              className={`p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition-all active:scale-98 ${
-                isDark
-                  ? "bg-[#141c16] hover:bg-[#18231b] border-amber-500/30 text-white shadow-sm"
-                  : "bg-white hover:bg-stone-50 border-amber-300 text-stone-900 shadow-xs"
-              }`}
-            >
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-black shrink-0 border ${
-                role === "admin" ? "bg-amber-400/20 text-amber-500 border-amber-500/40" :
-                role === "distributor" ? "bg-sky-400/20 text-sky-500 border-sky-500/40" :
-                role === "seller" ? "bg-emerald-400/20 text-emerald-500 border-emerald-500/40" :
-                "bg-violet-400/20 text-violet-500 border-violet-500/40"
-              }`}>
-                {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-black truncate">{safeUser?.fullName || safeUser?.name || "My Profile"}</div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={`text-[8.5px] font-mono font-black uppercase px-1.5 py-0.5 rounded ${
-                    role === "admin" ? "bg-amber-500/20 text-amber-600 dark:text-amber-300" :
-                    role === "distributor" ? "bg-sky-500/20 text-sky-600 dark:text-sky-300" :
-                    role === "seller" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300" :
-                    "bg-violet-500/20 text-violet-600 dark:text-violet-300"
-                  }`}>
-                    {role}
-                  </span>
-                  <span className="text-[9.5px] font-bold text-amber-600 dark:text-amber-400">View Profile ➔</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => go("login")}
-              className={`w-full p-3 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-between cursor-pointer ${
-                isDark ? "bg-amber-500 text-black border-amber-500 shadow-sm" : "bg-stone-900 text-white border-stone-800 shadow-sm"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span>👤</span>
-                <span>Sign In / Profile</span>
-              </span>
-              <span>➔</span>
-            </button>
-          )}
-        </div>
-
         {/* Sidebar Scroll Content */}
         <div className="flex-1 overflow-y-auto overscroll-contain py-2 no-scrollbar">
 
@@ -465,22 +413,22 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           )}
         </div>
 
-        {/* Sidebar Footer: Dashboard & Logout Actions */}
+        {/* Sidebar Footer: View Profile & Logout Actions */}
         <div className={`px-3 py-3 border-t shrink-0 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
           {loggedIn ? (
             <div className="flex items-center gap-2">
               <button
-                onClick={() => go(role === "admin" ? "admin" : "dashboard")}
+                onClick={() => go("my-profile")}
                 className={`flex-1 py-3 px-3 rounded-xl font-black text-xs transition-colors cursor-pointer uppercase flex items-center justify-center gap-2 border ${
                   isDark
                     ? "bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/30 text-[#fbbf24]"
                     : "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900 shadow-xs"
                 }`}
-                title="Open Dashboard"
+                title="View Profile"
               >
-                <span>{role === "admin" ? "⚙️ ADMIN PANEL" : "📊 DASHBOARD"}</span>
+                <span>👤 VIEW PROFILE</span>
                 <span>➔</span>
               </button>
               <button
