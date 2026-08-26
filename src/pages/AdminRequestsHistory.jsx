@@ -148,16 +148,16 @@ export default function AdminRequestHistory() {
               placeholder="Search by Applicant Name, Email address, or Phone number..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className={`w-full pl-9 pr-8 py-2.5 rounded-2xl text-xs font-medium focus:outline-none transition-colors border ${
+              className={`w-full pl-9 pr-8 py-2.5 rounded-2xl text-xs font-semibold focus:outline-none transition-colors border ${
                 isDark
-                  ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:bg-white shadow-sm"
               }`}
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200 text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-xs cursor-pointer"
               >
                 ✕
               </button>
@@ -167,7 +167,7 @@ export default function AdminRequestHistory() {
           {isAnyFilterActive && (
             <button
               onClick={resetFilters}
-              className="px-4 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-xs font-bold uppercase transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5"
+              className="px-4 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 text-xs font-black uppercase transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
             >
               <span>↺</span>
               <span>Clear All Filters</span>
@@ -175,74 +175,61 @@ export default function AdminRequestHistory() {
           )}
         </div>
 
-        {/* Row 2: Status & Role Pill Selectors with Human-Friendly Text */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+        {/* Row 2: 4 Unified Clean Dropdown Selectors in 2x2 Grid */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t ${
+          isDark ? "border-white/[0.06]" : "border-stone-100"
+        }`}>
           
-          {/* Decision Status Filter */}
+          {/* 1. Decision Status Dropdown */}
           <div>
             <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
-              isDark ? "text-stone-400" : "text-stone-600"
+              isDark ? "text-stone-300" : "text-stone-700"
             }`}>
               🚦 Decision Status
             </label>
-            <div className="flex gap-1.5 p-1 rounded-2xl bg-black/20 border border-white/[0.06] overflow-x-auto no-scrollbar">
-              {[
-                { id: "", label: "All Decisions" },
-                { id: "approved", label: "✅ Approved Only" },
-                { id: "rejected", label: "❌ Rejected Only" },
-              ].map(st => (
-                <button
-                  key={st.id}
-                  onClick={() => setStatusFilter(st.id)}
-                  className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer text-center ${
-                    statusFilter === st.id
-                      ? "bg-[#fbbf24] text-black font-black shadow-sm"
-                      : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
-                  }`}
-                >
-                  {st.label}
-                </button>
-              ))}
-            </div>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className={`w-full p-2.5 rounded-xl text-xs font-bold focus:outline-none border cursor-pointer ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+              }`}
+            >
+              <option value="">🔘 All Decisions</option>
+              <option value="approved">✅ Approved Only</option>
+              <option value="rejected">❌ Rejected Only</option>
+            </select>
           </div>
 
-          {/* Role Type Filter */}
+          {/* 2. Role Requested Dropdown */}
           <div>
             <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
-              isDark ? "text-stone-400" : "text-stone-600"
+              isDark ? "text-stone-300" : "text-stone-700"
             }`}>
               👤 Account Role Requested
             </label>
-            <div className="flex gap-1.5 p-1 rounded-2xl bg-black/20 border border-white/[0.06] overflow-x-auto no-scrollbar">
-              {[
-                { id: "", label: "All Roles" },
-                { id: "distributor", label: "🏢 Distributor" },
-                { id: "seller", label: "🛒 Seller" },
-                { id: "user", label: "👤 User" },
-                { id: "password-reset", label: "🔑 Reset" },
-              ].map(tp => (
-                <button
-                  key={tp.id}
-                  onClick={() => setTypeFilter(tp.id)}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer text-center ${
-                    typeFilter === tp.id
-                      ? "bg-[#fbbf24] text-black font-black shadow-sm"
-                      : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
-                  }`}
-                >
-                  {tp.label}
-                </button>
-              ))}
-            </div>
+            <select
+              value={typeFilter}
+              onChange={e => setTypeFilter(e.target.value)}
+              className={`w-full p-2.5 rounded-xl text-xs font-bold focus:outline-none border cursor-pointer ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+              }`}
+            >
+              <option value="">👥 All Roles</option>
+              <option value="distributor">🏢 Distributor</option>
+              <option value="seller">🛒 Direct Seller</option>
+              <option value="user">👤 Customer / User</option>
+              <option value="password-reset">🔑 Password Reset</option>
+            </select>
           </div>
 
-        </div>
-
-        {/* Row 3: Submission Date & Decision Date Pickers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-white/[0.06]">
+          {/* 3. When Request Was Submitted */}
           <div>
-            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
-              isDark ? "text-stone-400" : "text-stone-600"
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+              isDark ? "text-stone-300" : "text-stone-700"
             }`}>
               📅 When Request Was Submitted
             </label>
@@ -250,17 +237,18 @@ export default function AdminRequestHistory() {
               type="date"
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value)}
-              className={`w-full p-2.5 rounded-xl text-xs font-medium focus:outline-none border ${
+              className={`w-full p-2.5 rounded-xl text-xs font-semibold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
               }`}
             />
           </div>
 
+          {/* 4. When Decision Was Taken */}
           <div>
-            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
-              isDark ? "text-stone-400" : "text-stone-600"
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+              isDark ? "text-stone-300" : "text-stone-700"
             }`}>
               ⏱️ When Decision Was Taken
             </label>
@@ -268,27 +256,62 @@ export default function AdminRequestHistory() {
               type="date"
               value={decidedDateFilter}
               onChange={e => setDecidedDateFilter(e.target.value)}
-              className={`w-full p-2.5 rounded-xl text-xs font-medium focus:outline-none border ${
+              className={`w-full p-2.5 rounded-xl text-xs font-semibold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
               }`}
             />
           </div>
+
         </div>
 
         {/* Active Filter Summary Strip */}
         {isAnyFilterActive && (
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between gap-2 flex-wrap text-amber-500 font-medium">
+          <div className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-2 flex-wrap font-semibold ${
+            isDark
+              ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+              : "bg-amber-50 border-amber-200 text-amber-900 shadow-xs"
+          }`}>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold">Active Search:</span>
-              {search && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Keyword: "{search}"</span>}
-              {statusFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Status: {statusFilter}</span>}
-              {typeFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Role: {typeFilter}</span>}
-              {dateFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Submitted: {dateFilter}</span>}
-              {decidedDateFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Decided: {decidedDateFilter}</span>}
+              <span className="font-black uppercase text-[11px]">Active Search:</span>
+              {search && (
+                <span className={`px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] ${
+                  isDark ? "bg-black/50 text-white border-white/10" : "bg-white text-stone-900 border-amber-200 shadow-xs"
+                }`}>
+                  Keyword: "{search}"
+                </span>
+              )}
+              {statusFilter && (
+                <span className={`px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] ${
+                  isDark ? "bg-black/50 text-white border-white/10" : "bg-white text-stone-900 border-amber-200 shadow-xs"
+                }`}>
+                  Status: {statusFilter === "approved" ? "Approved" : "Rejected"}
+                </span>
+              )}
+              {typeFilter && (
+                <span className={`px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] ${
+                  isDark ? "bg-black/50 text-white border-white/10" : "bg-white text-stone-900 border-amber-200 shadow-xs"
+                }`}>
+                  Role: {typeFilter}
+                </span>
+              )}
+              {dateFilter && (
+                <span className={`px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] ${
+                  isDark ? "bg-black/50 text-white border-white/10" : "bg-white text-stone-900 border-amber-200 shadow-xs"
+                }`}>
+                  Submitted: {dateFilter}
+                </span>
+              )}
+              {decidedDateFilter && (
+                <span className={`px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] ${
+                  isDark ? "bg-black/50 text-white border-white/10" : "bg-white text-stone-900 border-amber-200 shadow-xs"
+                }`}>
+                  Decided: {decidedDateFilter}
+                </span>
+              )}
             </div>
-            <div className="font-bold">
+            <div className="font-black text-xs">
               {filteredRequests.length} match{filteredRequests.length === 1 ? "" : "es"} found
             </div>
           </div>
@@ -336,8 +359,8 @@ export default function AdminRequestHistory() {
                   <div className="flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-sm border shrink-0 ${
                       isApproved
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                        : "bg-red-500/15 text-red-400 border-red-500/30"
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30"
                     }`}>
                       {nameInitial}
                     </div>
@@ -352,14 +375,16 @@ export default function AdminRequestHistory() {
                           {getRoleLabel(r.type)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs font-mono mt-0.5 flex-wrap text-stone-400">
+                      <div className={`flex items-center gap-2 text-xs font-mono mt-0.5 flex-wrap ${
+                        isDark ? "text-stone-400" : "text-stone-500"
+                      }`}>
                         <span
                           onClick={() => copyText(r.email, `${r._id}-email`)}
                           className="cursor-pointer hover:underline transition-colors"
                           title="Click to copy email"
                         >
                           ✉️ {r.email || "No email"}
-                          {copiedId === `${r._id}-email` && <span className="text-emerald-500 font-bold ml-1">Copied!</span>}
+                          {copiedId === `${r._id}-email` && <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">Copied!</span>}
                         </span>
                         {r.phone && (
                           <span
@@ -368,7 +393,7 @@ export default function AdminRequestHistory() {
                             title="Click to copy phone"
                           >
                             · 📞 {r.phone}
-                            {copiedId === `${r._id}-phone` && <span className="text-emerald-500 font-bold ml-1">Copied!</span>}
+                            {copiedId === `${r._id}-phone` && <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">Copied!</span>}
                           </span>
                         )}
                       </div>
@@ -379,8 +404,8 @@ export default function AdminRequestHistory() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase border whitespace-nowrap ${
                       isApproved
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                        : "bg-red-500/15 text-red-400 border-red-500/30"
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30"
                     }`}>
                       {isApproved ? "✅ Approved" : "❌ Rejected"}
                     </span>
@@ -391,18 +416,20 @@ export default function AdminRequestHistory() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-3 text-xs">
                   {/* Submission & Decision Timeline */}
                   <div className={`p-2.5 rounded-xl border space-y-1 ${
-                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200"
                   }`}>
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Timeline</div>
+                    <div className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                      isDark ? "text-stone-400" : "text-stone-500"
+                    }`}>Timeline</div>
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-400">Submitted:</span>
-                      <span className={`font-mono ${isDark ? "text-white" : "text-stone-800"}`}>
+                      <span className={isDark ? "text-stone-400" : "text-stone-500"}>Submitted:</span>
+                      <span className={`font-mono font-semibold ${isDark ? "text-white" : "text-stone-800"}`}>
                         {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-400">Decided:</span>
-                      <span className="font-mono text-purple-400 font-bold">
+                      <span className={isDark ? "text-stone-400" : "text-stone-500"}>Decided:</span>
+                      <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">
                         {decidedAt ? new Date(decidedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </span>
                     </div>
@@ -410,35 +437,39 @@ export default function AdminRequestHistory() {
 
                   {/* Source & Placement Origin */}
                   <div className={`p-2.5 rounded-xl border space-y-1 ${
-                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200"
                   }`}>
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Origin & Referral</div>
+                    <div className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                      isDark ? "text-stone-400" : "text-stone-500"
+                    }`}>Origin & Referral</div>
                     <div className="truncate">
-                      <span className="text-stone-400 mr-1.5">Origin:</span>
+                      <span className={`mr-1.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>Origin:</span>
                       <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
                         {r.requestedBy?.name ? `Raised by ${r.requestedBy.name}` : "Self-Registered Portal"}
                       </span>
                     </div>
                     {r.requestedBy?.role && (
-                      <div className="text-stone-400 text-[11px] truncate">
+                      <div className={`text-[11px] truncate ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                         <span className="mr-1.5">Role:</span>
-                        <span className="capitalize">{r.requestedBy.role}</span>
+                        <span className="capitalize font-semibold">{r.requestedBy.role}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Decision Notes / Rejection Reason */}
                   <div className={`p-2.5 rounded-xl border space-y-1 sm:col-span-2 md:col-span-1 ${
-                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200"
                   }`}>
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Decision Audit Note</div>
+                    <div className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                      isDark ? "text-stone-400" : "text-stone-500"
+                    }`}>Decision Audit Note</div>
                     <div className="text-[11px]">
                       {r.rejectReason ? (
-                        <span className="text-red-400 font-medium">⚠️ Reason: {r.rejectReason}</span>
+                        <span className="text-red-600 dark:text-red-400 font-medium">⚠️ Reason: {r.rejectReason}</span>
                       ) : r.note ? (
-                        <span className="font-medium">📝 {r.note}</span>
+                        <span className="font-medium text-stone-800 dark:text-stone-200">📝 {r.note}</span>
                       ) : isApproved ? (
-                        <span className="text-emerald-500 font-medium">✅ Verified and onboarded by Admin</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-medium">✅ Verified and onboarded by Admin</span>
                       ) : (
                         <span className="text-stone-400 italic">No additional remarks</span>
                       )}
