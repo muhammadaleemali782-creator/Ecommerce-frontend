@@ -1,7 +1,9 @@
 import { useEffect, useState, useMemo } from "react"
 import { getRoleLabel } from "../utils/roleLabels"
+import { useTheme } from "../context/ThemeContext"
 
 export default function AdminRequestHistory() {
+  const { isDark } = useTheme()
   const [requests, setRequests] = useState([])
   const [loading, setLoading]   = useState(true)
   const [copiedId, setCopiedId] = useState(null)
@@ -76,7 +78,17 @@ export default function AdminRequestHistory() {
     setTimeout(() => setCopiedId(null), 1800)
   }
 
-  // Quick stats
+  const resetFilters = () => {
+    setSearch("")
+    setStatusFilter("")
+    setTypeFilter("")
+    setDateFilter("")
+    setDecidedDateFilter("")
+  }
+
+  const isAnyFilterActive = Boolean(search || statusFilter || typeFilter || dateFilter || decidedDateFilter)
+
+  // Counts
   const approvedCount = requests.filter(r => r.status === "approved").length
   const rejectedCount = requests.filter(r => r.status === "rejected").length
 
@@ -84,129 +96,222 @@ export default function AdminRequestHistory() {
     <div className="space-y-5 select-none w-full max-w-full overflow-hidden">
       
       {/* ── HEADER ── */}
-      <div className="bg-[#121814] p-4 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors ${
+        isDark
+          ? "bg-[#121814] border-white/[0.08]"
+          : "bg-white border-stone-200/90 shadow-sm"
+      } flex flex-col md:flex-row items-start md:items-center justify-between gap-4`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
-              ✦ AUDIT LOGS & DECISION ARCHIVE
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ AUDIT & VERIFICATION ARCHIVE
             </span>
           </div>
-          <h1 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight">
-            Requests History & Verification Log
+          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+            isDark ? "text-white" : "text-stone-900"
+          }`}>
+            Requests Decision History
           </h1>
-          <p className="text-xs text-stone-400 font-medium mt-0.5">
-            Total records: <span className="text-white font-bold">{requests.length}</span> · Showing: <span className="text-purple-300 font-bold">{filteredRequests.length}</span>
+          <p className={`text-xs font-medium mt-0.5 ${
+            isDark ? "text-stone-400" : "text-stone-600"
+          }`}>
+            Complete historical audit trail of all approved and rejected membership & password reset requests.
           </p>
         </div>
 
-        {/* Status Counts Pill Summary */}
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold flex items-center gap-1.5">
+        {/* Status Counter Pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="px-3.5 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-mono font-bold flex items-center gap-1.5">
             <span>✅</span>
             <span>{approvedCount} Approved</span>
           </div>
-          <div className="px-3 py-1.5 rounded-2xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5">
+          <div className="px-3.5 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-mono font-bold flex items-center gap-1.5">
             <span>❌</span>
             <span>{rejectedCount} Rejected</span>
           </div>
         </div>
       </div>
 
-      {/* ── QUICK FILTER CHIPS ── */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        {[
-          { label: "All History", status: "", type: "" },
-          { label: "✅ Approved", status: "approved", type: "" },
-          { label: "❌ Rejected", status: "rejected", type: "" },
-          { label: "Distributors", status: "", type: "distributor" },
-          { label: "Sellers", status: "", type: "seller" },
-          { label: "Users", status: "", type: "user" },
-          { label: "Password Resets", status: "", type: "password-reset" },
-        ].map((chip, idx) => {
-          const isActive = (chip.status ? statusFilter === chip.status : !statusFilter) &&
-                           (chip.type ? typeFilter === chip.type : !typeFilter)
-          return (
-            <button
-              key={idx}
-              onClick={() => {
-                setStatusFilter(chip.status)
-                setTypeFilter(chip.type)
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border shrink-0 ${
-                isActive
-                  ? "bg-[#fbbf24] text-black border-[#fbbf24] font-black shadow-md"
-                  : "bg-[#111713] text-stone-300 border-white/[0.08] hover:border-white/20 hover:text-white"
+      {/* ── INTUITIVE, SELF-EXPLANATORY SEARCH & FILTER SUITE ── */}
+      <div className={`p-4 sm:p-5 rounded-3xl border space-y-4 transition-colors ${
+        isDark
+          ? "bg-[#111713] border-white/[0.08]"
+          : "bg-white border-stone-200 shadow-sm"
+      }`}>
+
+        {/* Row 1: Search Bar + Quick Reset */}
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <div className="relative flex-1">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Search by Applicant Name, Email address, or Phone number..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className={`w-full pl-9 pr-8 py-2.5 rounded-2xl text-xs font-medium focus:outline-none transition-colors border ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
               }`}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {isAnyFilterActive && (
+            <button
+              onClick={resetFilters}
+              className="px-4 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-xs font-bold uppercase transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5"
             >
-              {chip.label}
+              <span>↺</span>
+              <span>Clear All Filters</span>
             </button>
-          )
-        })}
-      </div>
-
-      {/* ── SEARCH & DATE FILTER TOOLBAR ── */}
-      <div className="bg-[#111713] p-4 rounded-2xl border border-white/[0.08] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        {/* Search */}
-        <div className="lg:col-span-2">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1">Search Keyword (Name / Email / Phone)</label>
-          <input
-            type="text"
-            placeholder="Search applicant name, email, phone..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:border-[#fbbf24]"
-          />
+          )}
         </div>
 
-        {/* Submission Date */}
-        <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1">📅 Submitted On</label>
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={e => setDateFilter(e.target.value)}
-            className="w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white focus:outline-none focus:border-[#fbbf24]"
-          />
+        {/* Row 2: Status & Role Pill Selectors with Human-Friendly Text */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          
+          {/* Decision Status Filter */}
+          <div>
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              🚦 Decision Status
+            </label>
+            <div className="flex gap-1.5 p-1 rounded-2xl bg-black/20 border border-white/[0.06] overflow-x-auto no-scrollbar">
+              {[
+                { id: "", label: "All Decisions" },
+                { id: "approved", label: "✅ Approved Only" },
+                { id: "rejected", label: "❌ Rejected Only" },
+              ].map(st => (
+                <button
+                  key={st.id}
+                  onClick={() => setStatusFilter(st.id)}
+                  className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer text-center ${
+                    statusFilter === st.id
+                      ? "bg-[#fbbf24] text-black font-black shadow-sm"
+                      : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
+                  }`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Role Type Filter */}
+          <div>
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              👤 Account Role Requested
+            </label>
+            <div className="flex gap-1.5 p-1 rounded-2xl bg-black/20 border border-white/[0.06] overflow-x-auto no-scrollbar">
+              {[
+                { id: "", label: "All Roles" },
+                { id: "distributor", label: "🏢 Distributor" },
+                { id: "seller", label: "🛒 Seller" },
+                { id: "user", label: "👤 User" },
+                { id: "password-reset", label: "🔑 Reset" },
+              ].map(tp => (
+                <button
+                  key={tp.id}
+                  onClick={() => setTypeFilter(tp.id)}
+                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer text-center ${
+                    typeFilter === tp.id
+                      ? "bg-[#fbbf24] text-black font-black shadow-sm"
+                      : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
+                  }`}
+                >
+                  {tp.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
 
-        {/* Decision Date */}
-        <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1">⏱️ Decided On</label>
-          <input
-            type="date"
-            value={decidedDateFilter}
-            onChange={e => setDecidedDateFilter(e.target.value)}
-            className="w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white focus:outline-none focus:border-[#fbbf24]"
-          />
+        {/* Row 3: Submission Date & Decision Date Pickers */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-white/[0.06]">
+          <div>
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              📅 When Request Was Submitted
+            </label>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={e => setDateFilter(e.target.value)}
+              className={`w-full p-2.5 rounded-xl text-xs font-medium focus:outline-none border ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+              }`}
+            />
+          </div>
+
+          <div>
+            <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              ⏱️ When Decision Was Taken
+            </label>
+            <input
+              type="date"
+              value={decidedDateFilter}
+              onChange={e => setDecidedDateFilter(e.target.value)}
+              className={`w-full p-2.5 rounded-xl text-xs font-medium focus:outline-none border ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+              }`}
+            />
+          </div>
         </div>
 
-        {/* Reset Button */}
-        <div className="flex items-end">
-          <button
-            onClick={() => {
-              setSearch("")
-              setStatusFilter("")
-              setTypeFilter("")
-              setDateFilter("")
-              setDecidedDateFilter("")
-            }}
-            className="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 text-xs font-bold uppercase transition-colors cursor-pointer"
-          >
-            Reset Filters
-          </button>
-        </div>
+        {/* Active Filter Summary Strip */}
+        {isAnyFilterActive && (
+          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between gap-2 flex-wrap text-amber-500 font-medium">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-bold">Active Search:</span>
+              {search && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Keyword: "{search}"</span>}
+              {statusFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Status: {statusFilter}</span>}
+              {typeFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Role: {typeFilter}</span>}
+              {dateFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Submitted: {dateFilter}</span>}
+              {decidedDateFilter && <span className="px-2 py-0.5 rounded bg-black/30 font-mono">Decided: {decidedDateFilter}</span>}
+            </div>
+            <div className="font-bold">
+              {filteredRequests.length} match{filteredRequests.length === 1 ? "" : "es"} found
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ── HIGH-DENSITY PRECISE CARDS LIST (ZERO HORIZONTAL SCROLL) ── */}
       {loading ? (
         <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
-          Loading historical decision log...
+          Loading historical decision records...
         </div>
       ) : filteredRequests.length === 0 ? (
-        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+        <div className={`p-12 text-center rounded-3xl border ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+        }`}>
           <span className="text-3xl block mb-2">📜</span>
-          <h3 className="text-sm font-bold text-white uppercase">No History Records Found</h3>
-          <p className="text-xs text-stone-400 mt-1">Try resetting or adjusting the filter inputs above.</p>
+          <h3 className={`text-sm font-bold uppercase ${isDark ? "text-white" : "text-stone-900"}`}>
+            No Matching History Records
+          </h3>
+          <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+            No request matches your chosen filters. Try clicking "Clear All Filters" above.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -218,40 +323,52 @@ export default function AdminRequestHistory() {
             return (
               <div
                 key={r._id}
-                className="bg-[#111713] hover:bg-[#151c17] rounded-2xl border border-white/[0.08] hover:border-white/20 p-4 transition-all duration-150 shadow-md"
+                className={`rounded-2xl border p-4 transition-all duration-150 shadow-sm ${
+                  isDark
+                    ? "bg-[#111713] hover:bg-[#151c17] border-white/[0.08] hover:border-white/20"
+                    : "bg-white hover:bg-stone-50/80 border-stone-200 hover:border-stone-300"
+                }`}
               >
                 {/* ── TOP BAR: User info + Role tag + Status badge ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
+                  isDark ? "border-white/[0.06]" : "border-stone-100"
+                }`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-black text-sm border shrink-0 ${
-                      isApproved ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-red-500/15 text-red-300 border-red-500/30"
+                      isApproved
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/15 text-red-400 border-red-500/30"
                     }`}>
                       {nameInitial}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm text-white">{r.name || "Unnamed Applicant"}</span>
-                        <span className="px-2 py-0.5 rounded bg-white/[0.06] text-stone-300 border border-white/10 text-[9.5px] font-mono font-bold uppercase">
+                        <span className={`font-bold text-sm ${isDark ? "text-white" : "text-stone-900"}`}>
+                          {r.name || "Unnamed Applicant"}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-mono font-bold uppercase border ${
+                          isDark ? "bg-white/[0.06] text-stone-300 border-white/10" : "bg-stone-100 text-stone-700 border-stone-200"
+                        }`}>
                           {getRoleLabel(r.type)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-stone-400 font-mono mt-0.5 flex-wrap">
+                      <div className="flex items-center gap-2 text-xs font-mono mt-0.5 flex-wrap text-stone-400">
                         <span
                           onClick={() => copyText(r.email, `${r._id}-email`)}
-                          className="cursor-pointer hover:text-white transition-colors"
+                          className="cursor-pointer hover:underline transition-colors"
                           title="Click to copy email"
                         >
                           ✉️ {r.email || "No email"}
-                          {copiedId === `${r._id}-email` && <span className="text-emerald-400 font-bold ml-1">Copied!</span>}
+                          {copiedId === `${r._id}-email` && <span className="text-emerald-500 font-bold ml-1">Copied!</span>}
                         </span>
                         {r.phone && (
                           <span
                             onClick={() => copyText(r.phone, `${r._id}-phone`)}
-                            className="cursor-pointer hover:text-white transition-colors"
+                            className="cursor-pointer hover:underline transition-colors"
                             title="Click to copy phone"
                           >
                             · 📞 {r.phone}
-                            {copiedId === `${r._id}-phone` && <span className="text-emerald-400 font-bold ml-1">Copied!</span>}
+                            {copiedId === `${r._id}-phone` && <span className="text-emerald-500 font-bold ml-1">Copied!</span>}
                           </span>
                         )}
                       </div>
@@ -262,8 +379,8 @@ export default function AdminRequestHistory() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase border whitespace-nowrap ${
                       isApproved
-                        ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                        : "bg-red-500/15 text-red-300 border-red-500/30"
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/15 text-red-400 border-red-500/30"
                     }`}>
                       {isApproved ? "✅ Approved" : "❌ Rejected"}
                     </span>
@@ -273,51 +390,57 @@ export default function AdminRequestHistory() {
                 {/* ── BOTTOM BAR: Structured details grid without horizontal scroll ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-3 text-xs">
                   {/* Submission & Decision Timeline */}
-                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold">Timeline</div>
-                    <div className="text-stone-300 flex items-center justify-between">
-                      <span className="text-stone-500">Submitted:</span>
-                      <span className="font-mono text-white">
+                  <div className={`p-2.5 rounded-xl border space-y-1 ${
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                  }`}>
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Timeline</div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-stone-400">Submitted:</span>
+                      <span className={`font-mono ${isDark ? "text-white" : "text-stone-800"}`}>
                         {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </span>
                     </div>
-                    <div className="text-stone-300 flex items-center justify-between">
-                      <span className="text-stone-500">Decided:</span>
-                      <span className="font-mono text-purple-300">
+                    <div className="flex items-center justify-between">
+                      <span className="text-stone-400">Decided:</span>
+                      <span className="font-mono text-purple-400 font-bold">
                         {decidedAt ? new Date(decidedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </span>
                     </div>
                   </div>
 
                   {/* Source & Placement Origin */}
-                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold">Origin & Referral</div>
-                    <div className="text-stone-300 truncate">
-                      <span className="text-stone-500 mr-1.5">Origin:</span>
-                      <span className="font-bold text-white">
+                  <div className={`p-2.5 rounded-xl border space-y-1 ${
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                  }`}>
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Origin & Referral</div>
+                    <div className="truncate">
+                      <span className="text-stone-400 mr-1.5">Origin:</span>
+                      <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
                         {r.requestedBy?.name ? `Raised by ${r.requestedBy.name}` : "Self-Registered Portal"}
                       </span>
                     </div>
                     {r.requestedBy?.role && (
                       <div className="text-stone-400 text-[11px] truncate">
-                        <span className="text-stone-500 mr-1.5">Role:</span>
+                        <span className="mr-1.5">Role:</span>
                         <span className="capitalize">{r.requestedBy.role}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Decision Notes / Rejection Reason */}
-                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.04] space-y-1 sm:col-span-2 md:col-span-1">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold">Decision Audit Note</div>
-                    <div className="text-stone-300 text-[11px]">
+                  <div className={`p-2.5 rounded-xl border space-y-1 sm:col-span-2 md:col-span-1 ${
+                    isDark ? "bg-black/40 border-white/[0.04]" : "bg-stone-50 border-stone-200/60"
+                  }`}>
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">Decision Audit Note</div>
+                    <div className="text-[11px]">
                       {r.rejectReason ? (
-                        <span className="text-red-300 font-medium">⚠️ Reason: {r.rejectReason}</span>
+                        <span className="text-red-400 font-medium">⚠️ Reason: {r.rejectReason}</span>
                       ) : r.note ? (
-                        <span className="text-stone-300 font-medium">📝 {r.note}</span>
+                        <span className="font-medium">📝 {r.note}</span>
                       ) : isApproved ? (
-                        <span className="text-emerald-400 font-medium">✅ Verified and onboarded by Admin</span>
+                        <span className="text-emerald-500 font-medium">✅ Verified and onboarded by Admin</span>
                       ) : (
-                        <span className="text-stone-500 italic">No additional remarks</span>
+                        <span className="text-stone-400 italic">No additional remarks</span>
                       )}
                     </div>
                   </div>
@@ -332,4 +455,5 @@ export default function AdminRequestHistory() {
     </div>
   )
 }
+
 
