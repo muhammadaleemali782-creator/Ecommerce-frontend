@@ -355,40 +355,6 @@ export default function Login({ setPage }) {
           </div>
         )}
 
-        {/* ── 🌟 BUTTON 1: LOGIN WITH EDUCA ID (STEALTH TITANIUM SSO) ── */}
-        {!showChangePassword && (
-          <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={startEducaSSO}
-              className="relative group overflow-hidden w-full py-3 px-4 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] active:scale-[0.98] border border-white/15 text-white text-xs font-bold uppercase tracking-[0.16em] shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-200 flex items-center justify-between cursor-pointer"
-            >
-              {/* Shimmer Light Reflection Sweep */}
-              <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
-              
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">
-                  ✦
-                </span>
-                <span className="font-sans font-bold">LOGIN WITH EDUCA ID</span>
-              </div>
-              
-              <svg className="w-4 h-4 stroke-[2] text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Subtle Divider */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-[1px] bg-white/[0.08]" />
-              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">
-                or sign in with email
-              </span>
-              <div className="flex-1 h-[1px] bg-white/[0.08]" />
-            </div>
-          </div>
-        )}
-
         {/* ── STANDARD CREDENTIAL LOGIN FORM ── */}
         {!showChangePassword && (
           <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
@@ -396,7 +362,7 @@ export default function Login({ setPage }) {
             {/* Email Field with Focus Animation */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-mono font-medium text-slate-300 uppercase tracking-wider">
-                Email Address
+                Email Address or System ID
               </label>
               <div
                 className={`relative rounded-xl bg-black/40 border transition-all duration-200 flex items-center ${
@@ -407,9 +373,9 @@ export default function Login({ setPage }) {
               >
                 <span className="pl-3.5 text-slate-500 text-xs">✉</span>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="name@example.com"
+                  placeholder="name@example.com / DS001"
                   value={email}
                   onFocus={() => setActiveField("email")}
                   onBlur={() => setActiveField(null)}
@@ -429,7 +395,7 @@ export default function Login({ setPage }) {
                 <button
                   type="button"
                   onClick={() => setPage("password-help")}
-                  className="text-[9.5px] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="text-[9.5px] text-amber-400 hover:underline transition-colors cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -457,14 +423,14 @@ export default function Login({ setPage }) {
                 {/* 👁️ ANIMATED BLINKING SVG EYE ICON */}
                 <AnimatedEye
                   isOpen={showPassword}
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
                 />
               </div>
             </div>
 
-            {/* Remember Checkbox */}
+            {/* Remember Me Toggle */}
             <div className="flex items-center justify-between pt-0.5">
-              <label className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -482,7 +448,7 @@ export default function Login({ setPage }) {
               className={`w-full mt-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
                 loading || lockoutTimer > 0
                   ? "bg-white/10 text-slate-500 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-slate-200 active:scale-[0.98]"
+                  : "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black hover:from-amber-400 hover:to-yellow-300 active:scale-[0.98]"
               }`}
             >
               {loading ? (

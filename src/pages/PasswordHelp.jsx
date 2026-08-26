@@ -184,7 +184,7 @@ export default function PasswordHelp({ setPage }) {
                     6-Digit OTP (EDUCA Mail Inbox):
                   </label>
                   <a
-                    href="http://localhost:3000"
+                    href="https://messages-frontend-brown.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[9.5px] text-amber-400 hover:underline font-mono"

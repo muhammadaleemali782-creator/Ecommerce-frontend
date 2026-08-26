@@ -486,7 +486,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         }`}>
           {/* Quick Launch EDUCA Mail Server */}
           <a
-            href="http://localhost:3000"
+            href="https://messages-frontend-brown.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full mb-2.5 py-2.5 px-3 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all no-underline"
