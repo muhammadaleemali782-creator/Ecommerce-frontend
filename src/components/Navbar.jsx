@@ -318,24 +318,24 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
           {loggedIn ? (
-            <div className="flex items-center gap-2 min-w-0 pr-1 cursor-pointer" onClick={() => go("my-profile")}>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${
+            <div className="flex items-center gap-2.5 min-w-0 pr-1 cursor-pointer" onClick={() => go("my-profile")}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0 border shadow-sm ${
                 role === "admin" ? "bg-amber-400/20 text-amber-500 border-amber-500/40" :
                 role === "distributor" ? "bg-sky-400/20 text-sky-500 border-sky-500/40" :
                 role === "seller" ? "bg-emerald-400/20 text-emerald-500 border-emerald-500/40" :
                 "bg-violet-400/20 text-violet-500 border-violet-500/40"
               }`}>
-                {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
+                {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
               </div>
               <div className="min-w-0 text-left">
                 <div className="flex items-center gap-1.5 leading-tight">
-                  <span className={`text-[11px] font-black uppercase font-mono tracking-tight truncate max-w-[100px] ${
-                    isDark ? "text-[#fbbf24]" : "text-amber-700"
+                  <span className={`text-xs font-black truncate max-w-[110px] ${
+                    isDark ? "text-white" : "text-stone-900"
                   }`}>
-                    {safeUser?.name || "User"}
+                    {safeUser?.fullName || safeUser?.name || "User"}
                   </span>
-                  <span className={`text-[7.5px] font-mono font-black uppercase px-1 py-0.2 rounded border shrink-0 ${
-                    role === "admin" ? "bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30" :
+                  <span className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded border shrink-0 ${
+                    role === "admin" ? "bg-amber-500/15 text-amber-600 dark:text-[#fbbf24] border-amber-500/30" :
                     role === "distributor" ? "bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/30" :
                     role === "seller" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30" :
                     "bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/30"
@@ -343,10 +343,12 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
                     {role}
                   </span>
                 </div>
-                <div className={`text-[9.5px] font-bold truncate max-w-[125px] ${
-                  isDark ? "text-stone-300" : "text-stone-600"
+                <div className={`text-[10px] font-mono font-semibold truncate max-w-[130px] mt-0.5 ${
+                  isDark ? "text-stone-400" : "text-stone-500"
                 }`}>
-                  {safeUser?.fullName || safeUser?.name}
+                  {safeUser?.name && safeUser.name !== safeUser?.fullName
+                    ? `🆔 ${safeUser.name}`
+                    : safeUser?.email || "View Profile"}
                 </div>
               </div>
             </div>

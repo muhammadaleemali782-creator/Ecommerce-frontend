@@ -5,7 +5,7 @@ import { getRoleLabel } from "../utils/roleLabels"
 import InlineLoader from "../components/InlineLoader"
 
 export default function MyProfile() {
-  const { user: authUser } = useAuth()
+  const { user: authUser, updateUser } = useAuth()
   const { isDark } = useTheme()
 
   const [profile,  setProfile]  = useState(null)
@@ -32,12 +32,15 @@ export default function MyProfile() {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-      setProfile(data)
-      setForm({
-        fullName: data.fullName || "",
-        phone:    data.phone    || "",
-        address:  data.address  || "",
-      })
+      if (data) {
+        setProfile(data)
+        if (typeof updateUser === "function") updateUser(data)
+        setForm({
+          fullName: data.fullName || "",
+          phone:    data.phone    || "",
+          address:  data.address  || "",
+        })
+      }
     } catch (err) {
       console.error("Load profile error:", err)
     } finally {
@@ -98,7 +101,9 @@ export default function MyProfile() {
         setMsgType("error")
         return
       }
-      setProfile(prev => ({ ...prev, ...data.user }))
+      const updated = data.user || {}
+      setProfile(prev => ({ ...prev, ...updated }))
+      if (typeof updateUser === "function") updateUser(updated)
       setMsg("✅ Profile successfully updated!")
       setMsgType("success")
       setEditing(false)

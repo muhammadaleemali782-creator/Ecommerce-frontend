@@ -237,6 +237,41 @@ export function AuthProvider({ children }) {
     return () => clearInterval(interval)
   }, [])
 
+  /* ================= UPDATE USER HELPER ================= */
+  const updateUser = (newUserData) => {
+    if (!newUserData) return
+    setUser(prev => {
+      const updated = { ...(prev || {}), ...newUserData }
+      localStorage.setItem("user", JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  /* ================= FETCH FRESH PROFILE ================= */
+  const fetchFreshProfile = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) return
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const freshUser = await res.json()
+        if (freshUser) {
+          updateUser(freshUser)
+        }
+      }
+    } catch (e) {
+      console.log("Fetch fresh profile err:", e.message)
+    }
+  }
+
+  useEffect(() => {
+    if (loggedIn) {
+      fetchFreshProfile()
+    }
+  }, [loggedIn])
+
   return (
     <AuthContext.Provider
       value={{
@@ -244,7 +279,9 @@ export function AuthProvider({ children }) {
         loggedIn,
         loading,
         login,
-        logout
+        logout,
+        updateUser,
+        fetchFreshProfile
       }}
     >
       {children}
