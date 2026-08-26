@@ -62,6 +62,7 @@ import AdminBannerManagement from "./pages/AdminBannerManagement"
 import { StoreProvider, useStore } from "./context/StoreContext"
 import { AuthProvider, useAuth }   from "./context/AuthContext"
 import { NotificationProvider, useNotifications } from "./context/NotificationContext"
+import { ThemeProvider } from "./context/ThemeContext"
 
 /* ─── Unauthorized helper ─── */
 const Unauth = () => (
@@ -317,12 +318,15 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <StoreProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
-      </StoreProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <NotificationProvider>
+            <AppContent />
+          </NotificationProvider>
+        </StoreProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
+

@@ -1,15 +1,17 @@
 import React, { useState, useCallback, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import NotificationBell from "./NotificationBell"
 
 export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   const { loggedIn, logout, user } = useAuth() || {}
+  const { theme, toggleTheme, isDark } = useTheme()
   const safeUser = user || {}
   const role = safeUser?.role || "guest"
   const safeSetPage = typeof setPage === "function" ? setPage : () => {}
   const safeCartCount = Number(cartCount) || 0
   const [ribbonOpen, setRibbonOpen] = useState(false)   // desktop ribbon toggle
-  const [sidebarOpen, setSidebarOpen] = useState(false) // mobile LEFT sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false) // mobile sidebar
 
   // Close sidebar on route change
   const go = useCallback((pg, sectionId) => {
@@ -49,7 +51,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   const roleNavItems = {
     admin: {
       label: "ADMIN",
-      color: "text-amber-400",
+      color: isDark ? "text-amber-400" : "text-amber-700",
       links: [
         { label: "ADMIN PANEL", pg: "admin", accent: true },
         { label: "PRODUCTS", pg: "admin-products" },
@@ -69,7 +71,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     },
     distributor: {
       label: "DISTRIBUTOR",
-      color: "text-sky-400",
+      color: isDark ? "text-sky-400" : "text-sky-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
         { label: "MY ORDERS", pg: "distributor-orders" },
@@ -86,7 +88,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     },
     seller: {
       label: "SELLER",
-      color: "text-emerald-400",
+      color: isDark ? "text-emerald-400" : "text-emerald-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
         { label: "MY ORDERS", pg: "seller-orders" },
@@ -102,7 +104,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     },
     user: {
       label: "MY ACCOUNT",
-      color: "text-violet-400",
+      color: isDark ? "text-violet-400" : "text-violet-700",
       links: [
         { label: "MY ORDERS", pg: "orders" },
         { label: "MY PROFILE", pg: "my-profile" },
@@ -118,7 +120,11 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
   const RibbonBtn = ({ label, pg, section, badge }) => (
     <button
       onClick={() => go(pg, section)}
-      className="relative px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.12] text-slate-300 hover:text-white text-[10.5px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer whitespace-nowrap border border-transparent hover:border-white/10"
+      className={`relative px-3 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer whitespace-nowrap border ${
+        isDark
+          ? "bg-white/[0.04] hover:bg-white/[0.12] text-slate-300 hover:text-white border-transparent hover:border-white/10"
+          : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-black border-stone-200"
+      }`}
     >
       {label}
       {badge && (
@@ -133,7 +139,11 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     <>
       {/* ══════════════ MAIN HEADER ══════════════ */}
       <header
-        className="sticky top-0 z-50 bg-[#0a0c0b] text-white select-none border-b border-white/[0.06]"
+        className={`sticky top-0 z-50 select-none border-b transition-colors duration-300 ${
+          isDark
+            ? "bg-[#0a0c0b] text-white border-white/[0.06]"
+            : "bg-[#ffffff]/95 text-stone-900 border-stone-200/90 shadow-sm backdrop-blur-md"
+        }`}
         style={{ transform: "translateZ(0)", willChange: "transform" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-5 h-14 flex items-center justify-between relative">
@@ -143,8 +153,12 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
             className="flex items-center gap-2 cursor-pointer group shrink-0 z-20"
             onClick={() => go("home")}
           >
-            <div className="w-[14px] h-[22px] border-[2.5px] border-[#fbbf24] group-hover:bg-[#fbbf24]/15 transition-all duration-200 rounded-[1px]" />
-            <span className="text-[11px] sm:text-[12px] font-black uppercase tracking-[0.18em] text-white group-hover:text-[#fbbf24] transition-colors whitespace-nowrap leading-none">
+            <div className={`w-[14px] h-[22px] border-[2.5px] rounded-[1px] transition-all duration-200 ${
+              isDark ? "border-[#fbbf24] group-hover:bg-[#fbbf24]/15" : "border-amber-600 group-hover:bg-amber-100"
+            }`} />
+            <span className={`text-[11px] sm:text-[12px] font-black uppercase tracking-[0.18em] transition-colors whitespace-nowrap leading-none ${
+              isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+            }`}>
               EDUCA VEDA
             </span>
           </div>
@@ -167,7 +181,9 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
               className={`group flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 cursor-pointer shrink-0 font-mono ${
                 ribbonOpen
                   ? "bg-[#fbbf24] text-black shadow-[0_0_18px_rgba(251,191,36,0.45)] font-black scale-105"
-                  : "bg-white/[0.08] hover:bg-white/[0.18] text-white border border-white/15 hover:border-[#fbbf24]/50"
+                  : isDark
+                    ? "bg-white/[0.08] hover:bg-white/[0.18] text-white border border-white/15 hover:border-[#fbbf24]/50"
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 hover:border-amber-500"
               }`}
               aria-label="Toggle Nav"
             >
@@ -184,7 +200,6 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
                 <RibbonBtn label="GURUKUL" pg="home" section="billboard-gurukul" />
                 <RibbonBtn label="FINANCE" pg="home" section="billboard-banking" />
                 <RibbonBtn label="SHOP" pg="store" badge={safeCartCount > 0 ? safeCartCount : null} />
-                {/* Role items in ribbon if logged in */}
                 {loggedIn && currentRoleData && currentRoleData.links.slice(0, 3).map((l, i) => (
                   <RibbonBtn key={i} label={l.label} pg={l.pg} />
                 ))}
@@ -192,21 +207,40 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
             </div>
           </div>
 
-          {/* ── DESKTOP RIGHT: Bell + Auth ── */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0 z-20">
+          {/* ── DESKTOP RIGHT: Theme Toggle + Bell + Auth ── */}
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0 z-20">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-full border transition-all cursor-pointer flex items-center justify-center text-xs ${
+                isDark
+                  ? "bg-white/[0.08] border-white/15 text-amber-300 hover:bg-white/15"
+                  : "bg-stone-100 border-stone-300 text-amber-600 hover:bg-stone-200 shadow-sm"
+              }`}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle Theme"
+            >
+              {isDark ? "☀️" : "🌙"}
+            </button>
+
             {loggedIn && <NotificationBell isMobile={false} />}
+
             {loggedIn ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => go(role === "admin" ? "admin" : "dashboard")}
-                  className="w-7 h-7 rounded-full bg-[#1a1a1a] border border-[#fbbf24]/40 flex items-center justify-center text-xs font-bold text-[#fbbf24] hover:scale-105 transition-transform cursor-pointer"
+                  className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold hover:scale-105 transition-transform cursor-pointer ${
+                    isDark
+                      ? "bg-[#1a1a1a] border-[#fbbf24]/40 text-[#fbbf24]"
+                      : "bg-amber-50 border-amber-400 text-amber-800"
+                  }`}
                   title={safeUser?.name || "Dashboard"}
                 >
                   {safeUser?.name ? safeUser.name[0].toUpperCase() : "👤"}
                 </button>
                 <button
                   onClick={logout}
-                  className="text-[9px] uppercase font-bold text-slate-500 hover:text-red-400 px-2 py-1 rounded-lg bg-transparent hover:bg-red-950/30 transition-colors cursor-pointer"
+                  className="text-[9px] uppercase font-bold text-stone-400 hover:text-red-500 px-2 py-1 rounded-lg bg-transparent hover:bg-red-500/10 transition-colors cursor-pointer"
                 >
                   OUT
                 </button>
@@ -214,19 +248,41 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
             ) : (
               <button
                 onClick={() => go("login")}
-                className="px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white hover:text-black text-white text-[10.5px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border border-white/20"
+                className={`px-3.5 py-1.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
+                  isDark
+                    ? "bg-white/[0.08] hover:bg-white hover:text-black text-white border-white/20"
+                    : "bg-stone-900 hover:bg-stone-800 text-white border-stone-800"
+                }`}
               >
                 SIGN IN
               </button>
             )}
           </div>
 
-          {/* ── MOBILE RIGHT: Bell + Hamburger (opens LEFT sidebar) ── */}
+          {/* ── MOBILE RIGHT: Theme Toggle + Bell + Hamburger ── */}
           <div className="flex lg:hidden items-center gap-2 z-20">
+            {/* Mobile Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xs cursor-pointer ${
+                isDark
+                  ? "bg-white/[0.07] border-white/10 text-amber-300"
+                  : "bg-stone-100 border-stone-300 text-amber-600 shadow-sm"
+              }`}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? "☀️" : "🌙"}
+            </button>
+
             {loggedIn && <NotificationBell isMobile={true} />}
+
             <button
               onClick={() => setSidebarOpen(true)}
-              className="w-9 h-9 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] active:scale-90 flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
+              className={`w-9 h-9 rounded-xl active:scale-90 flex items-center justify-center transition-all cursor-pointer border ${
+                isDark
+                  ? "bg-white/[0.07] hover:bg-white/[0.14] text-white border-white/10"
+                  : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300 shadow-sm"
+              }`}
               aria-label="Open Menu"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -238,7 +294,7 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         </div>
       </header>
 
-      {/* ══════════════ MOBILE LEFT SIDEBAR DRAWER ══════════════ */}
+      {/* ══════════════ MOBILE SIDEBAR DRAWER ══════════════ */}
       {/* Backdrop overlay */}
       <div
         className={`fixed inset-0 z-[60] lg:hidden transition-all duration-300 ${
@@ -249,38 +305,69 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         aria-hidden="true"
       />
 
-      {/* Left Sidebar Panel */}
+      {/* Sidebar Panel */}
       <div
-        className={`fixed top-0 right-0 h-full z-[70] lg:hidden w-[82vw] max-w-[320px] bg-[#090c0a] border-l border-white/[0.08] flex flex-col transition-transform duration-300 ease-out ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full z-[70] lg:hidden w-[82vw] max-w-[320px] flex flex-col transition-transform duration-300 ease-out border-l ${
+          isDark
+            ? "bg-[#090c0a] text-white border-white/[0.08]"
+            : "bg-[#ffffff] text-stone-900 border-stone-200 shadow-2xl"
+        } ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}
         style={{ willChange: "transform" }}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-white/[0.08] shrink-0">
-          <div className="flex items-center gap-2" onClick={() => go("home")}>
-            <div className="w-[12px] h-[18px] border-[2px] border-[#fbbf24] rounded-[1px]" />
-            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#fbbf24]">EDUCA VEDA</span>
+        <div className={`flex items-center justify-between px-4 h-14 border-b shrink-0 ${
+          isDark ? "border-white/[0.08]" : "border-stone-200"
+        }`}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => go("home")}>
+            <div className={`w-[12px] h-[18px] border-[2px] rounded-[1px] ${
+              isDark ? "border-[#fbbf24]" : "border-amber-600"
+            }`} />
+            <span className={`text-[11px] font-black uppercase tracking-[0.18em] ${
+              isDark ? "text-[#fbbf24]" : "text-amber-700"
+            }`}>
+              EDUCA VEDA
+            </span>
           </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white text-sm transition-colors cursor-pointer"
-          >
-            ✕
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-lg border text-xs cursor-pointer ${
+                isDark ? "bg-white/[0.06] border-white/10 text-amber-300" : "bg-stone-100 border-stone-300 text-amber-600"
+              }`}
+            >
+              {isDark ? "☀️ Light" : "🌙 Dark"}
+            </button>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-colors cursor-pointer ${
+                isDark ? "bg-white/[0.06] hover:bg-white/[0.12] text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-800"
+              }`}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Sidebar Scroll Content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain py-2">
+        <div className="flex-1 overflow-y-auto overscroll-contain py-2 no-scrollbar">
 
           {/* Public Links */}
           <div className="px-2 pb-2">
-            <div className="px-2 py-1.5 text-[9px] font-black uppercase tracking-widest text-white/30">NAVIGATE</div>
+            <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${
+              isDark ? "text-white/30" : "text-stone-400"
+            }`}>
+              NAVIGATE
+            </div>
             {publicLinks.map((link, i) => (
               <button
                 key={i}
                 onClick={() => go(link.pg, link.section)}
-                className="w-full text-left py-3 px-3 rounded-xl hover:bg-white/[0.07] text-slate-200 hover:text-white flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group"
+                className={`w-full text-left py-3 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group ${
+                  isDark
+                    ? "hover:bg-white/[0.07] text-slate-200 hover:text-white"
+                    : "hover:bg-stone-100 text-stone-800 hover:text-black"
+                }`}
               >
                 <span className="flex items-center gap-2">
                   {link.label}
@@ -290,14 +377,18 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
                     </span>
                   )}
                 </span>
-                <span className="text-white/20 group-hover:text-white/50 text-sm transition-colors">›</span>
+                <span className={`text-sm transition-colors ${
+                  isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
+                }`}>›</span>
               </button>
             ))}
           </div>
 
           {/* Role-Based Links */}
           {loggedIn && currentRoleData && (
-            <div className="px-2 pt-1 border-t border-white/[0.06]">
+            <div className={`px-2 pt-1 border-t ${
+              isDark ? "border-white/[0.06]" : "border-stone-200"
+            }`}>
               <div className={`px-2 py-1.5 text-[9px] font-black uppercase tracking-widest ${currentRoleData.color}`}>
                 {currentRoleData.label}
               </div>
@@ -305,16 +396,18 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
                 <button
                   key={i}
                   onClick={() => go(link.pg)}
-                  className={`w-full text-left py-2.5 px-3 rounded-xl hover:bg-white/[0.07] flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group ${
+                  className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors text-[11px] font-bold uppercase tracking-wider group ${
                     link.danger
                       ? "text-red-400 hover:text-red-300 hover:bg-red-950/20"
                       : link.accent
-                      ? "text-amber-400 hover:text-amber-300"
-                      : "text-slate-300 hover:text-white"
+                      ? isDark ? "text-amber-400 hover:text-amber-300 hover:bg-amber-950/20" : "text-amber-700 hover:text-amber-900 hover:bg-amber-50"
+                      : isDark ? "text-slate-300 hover:text-white hover:bg-white/[0.07]" : "text-stone-700 hover:text-black hover:bg-stone-100"
                   }`}
                 >
                   <span>{link.label}</span>
-                  <span className="text-white/20 group-hover:text-white/50 text-sm transition-colors">›</span>
+                  <span className={`text-sm transition-colors ${
+                    isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
+                  }`}>›</span>
                 </button>
               ))}
             </div>
@@ -322,29 +415,33 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
         </div>
 
         {/* Sidebar Footer: Auth */}
-        <div className="px-3 py-3 border-t border-white/[0.08] shrink-0">
+        <div className={`px-3 py-3 border-t shrink-0 ${
+          isDark ? "border-white/[0.08]" : "border-stone-200"
+        }`}>
           {loggedIn ? (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => go(role === "admin" ? "admin" : "dashboard")}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white font-bold text-[11px] flex items-center gap-2.5 transition-colors cursor-pointer"
+                className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-[11px] flex items-center gap-2.5 transition-colors cursor-pointer ${
+                  isDark ? "bg-white/[0.07] hover:bg-white/[0.12] text-white" : "bg-stone-100 hover:bg-stone-200 text-stone-900"
+                }`}
               >
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  role === "admin" ? "bg-amber-400/20 text-amber-300" :
-                  role === "distributor" ? "bg-sky-400/20 text-sky-300" :
-                  role === "seller" ? "bg-emerald-400/20 text-emerald-300" :
-                  "bg-violet-400/20 text-violet-300"
+                  role === "admin" ? "bg-amber-400/20 text-amber-500" :
+                  role === "distributor" ? "bg-sky-400/20 text-sky-500" :
+                  role === "seller" ? "bg-emerald-400/20 text-emerald-500" :
+                  "bg-violet-400/20 text-violet-500"
                 }`}>
                   {safeUser?.name ? safeUser.name[0].toUpperCase() : "U"}
                 </span>
-                <div className="text-left">
-                  <div className="text-[10px] font-black text-white truncate max-w-[140px]">{safeUser?.name || "Dashboard"}</div>
-                  <div className="text-[8px] text-white/40 uppercase">{role}</div>
+                <div className="text-left truncate">
+                  <div className="text-[10px] font-black truncate max-w-[130px]">{safeUser?.name || "Dashboard"}</div>
+                  <div className="text-[8px] opacity-60 uppercase">{role}</div>
                 </div>
               </button>
               <button
                 onClick={logout}
-                className="py-2.5 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 font-bold text-[10px] transition-colors cursor-pointer uppercase"
+                className="py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-[10px] transition-colors cursor-pointer uppercase"
               >
                 OUT
               </button>
@@ -352,7 +449,9 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
           ) : (
             <button
               onClick={() => go("login")}
-              className="w-full py-3 rounded-xl bg-white text-black hover:bg-amber-50 font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2"
+              className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
+                isDark ? "bg-white text-black hover:bg-amber-50" : "bg-stone-900 text-white hover:bg-stone-800"
+              }`}
             >
               <span>SIGN IN TO ACCOUNT</span>
               <span>›</span>
@@ -363,3 +462,5 @@ export default function Navbar({ setPage, cartCount, pageBadge = {} }) {
     </>
   )
 }
+
+

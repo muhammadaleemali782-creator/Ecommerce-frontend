@@ -25,16 +25,27 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
-body {
+body, body.dark-theme {
   margin: 0;
   background-color: #121813;
   background-image:
     radial-gradient(ellipse at 80% 15%, rgba(42, 60, 42, 0.35) 0%, transparent 60%),
     radial-gradient(ellipse at 20% 75%, rgba(28, 42, 29, 0.45) 0%, transparent 60%),
     linear-gradient(180deg, #101511 0%, #141c15 50%, #0e140f 100%);
-  /* REMOVED: background-attachment: fixed; — causes full-page repaint on every scroll frame (huge GPU stall) */
   background-attachment: scroll;
   color: #e5e9df;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.light-theme {
+  margin: 0;
+  background-color: #f6f8f5;
+  background-image:
+    radial-gradient(ellipse at 80% 15%, rgba(220, 235, 220, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 75%, rgba(230, 240, 228, 0.6) 0%, transparent 60%),
+    linear-gradient(180deg, #fbfdfa 0%, #f4f7f2 50%, #edf2ea 100%);
+  background-attachment: scroll;
+  color: #19221a;
 }
 
 
