@@ -282,175 +282,161 @@ export default function AdminWithdrawalManagement() {
   }
   
   return (
-    <div className="max-w-7xl mx-auto space-y-6 px-2 sm:px-4">
+    <div className="space-y-6 select-none max-w-5xl mx-auto">
       
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-lg shadow-lg p-4 sm:p-6 text-white">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">💳 Withdrawal Management</h1>
-        <p className="text-sm sm:text-base opacity-90">Approve or reject withdrawal requests</p>
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ TREASURY & DISBURSEMENTS
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Withdrawal Management & Payouts
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Process bank transfers, disburse PPC rupee conversions, and honor milestone reward claims.
+          </p>
+        </div>
+
+        {/* View Switcher Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/10 rounded-2xl">
+          <button
+            onClick={() => switchView("withdrawal")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              view === "withdrawal"
+                ? "bg-[#fbbf24] text-black font-black shadow-sm"
+                : "text-stone-400 hover:text-white"
+            }`}
+          >
+            💸 Withdrawals
+          </button>
+          <button
+            onClick={() => switchView("rewards")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              view === "rewards"
+                ? "bg-purple-500 text-white font-black shadow-sm"
+                : "text-stone-400 hover:text-white"
+            }`}
+          >
+            🎁 Reward Claims
+          </button>
+        </div>
       </div>
-      
-      {/* Message */}
+
+      {/* ── STATUS MESSAGE ── */}
       {message.text && (
-        <div className={`
-          p-4 rounded-lg
-          ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-        `}>
+        <div className={`p-4 rounded-2xl text-xs font-bold border flex items-center gap-2 ${
+          message.type === "success"
+            ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30"
+            : "bg-red-950/60 text-red-300 border-red-500/30"
+        }`}>
+          <span>{message.type === "success" ? "✅" : "❌"}</span>
           {message.text}
         </div>
       )}
-      
-      {/* View Toggle — Withdrawals vs Reward Payments */}
-      <div className="bg-white rounded-lg shadow-md p-2 flex gap-2 overflow-x-auto">
-        <button
-          onClick={() => switchView("withdrawal")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${view === "withdrawal"
-              ? "bg-orange-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          💳 Withdrawals
-        </button>
 
-        <button
-          onClick={() => switchView("rewards")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${view === "rewards"
-              ? "bg-purple-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          🏆 Reward Payments
-        </button>
+      {/* ── FILTER BUTTONS ── */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {["pending", "approved", "rejected", "paid", "all"].map((status) => {
+          if (view === "withdrawal" && status === "paid") return null
+          if (view === "rewards" && status === "approved") return null
+
+          const isSelected = filter === status
+          return (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer border ${
+                isSelected
+                  ? "bg-white text-black border-white font-black shadow-sm"
+                  : "bg-[#111713] text-stone-400 border-white/[0.08] hover:bg-white/10"
+              }`}
+            >
+              {status === "all" ? "All Requests" : status}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="bg-white rounded-lg shadow-md p-2 flex gap-2 overflow-x-auto">
-        <button
-          onClick={() => setFilter("pending")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${filter === "pending" 
-              ? "bg-yellow-600 text-white" 
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          ⏳ Pending
-        </button>
-        
-        <button
-          onClick={() => setFilter(view === "rewards" ? "paid" : "approved")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${(filter === "approved" || filter === "paid")
-              ? "bg-green-600 text-white" 
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          {view === "rewards" ? "✅ Paid" : "✅ Approved"}
-        </button>
-        
-        <button
-          onClick={() => setFilter("rejected")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${filter === "rejected" 
-              ? "bg-red-600 text-white" 
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          ❌ Rejected
-        </button>
-        
-        <button
-          onClick={() => setFilter("")}
-          className={`
-            px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition duration-200
-            ${filter === "" 
-              ? "bg-blue-600 text-white" 
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-          `}
-        >
-          📋 All
-        </button>
-      </div>
-
-      {/* ============ REWARD REQUESTS LIST ============ */}
+      {/* ── REWARDS VIEW ── */}
       {view === "rewards" && (
+
         loading ? (
-          <InlineLoader label="Reward requests load ho rahe hain 🎁" minHeight={160} />
+          <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
+            Loading reward claims...
+          </div>
         ) : rewardRequests.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-600">
-            <p className="text-lg font-semibold mb-2">No reward requests found</p>
-            <p className="text-sm">No {filter || "any"} reward payment requests</p>
+          <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+            <span className="text-3xl block mb-2">🎁</span>
+            <h3 className="text-sm font-bold text-white uppercase">No Reward Claims Found</h3>
+            <p className="text-xs text-stone-400 mt-1">There are no {filter || "active"} reward claims.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {rewardRequests.map((rc) => (
               <div
                 key={rc._id}
-                className="bg-white rounded-lg shadow-md border-l-4 border-purple-500 p-4 sm:p-6"
+                className="bg-[#111713] rounded-3xl border border-purple-500/30 p-5 sm:p-6 space-y-4 hover:border-purple-500/50 transition-all shadow-md"
               >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800 mb-1">
-                      {rc.userId?.name || "Unknown User"}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">📧 {rc.userId?.email}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Role: <span className="font-semibold uppercase">{rc.userId?.role}</span>
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-white text-base">{rc.userId?.name || "Unknown User"}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-stone-300 text-[10px] font-mono font-bold uppercase">
+                        {rc.userId?.role}
+                      </span>
+                    </div>
+                    <div className="text-xs text-stone-400 mt-0.5">📧 {rc.userId?.email}</div>
                   </div>
 
-                  <span className={`
-                    px-3 py-1 rounded-full text-xs font-semibold inline-block
-                    ${rc.status === "pending" && "bg-yellow-100 text-yellow-800"}
-                    ${rc.status === "paid" && "bg-green-100 text-green-800"}
-                    ${rc.status === "rejected" && "bg-red-100 text-red-800"}
-                  `}>
-                    {rc.status.toUpperCase()}
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border self-start sm:self-auto ${
+                    rc.status === "pending"
+                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                      : rc.status === "paid"
+                        ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                        : "bg-red-500/15 text-red-300 border-red-500/30"
+                  }`}>
+                    {rc.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-600 mb-1">Wallet</p>
-                    <p className="text-sm font-semibold text-gray-900">{getWalletLabel(rc.walletType)}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                    <p className="text-[10px] font-mono text-stone-400 uppercase">Wallet Type</p>
+                    <p className="text-xs font-bold text-white mt-0.5">{getWalletLabel(rc.walletType)}</p>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-600 mb-1">Rank / Level</p>
-                    <p className="text-sm font-bold text-gray-900">🏅 {rc.levelName}</p>
+                  <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                    <p className="text-[10px] font-mono text-stone-400 uppercase">Rank Achieved</p>
+                    <p className="text-xs font-bold text-purple-300 mt-0.5">🏅 {rc.levelName}</p>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-600 mb-1">Reward</p>
-                    <p className="text-sm font-bold text-purple-700">{rc.rewardText}</p>
+                  <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                    <p className="text-[10px] font-mono text-emerald-400 uppercase">Milestone Reward</p>
+                    <p className="text-xs font-black text-emerald-300 mt-0.5">{rc.rewardText}</p>
                   </div>
                 </div>
 
-                <div className="text-xs text-gray-500 mb-4 space-y-1">
-                  <p>PPC at claim: {rc.ppcAtClaim} (required: {rc.ppcRequired})</p>
-                  <p>Requested: {new Date(rc.requestedAt).toLocaleString()}</p>
-                  {rc.paidAt && <p className="text-green-600">Paid: {new Date(rc.paidAt).toLocaleString()}</p>}
-                  {rc.rejectedAt && <p className="text-red-600">Rejected: {new Date(rc.rejectedAt).toLocaleString()}</p>}
-                  {rc.adminNote && <p>Note: {rc.adminNote}</p>}
+                <div className="text-[11px] font-mono text-stone-500 space-y-1">
+                  <p>PPC Score: {rc.ppcAtClaim} (Threshold: {rc.ppcRequired})</p>
+                  <p>Claimed On: {new Date(rc.requestedAt).toLocaleString("en-IN")}</p>
+                  {rc.paidAt && <p className="text-emerald-400">Disbursed: {new Date(rc.paidAt).toLocaleString("en-IN")}</p>}
+                  {rc.adminNote && <p className="text-stone-300">Admin Note: {rc.adminNote}</p>}
                 </div>
 
                 {rc.status === "pending" && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-2 border-t border-white/[0.06]">
                     <button
                       onClick={() => openModal("approve", rc, "reward")}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
                     >
-                      ✅ Mark Paid
+                      ✅ Mark Reward as Paid
                     </button>
                     <button
                       onClick={() => openModal("reject", rc, "reward")}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                      className="py-2.5 px-5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
                     >
-                      ❌ Reject
+                      ❌ Reject Claim
                     </button>
                   </div>
                 )}
@@ -460,239 +446,205 @@ export default function AdminWithdrawalManagement() {
         )
       )}
 
-      {/* ============ WITHDRAWAL REQUESTS LIST ============ */}
-      {view === "withdrawal" && (loading ? (
-        <InlineLoader label="Withdrawal requests load ho rahe hain 💸" minHeight={160} />
-      ) : requests.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-600">
-          <p className="text-lg font-semibold mb-2">No requests found</p>
-          <p className="text-sm">No {filter || "any"} withdrawal requests</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {requests.map((req) => (
-            <div 
-              key={req._id} 
-              className="bg-white rounded-lg shadow-md border-l-4 border-orange-500 p-4 sm:p-6"
-            >
-              {/* User Info */}
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">
-                    {req.userId?.name || "Unknown User"}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    📧 {req.userId?.email}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    📱 {req.userId?.phone || "N/A"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Role: <span className="font-semibold uppercase">{req.userRole}</span>
-                  </p>
-                </div>
-                
-                <span className={`
-                  px-3 py-1 rounded-full text-xs font-semibold inline-block
-                  ${req.status === "pending" && "bg-yellow-100 text-yellow-800"}
-                  ${req.status === "approved" && "bg-green-100 text-green-800"}
-                  ${req.status === "rejected" && "bg-red-100 text-red-800"}
-                `}>
-                  {req.status.toUpperCase()}
-                </span>
-              </div>
-              
-              {/* Amount & Wallet Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Amount</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {req.amount} <span className="text-sm font-semibold text-purple-600">PPC</span>
-                  </p>
-                  {req.ppcRateAtRequest > 0 ? (
-                    <p className="text-xs text-green-600 mt-1 font-semibold">
-                      = ₹{req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2)}
-                    </p>
-                  ) : ppcRate > 0 && (
-                    <p className="text-xs text-green-600 mt-1">
-                      ≈ ₹{(req.amount * ppcRate * 0.25).toFixed(2)} estimated
-                    </p>
-                  )}
-                </div>
-                
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Wallet</p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {getWalletLabel(req.walletType)}
-                  </p>
-                </div>
-                
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Balance at Request</p>
-                  <p className="text-sm font-bold text-gray-900">
-                    {req.balanceAtRequest} <span className="text-xs font-semibold text-purple-600">PPC</span>
-                  </p>
-                  {req.ppcRateAtRequest > 0 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      ≈ ₹{(req.balanceAtRequest * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2)}
-                    </p>
-                  )}
-                </div>
-              </div>
+      {/* ── WITHDRAWAL REQUESTS VIEW ── */}
+      {view === "withdrawal" && (
+        loading ? (
+          <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
+            Loading withdrawal queue...
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+            <span className="text-3xl block mb-2">💸</span>
+            <h3 className="text-sm font-bold text-white uppercase">No Withdrawal Requests</h3>
+            <p className="text-xs text-stone-400 mt-1">There are no {filter || "active"} withdrawal requests in this view.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {requests.map((req) => {
+              const rupeeVal = req.ppcRateAtRequest > 0 
+                ? (req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2))
+                : (ppcRate > 0 ? (req.amount * ppcRate * 0.25).toFixed(2) : "—")
 
-              {/* ⭐ Locked PPC Rate banner */}
-              {req.ppcRateAtRequest > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4 flex items-center justify-between">
-                  <div className="text-xs text-amber-800">
-                    <span className="font-bold">🔒 Locked Rate:</span> 1 PPC = ₹{req.ppcRateAtRequest} @ {req.percentageAtRequest}% share
+              return (
+                <div
+                  key={req._id}
+                  className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-6 space-y-4 hover:border-white/20 transition-all shadow-md"
+                >
+                  {/* User Profile Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-white text-base">{req.userId?.name || "Unknown User"}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-stone-300 text-[10px] font-mono font-bold uppercase">
+                          {req.userRole}
+                        </span>
+                      </div>
+                      <div className="text-xs text-stone-400 mt-0.5">
+                        📧 {req.userId?.email} · 📞 {req.userId?.phone || "N/A"}
+                      </div>
+                    </div>
+
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border self-start sm:self-auto ${
+                      req.status === "pending"
+                        ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                        : req.status === "approved"
+                          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                          : "bg-red-500/15 text-red-300 border-red-500/30"
+                    }`}>
+                      {req.status}
+                    </span>
                   </div>
-                  <div className="text-xs font-bold text-amber-900 bg-amber-100 px-2 py-1 rounded">
-                    Payout: ₹{req.rupeeValueAtRequest?.toFixed(2)}
+
+                  {/* Financial Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                      <p className="text-[10px] font-mono text-stone-400 uppercase">Withdrawal Amount</p>
+                      <p className="text-base font-black text-white mt-0.5">
+                        {req.amount} <span className="text-xs text-[#fbbf24]">PPC</span>
+                      </p>
+                      <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                        ≈ ₹{rupeeVal}
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                      <p className="text-[10px] font-mono text-stone-400 uppercase">Origin Wallet</p>
+                      <p className="text-xs font-bold text-white mt-0.5">{getWalletLabel(req.walletType)}</p>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-black/40 border border-white/[0.06]">
+                      <p className="text-[10px] font-mono text-stone-400 uppercase">Balance at Request</p>
+                      <p className="text-xs font-bold text-white mt-0.5">
+                        {req.balanceAtRequest} <span className="text-[10px] text-[#fbbf24]">PPC</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {/* Payment Details */}
-              {req.paymentMethod && (
-                <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                  <p className="text-xs text-blue-800 mb-1">
-                    <strong>Payment Method:</strong> {req.paymentMethod}
-                  </p>
-                  {req.paymentDetails && (
-                    <p className="text-xs text-blue-800">
-                      <strong>Details:</strong> {req.paymentDetails}
-                    </p>
+
+                  {/* Locked PPC Banner */}
+                  {req.ppcRateAtRequest > 0 && (
+                    <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-300 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-bold">🔒 Locked Exchange Rate:</span> 1 PPC = ₹{req.ppcRateAtRequest} @ {req.percentageAtRequest}% share
+                      </div>
+                      <div className="font-black text-white px-2 py-0.5 rounded bg-black/40 border border-amber-500/30">
+                        Payout: ₹{rupeeVal}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payment Details */}
+                  {req.paymentMethod && (
+                    <div className="p-3 rounded-xl bg-black/40 border border-sky-500/20 text-xs text-sky-200">
+                      <p><strong>Payment Mode:</strong> {req.paymentMethod}</p>
+                      {req.paymentDetails && <p className="text-stone-300 mt-0.5"><strong>Account Details:</strong> {req.paymentDetails}</p>}
+                    </div>
+                  )}
+
+                  {req.adminNote && (
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] text-xs text-stone-300">
+                      <strong className="text-white">Admin Note:</strong> {req.adminNote}
+                    </div>
+                  )}
+
+                  {req.transactionId && (
+                    <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300 font-mono">
+                      <strong>Transaction ID / UTR:</strong> {req.transactionId}
+                    </div>
+                  )}
+
+                  <div className="text-[10.5px] font-mono text-stone-500 space-y-0.5">
+                    <p>Requested: {new Date(req.createdAt).toLocaleString("en-IN")}</p>
+                    {req.approvedAt && <p className="text-emerald-400">Approved: {new Date(req.approvedAt).toLocaleString("en-IN")}</p>}
+                    {req.rejectedAt && <p className="text-red-400">Rejected: {new Date(req.rejectedAt).toLocaleString("en-IN")}</p>}
+                  </div>
+
+                  {/* Actions */}
+                  {req.status === "pending" && (
+                    <div className="flex gap-2 pt-2 border-t border-white/[0.06]">
+                      <button
+                        onClick={() => openModal("approve", req)}
+                        className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                      >
+                        ✅ Approve & Record Transfer
+                      </button>
+                      <button
+                        onClick={() => openModal("reject", req)}
+                        className="py-2.5 px-5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                      >
+                        ❌ Reject
+                      </button>
+                    </div>
                   )}
                 </div>
-              )}
-              
-              {/* Admin Note */}
-              {req.adminNote && (
-                <div className="bg-gray-100 p-3 rounded-lg mb-4">
-                  <p className="text-xs font-semibold text-gray-800 mb-1">Admin Note:</p>
-                  <p className="text-sm text-gray-700">{req.adminNote}</p>
-                </div>
-              )}
-              
-              {/* Transaction ID */}
-              {req.transactionId && (
-                <div className="bg-green-50 p-3 rounded-lg mb-4">
-                  <p className="text-xs text-green-800">
-                    <strong>Transaction ID:</strong> {req.transactionId}
-                  </p>
-                </div>
-              )}
-              
-              {/* Dates */}
-              <div className="text-xs text-gray-500 mb-4 space-y-1">
-                <p>Requested: {new Date(req.createdAt).toLocaleString()}</p>
-                {req.approvedAt && (
-                  <p className="text-green-600">Approved: {new Date(req.approvedAt).toLocaleString()}</p>
-                )}
-                {req.rejectedAt && (
-                  <p className="text-red-600">Rejected: {new Date(req.rejectedAt).toLocaleString()}</p>
-                )}
-              </div>
-              
-              {/* Action Buttons */}
-              {req.status === "pending" && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openModal("approve", req)}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                  >
-                    ✅ Approve
-                  </button>
-                  
-                  <button
-                    onClick={() => openModal("reject", req)}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                  >
-                    ❌ Reject
-                  </button>
-                </div>
-              )}
-              
-            </div>
-          ))}
-        </div>
-      ))}
-      
-      {/* Modal */}
+              )
+            })}
+          </div>
+        )
+      )}
+
+      {/* ── MODAL ── */}
       {modalData.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121814] border border-white/[0.12] rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <h2 className="text-base font-black text-white uppercase flex items-center gap-2">
               {modalData.context === "reward"
-                ? (modalData.action === "approve" ? "✅ Mark Reward as Paid" : "❌ Reject Reward Claim")
-                : (modalData.action === "approve" ? "✅ Approve Withdrawal" : "❌ Reject Withdrawal")}
+                ? (modalData.action === "approve" ? "✅ Disburse Level Reward" : "❌ Reject Reward Claim")
+                : (modalData.action === "approve" ? "✅ Confirm Withdrawal Transfer" : "❌ Reject Withdrawal")}
             </h2>
-            
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-1">User: {modalData.request?.userId?.name}</p>
+
+            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] text-xs text-stone-300 space-y-1">
+              <p><span className="text-stone-500">Recipient:</span> <strong className="text-white">{modalData.request?.userId?.name}</strong></p>
               {modalData.context === "reward" ? (
                 <>
-                  <p className="text-sm text-gray-600 mb-1">🏅 Rank: {modalData.request?.levelName}</p>
-                  <p className="text-lg font-bold text-purple-700">
-                    Reward: {modalData.request?.rewardText}
-                  </p>
+                  <p><span className="text-stone-500">Rank:</span> {modalData.request?.levelName}</p>
+                  <p className="text-purple-300 font-bold">Reward: {modalData.request?.rewardText}</p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold text-gray-900">
-                    Amount: {modalData.request?.amount} <span className="text-base text-purple-600">PPC</span>
+                  <p className="text-white font-bold text-sm">
+                    Amount: {modalData.request?.amount} <span className="text-[#fbbf24]">PPC</span>
                   </p>
-                  {modalData.request?.ppcRateAtRequest > 0 ? (
-                    <div className="mt-2 bg-amber-50 border border-amber-200 rounded p-2">
-                      <p className="text-sm font-bold text-amber-800">
-                        🔒 Locked Rate: 1 PPC = ₹{modalData.request.ppcRateAtRequest} @ {modalData.request.percentageAtRequest}%
-                      </p>
-                      <p className="text-base font-bold text-green-700 mt-1">
-                        Payout = ₹{modalData.request.rupeeValueAtRequest?.toFixed(2)}
-                      </p>
-                    </div>
-                  ) : ppcRate > 0 && (
-                    <p className="text-sm text-green-600">
-                      ≈ ₹{((modalData.request?.amount || 0) * ppcRate * 0.25).toFixed(2)} estimated value
+                  {modalData.request?.ppcRateAtRequest > 0 && (
+                    <p className="text-emerald-400 font-bold">
+                      Payout Value: ₹{modalData.request.rupeeValueAtRequest?.toFixed(2)}
                     </p>
                   )}
                 </>
               )}
             </div>
-            
+
             {modalData.context === "withdrawal" && modalData.action === "approve" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Transaction ID
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Bank Reference / UTR Number
                 </label>
                 <input
                   type="text"
                   value={modalData.transactionId}
                   onChange={(e) => setModalData({ ...modalData, transactionId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter transaction ID"
+                  className="w-full p-2.5 bg-black/40 text-xs text-white border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  placeholder="e.g. UTR123456789 / IMPS Ref"
                 />
               </div>
             )}
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {modalData.action === "approve" ? "Note (Optional)" : "Rejection Reason"}
+
+            <div>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                {modalData.action === "approve" ? "Administrative Note (Optional)" : "Reason for Rejection"}
               </label>
               <textarea
                 value={modalData.note}
                 onChange={(e) => setModalData({ ...modalData, note: e.target.value })}
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder={modalData.action === "approve" ? "Add a note..." : "Why rejecting?"}
-              ></textarea>
+                className="w-full p-2.5 bg-black/40 text-xs text-white border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                placeholder={modalData.action === "approve" ? "Add transaction note..." : "State why this request is rejected..."}
+              />
             </div>
-            
-            <div className="flex gap-2">
+
+            <div className="flex gap-2 pt-2">
               <button
                 onClick={closeModal}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-200"
+                className="flex-1 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
               >
                 Cancel
               </button>
@@ -706,21 +658,19 @@ export default function AdminWithdrawalManagement() {
                   }
                 }}
                 disabled={loading}
-                className={`
-                  flex-1 font-semibold py-2 px-4 rounded-lg transition duration-200
-                  ${loading ? "bg-gray-400 cursor-not-allowed text-gray-200" : ""}
-                  ${modalData.action === "approve" && !loading ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                  ${modalData.action === "reject" && !loading ? "bg-red-600 hover:bg-red-700 text-white" : ""}
-                `}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-xs uppercase cursor-pointer shadow-sm transition-all ${
+                  modalData.action === "approve"
+                    ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                    : "bg-red-600 hover:bg-red-500 text-white"
+                }`}
               >
-                {loading ? "Processing..." : "Confirm"}
+                {loading ? "Processing..." : "Confirm Action"}
               </button>
             </div>
-            
           </div>
         </div>
       )}
-      
+
     </div>
   )
 }

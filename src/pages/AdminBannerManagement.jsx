@@ -16,8 +16,8 @@ export default function AdminBannerManagement({ setPage }) {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing]   = useState(null)
   const [busy, setBusy]         = useState(false)
-  const [preview, setPreview]   = useState(null) // { url, type } — desktop/default media
-  const [previewMobile, setPreviewMobile] = useState(null) // { url, type } — mobile-specific media
+  const [preview, setPreview]   = useState(null)
+  const [previewMobile, setPreviewMobile] = useState(null)
 
   const [form, setForm] = useState({
     title: "", subtitle: "", eyebrow: "", align: "left", buttonText: "", buttonLink: "",
@@ -121,11 +121,11 @@ export default function AdminBannerManagement({ setPage }) {
       const data = await res.json()
 
       if (res.ok && data.success) {
-        alert(editing ? "✅ Banner update ho gaya!" : "✅ Banner add ho gaya!")
+        alert(editing ? "✅ Banner updated successfully!" : "✅ Banner created successfully!")
         resetForm()
         load()
       } else {
-        alert("❌ " + (data.message || "Kuch galat ho gaya"))
+        alert("❌ " + (data.message || "Something went wrong"))
       }
     } catch (e) {
       alert("Error: " + e.message)
@@ -146,22 +146,22 @@ export default function AdminBannerManagement({ setPage }) {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Yeh banner permanently delete ho jayega. Confirm?")) return
+    if (!window.confirm("This banner will be permanently deleted. Continue?")) return
     try {
       const res = await fetch(`${API}/api/banners/${id}`, {
         method: "DELETE", headers: { Authorization: `Bearer ${token()}` }
       })
       const data = await res.json()
-      if (res.ok && data.success) { alert("🗑️ Banner delete ho gaya"); load() }
-      else alert("❌ " + (data.message || "Delete nahi hua"))
+      if (res.ok && data.success) { alert("🗑️ Banner deleted"); load() }
+      else alert("❌ " + (data.message || "Failed to delete"))
     } catch (e) { alert("Error: " + e.message) }
   }
 
   const mediaBadge = (type) => ({
-    image: { emoji: "🖼️", label: "Image", color: "#0369a1", bg: "#e0f2fe" },
-    gif:   { emoji: "🎞️", label: "GIF",   color: "#a16207", bg: "#fef9c3" },
-    video: { emoji: "🎬", label: "Video", color: "#7c3aed", bg: "#ede9fe" },
-  }[type] || { emoji: "📄", label: type, color: "#475569", bg: "#f1f5f9" })
+    image: { emoji: "🖼️", label: "Image", bg: "bg-sky-500/15 text-sky-300 border-sky-500/30" },
+    gif:   { emoji: "🎞️", label: "GIF",   bg: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+    video: { emoji: "🎬", label: "Video", bg: "bg-purple-500/15 text-purple-300 border-purple-500/30" },
+  }[type] || { emoji: "📄", label: type || "Media", bg: "bg-stone-500/15 text-stone-300 border-stone-500/30" })
 
   const placementLabel = (p) => ({
     hero:  "🖼️ Hero Banner",
@@ -171,250 +171,367 @@ export default function AdminBannerManagement({ setPage }) {
   }[p] || p)
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 4px" }}>
-      <button onClick={() => setPage?.("admin")}
-        style={{ background: "none", border: "none", color: "#7c3aed", fontWeight: 700, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 14 }}>
-        ← Back to Dashboard
-      </button>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 18 }}>
+    <div className="space-y-6 select-none max-w-5xl mx-auto">
+      
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1e293b", margin: 0 }}>🎬 Home Banners / Ads</h2>
-          <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0" }}>
-            Home page ke top pe dikhne wala hero banner control karo — photo, GIF, ya video, jo bhi chaho
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ HERO & PROMOTIONS ENGINE
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Marketing Banners & Ad Placements
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Manage high-impact hero media, responsive video ads, and in-app promotional banners.
           </p>
         </div>
+
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          style={{ padding: "10px 18px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}
+          className="px-5 py-3 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
         >
-          ➕ Naya Banner Add Karo
+          ➕ Add New Banner
         </button>
       </div>
 
-      {/* ══ FORM ══ */}
+      {/* ── CREATE / EDIT MODAL FORM ── */}
       {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: "#fff", borderRadius: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", padding: 20, marginBottom: 20 }}>
-          <h3 style={{ fontWeight: 800, fontSize: 15, color: "#374151", margin: "0 0 14px" }}>
-            {editing ? "✏️ Banner Edit Karo" : "➕ Naya Banner"}
-          </h3>
+        <form onSubmit={handleSubmit} className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 shadow-2xl space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <h3 className="font-black text-base text-white uppercase flex items-center gap-2">
+              <span>{editing ? "✏️" : "➕"}</span> {editing ? "Edit Banner Placement" : "Create New Promotion Banner"}
+            </h3>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-stone-400 hover:text-white text-xs font-bold uppercase"
+            >
+              ✕ Close
+            </button>
+          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+          <div className="space-y-4 text-xs">
             <div>
-              <label style={lbl}>Yeh Ad Kahan Dikhega?</label>
-              <select value={form.placement} onChange={e => setForm(f => ({ ...f, placement: e.target.value }))} style={inp}>
-                <option value="hero">🖼️ Top Hero Banner (poori width, sabse upar)</option>
-                <option value="slot1">📱 Vertical Slot 1 (search bar ke neeche)</option>
-                <option value="slot2">📱 Vertical Slot 2 (product list ke neeche)</option>
-                <option value="slot3">📱 Vertical Slot 3 (extra jagah)</option>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                Target Ad Placement Location
+              </label>
+              <select
+                value={form.placement}
+                onChange={e => setForm(f => ({ ...f, placement: e.target.value }))}
+                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-bold focus:outline-none focus:border-[#fbbf24]"
+              >
+                <option value="hero">🖼️ Top Hero Banner (Full width main banner)</option>
+                <option value="slot1">📱 Vertical Slot 1 (Under search bar)</option>
+                <option value="slot2">📱 Vertical Slot 2 (Under product grid)</option>
+                <option value="slot3">📱 Vertical Slot 3 (Extra promotional area)</option>
               </select>
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-                Vertical slots optional hain — jab tak koi banner na daalo, wahan kuch bhi nahi dikhega, page normal rahega.
-              </p>
             </div>
 
-            <div>
-              <label style={lbl}>Media — Desktop / Default (Image / GIF / Video) {editing ? "— badalne ke liye naya select karo" : "*"}</label>
-              <input type="file" accept="image/*,video/*" onChange={onFileChange} style={{ ...inp, padding: "6px" }} />
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-                Video ke liye size chhota rakho (kam se kam 5-10 sec) taake page fast load ho — max 80MB.
-              </p>
+            {/* Desktop Media */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-2">
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300">
+                Desktop / Default Media (Image / GIF / Video) {editing ? "(Choose new to replace)" : "*"}
+              </label>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={onFileChange}
+                className="w-full p-2 bg-[#121814] text-xs text-stone-300 rounded-xl border border-white/10 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-xs file:font-bold"
+              />
 
-              {/* Live preview of newly selected file */}
               {preview && (
-                <div style={{ marginTop: 10, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200 }}>
+                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-48">
                   {preview.type === "video" ? (
-                    <video src={preview.url} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <video src={preview.url} muted autoPlay loop playsInline className="w-full max-h-48 object-cover" />
                   ) : (
-                    <img src={preview.url} alt="preview" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <img src={preview.url} alt="preview" className="w-full max-h-48 object-cover" />
                   )}
                 </div>
               )}
 
-              {/* Existing media preview when editing and no new file chosen yet */}
               {!preview && editing?.media && (
-                <div style={{ marginTop: 10, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200 }}>
+                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-48">
                   {editing.mediaType === "video" ? (
-                    <video src={`${API}${editing.media}`} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <video src={`${API}${editing.media}`} muted autoPlay loop playsInline className="w-full max-h-48 object-cover" />
                   ) : (
-                    <img src={`${API}${editing.media}`} alt="current" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <img src={`${API}${editing.media}`} alt="current" className="w-full max-h-48 object-cover" />
                   )}
                 </div>
               )}
             </div>
 
-            <div>
-              <label style={lbl}>Media — Mobile ke liye Alag (Optional)</label>
-              <input type="file" accept="image/*,video/*" onChange={onFileChangeMobile} style={{ ...inp, padding: "6px" }} />
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-                Agar khali chhoda to mobile pe bhi upar wala (desktop) media hi dikhega. Vertical/portrait video best rahega mobile ke liye.
-              </p>
+            {/* Mobile Media */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-2">
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300">
+                Mobile-Specific Media (Optional - Portrait / 9:16)
+              </label>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={onFileChangeMobile}
+                className="w-full p-2 bg-[#121814] text-xs text-stone-300 rounded-xl border border-white/10 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-xs file:font-bold"
+              />
 
-              {/* Live preview of newly selected mobile file */}
               {previewMobile && (
-                <div style={{ marginTop: 10, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200, width: 130 }}>
+                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-40 w-32">
                   {previewMobile.type === "video" ? (
-                    <video src={previewMobile.url} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <video src={previewMobile.url} muted autoPlay loop playsInline className="w-full max-h-40 object-cover" />
                   ) : (
-                    <img src={previewMobile.url} alt="preview mobile" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                    <img src={previewMobile.url} alt="mobile preview" className="w-full max-h-40 object-cover" />
                   )}
                 </div>
               )}
 
-              {/* Existing mobile media preview when editing */}
               {!previewMobile && !form.removeMobileMedia && editing?.mediaMobile && (
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0", maxHeight: 200, width: 130, marginBottom: 6 }}>
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="rounded-xl overflow-hidden border border-white/10 max-h-40 w-32">
                     {editing.mediaTypeMobile === "video" ? (
-                      <video src={`${API}${editing.mediaMobile}`} muted autoPlay loop playsInline style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                      <video src={`${API}${editing.mediaMobile}`} muted autoPlay loop playsInline className="w-full max-h-40 object-cover" />
                     ) : (
-                      <img src={`${API}${editing.mediaMobile}`} alt="current mobile" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                      <img src={`${API}${editing.mediaMobile}`} alt="current mobile" className="w-full max-h-40 object-cover" />
                     )}
                   </div>
-                  <button type="button" onClick={() => setForm(f => ({ ...f, removeMobileMedia: true, mediaMobile: null }))}
-                    style={{ fontSize: 11, color: "#dc2626", background: "none", border: "none", cursor: "pointer", padding: 0, fontWeight: 700 }}>
-                    ✕ Mobile-specific media hatao (wapas desktop wala hi chalega)
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, removeMobileMedia: true, mediaMobile: null }))}
+                    className="text-xs text-red-400 font-bold hover:underline cursor-pointer"
+                  >
+                    ✕ Remove Mobile Media
                   </button>
                 </div>
               )}
-              {form.removeMobileMedia && (
-                <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6, fontWeight: 600 }}>
-                  Save karne ke baad mobile-specific media hat jayegi.
-                </p>
-              )}
             </div>
 
-            <div>
-              <label style={lbl}>Heading (optional)</label>
-              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Naya Saal, Nayi Deals!" style={inp} />
-            </div>
-
-            <div>
-              <label style={lbl}>Badge / Trust Text (optional)</label>
-              <input value={form.eyebrow} onChange={e => setForm(f => ({ ...f, eyebrow: e.target.value }))}
-                placeholder="e.g. ⭐ 4.3/5 Rating, 🔥 Limited Time Offer" style={inp} />
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-                Chhota pill-style badge jo heading ke upar dikhta hai — professional trust signal ke liye
-              </p>
-            </div>
-
-            <div>
-              <label style={lbl}>Subheading (optional)</label>
-              <input value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
-                placeholder="e.g. 50% tak ki chhoot sirf is hafte" style={inp} />
-            </div>
-
-            <div>
-              <label style={lbl}>Text Alignment</label>
-              <select value={form.align} onChange={e => setForm(f => ({ ...f, align: e.target.value }))} style={inp}>
-                <option value="left">⬅️ Left (image ke saath side-by-side feel)</option>
-                <option value="center">⏺️ Center (bold, symmetrical look)</option>
-              </select>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {/* Text Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={lbl}>Button Text (optional)</label>
-                <input value={form.buttonText} onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))}
-                  placeholder="e.g. Abhi Kharido" style={inp} />
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Heading (Optional)
+                </label>
+                <input
+                  value={form.title}
+                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                  placeholder="e.g. Festival Mega Sale"
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
               </div>
+
               <div>
-                <label style={lbl}>Link Type</label>
-                <select value={form.linkType} onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))} style={inp}>
-                  <option value="internal">📱 Internal (app ke andar)</option>
-                  <option value="external">🔗 External (URL)</option>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Badge / Eyebrow Text (Optional)
+                </label>
+                <input
+                  value={form.eyebrow}
+                  onChange={e => setForm(f => ({ ...f, eyebrow: e.target.value }))}
+                  placeholder="e.g. ⭐ 4.8/5 Rating · 50% OFF"
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                Subheading / Description (Optional)
+              </label>
+              <input
+                value={form.subtitle}
+                onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
+                placeholder="e.g. Claim exclusive discounts and rewards today"
+                className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+              />
+            </div>
+
+            {/* Button & Link */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  CTA Button Label (Optional)
+                </label>
+                <input
+                  value={form.buttonText}
+                  onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))}
+                  placeholder="e.g. Shop Now"
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Link Type
+                </label>
+                <select
+                  value={form.linkType}
+                  onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                >
+                  <option value="internal">📱 Internal Route (In-App)</option>
+                  <option value="external">🔗 External URL</option>
                 </select>
               </div>
-            </div>
 
-            <div>
-              <label style={lbl}>{form.linkType === "internal" ? "App ka Page" : "Button Link / URL"}</label>
-              {form.linkType === "internal" ? (
-                <select value={form.buttonLink} onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))} style={inp}>
-                  <option value="">— Page select karo (optional) —</option>
-                  {PAGE_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-                </select>
-              ) : (
-                <input value={form.buttonLink} onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
-                  placeholder="https://example.com/offer" style={inp} />
-              )}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "end" }}>
               <div>
-                <label style={lbl}>Display Order (chhota number pehle)</label>
-                <input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: e.target.value }))} style={inp} />
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Destination Target
+                </label>
+                {form.linkType === "internal" ? (
+                  <select
+                    value={form.buttonLink}
+                    onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
+                    className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  >
+                    <option value="">— Select internal page —</option>
+                    {PAGE_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={form.buttonLink}
+                    onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
+                    placeholder="https://example.com/promo"
+                    className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                  />
+                )}
               </div>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "#374151", paddingBottom: 9 }}>
-                <input type="checkbox" checked={form.overlay} onChange={e => setForm(f => ({ ...f, overlay: e.target.checked }))} />
-                Dark overlay (text padhne mein aasani)
+            </div>
+
+            {/* Alignment & Order & Overlay */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-2">
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Text Alignment
+                </label>
+                <select
+                  value={form.align}
+                  onChange={e => setForm(f => ({ ...f, align: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                >
+                  <option value="left">⬅️ Left Aligned</option>
+                  <option value="center">⏺️ Center Aligned</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  value={form.order}
+                  onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-stone-300 font-bold cursor-pointer pt-4">
+                <input
+                  type="checkbox"
+                  checked={form.overlay}
+                  onChange={e => setForm(f => ({ ...f, overlay: e.target.checked }))}
+                  className="rounded border-white/20 bg-black/50 text-[#fbbf24]"
+                />
+                Apply Dark Gradient Overlay
               </label>
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button type="button" onClick={resetForm}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 9, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+          <div className="flex gap-2 pt-4 border-t border-white/[0.06]">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="flex-1 py-3 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={busy}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 9, border: "none", background: busy ? "#c4b5fd" : "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: busy ? "default" : "pointer" }}>
-              {busy ? "Saving..." : editing ? "💾 Update Karo" : "✅ Add Karo"}
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase cursor-pointer shadow-lg active:scale-95 disabled:opacity-50"
+            >
+              {busy ? "Saving Banner..." : editing ? "💾 Update Banner" : "✅ Deploy Banner"}
             </button>
           </div>
         </form>
       )}
 
-      {/* ══ LIST ══ */}
+      {/* ── BANNERS LIST ── */}
       {loading ? (
-        <p style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>Loading...</p>
+        <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
+          Loading active marketing banners...
+        </div>
       ) : banners.length === 0 ? (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 40, textAlign: "center", color: "#94a3b8" }}>
-          Koi banner add nahi kiya abhi tak. "➕ Naya Banner Add Karo" pe click karo.
+        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+          <span className="text-3xl block mb-2">🎬</span>
+          <h3 className="text-sm font-bold text-white uppercase">No Banners Deployed</h3>
+          <p className="text-xs text-stone-400 mt-1">Click "Add New Banner" above to publish your first promotion.</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className="space-y-3">
           {banners.map(b => {
             const badge = mediaBadge(b.mediaType)
             return (
-              <div key={b._id} style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", opacity: b.isActive ? 1 : 0.55 }}>
-                <div style={{ width: 84, height: 56, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#f1f5f9" }}>
-                  {b.mediaType === "video" ? (
-                    <video src={`${API}${b.media}`} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  ) : (
-                    <img src={`${API}${b.media}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  )}
+              <div
+                key={b._id}
+                className={`bg-[#111713] rounded-3xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md ${
+                  b.isActive ? "opacity-100" : "opacity-50"
+                }`}
+              >
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="w-24 h-16 rounded-2xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                    {b.mediaType === "video" ? (
+                      <video src={`${API}${b.media}`} muted className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={`${API}${b.media}`} alt="" className="w-full h-full object-cover" />
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase border ${badge.bg}`}>
+                        {badge.emoji} {badge.label}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-stone-300 border border-white/10 text-[9px] font-mono font-bold uppercase">
+                        {placementLabel(b.placement)}
+                      </span>
+                      <h3 className="font-bold text-sm text-white truncate">
+                        {b.title || "(No heading title)"}
+                      </h3>
+                    </div>
+
+                    <div className="text-xs text-stone-400 truncate mt-1">
+                      {b.subtitle || "—"}
+                    </div>
+
+                    <div className="text-[10px] font-mono text-[#fbbf24] mt-1">
+                      Priority Order: {b.order} {b.buttonText && `· CTA: "${b.buttonText}"`}
+                    </div>
+                  </div>
                 </div>
 
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, background: badge.bg, color: badge.color }}>
-                      {badge.emoji} {badge.label}
-                    </span>
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, background: "#f1f5f9", color: "#475569" }}>
-                      {placementLabel(b.placement)}
-                    </span>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>{b.title || "(No heading)"}</div>
-                  </div>
-                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 3 }}>{b.subtitle || "—"}</div>
-                  <div style={{ fontSize: 11, color: "#7c3aed", marginTop: 2 }}>
-                    order: {b.order} {b.buttonText && <>· button: "{b.buttonText}"</>}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <button onClick={() => toggleActive(b)}
-                    style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                      background: b.isActive ? "#dcfce7" : "#fee2e2", color: b.isActive ? "#166534" : "#991b1b" }}>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <button
+                    onClick={() => toggleActive(b)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border ${
+                      b.isActive
+                        ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                        : "bg-stone-500/15 text-stone-400 border-stone-500/30 hover:bg-stone-500/25"
+                    }`}
+                  >
                     {b.isActive ? "🟢 Active" : "⚪ Hidden"}
                   </button>
-                  <button onClick={() => openEdit(b)}
-                    style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#374151", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+
+                  <button
+                    onClick={() => openEdit(b)}
+                    className="px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  >
                     ✏️ Edit
                   </button>
-                  <button onClick={() => handleDelete(b._id)}
-                    style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fee2e2", color: "#991b1b", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+
+                  <button
+                    onClick={() => handleDelete(b._id)}
+                    className="px-3 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase cursor-pointer"
+                  >
                     🗑️
                   </button>
                 </div>
@@ -423,9 +540,8 @@ export default function AdminBannerManagement({ setPage }) {
           })}
         </div>
       )}
+
     </div>
   )
 }
 
-const lbl = { display: "block", fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 5 }
-const inp = { width: "100%", borderRadius: 8, border: "1px solid #e2e8f0", padding: "9px 11px", fontSize: 13, boxSizing: "border-box", fontFamily: "inherit" }

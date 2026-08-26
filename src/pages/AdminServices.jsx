@@ -65,7 +65,7 @@ export default function AdminServices({ setPage }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.title.trim() || !form.link.trim()) {
-      alert("⚠️ Title aur Link dono daalna zaroori hai")
+      alert("⚠️ Title and Link are required")
       return
     }
     setBusy(true)
@@ -87,11 +87,11 @@ export default function AdminServices({ setPage }) {
       const data = await res.json()
 
       if (res.ok) {
-        alert(editing ? "✅ Service update ho gayi!" : "✅ Service add ho gayi!")
+        alert(editing ? "✅ Service updated successfully!" : "✅ Service created successfully!")
         resetForm()
         load()
       } else {
-        alert("❌ " + (data.message || "Kuch galat ho gaya"))
+        alert("❌ " + (data.message || "Something went wrong"))
       }
     } catch (e) {
       alert("Error: " + e.message)
@@ -112,171 +112,279 @@ export default function AdminServices({ setPage }) {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Yeh service permanently delete ho jayegi. Confirm?")) return
+    if (!window.confirm("This service card will be permanently deleted. Continue?")) return
     try {
       const res = await fetch(`${API}/api/services/${id}`, {
         method: "DELETE", headers: { Authorization: `Bearer ${token()}` }
       })
-      if (res.ok) { alert("🗑️ Service delete ho gayi"); load() }
+      if (res.ok) { alert("🗑️ Service deleted"); load() }
     } catch (e) { alert("Error: " + e.message) }
   }
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 4px" }}>
-      <button onClick={() => setPage?.("admin")}
-        style={{ background: "none", border: "none", color: "#7c3aed", fontWeight: 700, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 14 }}>
-        ← Back to Dashboard
-      </button>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 18 }}>
+    <div className="space-y-6 select-none max-w-5xl mx-auto">
+      
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1e293b", margin: 0 }}>🧩 Manage Services</h2>
-          <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0" }}>Link cards add karo jo users ko Services page pe dikhengi — click karne par seedha link pe le jayengi</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ APP SHORTCUTS & HUBS
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Consultation & Link Services Hub
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Configure direct links, consultation portals, and interactive service widgets across the app.
+          </p>
         </div>
+
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          style={{ padding: "10px 18px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}
+          className="px-5 py-3 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
         >
-          ➕ Naya Service Add Karo
+          ➕ Add New Service
         </button>
       </div>
 
-      {/* ══ FORM ══ */}
+      {/* ── CREATE / EDIT FORM ── */}
       {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: "#fff", borderRadius: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", padding: 20, marginBottom: 20 }}>
-          <h3 style={{ fontWeight: 800, fontSize: 15, color: "#374151", margin: "0 0 14px" }}>
-            {editing ? "✏️ Service Edit Karo" : "➕ Naya Service"}
-          </h3>
+        <form onSubmit={handleSubmit} className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 shadow-2xl space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <h3 className="font-black text-base text-white uppercase flex items-center gap-2">
+              <span>{editing ? "✏️" : "➕"}</span> {editing ? "Edit Service Card" : "Create New Service"}
+            </h3>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-stone-400 hover:text-white text-xs font-bold uppercase"
+            >
+              ✕ Close
+            </button>
+          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+          <div className="space-y-4 text-xs">
             <div>
-              <label style={lbl}>Title *</label>
-              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. New Year Offer, Refer & Earn, Latest Blog..." style={inp} />
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                Service Title <span className="text-red-400">*</span>
+              </label>
+              <input
+                value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Free Doctor Consultation, Refer & Earn..."
+                className="w-full p-3 bg-black/40 text-white rounded-xl border border-white/10 font-bold focus:outline-none focus:border-[#fbbf24]"
+              />
             </div>
 
             <div>
-              <label style={lbl}>Description (optional)</label>
-              <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Short line jo card pe dikhegi..." rows={2} style={{ ...inp, resize: "vertical" }} />
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                Description (Optional)
+              </label>
+              <textarea
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="Short tagline shown on the service card..."
+                rows={2}
+                className="w-full p-3 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+              />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={lbl}>Link Type</label>
-                <select value={form.linkType} onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))} style={inp}>
-                  <option value="external">🔗 External (naya tab, koi bhi URL)</option>
-                  <option value="internal">📱 Internal (app ke andar ka page)</option>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Link Type
+                </label>
+                <select
+                  value={form.linkType}
+                  onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                >
+                  <option value="external">🔗 External Web URL (Opens in new tab)</option>
+                  <option value="internal">📱 In-App Screen (Native routing)</option>
                 </select>
               </div>
+
               <div>
-                <label style={lbl}>Card Style</label>
-                <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} style={inp}>
-                  <option value="square">⬛ Square</option>
-                  <option value="video">▭ Wide</option>
-                  <option value="banner">📰 Banner (full width, chhota height)</option>
-                  <option value="round">⚪ Round (gol icon-style)</option>
-                  <option value="list">📋 List Row (compact, ek line)</option>
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Card Display Style
+                </label>
+                <select
+                  value={form.type}
+                  onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                >
+                  <option value="square">⬛ Square Card</option>
+                  <option value="video">▭ Wide Format</option>
+                  <option value="banner">📰 Full-Width Banner</option>
+                  <option value="round">⚪ Circular Icon</option>
+                  <option value="list">📋 Compact List Row</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label style={lbl}>Category / Section (partition ke liye)</label>
-              <input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                placeholder="e.g. Blogs, Offers, Videos, Important Links..." style={inp} list="category-suggestions" />
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                Category / Section Group
+              </label>
+              <input
+                value={form.category}
+                onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                placeholder="e.g. Health Consultations, Blogs, Exclusive Offers..."
+                list="category-suggestions"
+                className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+              />
               <datalist id="category-suggestions">
                 {existingCategories.map(c => <option key={c} value={c} />)}
               </datalist>
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-                Same naam ki category daalne se services us section ke neeche group ho jayengi (e.g. sab "Blogs" wali ek saath dikhengi)
-              </p>
             </div>
 
             <div>
-              <label style={lbl}>
-                {form.linkType === "internal" ? "App ka Page Select Karo *" : "Link / URL *"}
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                {form.linkType === "internal" ? "Target Internal Screen *" : "Destination URL *"}
               </label>
               {form.linkType === "internal" ? (
-                <select value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} style={inp}>
-                  <option value="">— Page select karo —</option>
+                <select
+                  value={form.link}
+                  onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white font-bold rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                >
+                  <option value="">— Select internal screen —</option>
                   {PAGE_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                 </select>
               ) : (
-                <input value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
-                  placeholder="https://example.com/blog-post" style={inp} />
+                <input
+                  value={form.link}
+                  onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
+                  placeholder="https://consultation.example.com"
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
               )}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={lbl}>Display Order (chhota number pehle)</label>
-                <input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: e.target.value }))} style={inp} />
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Display Priority Order
+                </label>
+                <input
+                  type="number"
+                  value={form.order}
+                  onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
+                  className="w-full p-2.5 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24]"
+                />
               </div>
+
               <div>
-                <label style={lbl}>Thumbnail Image (optional)</label>
-                <input type="file" accept="image/*" onChange={e => setForm(f => ({ ...f, image: e.target.files[0] }))} style={{ ...inp, padding: "6px" }} />
+                <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Thumbnail Asset (Optional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setForm(f => ({ ...f, image: e.target.files[0] }))}
+                  className="w-full p-2 bg-[#121814] text-xs text-stone-300 rounded-xl border border-white/10 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-xs file:font-bold"
+                />
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button type="button" onClick={resetForm}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 9, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+          <div className="flex gap-2 pt-4 border-t border-white/[0.06]">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="flex-1 py-3 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={busy}
-              style={{ flex: 1, padding: "10px 0", borderRadius: 9, border: "none", background: busy ? "#c4b5fd" : "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: busy ? "default" : "pointer" }}>
-              {busy ? "Saving..." : editing ? "💾 Update Karo" : "✅ Add Karo"}
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase cursor-pointer shadow-lg active:scale-95 disabled:opacity-50"
+            >
+              {busy ? "Saving Service..." : editing ? "💾 Update Service" : "✅ Deploy Service"}
             </button>
           </div>
         </form>
       )}
 
-      {/* ══ LIST ══ */}
+      {/* ── SERVICES LIST GROUPED BY CATEGORY ── */}
       {loading ? (
         <InlineLoader minHeight={140} />
       ) : services.length === 0 ? (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 40, textAlign: "center", color: "#94a3b8" }}>
-          Koi service add nahi ki hai abhi tak. "➕ Naya Service Add Karo" pe click karo.
+        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+          <span className="text-3xl block mb-2">🧩</span>
+          <h3 className="text-sm font-bold text-white uppercase">No Services Configured</h3>
+          <p className="text-xs text-stone-400 mt-1">Click "Add New Service" to create shortcuts and links.</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 22 }}>
+        <div className="space-y-6">
           {existingCategories.map(cat => (
-            <div key={cat}>
-              <h4 style={{ fontSize: 12, fontWeight: 800, color: "#7c3aed", textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 8px 4px" }}>
-                📁 {cat}
+            <div key={cat} className="space-y-3">
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#fbbf24] px-1 flex items-center gap-2">
+                <span>📁</span> Section: {cat}
               </h4>
-              <div style={{ display: "grid", gap: 10 }}>
-                {services.filter(s => (s.category || "General") === cat).map(s => (
-                  <div key={s._id} style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", opacity: s.isActive ? 1 : 0.55 }}>
-                    {s.image ? (
-                      <img src={`${API}${s.image}`} alt="" style={{ width: 52, height: 52, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: 52, height: 52, borderRadius: 10, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🧩</div>
-                    )}
 
-                    <div style={{ flex: 1, minWidth: 160 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>{s.title}</div>
-                      <div style={{ fontSize: 12, color: "#94a3b8" }}>{s.description || "—"}</div>
-                      <div style={{ fontSize: 11, color: "#7c3aed", marginTop: 2 }}>
-                        {s.linkType === "internal" ? "📱 internal:" : "🔗 external:"} {s.link}
-                        <span style={{ marginLeft: 8, color: "#94a3b8" }}>· style: {s.type}</span>
+              <div className="space-y-3">
+                {services.filter(s => (s.category || "General") === cat).map(s => (
+                  <div
+                    key={s._id}
+                    className={`bg-[#111713] rounded-3xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md ${
+                      s.isActive ? "opacity-100" : "opacity-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      {s.image ? (
+                        <img src={`${API}${s.image}`} alt="" className="w-14 h-14 rounded-2xl object-cover border border-white/10 shrink-0" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center text-xl shrink-0">
+                          🧩
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-sm text-white truncate">
+                            {s.title}
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-stone-400 border border-white/10 text-[9px] font-mono font-bold uppercase">
+                            {s.type}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-stone-400 truncate mt-0.5">
+                          {s.description || "—"}
+                        </div>
+
+                        <div className="text-[10px] font-mono text-sky-400 mt-1 truncate">
+                          {s.linkType === "internal" ? "📱 In-App Screen:" : "🔗 External Link:"} {s.link}
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <button onClick={() => toggleActive(s)}
-                        style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                          background: s.isActive ? "#dcfce7" : "#fee2e2", color: s.isActive ? "#166534" : "#991b1b" }}>
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      <button
+                        onClick={() => toggleActive(s)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border ${
+                          s.isActive
+                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
+                            : "bg-stone-500/15 text-stone-400 border-stone-500/30 hover:bg-stone-500/25"
+                        }`}
+                      >
                         {s.isActive ? "🟢 Active" : "⚪ Hidden"}
                       </button>
-                      <button onClick={() => openEdit(s)}
-                        style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#374151", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+
+                      <button
+                        onClick={() => openEdit(s)}
+                        className="px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+                      >
                         ✏️ Edit
                       </button>
-                      <button onClick={() => handleDelete(s._id)}
-                        style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fee2e2", color: "#991b1b", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+
+                      <button
+                        onClick={() => handleDelete(s._id)}
+                        className="px-3 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase cursor-pointer"
+                      >
                         🗑️
                       </button>
                     </div>
@@ -287,9 +395,8 @@ export default function AdminServices({ setPage }) {
           ))}
         </div>
       )}
+
     </div>
   )
 }
 
-const lbl = { display: "block", fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 5 }
-const inp = { width: "100%", borderRadius: 8, border: "1px solid #e2e8f0", padding: "9px 11px", fontSize: 13, boxSizing: "border-box", fontFamily: "inherit" }

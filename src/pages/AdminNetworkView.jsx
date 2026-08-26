@@ -6,10 +6,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import InlineLoader from "../components/InlineLoader"
 
 const RC = {
-  admin:       { bg:"#f5f3ff", border:"#7c3aed", text:"#5b21b6", dot:"#7c3aed", icon:"👑", label:"Admin" },
-  distributor: { bg:"#f0fdf4", border:"#16a34a", text:"#15803d", dot:"#16a34a", icon:"🏢", label:"Distributor" },
-  seller:      { bg:"#eff6ff", border:"#3b82f6", text:"#1d4ed8", dot:"#3b82f6", icon:"🛒", label:"Seller" },
-  user:        { bg:"#f8fafc", border:"#94a3b8", text:"#475569", dot:"#94a3b8", icon:"👤", label:"User" },
+  admin:       { bg:"bg-purple-950/40", border:"border-purple-500/30", text:"text-purple-300", dot:"#a855f7", icon:"👑", label:"Admin" },
+  distributor: { bg:"bg-emerald-950/40", border:"border-emerald-500/30", text:"text-emerald-300", dot:"#10b981", icon:"🏢", label:"Distributor" },
+  seller:      { bg:"bg-sky-950/40", border:"border-sky-500/30", text:"text-sky-300", dot:"#38bdf8", icon:"🛒", label:"Seller" },
+  user:        { bg:"bg-stone-900/40", border:"border-stone-700/40", text:"text-stone-300", dot:"#94a3b8", icon:"👤", label:"User" },
 }
 const getRC     = (role) => RC[role] || RC.user
 const ROLE_SORT = { distributor:0, seller:1, user:2, admin:3 }
@@ -17,19 +17,24 @@ const sortKids  = (arr) => [...(arr||[])].sort((a,b)=>(ROLE_SORT[a.role]??9)-(RO
 
 function LevelBadge({ level }) {
   const cfgs = [null,
-    {bg:"#fef9c3",color:"#92400e",label:"L1 • Commission"},
-    {bg:"#dcfce7",color:"#166534",label:"L2 • Commission"},
-    {bg:"#dbeafe",color:"#1e40af",label:"L3 • Commission"},
-    {bg:"#fce7f3",color:"#9d174d",label:"L4 • Coins"},
+    { bg:"bg-amber-500/15", color:"text-amber-300", border:"border-amber-500/30", label:"L1 · Commission" },
+    { bg:"bg-emerald-500/15", color:"text-emerald-300", border:"border-emerald-500/30", label:"L2 · Commission" },
+    { bg:"bg-sky-500/15", color:"text-sky-300", border:"border-sky-500/30", label:"L3 · Commission" },
+    { bg:"bg-pink-500/15", color:"text-pink-300", border:"border-pink-500/30", label:"L4 · Coins" },
   ]
-  const cfg = cfgs[level]||{bg:"#f1f5f9",color:"#475569",label:`L${level} • Coins`}
-  return <span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:99,background:cfg.bg,color:cfg.color,border:`1px solid ${cfg.color}22`,whiteSpace:"nowrap"}}>{cfg.label}</span>
+  const cfg = cfgs[level] || { bg:"bg-stone-800", color:"text-stone-300", border:"border-white/10", label:`L${level} · Coins` }
+  return (
+    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${cfg.bg} ${cfg.color} ${cfg.border}`}>
+      {cfg.label}
+    </span>
+  )
 }
 
 function InlineAnalytics({ userId, userName, userRole }) {
   const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
   const c = getRC(userRole)
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -41,57 +46,68 @@ function InlineAnalytics({ userId, userName, userRole }) {
     }
     load()
   }, [userId])
+
   const timeline = data?.timeline?.length ? data.timeline : Array.from({length:7},(_,i)=>({label:`D${i+1}`,total:0}))
+
   return (
-    <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"12px 14px",marginTop:2}}>
+    <div className={`p-4 rounded-2xl border ${c.bg} ${c.border} mt-2 space-y-3`}>
       {loading ? (
-        <InlineLoader label="Analytics load ho rahi hai..." minHeight={60} />
+        <InlineLoader label="Loading user performance metrics..." minHeight={60} />
       ) : !data ? (
-        <div style={{fontSize:12,color:"#94a3b8",textAlign:"center",padding:"8px"}}>Koi data nahi</div>
+        <div className="text-xs text-stone-500 text-center py-2 font-mono">No analytics recorded</div>
       ) : (
         <>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
-            <span style={{fontSize:13}}>{c.icon}</span>
-            <span style={{fontSize:13,fontWeight:700,color:c.text}}>{userName}</span>
-            <span style={{fontSize:10,padding:"1px 7px",borderRadius:99,background:`${c.dot}20`,color:c.dot,fontWeight:700}}>{c.label}</span>
+          <div className="flex items-center gap-2">
+            <span>{c.icon}</span>
+            <span className={`font-bold text-xs ${c.text}`}>{userName}</span>
+            <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 ${c.text}`}>
+              {c.label}
+            </span>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              {label:"Orders",val:data.ordersCount??0,color:"#1d4ed8",bg:"#eff6ff"},
-              {label:"Sales",val:`₹${Number(data.totalSales??0).toLocaleString()}`,color:"#15803d",bg:"#f0fdf4"},
-              {label:"Connected",val:data.subUsersCount??0,color:"#7c3aed",bg:"#faf5ff"},
-              {label:"Products",val:data.assignedProducts?.length??0,color:"#b45309",bg:"#fffbeb"},
+              { label:"Orders", val:data.ordersCount??0, color:"text-sky-300", bg:"bg-sky-950/40 border-sky-500/20" },
+              { label:"Sales Volume", val:`₹${Number(data.totalSales??0).toLocaleString()}`, color:"text-emerald-300", bg:"bg-emerald-950/40 border-emerald-500/20" },
+              { label:"Connected", val:data.subUsersCount??0, color:"text-purple-300", bg:"bg-purple-950/40 border-purple-500/20" },
+              { label:"Products", val:data.assignedProducts?.length??0, color:"text-amber-300", bg:"bg-amber-950/40 border-amber-500/20" },
             ].map((s,i)=>(
-              <div key={i} style={{background:s.bg,borderRadius:8,padding:"6px 8px",textAlign:"center"}}>
-                <div style={{fontSize:9,color:"#64748b",fontWeight:600,marginBottom:2}}>{s.label}</div>
-                <div style={{fontSize:14,fontWeight:800,color:s.color}}>{s.val}</div>
+              <div key={i} className={`p-2.5 rounded-xl border text-center ${s.bg}`}>
+                <div className="text-[9px] font-mono uppercase text-stone-400 font-bold">{s.label}</div>
+                <div className={`text-sm font-black mt-0.5 ${s.color}`}>{s.val}</div>
               </div>
             ))}
           </div>
+
           {data.topProduct && (
-            <div style={{background:"#fff7ed",borderRadius:7,padding:"6px 10px",marginBottom:10,border:"1px solid #fed7aa"}}>
-              <span style={{fontSize:10,color:"#92400e",fontWeight:700}}>🏆 Top: </span>
-              <span style={{fontSize:11,color:"#c2410c",fontWeight:600}}>{data.topProduct.name}</span>
-              <span style={{fontSize:10,color:"#78716c",marginLeft:6}}>{data.topProduct.count} units · ₹{Number(data.topProduct.total).toLocaleString()}</span>
+            <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/20 text-xs flex items-center justify-between gap-2">
+              <span className="font-bold text-amber-300">🏆 Top: {data.topProduct.name}</span>
+              <span className="text-[10px] font-mono text-stone-400">
+                {data.topProduct.count} units · ₹{Number(data.topProduct.total).toLocaleString()}
+              </span>
             </div>
           )}
+
           {data.assignedProducts?.length > 0 && (
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:4}}>📦 Products:</div>
-              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono uppercase font-bold text-stone-400">Assigned Inventory:</div>
+              <div className="flex gap-1.5 flex-wrap">
                 {data.assignedProducts.map(p=>(
-                  <span key={p._id} style={{fontSize:10,padding:"2px 8px",borderRadius:99,background:"#f1f5f9",color:"#334155",border:"1px solid #e2e8f0"}}>{p.title} — ₹{p.price}</span>
+                  <span key={p._id} className="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-black/40 text-stone-300 border border-white/10">
+                    {p.title} — ₹{p.price}
+                  </span>
                 ))}
               </div>
             </div>
           )}
-          <div style={{height:65}}>
+
+          <div className="h-16 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={timeline}>
-                <CartesianGrid strokeDasharray="2 2" stroke="#e2e8f0"/>
-                <XAxis dataKey="label" tick={{fontSize:7}}/>
-                <YAxis tick={{fontSize:7}} width={22}/>
-                <Tooltip contentStyle={{fontSize:10,borderRadius:6,padding:"3px 8px"}}/>
+                <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.05)"/>
+                <XAxis dataKey="label" tick={{fontSize:7, fill:"#78716c"}}/>
+                <YAxis tick={{fontSize:7, fill:"#78716c"}} width={24}/>
+                <Tooltip contentStyle={{background:"#121814", borderColor:"rgba(255,255,255,0.1)", fontSize:10, borderRadius:8}}/>
                 <Line type="monotone" dataKey="total" stroke={c.dot} strokeWidth={2} dot={false}/>
               </LineChart>
             </ResponsiveContainer>
@@ -119,36 +135,51 @@ function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false
   )
 
   return (
-    <div style={{position:"relative"}}>
-      {depth>0&&(<>
-        <div style={{position:"absolute",left:-17,top:0,bottom:isLast?"50%":0,width:2,background:"#e2e8f0"}}/>
-        <div style={{position:"absolute",left:-17,top:18,width:14,height:2,background:"#e2e8f0"}}/>
-      </>)}
-      <div onClick={()=>hasKids&&setOpen(p=>!p)}
-        style={{display:"flex",alignItems:"center",gap:7,padding:"6px 10px",marginBottom:3,borderRadius:9,background:open&&hasKids?c.bg:"#fff",border:`1.5px solid ${open&&hasKids?c.border:"#e8eef4"}`,cursor:hasKids?"pointer":"default",userSelect:"none",transition:"all 0.12s",boxShadow:"0 1px 3px rgba(0,0,0,0.04)"}}
-        onMouseEnter={e=>{if(hasKids)e.currentTarget.style.borderColor=c.border}}
-        onMouseLeave={e=>{if(hasKids&&!(open&&hasKids))e.currentTarget.style.borderColor="#e8eef4"}}
+    <div className="relative">
+      {depth>0&&(
+        <>
+          <div className="absolute left-[-16px] top-0 w-0.5 bg-white/10" style={{bottom: isLast ? "50%" : "0"}} />
+          <div className="absolute left-[-16px] top-[18px] w-3.5 h-0.5 bg-white/10" />
+        </>
+      )}
+      <div
+        onClick={()=>hasKids&&setOpen(p=>!p)}
+        className={`flex items-center gap-2 p-2.5 mb-1.5 rounded-2xl border transition-all cursor-pointer ${
+          open && hasKids ? `${c.bg} ${c.border}` : "bg-black/40 border-white/[0.08] hover:border-white/20"
+        }`}
       >
-        <div style={{width:18,height:18,borderRadius:5,background:hasKids?(open?c.dot:"#e2e8f0"):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          {hasKids&&<span style={{fontSize:8,color:open?"#fff":"#94a3b8",fontWeight:700}}>{open?"▼":"▶"}</span>}
+        <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${
+          hasKids ? (open ? "bg-white/20 text-white" : "bg-white/5 text-stone-400") : "bg-transparent"
+        }`}>
+          {hasKids && <span className="text-[8px] font-bold">{open ? "▼" : "▶"}</span>}
         </div>
-        <span style={{fontSize:13}}>{c.icon}</span>
-        <span style={{fontSize:13,fontWeight:600,color:"#1e293b",flex:1}}>{node.name}</span>
+        <span>{c.icon}</span>
+        <span className="text-xs font-bold text-white flex-1 truncate">{node.name}</span>
         <LevelBadge level={level}/>
-        <span style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:99,background:`${c.dot}15`,color:c.dot,border:`1px solid ${c.dot}30`}}>{c.label}</span>
-        {summary&&<span style={{fontSize:10,color:"#94a3b8",whiteSpace:"nowrap"}}>({summary})</span>}
-        {node.isBlocked&&<span title="Blocked" style={{fontSize:11}}>🚫</span>}
-        <span onClick={e=>{e.stopPropagation();setInlineOpen(p=>!p)}} title="Analytics" style={{fontSize:11,padding:"2px 7px",borderRadius:99,background:inlineOpen?"#3b82f6":"#f1f5f9",color:inlineOpen?"#fff":"#94a3b8",cursor:"pointer",userSelect:"none",flexShrink:0,transition:"all 0.15s"}}>
-          {inlineOpen?"▲":"📊"}
+        <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 ${c.text}`}>
+          {c.label}
         </span>
+        {summary && <span className="text-[10px] text-stone-500 font-mono hidden sm:inline truncate">({summary})</span>}
+        {node.isBlocked && <span title="Blocked">🚫</span>}
+        <button
+          onClick={e=>{e.stopPropagation();setInlineOpen(p=>!p)}}
+          title="Performance Graph"
+          className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+            inlineOpen ? "bg-sky-500 text-white border-sky-400" : "bg-white/[0.06] text-stone-400 border-white/10 hover:text-white"
+          }`}
+        >
+          {inlineOpen ? "▲" : "📊"}
+        </button>
       </div>
-      {inlineOpen&&(
-        <div style={{marginLeft:26,marginBottom:6,marginTop:2}}>
+
+      {inlineOpen && (
+        <div className="ml-6 mb-2">
           <InlineAnalytics userId={node.id||node._id} userName={node.name} userRole={node.role}/>
         </div>
       )}
-      {open&&hasKids&&(
-        <div style={{paddingLeft:28,position:"relative"}}>
+
+      {open && hasKids && (
+        <div className="pl-6 relative">
           {children.map((child,i)=><SubTreeNode key={child.id||child._id||i} node={child} depth={depth+1} isLast={i===children.length-1} level={level+1} hideIfNotUser={hideIfNotUser}/>)}
         </div>
       )}
@@ -164,7 +195,6 @@ function SubUsersList({ subtree, allSubs }) {
   const rawChildren = sortKids(subtree?.children||[])
   const distCount   = rawChildren.filter(c=>c.role==="distributor").length
   const sellerCount = rawChildren.filter(c=>c.role==="seller").length
-  const userCount   = rawChildren.filter(c=>c.role==="user").length
   const total       = allSubs?.length??0
 
   const totalUserCount = (() => {
@@ -194,55 +224,71 @@ function SubUsersList({ subtree, allSubs }) {
   ].filter(Boolean)
 
   return (
-    <div>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:13,fontWeight:700,color:"#1e293b"}}>👥 Connected Users</span>
-          <span style={{fontSize:11,fontWeight:700,padding:"1px 8px",borderRadius:99,background:"#e0e7ff",color:"#4338ca"}}>{total}</span>
+    <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">👥 Connected Network Nodes</span>
+          <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            {total} Total
+          </span>
         </div>
         {rawChildren.length>0&&(
-          <button onClick={()=>setCollapsed(p=>!p)} style={{fontSize:11,padding:"3px 11px",borderRadius:7,border:"1.5px solid #e2e8f0",background:collapsed?"#f8fafc":"#fff",color:"#64748b",cursor:"pointer",fontWeight:600}}>
-            {collapsed?"▼ Show":"▲ Collapse"}
+          <button
+            onClick={()=>setCollapsed(p=>!p)}
+            className="text-xs font-mono font-bold text-stone-400 hover:text-white uppercase cursor-pointer"
+          >
+            {collapsed ? "▼ Expand" : "▲ Collapse"}
           </button>
         )}
       </div>
 
       {!collapsed&&rawChildren.length>0&&(
         <>
-          <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+          <div className="flex gap-2 flex-wrap items-center">
             {tabs.map(tab=>{
-              const isActive=activeFilter===tab.key; const dotColor=tab.dot||"#94a3b8"
+              const isActive=activeFilter===tab.key
               return(
-                <button key={tab.key} onClick={()=>setActiveFilter(tab.key)}
-                  style={{display:"flex",alignItems:"center",gap:5,padding:"4px 11px",borderRadius:99,border:`1.5px solid ${isActive?dotColor:"#e2e8f0"}`,background:isActive?(tab.dot?`${dotColor}12`:"#f1f5f9"):"#fff",color:isActive?dotColor:"#64748b",fontWeight:isActive?700:500,fontSize:12,cursor:"pointer",boxShadow:isActive?`0 0 0 2px ${dotColor}22`:"none",transition:"all 0.12s"}}>
-                  {tab.dot&&<span style={{width:7,height:7,borderRadius:"50%",background:isActive?dotColor:"#94a3b8",display:"inline-block"}}/>}
+                <button
+                  key={tab.key}
+                  onClick={()=>setActiveFilter(tab.key)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-white text-black border-white font-black"
+                      : "bg-[#111713] text-stone-400 border-white/[0.08] hover:bg-white/10"
+                  }`}
+                >
                   {tab.label}
-                  <span style={{fontSize:10,fontWeight:700,padding:"0px 5px",borderRadius:99,background:isActive?`${dotColor}20`:"#f1f5f9",color:isActive?dotColor:"#94a3b8"}}>{tab.count}</span>
+                  <span className="text-[10px] font-mono font-bold opacity-80">({tab.count})</span>
                 </button>
               )
             })}
-            <div style={{marginLeft:"auto",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-              {[1,2,3,4].map(l=><LevelBadge key={l} level={l}/>)}
-            </div>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"#f8fafc",borderRadius:8,border:"1px solid #e2e8f0",marginBottom:10}}>
-            <span style={{color:"#94a3b8",fontSize:14}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name..."
-              style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:"#334155"}}/>
-            {search&&<button onClick={()=>setSearch("")} style={{border:"none",background:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}}>✕</button>}
+
+          <div className="relative">
+            <input
+              value={search}
+              onChange={e=>setSearch(e.target.value)}
+              placeholder="Filter nodes by name..."
+              className="w-full p-2.5 bg-[#121814] text-white text-xs rounded-xl border border-white/10 focus:outline-none focus:border-[#fbbf24] font-medium"
+            />
+            {search && (
+              <button onClick={()=>setSearch("")} className="absolute right-3 top-2.5 text-stone-400 hover:text-white text-xs font-bold">
+                ✕
+              </button>
+            )}
           </div>
         </>
       )}
 
       {total===0?(
-        <div style={{textAlign:"center",padding:"20px 0",color:"#94a3b8",fontSize:13}}>Koi connected user nahi hai</div>
+        <div className="text-center py-6 text-stone-500 text-xs font-mono">No direct downstream nodes connected.</div>
       ):collapsed?(
-        <div style={{textAlign:"center",padding:"10px",color:"#94a3b8",fontSize:12,background:"#f8fafc",borderRadius:8,border:"1px dashed #e2e8f0"}}>{total} users — Show karo dekhne ke liye</div>
+        <div className="text-center py-3 text-stone-500 text-xs font-mono">{total} downstream nodes hidden.</div>
       ):(
-        <div style={{maxHeight:400,overflowY:"auto",paddingRight:4}}>
+        <div className="max-h-96 overflow-y-auto space-y-1 pr-1">
           {searchedFiltered.length>0
             ?searchedFiltered.map((child,i)=><SubTreeNode key={child.id||child._id||i} node={child} depth={0} isLast={i===searchedFiltered.length-1} level={1} hideIfNotUser={activeFilter==="user"}/>)
-            :<div style={{textAlign:"center",padding:"16px 0",color:"#94a3b8",fontSize:12}}>{search?`"${search}" nahi mila`:`Is filter mein koi ${activeFilter} nahi`}</div>
+            :<div className="text-center py-6 text-stone-500 text-xs font-mono">No matching records found.</div>
           }
         </div>
       )}
@@ -266,7 +312,11 @@ export default function AdminNetworkView() {
   const [cpLoading,      setCpLoading]      = useState(false)
   const [cpMsg,          setCpMsg]          = useState("")
 
-  if (!user||user.role!=="admin") return <div className="bg-white p-6 rounded shadow"><p className="text-red-600 font-semibold">❌ Admin access only</p></div>
+  if (!user||user.role!=="admin") return (
+    <div className="p-6 bg-red-950/40 border border-red-500/30 rounded-3xl text-red-300 font-bold text-sm">
+      ❌ Restricted: Super Admin access required.
+    </div>
+  )
 
   useEffect(()=>{loadTree()},[])
 
@@ -319,86 +369,182 @@ export default function AdminNetworkView() {
   }
 
   const finalTimeline=analytics?.timeline?.length?analytics.timeline:Array.from({length:7},(_,i)=>({label:`Day ${i+1}`,total:0}))
-  if(loading) return <div className="bg-white p-6 rounded shadow"><InlineLoader label="Poora network tree load ho raha hai 🌳" minHeight={220} /></div>
-  if(error)   return <div className="bg-white p-6 rounded shadow text-red-600">{error}</div>
+
+  if(loading) return (
+    <div className="bg-[#111713] p-12 rounded-3xl border border-white/[0.08] text-center">
+      <InlineLoader label="Loading enterprise network topology..." minHeight={220} />
+    </div>
+  )
+
+  if(error) return (
+    <div className="bg-red-950/40 p-6 rounded-3xl border border-red-500/30 text-red-300 font-bold text-xs">
+      {error}
+    </div>
+  )
 
   return (
-    <div style={{background:"#fff",borderRadius:12,boxShadow:"0 2px 16px rgba(0,0,0,0.07)",overflow:"hidden"}}>
-      <div style={{padding:"14px 16px",borderBottom:"1px solid #f1f5f9",background:"linear-gradient(135deg,#f8fafc,#f0f4ff)",display:"flex",flexWrap:"wrap",gap:10,alignItems:"center",justifyContent:"space-between"}}>
-        <div><h1 style={{fontSize:16,fontWeight:800,color:"#1e293b",margin:0}}>🌐 Network Hierarchy</h1><p style={{fontSize:11,color:"#94a3b8",margin:"2px 0 0"}}>Kisi bhi user pe click karo</p></div>
-        <div style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer"}} onClick={()=>setShowLines(p=>!p)}>
-          <span style={{fontSize:11,color:"#64748b"}}>Lines</span>
-          <div style={{width:38,height:22,borderRadius:99,background:showLines?"#3b82f6":"#cbd5e1",position:"relative",transition:"background 0.2s"}}><div style={{position:"absolute",top:3,left:showLines?18:3,width:16,height:16,borderRadius:"50%",background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,0.2)",transition:"left 0.2s"}}/></div>
-          <span style={{fontSize:10,color:showLines?"#3b82f6":"#94a3b8",fontWeight:700}}>{showLines?"ON":"OFF"}</span>
+    <div className="space-y-6 select-none max-w-6xl mx-auto">
+      
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ GENEALOGY TOPOLOGY TREE
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Network Hierarchy & Downstream Tree
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Click any network node to inspect sales performance, assign new parent links, or view level depths.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={()=>setShowLines(p=>!p)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+              showLines ? "bg-white/10 text-white border-white/20" : "bg-black/40 text-stone-500 border-white/10"
+            }`}
+          >
+            Topology Lines: {showLines ? "ON" : "OFF"}
+          </button>
         </div>
       </div>
 
-      <div style={{overflowX:"auto",borderBottom:"1px solid #f1f5f9",background:"#f8fafc",minHeight:280}}>
-        {treeData.length===0?<p style={{padding:24,color:"#94a3b8",textAlign:"center"}}>No users in network</p>
-          :<VisualTree data={treeData} showLines={showLines} onSelect={(node)=>{setSelectedUser(node);setAnalytics(null);setNewParentId("");setCpMsg("")}}/>}
+      {/* ── VISUAL TREE CANVAS ── */}
+      <div className="bg-[#111713] rounded-3xl border border-white/[0.08] overflow-x-auto p-4 sm:p-6 shadow-2xl min-h-[300px]">
+        {treeData.length===0?(
+          <div className="text-center py-16 text-stone-500 text-xs font-mono">No nodes registered in network.</div>
+        ):(
+          <VisualTree
+            data={treeData}
+            showLines={showLines}
+            onSelect={(node)=>{setSelectedUser(node);setAnalytics(null);setNewParentId("");setCpMsg("")}}
+          />
+        )}
       </div>
 
-      {selectedUser&&(
-        <div style={{padding:"16px",borderTop:"2px solid #e0e7ff",background:"#fff"}}>
-          <div style={{display:"flex",flexWrap:"wrap",gap:10,alignItems:"flex-start",marginBottom:14}}>
-            <div style={{flex:1,minWidth:160}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                <span style={{fontSize:16,fontWeight:800,color:"#1e293b"}}>{selectedUser.name}</span>
-                <span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:99,background:getRC(selectedUser.role).bg,color:getRC(selectedUser.role).dot,border:`1px solid ${getRC(selectedUser.role).border}`}}>{getRC(selectedUser.role).icon} {getRC(selectedUser.role).label}</span>
+      {/* ── SELECTED NODE DETAILS INSPECTOR ── */}
+      {selectedUser && (
+        <div className="bg-[#111713] rounded-3xl border border-indigo-500/30 p-5 sm:p-7 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-black text-white">{selectedUser.name}</h2>
+                <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${getRC(selectedUser.role).bg} ${getRC(selectedUser.role).text} ${getRC(selectedUser.role).border}`}>
+                  {getRC(selectedUser.role).icon} {getRC(selectedUser.role).label}
+                </span>
               </div>
-              {cpMsg&&<p style={{fontSize:12,marginTop:4}}>{cpMsg}</p>}
+              {cpMsg && <p className="text-xs font-bold text-emerald-300 mt-1">{cpMsg}</p>}
             </div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
-              <select value={range} onChange={e=>setRange(e.target.value)} style={{fontSize:12,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",background:"#f8fafc",color:"#334155",cursor:"pointer"}}>
-                <option value="today">📅 Aaj</option><option value="week">📅 Hafte mein</option><option value="month">📅 Is Mahine</option><option value="year">📅 Is Saal</option><option value="lifetime">♾️ Lifetime</option>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                value={range}
+                onChange={e=>setRange(e.target.value)}
+                className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white font-bold text-xs focus:outline-none"
+              >
+                <option value="today">📅 Today</option>
+                <option value="week">📅 This Week</option>
+                <option value="month">📅 This Month</option>
+                <option value="year">📅 This Year</option>
+                <option value="lifetime">♾️ Lifetime</option>
               </select>
-              <button onClick={()=>{setChangingParent(p=>!p);setCpMsg("")}} style={{fontSize:12,padding:"6px 12px",borderRadius:8,border:"none",background:changingParent?"#e0e7ff":"#4f46e5",color:changingParent?"#4f46e5":"#fff",fontWeight:700,cursor:"pointer"}}>{changingParent?"✕ Cancel":"🔗 Change Parent"}</button>
-              <button onClick={()=>{setSelectedUser(null);setAnalytics(null);setCpMsg("")}} style={{width:32,height:32,borderRadius:"50%",border:"1.5px solid #e2e8f0",background:"#f8fafc",color:"#94a3b8",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>✕</button>
+
+              <button
+                onClick={()=>{setChangingParent(p=>!p);setCpMsg("")}}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase cursor-pointer"
+              >
+                {changingParent ? "✕ Cancel" : "🔗 Change Parent"}
+              </button>
+
+              <button
+                onClick={()=>{setSelectedUser(null);setAnalytics(null);setCpMsg("")}}
+                className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-400 hover:text-white text-xs font-bold flex items-center justify-center cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
           </div>
 
-          {changingParent&&(
-            <div style={{marginBottom:14,padding:"12px 14px",background:"#eef2ff",borderRadius:10,border:"1px solid #c7d2fe",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:12,fontWeight:700,color:"#4f46e5"}}>New Parent:</span>
-              <select value={newParentId} onChange={e=>setNewParentId(e.target.value)} style={{flex:1,minWidth:180,fontSize:12,padding:"6px 10px",borderRadius:8,border:"1.5px solid #c7d2fe",background:"#fff"}}>
-                <option value="">— Root (Admin ke neeche) —</option>
-                {allUsers.filter(u=>String(u._id)!==String(selectedUser.id||selectedUser._id)).map(u=>(<option key={u._id} value={u._id}>{u.name} ({u.role})</option>))}
+          {/* Change Parent Dialog */}
+          {changingParent && (
+            <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex flex-col sm:flex-row items-center gap-3">
+              <span className="text-xs font-bold text-indigo-300 whitespace-nowrap">Target Parent Node:</span>
+              <select
+                value={newParentId}
+                onChange={e=>setNewParentId(e.target.value)}
+                className="w-full sm:flex-1 p-2 bg-[#121814] text-white text-xs font-bold rounded-xl border border-white/10 focus:outline-none"
+              >
+                <option value="">— Root Node (Direct Admin) —</option>
+                {allUsers.filter(u=>String(u._id)!==String(selectedUser.id||selectedUser._id)).map(u=>(
+                  <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
+                ))}
               </select>
-              <button onClick={handleChangeParent} disabled={cpLoading} style={{fontSize:12,padding:"6px 16px",borderRadius:8,border:"none",background:"#4f46e5",color:"#fff",fontWeight:700,cursor:"pointer",opacity:cpLoading?0.6:1}}>{cpLoading?"Saving...":"✓ Save"}</button>
+              <button
+                onClick={handleChangeParent}
+                disabled={cpLoading}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase cursor-pointer disabled:opacity-50"
+              >
+                {cpLoading ? "Linking..." : "✓ Confirm Reassignment"}
+              </button>
             </div>
           )}
 
-          {aLoading&&<div style={{textAlign:"center",padding:"16px",color:"#94a3b8",fontSize:13}}>⏳ Loading analytics...</div>}
-
-          {analytics&&!aLoading&&(
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10}}>
-                {[{label:"📦 Orders",val:analytics.ordersCount??0,bg:"#eff6ff",color:"#1d4ed8"},{label:"💰 Sales",val:`₹${Number(analytics.totalSales??0).toLocaleString()}`,bg:"#f0fdf4",color:"#15803d"},{label:"👥 Connected",val:analytics.subUsersCount??0,bg:"#faf5ff",color:"#7c3aed"},{label:"📋 Products",val:analytics.assignedProducts?.length??0,bg:"#fffbeb",color:"#b45309"}].map((card,i)=>(
-                  <div key={i} style={{background:card.bg,borderRadius:12,padding:"12px 14px",border:`1px solid ${card.color}22`}}>
-                    <div style={{fontSize:11,color:"#64748b",fontWeight:600,marginBottom:4}}>{card.label}</div>
-                    <div style={{fontSize:22,fontWeight:800,color:card.color}}>{card.val}</div>
+          {aLoading ? (
+            <div className="text-center py-12 text-stone-400 text-xs font-mono animate-pulse">
+              Fetching metrics & downstream topology...
+            </div>
+          ) : analytics && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label:"Orders Fulfilled", val:analytics.ordersCount??0, color:"text-sky-300", bg:"bg-sky-950/30 border-sky-500/20" },
+                  { label:"Gross Sales", val:`₹${Number(analytics.totalSales??0).toLocaleString()}`, color:"text-emerald-300", bg:"bg-emerald-950/30 border-emerald-500/20" },
+                  { label:"Downstream Users", val:analytics.subUsersCount??0, color:"text-purple-300", bg:"bg-purple-950/30 border-purple-500/20" },
+                  { label:"Inventory Count", val:analytics.assignedProducts?.length??0, color:"text-amber-300", bg:"bg-amber-950/30 border-amber-500/20" },
+                ].map((card,i)=>(
+                  <div key={i} className={`p-4 rounded-2xl border ${card.bg}`}>
+                    <div className="text-[10px] font-mono uppercase text-stone-400 font-bold">{card.label}</div>
+                    <div className={`text-xl font-black mt-1 ${card.color}`}>{card.val}</div>
                   </div>
                 ))}
               </div>
-              {analytics.topProduct&&(<div style={{background:"#fff7ed",borderRadius:10,padding:"10px 14px",border:"1px solid #fed7aa"}}><div style={{fontSize:11,color:"#92400e",fontWeight:700,marginBottom:4}}>🏆 Best Selling Product</div><div style={{fontSize:14,fontWeight:700,color:"#c2410c"}}>{analytics.topProduct.name}</div><div style={{fontSize:12,color:"#78716c",marginTop:2}}>{analytics.topProduct.count} units · ₹{Number(analytics.topProduct.total).toLocaleString()}</div></div>)}
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:"#1e293b",marginBottom:8}}>📦 Assigned Products</div>
-                {analytics.assignedProducts?.length>0?<div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:160,overflowY:"auto"}}>{analytics.assignedProducts.map(p=>(<div key={p._id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#f8fafc",borderRadius:8,border:"1px solid #e8eef4"}}><span style={{fontSize:13,fontWeight:600,color:"#334155"}}>{p.title}</span><span style={{fontSize:13,fontWeight:700,color:"#16a34a"}}>₹{p.price}</span></div>))}</div>:<p style={{fontSize:12,color:"#94a3b8"}}>Koi product assign nahi</p>}
-              </div>
-              <SubUsersList subtree={(() => {
-                const uid=selectedUser?.id||selectedUser?._id
-                for(const root of treeData){const found=(function find(n){if(!n)return null;if(String(n.id||n._id)===String(uid))return n;for(const ch of(n.children||[])){const r=find(ch);if(r)return r}return null})(root);if(found)return found}
-                return null
-              })()} allSubs={analytics.allSubUsers||[]}/>
-              <div style={{background:"#f8fafc",borderRadius:12,padding:"14px",border:"1px solid #e8eef4"}}>
-                <div style={{fontSize:13,fontWeight:700,color:"#1e293b",marginBottom:10}}>📈 Sales Graph</div>
-                <div style={{height:150}}><ResponsiveContainer width="100%" height="100%"><LineChart data={finalTimeline}><CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/><XAxis dataKey="label" tick={{fontSize:9}}/><YAxis tick={{fontSize:9}}/><Tooltip contentStyle={{fontSize:11,borderRadius:8}}/><Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2.5} dot={false}/></LineChart></ResponsiveContainer></div>
-                {analytics.timeline?.length===0&&<p style={{fontSize:11,color:"#94a3b8",textAlign:"center",marginTop:4}}>Is period mein koi sale nahi</p>}
+
+              {/* Sub Users Tree */}
+              <SubUsersList
+                subtree={(() => {
+                  const uid=selectedUser?.id||selectedUser?._id
+                  for(const root of treeData){const found=(function find(n){if(!n)return null;if(String(n.id||n._id)===String(uid))return n;for(const ch of(n.children||[])){const r=find(ch);if(r)return r}return null})(root);if(found)return found}
+                  return null
+                })()}
+                allSubs={analytics.allSubUsers||[]}
+              />
+
+              {/* Sales Graph */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/[0.08] space-y-3">
+                <div className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                  📈 Lifetime Sales Trajectory
+                </div>
+                <div className="h-44 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={finalTimeline}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
+                      <XAxis dataKey="label" tick={{fontSize:9, fill:"#78716c"}}/>
+                      <YAxis tick={{fontSize:9, fill:"#78716c"}}/>
+                      <Tooltip contentStyle={{background:"#121814", borderColor:"rgba(255,255,255,0.1)", fontSize:11, borderRadius:8}}/>
+                      <Line type="monotone" dataKey="total" stroke="#38bdf8" strokeWidth={2.5} dot={false}/>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           )}
         </div>
       )}
+
     </div>
   )
 }

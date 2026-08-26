@@ -1,34 +1,33 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import InvoiceModal from "../components/InvoiceModal"
 
 const StatusBadge = ({ status }) => {
   const map = {
-    confirmed:    { label:"Confirmed",        bg:"#f0fdf4", color:"#15803d", dot:"#22c55e" },
-    dist_approved:{ label:"Dist. Approved",   bg:"#eff6ff", color:"#1d4ed8", dot:"#3b82f6" },
-    pending:      { label:"Pending",          bg:"#fff7ed", color:"#c2410c", dot:"#f97316" },
-    rejected:     { label:"Rejected",         bg:"#fef2f2", color:"#dc2626", dot:"#ef4444" },
+    confirmed:     { label: "Confirmed",      bg: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", dot: "bg-emerald-400" },
+    dist_approved: { label: "Dist. Approved", bg: "bg-sky-500/15 text-sky-400 border-sky-500/30",         dot: "bg-sky-400" },
+    pending:       { label: "Pending",        bg: "bg-amber-500/15 text-amber-400 border-amber-500/30",     dot: "bg-amber-400" },
+    rejected:      { label: "Rejected",       bg: "bg-red-500/15 text-red-400 border-red-500/30",           dot: "bg-red-400" },
   }
-  const m = map[status] || { label: status, bg:"#f8fafc", color:"#64748b", dot:"#94a3b8" }
+  const m = map[status] || { label: status || "Unknown", bg: "bg-stone-500/15 text-stone-300 border-stone-500/30", dot: "bg-stone-400" }
   return (
-    <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:11, fontWeight:700,
-      padding:"3px 9px", borderRadius:99, background:m.bg, color:m.color, whiteSpace:"nowrap" }}>
-      <span style={{ width:6, height:6, borderRadius:"50%", background:m.dot }} />{m.label}
+    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full border whitespace-nowrap ${m.bg}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
+      {m.label}
     </span>
   )
 }
 
 const NotesCell = ({ order }) => {
   const notes = []
-  if (order.distributorNote) notes.push({ icon:"🏢", text:order.distributorNote, visible:order.distributorNoteVisible, from:"Dist" })
-  if (order.adminNote)       notes.push({ icon:"👑", text:order.adminNote,       visible:order.adminNoteVisible,       from:"Admin" })
-  if (!notes.length) return <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>
+  if (order.distributorNote) notes.push({ icon: "🏢", text: order.distributorNote, visible: order.distributorNoteVisible, from: "Dist" })
+  if (order.adminNote)       notes.push({ icon: "👑", text: order.adminNote,       visible: order.adminNoteVisible,       from: "Admin" })
+  if (!notes.length) return <span className="text-stone-600 text-xs">—</span>
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:4, maxWidth:220 }}>
-      {notes.map((n,i) => (
-        <div key={i} style={{ fontSize:10, padding:"3px 8px", borderRadius:6,
-          background:n.visible?"#f0fdf4":"#f8fafc", border:`1px solid ${n.visible?"#bbf7d0":"#e2e8f0"}`, color:n.visible?"#15803d":"#64748b" }}>
-          {n.icon} <b>{n.from}:</b> "{n.text}"
-          {n.visible && <span style={{ color:"#86efac", marginLeft:4, fontSize:9 }}>👁</span>}
+    <div className="flex flex-col gap-1 max-w-[200px]">
+      {notes.map((n, i) => (
+        <div key={i} className={`text-[10px] px-2 py-1 rounded-lg border leading-tight ${n.visible ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-300" : "bg-white/[0.04] border-white/10 text-stone-400"}`}>
+          {n.icon} <b className="text-white">{n.from}:</b> "{n.text}"
+          {n.visible && <span className="text-emerald-400 ml-1">👁</span>}
         </div>
       ))}
     </div>
@@ -39,6 +38,7 @@ export default function AdminOrders() {
   const [orders,      setOrders]      = useState([])
   const [loading,     setLoading]     = useState(true)
   const [filter,      setFilter]      = useState("all")
+  const [search,      setSearch]      = useState("")
   const [busy,        setBusy]        = useState(null)
   const [modal,       setModal]       = useState(null)
   const [note,        setNote]        = useState("")
@@ -51,11 +51,17 @@ export default function AdminOrders() {
     try {
       setLoading(true)
       const token = localStorage.getItem("token")
-      const url = filter==="all" ? `${import.meta.env.VITE_API_URL}/orders/admin` : `${import.meta.env.VITE_API_URL}/orders/admin?status=${filter}`
-      const res  = await fetch(url, { headers:{ Authorization:`Bearer ${token}` } })
+      const url = filter === "all"
+        ? `${import.meta.env.VITE_API_URL}/orders/admin`
+        : `${import.meta.env.VITE_API_URL}/orders/admin?status=${filter}`
+      const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       const data = await res.json()
       setOrders(Array.isArray(data) ? data : [])
-    } catch(e) {} finally { setLoading(false) }
+    } catch (e) {
+      console.error("Load orders error:", e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [filter])
@@ -66,13 +72,25 @@ export default function AdminOrders() {
       setBusy(modal.orderId)
       const token = localStorage.getItem("token")
       const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/admin-approve/${modal.orderId}`, {
-        method:"PUT", headers:{ Authorization:`Bearer ${token}`, "Content-Type":"application/json" },
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ note, noteVisible })
       })
       const data = await res.json()
-      if (res.ok) { setModal(null); setNote(""); setNoteVisible(false); alert("✅ Final approve!"); load() }
-      else { alert("❌ " + (data.msg || data.message)) }
-    } catch(e) { alert("Error: " + e.message) } finally { setBusy(null) }
+      if (res.ok) {
+        setModal(null)
+        setNote("")
+        setNoteVisible(false)
+        alert("✅ Order Finally Approved!")
+        load()
+      } else {
+        alert("❌ " + (data.msg || data.message))
+      }
+    } catch (e) {
+      alert("Error: " + e.message)
+    } finally {
+      setBusy(null)
+    }
   }
 
   const handleFinalReject = async () => {
@@ -81,236 +99,371 @@ export default function AdminOrders() {
       setBusy(rejectModal.orderId)
       const token = localStorage.getItem("token")
       const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/reject/${rejectModal.orderId}`, {
-        method:"PUT", headers:{ Authorization:`Bearer ${token}`, "Content-Type":"application/json" },
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ note: rejectNote })
       })
       const data = await res.json()
-      if (res.ok) { setRejectModal(null); setRejectNote(""); alert("❌ Order reject ho gaya!"); load() }
-      else { alert("❌ " + (data.msg || data.message)) }
-    } catch(e) { alert("Error: " + e.message) } finally { setBusy(null) }
+      if (res.ok) {
+        setRejectModal(null)
+        setRejectNote("")
+        alert("❌ Order Rejected!")
+        load()
+      } else {
+        alert("❌ " + (data.msg || data.message))
+      }
+    } catch (e) {
+      alert("Error: " + e.message)
+    } finally {
+      setBusy(null)
+    }
   }
 
   const counts = {
     all: orders.length,
-    pending:       orders.filter(o=>o.status==="pending").length,
-    dist_approved: orders.filter(o=>o.status==="dist_approved").length,
-    confirmed:     orders.filter(o=>o.status==="confirmed").length,
-    rejected:      orders.filter(o=>o.status==="rejected").length,
+    pending:       orders.filter(o => o.status === "pending").length,
+    dist_approved: orders.filter(o => o.status === "dist_approved").length,
+    confirmed:     orders.filter(o => o.status === "confirmed").length,
+    rejected:      orders.filter(o => o.status === "rejected").length,
   }
 
-  const fmt     = (n) => Number(n||0).toLocaleString("en-IN")
-  const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN") : "—"
+  const fmt     = (n) => Number(n || 0).toLocaleString("en-IN")
+  const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"
 
   const FILTERS = [
-    { key:"all",           label:"All",            color:"#1e293b" },
-    { key:"pending",       label:"Pending",        color:"#c2410c" },
-    { key:"dist_approved", label:"Dist. Approved", color:"#1d4ed8" },
-    { key:"confirmed",     label:"Confirmed",      color:"#15803d" },
-    { key:"rejected",      label:"Rejected",       color:"#dc2626" },
+    { key: "all",           label: "All Orders",    color: "bg-white/10 text-white border-white/20" },
+    { key: "pending",       label: "Pending",        color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+    { key: "dist_approved", label: "Dist. Approved", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" },
+    { key: "confirmed",     label: "Confirmed",      color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
+    { key: "rejected",      label: "Rejected",       color: "bg-red-500/20 text-red-300 border-red-500/30" },
   ]
 
-  return (
-    <div style={{ fontFamily:"system-ui,sans-serif", padding:"0 4px" }}>
+  const filteredOrders = useMemo(() => {
+    if (!search.trim()) return orders
+    const q = search.toLowerCase().trim()
+    return orders.filter(o => 
+      (o._id || "").toLowerCase().includes(q) ||
+      (o.customerName || "").toLowerCase().includes(q) ||
+      (o.phone || "").toLowerCase().includes(q) ||
+      (o.sellerId?.name || "").toLowerCase().includes(q) ||
+      (o.distributorId?.name || "").toLowerCase().includes(q)
+    )
+  }, [orders, search])
 
-      <div style={{ background:"linear-gradient(135deg,#1e293b,#334155)", borderRadius:14, padding:"18px 22px", marginBottom:18, color:"#fff" }}>
-        <h1 style={{ margin:0, fontWeight:800, fontSize:20 }}>📦 Orders — Admin Panel</h1>
-        <p style={{ margin:"4px 0 0", fontSize:12, opacity:0.7 }}>
-          Stage 1: Distributor → Stage 2: Admin Final | 🧾 Invoice available on every order
-        </p>
+  return (
+    <div className="space-y-6 select-none">
+
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ DISPATCH & ORDER WORKFLOW
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Order Management & Invoicing Hub
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Stage 1: Distributor Review → Stage 2: Admin Final Approval · Invoices Generated Instantaneously
+          </p>
+        </div>
+
+        <div className="w-full md:w-72">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search order ID, customer, phone..."
+            className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-stone-500 focus:outline-none focus:border-[#fbbf24] transition-colors"
+          />
+        </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginBottom:16 }}>
+      {/* ── STATS CARDS ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label:"Pending",       count:counts.pending,       bg:"#fff7ed", color:"#c2410c" },
-          { label:"Dist Approved", count:counts.dist_approved, bg:"#eff6ff", color:"#1d4ed8" },
-          { label:"Confirmed",     count:counts.confirmed,     bg:"#f0fdf4", color:"#15803d" },
-          { label:"Rejected",      count:counts.rejected,      bg:"#fef2f2", color:"#dc2626" },
+          { label: "Pending",       count: counts.pending,       border: "border-amber-500/30", text: "text-amber-400", icon: "⏳" },
+          { label: "Dist Approved", count: counts.dist_approved, border: "border-sky-500/30",   text: "text-sky-400",   icon: "🏢" },
+          { label: "Confirmed",     count: counts.confirmed,     border: "border-emerald-500/30", text: "text-emerald-400", icon: "✅" },
+          { label: "Rejected",      count: counts.rejected,      border: "border-red-500/30",   text: "text-red-400",   icon: "❌" },
         ].map(c => (
-          <div key={c.label} style={{ background:c.bg, borderRadius:10, padding:"10px 14px", textAlign:"center" }}>
-            <div style={{ fontSize:22, fontWeight:800, color:c.color }}>{c.count}</div>
-            <div style={{ fontSize:11, color:c.color, opacity:0.8 }}>{c.label}</div>
+          <div key={c.label} className={`p-4 rounded-2xl bg-[#111713] border ${c.border} text-center`}>
+            <div className="text-xl sm:text-2xl font-black text-white tracking-tight">{c.count}</div>
+            <div className={`text-[10px] font-bold uppercase tracking-wider font-mono mt-1 ${c.text}`}>
+              {c.icon} {c.label}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display:"flex", gap:6, marginBottom:14, flexWrap:"wrap" }}>
+      {/* ── FILTERS ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         {FILTERS.map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)}
-            style={{ padding:"5px 14px", borderRadius:99, border:`1.5px solid ${filter===f.key?f.color:"#e2e8f0"}`,
-              background:filter===f.key?f.color:"#fff", color:filter===f.key?"#fff":f.color,
-              fontWeight:700, fontSize:12, cursor:"pointer" }}>
-            {f.label} ({counts[f.key]??""})
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer border ${
+              filter === f.key
+                ? "bg-[#fbbf24] text-black border-[#fbbf24] font-black shadow-sm"
+                : "bg-[#111713] text-stone-300 border-white/[0.08] hover:bg-white/10"
+            }`}
+          >
+            {f.label} ({counts[f.key] ?? 0})
           </button>
         ))}
       </div>
 
+      {/* ── CONTENT (TABLE & MOBILE CARDS) ── */}
       {loading ? (
-        <div style={{ textAlign:"center", padding:40, color:"#94a3b8" }}>Loading orders...</div>
-      ) : orders.length === 0 ? (
-        <div style={{ textAlign:"center", padding:40, color:"#94a3b8" }}>Koi order nahi mila</div>
+        <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
+          Loading order database...
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <div className="bg-[#111713] p-12 text-center rounded-3xl border border-white/[0.08]">
+          <span className="text-3xl block mb-2">📦</span>
+          <h3 className="text-sm font-bold text-white uppercase">No Orders Found</h3>
+          <p className="text-xs text-stone-400 mt-1">There are no orders matching this filter or search query.</p>
+        </div>
       ) : (
-        <div style={{ overflowX:"auto", borderRadius:12, boxShadow:"0 1px 8px rgba(0,0,0,0.07)", border:"1px solid #e2e8f0" }}>
-          <table style={{ width:"100%", borderCollapse:"collapse", minWidth:900, background:"#fff" }}>
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#111713] shadow-lg">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr style={{ background:"#f8fafc", borderBottom:"2px solid #e2e8f0" }}>
-                {["ORDER","USER","SELLER","DISTRIBUTOR","CUSTOMER","TOTAL","NOTES","STATUS","ACTION"].map(c => (
-                  <th key={c} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:"#64748b", whiteSpace:"nowrap", letterSpacing:"0.04em" }}>{c}</th>
-                ))}
+              <tr className="border-b border-white/[0.08] bg-black/40 text-[10px] font-black uppercase tracking-wider text-stone-400 font-mono">
+                <th className="p-3.5">ORDER</th>
+                <th className="p-3.5">USER</th>
+                <th className="p-3.5">SELLER</th>
+                <th className="p-3.5">DISTRIBUTOR</th>
+                <th className="p-3.5">CUSTOMER</th>
+                <th className="p-3.5">TOTAL</th>
+                <th className="p-3.5">NOTES</th>
+                <th className="p-3.5">STATUS</th>
+                <th className="p-3.5 text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody>
-              {orders.map((order, i) => (
-                <tr key={order._id}
-                  style={{ borderBottom:"1px solid #f1f5f9", background:i%2===0?"#fff":"#fafafa" }}
-                  onMouseEnter={e=>e.currentTarget.style.background="#f0f9ff"}
-                  onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"#fff":"#fafafa"}>
+            <tbody className="divide-y divide-white/[0.04] text-xs">
+              {filteredOrders.map((order) => {
+                const isBusy = busy === order._id
+                return (
+                  <tr key={order._id} className="hover:bg-white/[0.02] transition-colors">
+                    
+                    {/* Order ID & Date & Invoice */}
+                    <td className="p-3.5 whitespace-nowrap">
+                      <div className="font-mono text-xs font-bold text-[#fbbf24]">#{order._id?.slice(-6)}</div>
+                      <div className="text-[10px] text-stone-500 mt-0.5">{fmtDate(order.createdAt)}</div>
+                      <button
+                        onClick={() => setInvoice(order)}
+                        className="mt-1.5 px-2 py-1 rounded-md bg-white/[0.06] hover:bg-white/10 text-stone-300 text-[10px] font-bold flex items-center gap-1 border border-white/10 cursor-pointer"
+                      >
+                        🧾 Invoice
+                      </button>
+                    </td>
 
-                  <td style={{ padding:"11px 14px", whiteSpace:"nowrap" }}>
-                    <div style={{ fontFamily:"monospace", fontSize:12, fontWeight:700, color:"#1e293b" }}>#{order._id?.slice(-6)}</div>
-                    <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{fmtDate(order.createdAt)}</div>
-                    {/* 🧾 INVOICE BUTTON */}
-                    <button onClick={() => setInvoice(order)}
-                      style={{ marginTop:5, padding:"3px 9px", borderRadius:6, border:"1px solid #e2e8f0",
-                        background:"#f8fafc", color:"#475569", fontWeight:700, fontSize:10, cursor:"pointer", display:"flex", alignItems:"center", gap:3 }}>
-                      🧾 Invoice
-                    </button>
-                  </td>
+                    {/* User */}
+                    <td className="p-3.5">
+                      {order.userId?.name ? (
+                        <div>
+                          <div className="font-bold text-sky-400">{order.userId.name}</div>
+                          <div className="text-[10px] text-stone-500">Customer</div>
+                        </div>
+                      ) : <span className="text-stone-600">—</span>}
+                    </td>
 
-                  <td style={{ padding:"11px 14px" }}>
-                    {order.userId?.role==="user" ? (
-                      <div><div style={{ fontWeight:600, fontSize:12, color:"#1d4ed8" }}>{order.userId.name}</div><div style={{ fontSize:10, color:"#93c5fd" }}>user</div></div>
-                    ) : <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>}
-                  </td>
+                    {/* Seller */}
+                    <td className="p-3.5">
+                      {order.sellerId?.name ? (
+                        <div>
+                          <div className="font-bold text-emerald-400">{order.sellerId.name}</div>
+                          <div className="text-[10px] text-stone-500">Seller</div>
+                          {order.onBehalfOfId && (
+                            <div className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/40 text-amber-300 border border-amber-500/20">
+                              {order.placedByName} → {order.onBehalfOfName}
+                            </div>
+                          )}
+                        </div>
+                      ) : <span className="text-stone-600">—</span>}
+                    </td>
 
-                  <td style={{ padding:"11px 14px" }}>
-                    {order.sellerId?.role==="seller" ? (
-                      <div>
-                        <div style={{ fontWeight:600, fontSize:12, color:"#1e293b" }}>{order.sellerId.name}</div>
-                        <div style={{ fontSize:10, color:"#94a3b8" }}>seller</div>
-                        {order.onBehalfOfId && (
-                          <div style={{ marginTop:3, fontSize:9, background:"#fff7ed", color:"#92400e", border:"1px solid #fde68a", borderRadius:4, padding:"2px 6px", display:"inline-block" }}>
-                            {order.placedByName} → {order.onBehalfOfName}
-                          </div>
-                        )}
-                      </div>
-                    ) : <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>}
-                  </td>
+                    {/* Distributor */}
+                    <td className="p-3.5">
+                      {order.distributorId?.name ? (
+                        <div>
+                          <div className="font-bold text-violet-400">{order.distributorId.name}</div>
+                          <div className="text-[10px] text-stone-500">Distributor</div>
+                        </div>
+                      ) : <span className="text-stone-600">—</span>}
+                    </td>
 
-                  <td style={{ padding:"11px 14px" }}>
-                    {order.distributorId ? (
-                      <div><div style={{ fontWeight:600, fontSize:12, color:"#7c3aed" }}>{order.distributorId.name}</div><div style={{ fontSize:10, color:"#c4b5fd" }}>distributor</div></div>
-                    ) : <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>}
-                  </td>
+                    {/* Customer */}
+                    <td className="p-3.5">
+                      <div className="font-bold text-white">{order.customerName || "—"}</div>
+                      <div className="text-[10px] text-stone-400">{order.phone || ""}</div>
+                    </td>
 
-                  <td style={{ padding:"11px 14px" }}>
-                    <div style={{ fontWeight:600, fontSize:12, color:"#1e293b" }}>{order.customerName||"—"}</div>
-                    <div style={{ fontSize:10, color:"#94a3b8" }}>{order.phone||""}</div>
-                    {order.onBehalfOfId && (
-                      <div style={{ marginTop:3, fontSize:10, background:"#fff7ed", color:"#c2410c", border:"1px solid #fed7aa", borderRadius:4, padding:"1px 6px", display:"inline-block" }}>
-                        {order.distributorId?.name||"DB"} → {order.sellerId?.name}
-                      </div>
-                    )}
-                  </td>
+                    {/* Total Amount */}
+                    <td className="p-3.5 whitespace-nowrap">
+                      <div className="font-black text-sm text-[#fbbf24]">₹{fmt(order.total)}</div>
+                      {order.items?.length > 0 && (
+                        <div className="text-[10px] text-stone-500">
+                          {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                        </div>
+                      )}
+                    </td>
 
-                  <td style={{ padding:"11px 14px", whiteSpace:"nowrap" }}>
-                    <div style={{ fontWeight:800, fontSize:13, color:"#16a34a" }}>₹{fmt(order.total)}</div>
-                    {order.items?.length>0 && <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{order.items.length} item{order.items.length>1?"s":""}</div>}
-                  </td>
+                    {/* Notes */}
+                    <td className="p-3.5">
+                      <NotesCell order={order} />
+                    </td>
 
-                  <td style={{ padding:"11px 14px" }}><NotesCell order={order} /></td>
+                    {/* Status */}
+                    <td className="p-3.5 whitespace-nowrap">
+                      <StatusBadge status={order.status} />
+                      {order.approvedByAdmin && order.status === "confirmed" && (
+                        <div className="text-[9px] text-amber-400 font-bold mt-1">👑 Admin Approved</div>
+                      )}
+                    </td>
 
-                  <td style={{ padding:"11px 14px", whiteSpace:"nowrap" }}>
-                    <StatusBadge status={order.status} />
-                    {order.status==="confirmed" && <div style={{ fontSize:9, color:"#16a34a", marginTop:3, fontWeight:600 }}>✅ Confirmed</div>}
-                    {order.approvedByAdmin && order.status==="confirmed" && <div style={{ fontSize:9, color:"#7c3aed", fontWeight:600 }}>👑 Admin approved</div>}
-                  </td>
+                    {/* Actions */}
+                    <td className="p-3.5 whitespace-nowrap text-right">
+                      {order.status === "confirmed" || order.status === "rejected" ? (
+                        <span className="text-[11px] font-bold text-stone-500">
+                          Completed<br />
+                          <span className="text-[9.5px] font-mono">{fmtDate(order.confirmedAt || order.rejectedAt)}</span>
+                        </span>
+                      ) : (
+                        <div className="flex flex-col gap-1.5 items-end">
+                          <button
+                            disabled={isBusy}
+                            onClick={() => { setModal({ orderId: order._id }); setNote(""); setNoteVisible(false) }}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            👑 Final Approve
+                          </button>
+                          <button
+                            disabled={isBusy}
+                            onClick={() => { setRejectModal({ orderId: order._id }); setRejectNote("") }}
+                            className="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 font-bold text-[11px] uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            ❌ Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
 
-                  <td style={{ padding:"11px 14px", whiteSpace:"nowrap" }}>
-                    {order.status==="confirmed"||order.status==="rejected" ? (
-                      <span style={{ fontSize:11, color:"#94a3b8", fontWeight:600 }}>✅ Done<br/><span style={{ fontSize:9 }}>{fmtDate(order.confirmedAt||order.rejectedAt)}</span></span>
-                    ) : (
-                      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                        <button disabled={busy===order._id}
-                          onClick={() => { setModal({ orderId:order._id }); setNote(""); setNoteVisible(false) }}
-                          style={{ padding:"6px 12px", borderRadius:8, border:"none",
-                            background:busy===order._id?"#e2e8f0":"#7c3aed",
-                            color:"#fff", fontWeight:700, fontSize:11, cursor:"pointer" }}>
-                          👑 Final Approve
-                        </button>
-                        <button disabled={busy===order._id}
-                          onClick={() => { setRejectModal({ orderId:order._id }); setRejectNote("") }}
-                          style={{ padding:"6px 12px", borderRadius:8, border:"none",
-                            background:busy===order._id?"#e2e8f0":"#dc2626",
-                            color:"#fff", fontWeight:700, fontSize:11, cursor:"pointer" }}>
-                          ❌ Final Reject
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Final Approve Modal */}
+      {/* ── FINAL APPROVE MODAL ── */}
       {modal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
-          <div style={{ background:"#fff", borderRadius:16, padding:24, width:"100%", maxWidth:420, boxShadow:"0 20px 60px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ margin:"0 0 16px", fontWeight:800, fontSize:16, color:"#1e293b" }}>👑 Final Approve — Admin</h3>
-            <p style={{ fontSize:12, color:"#64748b", marginBottom:14 }}>Yeh action order ko finally confirm karega.</p>
-            <label style={{ display:"block", fontSize:12, fontWeight:700, color:"#374151", marginBottom:6 }}>📝 Admin Note (optional)</label>
-            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="Note likhein..." rows={3}
-              style={{ width:"100%", borderRadius:8, border:"1px solid #e2e8f0", padding:"8px 10px", fontSize:12, resize:"vertical", boxSizing:"border-box", marginBottom:10 }} />
-            <div onClick={() => setNoteVisible(p=>!p)}
-              style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer", marginBottom:16, padding:"8px 12px", borderRadius:8,
-                background:noteVisible?"#f0fdf4":"#f8fafc", border:`1px solid ${noteVisible?"#bbf7d0":"#e2e8f0"}` }}>
-              <div style={{ width:16, height:16, borderRadius:4, border:`2px solid ${noteVisible?"#16a34a":"#d1d5db"}`,
-                background:noteVisible?"#16a34a":"transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                {noteVisible && <span style={{ color:"#fff", fontSize:10, fontWeight:900 }}>✓</span>}
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121814] border border-white/[0.12] rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">👑</span>
+              <h3 className="text-base font-black text-white uppercase">Final Order Approval</h3>
+            </div>
+            <p className="text-xs text-stone-400">
+              Confirming this order will authorize fulfillment and disburse commissions.
+            </p>
+
+            <div>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                📝 Admin Note (Optional)
+              </label>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder="Add instructions or delivery note..."
+                rows={3}
+                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:border-[#fbbf24]"
+              />
+            </div>
+
+            <div
+              onClick={() => setNoteVisible(p => !p)}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors ${
+                noteVisible ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-300" : "bg-black/30 border-white/10 text-stone-400"
+              }`}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] font-black ${
+                noteVisible ? "bg-emerald-500 text-black border-emerald-500" : "border-stone-500"
+              }`}>
+                {noteVisible ? "✓" : ""}
               </div>
-              <span style={{ fontSize:12, fontWeight:600, color:noteVisible?"#15803d":"#374151" }}>
-                {noteVisible ? "👁 Seller/User ko dikhega" : "🔒 Sirf Admin ko dikhega"}
+              <span className="text-xs font-bold">
+                {noteVisible ? "👁 Note Visible to Seller & Customer" : "🔒 Private Note (Admin Only)"}
               </span>
             </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={() => { setModal(null); setNote(""); setNoteVisible(false) }}
-                style={{ flex:1, padding:"10px 0", borderRadius:8, border:"1px solid #e2e8f0", background:"#f8fafc", color:"#374151", fontWeight:700, fontSize:13, cursor:"pointer" }}>Cancel</button>
-              <button onClick={handleFinalApprove} disabled={busy===modal.orderId}
-                style={{ flex:1, padding:"10px 0", borderRadius:8, border:"none",
-                  background:busy===modal.orderId?"#e2e8f0":"#7c3aed", color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer" }}>
-                {busy===modal.orderId?"Processing...":"👑 Final Approve"}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => { setModal(null); setNote(""); setNoteVisible(false) }}
+                className="flex-1 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFinalApprove}
+                disabled={busy === modal.orderId}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase cursor-pointer disabled:opacity-50 shadow-sm"
+              >
+                {busy === modal.orderId ? "Processing..." : "Confirm & Approve"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Final Reject Modal */}
+      {/* ── FINAL REJECT MODAL ── */}
       {rejectModal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
-          <div style={{ background:"#fff", borderRadius:16, padding:24, width:"100%", maxWidth:420, boxShadow:"0 20px 60px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ margin:"0 0 16px", fontWeight:800, fontSize:16, color:"#dc2626" }}>❌ Final Reject — Admin</h3>
-            <p style={{ fontSize:12, color:"#64748b", marginBottom:14 }}>Yeh action order ko permanently reject karega. Yeh undo nahi ho sakta.</p>
-            <label style={{ display:"block", fontSize:12, fontWeight:700, color:"#374151", marginBottom:6 }}>📝 Reject Reason (optional)</label>
-            <textarea value={rejectNote} onChange={e=>setRejectNote(e.target.value)} placeholder="Reason likhein..." rows={3}
-              style={{ width:"100%", borderRadius:8, border:"1px solid #e2e8f0", padding:"8px 10px", fontSize:12, resize:"vertical", boxSizing:"border-box", marginBottom:16 }} />
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={() => { setRejectModal(null); setRejectNote("") }}
-                style={{ flex:1, padding:"10px 0", borderRadius:8, border:"1px solid #e2e8f0", background:"#f8fafc", color:"#374151", fontWeight:700, fontSize:13, cursor:"pointer" }}>Cancel</button>
-              <button onClick={handleFinalReject} disabled={busy===rejectModal.orderId}
-                style={{ flex:1, padding:"10px 0", borderRadius:8, border:"none",
-                  background:busy===rejectModal.orderId?"#e2e8f0":"#dc2626", color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer" }}>
-                {busy===rejectModal.orderId?"Processing...":"❌ Confirm Reject"}
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121814] border border-red-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">❌</span>
+              <h3 className="text-base font-black text-red-400 uppercase">Reject Order</h3>
+            </div>
+            <p className="text-xs text-stone-400">
+              This will mark the order as rejected and cancel the purchase.
+            </p>
+
+            <div>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+                📝 Reason for Rejection
+              </label>
+              <textarea
+                value={rejectNote}
+                onChange={e => setRejectNote(e.target.value)}
+                placeholder="State why this order was rejected..."
+                rows={3}
+                className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:border-red-500"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => { setRejectModal(null); setRejectNote("") }}
+                className="flex-1 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/15 text-stone-300 font-bold text-xs uppercase cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFinalReject}
+                disabled={busy === rejectModal.orderId}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase cursor-pointer disabled:opacity-50 shadow-sm"
+              >
+                {busy === rejectModal.orderId ? "Processing..." : "Confirm Rejection"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Invoice Modal */}
+      {/* ── INVOICE MODAL ── */}
       {invoice && <InvoiceModal order={invoice} onClose={() => setInvoice(null)} viewerRole="admin" />}
+
     </div>
   )
 }

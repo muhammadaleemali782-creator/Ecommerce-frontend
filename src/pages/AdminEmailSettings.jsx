@@ -31,7 +31,7 @@ export default function AdminEmailSettings() {
   /* ── Save ── */
   const handleSave = async () => {
     if (!input.trim()) {
-      setMsg("❌ Domain khali nahi ho sakta")
+      setMsg("❌ Domain cannot be empty")
       return
     }
 
@@ -57,10 +57,10 @@ export default function AdminEmailSettings() {
       }
 
       setDomain(data.domain)
-      setMsg("✅ Domain save ho gaya!")
+      setMsg("✅ Corporate email domain configured successfully!")
 
     } catch {
-      setMsg("❌ Server error")
+      setMsg("❌ Server connection error")
     } finally {
       setSaving(false)
     }
@@ -84,83 +84,121 @@ export default function AdminEmailSettings() {
 
       setDomain("")
       setInput("")
-      setMsg("✅ Domain remove ho gaya — ab free email use hogi")
+      setMsg("✅ Domain cleared — open/free email formats allowed.")
     } catch {
-      setMsg("❌ Server error")
+      setMsg("❌ Server connection error")
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <div className="bg-white p-6 rounded shadow max-w-lg">
-
-      <h2 className="text-xl font-bold mb-1">📧 Email Domain Settings</h2>
-      <p className="text-sm text-gray-500 mb-5">
-        Yeh domain set karne ke baad Request form mein automatically
-        yahi domain lagega. Users sirf apna naam likhenge.
-      </p>
-
-      {/* Current domain badge */}
-      <div className="mb-4">
-        <span className="text-sm font-semibold text-gray-600">Current Domain: </span>
-        {domain ? (
-          <span className="ml-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
-            {domain}
-          </span>
-        ) : (
-          <span className="ml-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-sm">
-            Not set — free email
-          </span>
-        )}
-      </div>
-
-      {/* Input */}
-      <div className="flex gap-2 items-center mb-2">
-        <span className="text-gray-500 font-semibold text-lg">@</span>
-        <input
-          className="border p-2 rounded flex-1 text-sm"
-          placeholder="educaved.com"
-          value={input}
-          onChange={e => setInput(e.target.value.replace(/^@/, ""))}
-        />
-      </div>
-
-      {/* Preview */}
-      {input && (
-        <div className="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded border">
-          Preview: <b>john@{input.replace(/^@/, "")}</b>
-          &nbsp;→ users "john" likhenge, system "{`john@${input.replace(/^@/, "")}`}" banayega
+    <div className="space-y-6 select-none max-w-3xl mx-auto">
+      
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ SYSTEM ONBOARDING RULES
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            Email Domain Configuration
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Enforce unified corporate email suffix during applicant registration and request intake.
+          </p>
         </div>
-      )}
-
-      {/* Buttons */}
-      <div className="flex gap-3">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Domain"}
-        </button>
-
-        {domain && (
-          <button
-            onClick={handleClear}
-            disabled={saving}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
-          >
-            Remove Domain
-          </button>
-        )}
       </div>
 
-      {msg && (
-        <p className={`mt-3 text-sm font-medium ${msg.startsWith("✅") ? "text-green-600" : "text-red-500"}`}>
-          {msg}
-        </p>
-      )}
+      {/* ── CARD CONTENT ── */}
+      <div className="bg-[#111713] p-6 sm:p-8 rounded-3xl border border-white/[0.08] shadow-2xl space-y-6">
+        
+        {/* Current Domain Badge */}
+        <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
+              Active Corporate Domain
+            </div>
+            <div className="text-base font-black text-white mt-0.5 flex items-center gap-2">
+              {domain ? (
+                <>
+                  <span className="text-cyan-400 font-mono">@{domain.replace(/^@/, "")}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[9px] font-mono font-bold">
+                    ENFORCED
+                  </span>
+                </>
+              ) : (
+                <span className="text-stone-400 text-sm font-semibold">
+                  Not Configured (Any email provider permitted)
+                </span>
+              )}
+            </div>
+          </div>
+
+          {domain && (
+            <button
+              onClick={handleClear}
+              disabled={saving}
+              className="px-3.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+            >
+              Remove Restriction
+            </button>
+          )}
+        </div>
+
+        {/* Input Form */}
+        <div className="space-y-3">
+          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-stone-300">
+            Set Enforced Domain Name
+          </label>
+
+          <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-2xl p-1.5 focus-within:border-[#fbbf24] transition-colors">
+            <span className="text-stone-400 font-mono font-bold text-base pl-3">@</span>
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value.replace(/^@/, ""))}
+              placeholder="educaved.com"
+              className="w-full bg-transparent p-2 text-white font-mono text-sm focus:outline-none placeholder-stone-600 font-bold"
+            />
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-6 py-2.5 rounded-xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 disabled:opacity-50 whitespace-nowrap"
+            >
+              {saving ? "Saving..." : "Save Domain"}
+            </button>
+          </div>
+        </div>
+
+        {/* Live Preview Pill */}
+        {input && (
+          <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/20 text-xs text-cyan-200 space-y-1">
+            <div className="font-mono font-bold text-[10px] uppercase tracking-wider text-cyan-400">
+              ⚡ Live Registration Preview
+            </div>
+            <p>
+              Users enter username: <span className="font-mono text-white font-bold">john</span> → System issues account as: <span className="font-mono text-white font-bold">john@{input.replace(/^@/, "")}</span>
+            </p>
+          </div>
+        )}
+
+        {/* Status Message */}
+        {msg && (
+          <div className={`p-4 rounded-2xl text-xs font-bold border flex items-center gap-2 ${
+            msg.startsWith("✅")
+              ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30"
+              : "bg-red-950/60 text-red-300 border-red-500/30"
+          }`}>
+            {msg}
+          </div>
+        )}
+
+      </div>
 
     </div>
   )
 }
+

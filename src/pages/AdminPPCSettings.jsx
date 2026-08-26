@@ -282,82 +282,123 @@ export default function AdminPPCSettings() {
   }
   
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-2 sm:px-4">
+    <div className="space-y-6 select-none max-w-5xl mx-auto">
       
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-4 sm:p-6 text-white">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">⚙️ PPC Settings</h1>
-        <p className="text-sm sm:text-base opacity-90">Configure PPC rates and distribution</p>
+      {/* ── HEADER ── */}
+      <div className="bg-[#121814] p-5 sm:p-6 rounded-3xl border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+              ✦ COMMISSION & LEVEL ENGINE
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+            PPC Calibration & Reward Settings
+          </h1>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">
+            Configure base valuation, commission distribution algorithms, thresholds, and tier milestone rewards.
+          </p>
+        </div>
       </div>
-      
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="font-semibold text-green-900 mb-2">💚 Direct Seller</h3>
-          <p className="text-sm text-green-800">Gets 50% of PPC value</p>
+
+      {/* ── DISTRIBUTION QUICK CARDS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="bg-[#111713] border border-emerald-500/30 p-4 rounded-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">💚</span>
+            <h3 className="font-bold text-xs text-emerald-400 uppercase tracking-wider">Direct Seller</h3>
+          </div>
+          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.directRate || 50}%</span> of generated PPC value</p>
         </div>
-        
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">💙 Parent Seller</h3>
-          <p className="text-sm text-blue-800">Gets 25% of PPC value</p>
+
+        <div className="bg-[#111713] border border-sky-500/30 p-4 rounded-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">💙</span>
+            <h3 className="font-bold text-xs text-sky-400 uppercase tracking-wider">Parent Seller</h3>
+          </div>
+          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.parentRate || 25}%</span> of generated PPC value</p>
         </div>
-        
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <h3 className="font-semibold text-purple-900 mb-2">💜 Distributor</h3>
-          <p className="text-sm text-purple-800">Gets 25% of PPC value</p>
+
+        <div className="bg-[#111713] border border-purple-500/30 p-4 rounded-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">💜</span>
+            <h3 className="font-bold text-xs text-purple-400 uppercase tracking-wider">Distributor</h3>
+          </div>
+          <p className="text-xs text-stone-400">Receives <span className="font-black text-white">{formData.distributorRate || 25}%</span> of generated PPC value</p>
         </div>
-        
       </div>
-      
-      {/* Settings Form */}
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Configure Rates</h2>
-        
+
+      {/* ── SETTINGS FORM ── */}
+      <div className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 shadow-xl">
+        <h2 className="text-lg font-black text-white uppercase tracking-tight mb-4 flex items-center gap-2">
+          <span>⚙️</span> Financial & Threshold Parameters
+        </h2>
+
         {message.text && (
-          <div className={`
-            p-4 rounded-lg mb-4
-            ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-          `}>
+          <div className={`p-4 rounded-2xl mb-6 text-xs font-bold border flex items-center gap-2 ${
+            message.type === "success"
+              ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30"
+              : "bg-red-950/60 text-red-300 border-red-500/30"
+          }`}>
+            <span>{message.type === "success" ? "✅" : "❌"}</span>
             {message.text}
           </div>
         )}
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
+
+        <form onSubmit={handleSubmit} className="space-y-8">
           
-          {/* Base PPC Value */}
-          <div className="border-b border-gray-200 pb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">💰 Base PPC Value</h3>
+          {/* Section 1: Base PPC & Withdrawal */}
+          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="text-[#fbbf24]">💰</span> Base PPC Valuation & Payout Constraints
+            </h3>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                1 PPC = ₹ <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.basePPCValue}
-                onChange={(e) => setFormData({ ...formData, basePPCValue: e.target.value })}
-                required
-                className="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="40"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Base value per PPC (example: ₹40)
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+                  1 PPC Value (₹) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.basePPCValue}
+                  onChange={(e) => setFormData({ ...formData, basePPCValue: e.target.value })}
+                  required
+                  className="w-full px-4 py-2.5 bg-[#121814] text-white font-mono font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  placeholder="40"
+                />
+                <p className="text-[10px] text-stone-500 mt-1">Base rupee exchange value per PPC point</p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+                  Minimum Withdrawal Limit (₹) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.minimumWithdrawal}
+                  onChange={(e) => setFormData({ ...formData, minimumWithdrawal: e.target.value })}
+                  required
+                  className="w-full px-4 py-2.5 bg-[#121814] text-white font-mono font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
+                  placeholder="100"
+                />
+                <p className="text-[10px] text-stone-500 mt-1">Minimum wallet balance required to request bank payout</p>
+              </div>
             </div>
           </div>
-          
-          {/* Distribution Percentages */}
-          <div className="border-b border-gray-200 pb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 Distribution Rates (%)</h3>
+
+          {/* Section 2: Distribution Rates */}
+          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="text-emerald-400">📊</span> Standard Order Distribution Percentages
+            </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              
-              {/* Direct Seller */}
               <div>
-                <label className="block text-sm font-medium text-green-700 mb-2">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
                   Direct Seller (%)
                 </label>
                 <input
@@ -367,15 +408,14 @@ export default function AdminPPCSettings() {
                   value={formData.directRate}
                   onChange={(e) => setFormData({ ...formData, directRate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-emerald-500/30 rounded-xl focus:outline-none focus:border-emerald-400"
                   placeholder="50"
                 />
               </div>
-              
-              {/* Parent */}
+
               <div>
-                <label className="block text-sm font-medium text-blue-700 mb-2">
-                  Parent (%)
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-sky-400 mb-1.5">
+                  Parent Seller (%)
                 </label>
                 <input
                   type="number"
@@ -384,14 +424,13 @@ export default function AdminPPCSettings() {
                   value={formData.parentRate}
                   onChange={(e) => setFormData({ ...formData, parentRate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-sky-500/30 rounded-xl focus:outline-none focus:border-sky-400"
                   placeholder="25"
                 />
               </div>
-              
-              {/* Distributor */}
+
               <div>
-                <label className="block text-sm font-medium text-purple-700 mb-2">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1.5">
                   Distributor (%)
                 </label>
                 <input
@@ -401,34 +440,35 @@ export default function AdminPPCSettings() {
                   value={formData.distributorRate}
                   onChange={(e) => setFormData({ ...formData, distributorRate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-purple-500/30 rounded-xl focus:outline-none focus:border-purple-400"
                   placeholder="25"
                 />
               </div>
-              
             </div>
-            
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded p-3">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Total should = 100% (Direct + Parent + Distributor)
-              </p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Current Total: {(Number(formData.directRate) + Number(formData.parentRate) + Number(formData.distributorRate))}%
-              </p>
+
+            <div className="text-[11px] p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/20 text-amber-300 flex items-center justify-between">
+              <span>⚠️ Must sum to exactly 100%</span>
+              <span className="font-mono font-bold">
+                Current Total: {(Number(formData.directRate || 0) + Number(formData.parentRate || 0) + Number(formData.distributorRate || 0))}%
+              </span>
             </div>
           </div>
 
-          {/* ⭐ NEW: User Order Distribution — jab "user" role wala khud sale kare */}
-          <div className="border-b border-gray-200 pb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">👤 User Sale Distribution (%)</h3>
-            <p className="text-xs text-gray-500 mb-4">
-              Jab koi <strong>User</strong> (jiska koi wallet nahi hota) khud kuch bech de — payment sirf 2 jagah jaati hai: uske <strong>upar wale Seller/Distributor</strong> aur uske aage ke <strong>Distributor</strong> ko. Ye seller-order wale "Distribution Rates" se bilkul alag hai.
-            </p>
+          {/* Section 3: Direct User Order Distribution */}
+          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-4">
+            <div>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="text-sky-400">👤</span> User Direct Sale Split (%)
+              </h3>
+              <p className="text-xs text-stone-400 mt-1">
+                When a plain customer makes a purchase directly without an intermediary seller.
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-green-700 mb-2">
-                  Upar wala Seller/Distributor (%)
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+                  Parent Seller / Sponsor (%)
                 </label>
                 <input
                   type="number"
@@ -437,13 +477,13 @@ export default function AdminPPCSettings() {
                   value={formData.userOrderDirectRate}
                   onChange={(e) => setFormData({ ...formData, userOrderDirectRate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
                   placeholder="50"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-purple-700 mb-2">
+                <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1.5">
                   Distributor (%)
                 </label>
                 <input
@@ -453,372 +493,248 @@ export default function AdminPPCSettings() {
                   value={formData.userOrderDistributorRate}
                   onChange={(e) => setFormData({ ...formData, userOrderDistributorRate: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3.5 py-2.5 bg-[#121814] text-white font-bold border border-white/10 rounded-xl focus:outline-none focus:border-[#fbbf24]"
                   placeholder="50"
                 />
               </div>
             </div>
-
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded p-3">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Total should = 100%
-              </p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Current Total: {(Number(formData.userOrderDirectRate) + Number(formData.userOrderDistributorRate))}%
-              </p>
-            </div>
-          </div>
-          
-          {/* Withdrawal Limit */}
-          <div className="pb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">💳 Withdrawal Settings</h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Minimum Withdrawal (₹)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.minimumWithdrawal}
-                onChange={(e) => setFormData({ ...formData, minimumWithdrawal: e.target.value })}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="100"
-              />
-            </div>
           </div>
 
-          {/* ✅ Level Up Thresholds */}
-          <div style={{ marginTop:24, padding:"20px", background:"#faf5ff", borderRadius:12, border:"1px solid #e9d5ff" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#7c3aed", marginBottom:4 }}>🏆 Distributor Level Up Settings</h3>
-            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Distributor wallet mein kitni PPC ho to next level milega — naam bhi set karo
-            </p>
+          {/* Section 4: Distributor Level Up Settings */}
+          <div className="p-5 rounded-2xl bg-[#121814] border border-purple-500/30 space-y-4">
+            <h3 className="text-sm font-black text-purple-300 uppercase tracking-wider flex items-center gap-2">
+              <span>🏆</span> Distributor Level Hierarchy & Thresholds
+            </h3>
 
-            {/* Level names + thresholds */}
-            {[0,1,2,3,4].map(lvl => (
-              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
-                <div>
-                  <label style={{ fontSize:10, fontWeight:700, color:"#7c3aed", display:"block", marginBottom:4 }}>
-                    Level {lvl} Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData[`level${lvl}Name`] || ""}
-                    onChange={e => setFormData({ ...formData, [`level${lvl}Name`]: e.target.value })}
-                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #ddd6fe", fontSize:12, boxSizing:"border-box" }}
-                    placeholder={`Level ${lvl} naam`}
-                  />
-                </div>
-                {lvl > 0 ? (
+            <div className="space-y-3">
+              {[0, 1, 2, 3, 4].map(lvl => (
+                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
                   <div>
-                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
-                      PPC Required for Level {lvl}
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400 mb-1">
+                      Level {lvl} Title
                     </label>
                     <input
-                      type="number"
-                      value={formData[`level${lvl}Threshold`] || ""}
-                      onChange={e => setFormData({ ...formData, [`level${lvl}Threshold`]: e.target.value })}
-                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #ddd6fe", fontSize:12, boxSizing:"border-box" }}
-                      placeholder="e.g. 100"
+                      type="text"
+                      value={formData[`level${lvl}Name`] || ""}
+                      onChange={e => setFormData({ ...formData, [`level${lvl}Name`]: e.target.value })}
+                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-purple-400"
+                      placeholder={`Level ${lvl} Title`}
                     />
                   </div>
-                ) : (
-                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>← Starting level (koi threshold nahi)</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* ✅ Level Rewards — Admin Control */}
-          <div style={{ background:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:12, padding:20 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-              <span style={{ fontSize:18 }}>🎁</span>
-              <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#15803d", margin:0 }}>Level Rewards</h3>
-                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  Har level achieve karne par distributor ko kya milega — aap control karo
-                </p>
-              </div>
+                  {lvl > 0 ? (
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                        PPC Threshold for Level {lvl}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData[`level${lvl}Threshold`] || ""}
+                        onChange={e => setFormData({ ...formData, [`level${lvl}Threshold`]: e.target.value })}
+                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-purple-400"
+                        placeholder="e.g. 100"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                      Initial starting rank (0 threshold)
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-              {[1,2,3,4].map(n => (
-                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:12, fontWeight:700, color:"#15803d", minWidth:60 }}>
-                    Level {n}:
-                  </span>
+
+            {/* Distributor Rewards */}
+            <div className="pt-2 border-t border-purple-500/20 space-y-2">
+              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">🎁 Level Milestone Rewards</h4>
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="flex items-center gap-3 text-xs">
+                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`level${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`level${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. 🎁 ₹${[500,1500,3000,10000][n-1]} bonus credit`}
-                    style={{ flex:1, border:"1px solid #86efac", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
+                    placeholder={`e.g. 🎁 ₹${[500, 1500, 3000, 10000][n-1]} bonus credit`}
+                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-emerald-500/30 rounded-lg focus:outline-none focus:border-emerald-400"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 🏢 Distributor's OWN Direct Seller Wallet — Level Up Settings */}
-          <div style={{ marginTop:24, padding:"20px", background:"#fff7ed", borderRadius:12, border:"1px solid #fed7aa" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#c2410c", marginBottom:4 }}>🏢 Distributor's Direct Seller Wallet — Level Up Settings</h3>
-            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Yeh <strong>Distributor</strong> ke apne Direct Seller Wallet (jab distributor khud commission kamaye) ke liye alag settings hain — Seller role ke Direct Seller Wallet se bilkul alag
-            </p>
-            {[0,1,2,3,4].map(lvl => (
-              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
-                <div>
-                  <label style={{ fontSize:10, fontWeight:700, color:"#c2410c", display:"block", marginBottom:4 }}>
-                    Distributor's Seller Wallet Level {lvl} Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData[`distSellerLevel${lvl}Name`] || ""}
-                    onChange={e => setFormData({ ...formData, [`distSellerLevel${lvl}Name`]: e.target.value })}
-                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #fed7aa", fontSize:12, boxSizing:"border-box" }}
-                    placeholder={`Level ${lvl} naam`}
-                  />
-                </div>
-                {lvl > 0 ? (
+          {/* Section 5: Seller Level Up Settings */}
+          <div className="p-5 rounded-2xl bg-[#121814] border border-sky-500/30 space-y-4">
+            <h3 className="text-sm font-black text-sky-300 uppercase tracking-wider flex items-center gap-2">
+              <span>🛍️</span> Seller Direct Wallet Level Hierarchy
+            </h3>
+
+            <div className="space-y-3">
+              {[0, 1, 2, 3, 4].map(lvl => (
+                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
                   <div>
-                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
-                      PPC Required for Level {lvl}
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400 mb-1">
+                      Seller Level {lvl} Title
                     </label>
                     <input
-                      type="number"
-                      value={formData[`distSellerLevel${lvl}Threshold`] || ""}
-                      onChange={e => setFormData({ ...formData, [`distSellerLevel${lvl}Threshold`]: e.target.value })}
-                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #fed7aa", fontSize:12, boxSizing:"border-box" }}
-                      placeholder="e.g. 50"
+                      type="text"
+                      value={formData[`sellerLevel${lvl}Name`] || ""}
+                      onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Name`]: e.target.value })}
+                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-sky-400"
+                      placeholder={`Seller Level ${lvl} Title`}
                     />
                   </div>
-                ) : (
-                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>Starting level (koi threshold nahi)</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 🏆 Distributor's Direct Seller Wallet — Level Rewards */}
-          <div style={{ background:"#fff7ed", border:"1.5px solid #fed7aa", borderRadius:12, padding:20, marginTop:24 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-              <span style={{ fontSize:18 }}>🏆</span>
-              <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#c2410c", margin:0 }}>Distributor's Direct Seller Wallet — Level Rewards</h3>
-                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  Distributor ke apne Direct Seller Wallet ki PPC se level milne par reward
-                </p>
-              </div>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-              {[1,2,3,4].map(n => (
-                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:12, fontWeight:700, color:"#c2410c", minWidth:70 }}>
-                    Level {n}:
-                  </span>
-                  <input
-                    type="text"
-                    value={formData[`distSellerLevel${n}Reward`] || ""}
-                    onChange={e => setFormData(p => ({ ...p, [`distSellerLevel${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
-                    style={{ flex:1, border:"1px solid #fed7aa", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
-                  />
+                  {lvl > 0 ? (
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                        PPC Threshold for Seller Level {lvl}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData[`sellerLevel${lvl}Threshold`] || ""}
+                        onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Threshold`]: e.target.value })}
+                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-sky-400"
+                        placeholder="e.g. 50"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                      Initial starting rank (0 threshold)
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* 🛍️ Seller's OWN Direct Seller Wallet — Level Up Settings */}
-          <div style={{ marginTop:24, padding:"20px", background:"#eff6ff", borderRadius:12, border:"1px solid #bfdbfe" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#1d4ed8", marginBottom:4 }}>🛍️ Seller's Direct Seller Wallet — Level Up Settings</h3>
-            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Yeh <strong>Seller</strong> role ke apne Direct Seller Wallet ke liye hai — Distributor wale se alag
-            </p>
-            {[0,1,2,3,4].map(lvl => (
-              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
-                <div>
-                  <label style={{ fontSize:10, fontWeight:700, color:"#1d4ed8", display:"block", marginBottom:4 }}>
-                    Seller Level {lvl} Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData[`sellerLevel${lvl}Name`] || ""}
-                    onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Name`]: e.target.value })}
-                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #bfdbfe", fontSize:12, boxSizing:"border-box" }}
-                    placeholder={`Seller Level ${lvl} naam`}
-                  />
-                </div>
-                {lvl > 0 ? (
-                  <div>
-                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
-                      PPC Required for Seller Level {lvl}
-                    </label>
-                    <input
-                      type="number"
-                      value={formData[`sellerLevel${lvl}Threshold`] || ""}
-                      onChange={e => setFormData({ ...formData, [`sellerLevel${lvl}Threshold`]: e.target.value })}
-                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #bfdbfe", fontSize:12, boxSizing:"border-box" }}
-                      placeholder="e.g. 50"
-                    />
-                  </div>
-                ) : (
-                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>Starting level (koi threshold nahi)</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 🏆 Direct Seller Wallet — Level Rewards */}
-          <div style={{ background:"#f0f9ff", border:"1.5px solid #7dd3fc", borderRadius:12, padding:20, marginTop:24 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-              <span style={{ fontSize:18 }}>🏆</span>
-              <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#0369a1", margin:0 }}>Seller's Direct Seller Wallet — Level Rewards</h3>
-                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  Seller apne Direct Seller Wallet ki PPC se level milne par reward — aap control karo
-                </p>
-              </div>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-              {[1,2,3,4].map(n => (
-                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:12, fontWeight:700, color:"#0369a1", minWidth:70 }}>
-                    Level {n}:
-                  </span>
+            {/* Seller Rewards */}
+            <div className="pt-2 border-t border-sky-500/20 space-y-2">
+              <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider">🎁 Seller Milestone Rewards</h4>
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="flex items-center gap-3 text-xs">
+                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`sellerLevel${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`sellerLevel${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
-                    style={{ flex:1, border:"1px solid #7dd3fc", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
+                    placeholder={`e.g. 🎁 ₹${[250, 750, 1500, 5000][n-1]} bonus credit`}
+                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-sky-500/30 rounded-lg focus:outline-none focus:border-sky-400"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 👤 User Wallet — Level Up Settings */}
-          <div style={{ marginTop:24, padding:"20px", background:"#fdf4ff", borderRadius:12, border:"1px solid #e9d5ff" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#a21caf", marginBottom:4 }}>👤 User Wallet — Level Up Settings</h3>
-            <p style={{ fontSize:11, color:"#94a3b8", marginBottom:16 }}>
-              Sirf <strong>User Wallet</strong> ki PPC se level calculate hoga — naam aur threshold set karo
-            </p>
-            {[0,1,2,3,4].map(lvl => (
-              <div key={lvl} style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10, alignItems:"center" }}>
-                <div>
-                  <label style={{ fontSize:10, fontWeight:700, color:"#a21caf", display:"block", marginBottom:4 }}>
-                    User Wallet Level {lvl} Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData[`userWalletLevel${lvl}Name`] || ""}
-                    onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Name`]: e.target.value })}
-                    style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #e9d5ff", fontSize:12, boxSizing:"border-box" }}
-                    placeholder={`User Wallet Level ${lvl} naam`}
-                  />
-                </div>
-                {lvl > 0 ? (
+          {/* Section 6: User Wallet Level Up Settings */}
+          <div className="p-5 rounded-2xl bg-[#121814] border border-pink-500/30 space-y-4">
+            <h3 className="text-sm font-black text-pink-300 uppercase tracking-wider flex items-center gap-2">
+              <span>👤</span> User Wallet Level Hierarchy & Rewards
+            </h3>
+
+            <div className="space-y-3">
+              {[0, 1, 2, 3, 4].map(lvl => (
+                <div key={lvl} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/[0.04]">
                   <div>
-                    <label style={{ fontSize:10, fontWeight:700, color:"#94a3b8", display:"block", marginBottom:4 }}>
-                      PPC Required for User Wallet Level {lvl}
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-pink-400 mb-1">
+                      User Level {lvl} Title
                     </label>
                     <input
-                      type="number"
-                      value={formData[`userWalletLevel${lvl}Threshold`] || ""}
-                      onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Threshold`]: e.target.value })}
-                      style={{ width:"100%", padding:"7px 10px", borderRadius:7, border:"1px solid #e9d5ff", fontSize:12, boxSizing:"border-box" }}
-                      placeholder="e.g. 50"
+                      type="text"
+                      value={formData[`userWalletLevel${lvl}Name`] || ""}
+                      onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Name`]: e.target.value })}
+                      className="w-full p-2 bg-[#121814] text-xs text-white border border-white/10 rounded-lg focus:outline-none focus:border-pink-400"
+                      placeholder={`User Level ${lvl} Title`}
                     />
                   </div>
-                ) : (
-                  <div style={{ fontSize:11, color:"#94a3b8", paddingTop:20 }}>Starting level (koi threshold nahi)</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 🏆 User Wallet — Level Rewards */}
-          <div style={{ background:"#fdf4ff", border:"1.5px solid #e9d5ff", borderRadius:12, padding:20, marginTop:24 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-              <span style={{ fontSize:18 }}>🏆</span>
-              <div>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#a21caf", margin:0 }}>User Wallet — Level Rewards</h3>
-                <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
-                  User Wallet ki PPC se level milne par reward — aap control karo
-                </p>
-              </div>
+                  {lvl > 0 ? (
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 mb-1">
+                        PPC Threshold for User Level {lvl}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData[`userWalletLevel${lvl}Threshold`] || ""}
+                        onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Threshold`]: e.target.value })}
+                        className="w-full p-2 bg-[#121814] text-xs text-white font-mono border border-white/10 rounded-lg focus:outline-none focus:border-pink-400"
+                        placeholder="e.g. 50"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-stone-500 flex items-center pt-4">
+                      Initial starting rank (0 threshold)
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-              {[1,2,3,4].map(n => (
-                <div key={n} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:12, fontWeight:700, color:"#a21caf", minWidth:70 }}>
-                    Level {n}:
-                  </span>
+
+            {/* User Rewards */}
+            <div className="pt-2 border-t border-pink-500/20 space-y-2">
+              <h4 className="text-xs font-bold text-pink-400 uppercase tracking-wider">🎁 User Milestone Rewards</h4>
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="flex items-center gap-3 text-xs">
+                  <span className="font-bold text-stone-400 min-w-[70px]">Level {n}:</span>
                   <input
                     type="text"
                     value={formData[`userWalletLevel${n}Reward`] || ""}
                     onChange={e => setFormData(p => ({ ...p, [`userWalletLevel${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. ₹${[250,750,1500,5000][n-1]} bonus credit`}
-                    style={{ flex:1, border:"1px solid #e9d5ff", borderRadius:8, padding:"7px 12px", fontSize:13, outline:"none", background:"#fff" }}
+                    placeholder={`e.g. 🎁 ₹${[250, 750, 1500, 5000][n-1]} bonus credit`}
+                    className="flex-1 p-2 bg-black/40 text-white text-xs border border-pink-500/30 rounded-lg focus:outline-none focus:border-pink-400"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`
-              w-full py-3 rounded-lg font-semibold text-white transition duration-200
-              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"}
-            `}
+            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 ${
+              loading
+                ? "bg-stone-800 text-stone-500 cursor-not-allowed border border-white/10"
+                : "bg-emerald-600 hover:bg-emerald-500 text-white"
+            }`}
           >
-            {loading ? "Updating..." : "💾 Save Settings"}
+            {loading ? "Saving Configuration..." : "💾 Save & Deploy PPC Configuration"}
           </button>
           
         </form>
       </div>
       
-      {/* Current Settings Display */}
+      {/* ── ACTIVE SETTINGS SNAPSHOT ── */}
       {settings && (
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Current Active Settings</h2>
+        <div className="bg-[#111713] rounded-3xl border border-white/[0.08] p-5 sm:p-7 space-y-4">
+          <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+            <span>⚡</span> Active Deployed Parameters
+          </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Base PPC Value</p>
-              <p className="text-2xl font-bold text-gray-900">₹{settings.basePPCValue}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <p className="text-[10px] font-mono text-stone-400 uppercase">Base PPC</p>
+              <p className="text-lg font-black text-[#fbbf24] mt-0.5">₹{settings.basePPCValue}</p>
             </div>
             
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Direct Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{settings.distributionRates?.direct}%</p>
+            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <p className="text-[10px] font-mono text-emerald-400 uppercase">Direct Rate</p>
+              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.direct}%</p>
             </div>
             
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Parent Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{settings.distributionRates?.parent}%</p>
+            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <p className="text-[10px] font-mono text-sky-400 uppercase">Parent Rate</p>
+              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.parent}%</p>
             </div>
             
-            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Distributor Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{settings.distributionRates?.distributor}%</p>
+            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <p className="text-[10px] font-mono text-purple-400 uppercase">Distributor</p>
+              <p className="text-lg font-black text-white mt-0.5">{settings.distributionRates?.distributor}%</p>
             </div>
 
-            <div className="bg-gradient-to-br from-teal-50 to-green-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">👤 User Sale → Seller/Dist</p>
-              <p className="text-2xl font-bold text-gray-900">{settings.userOrderDistributionRates?.directSeller}% / {settings.userOrderDistributionRates?.distributor}%</p>
+            <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <p className="text-[10px] font-mono text-amber-400 uppercase">Min Withdraw</p>
+              <p className="text-lg font-black text-white mt-0.5">₹{settings.minimumWithdrawal}</p>
             </div>
-            
           </div>
           
-          <div className="mt-4 text-xs text-gray-500">
-            Last updated: {new Date(settings.updatedAt).toLocaleString()}
+          <div className="text-[10px] font-mono text-stone-500 pt-2 border-t border-white/[0.04]">
+            Last updated: {new Date(settings.updatedAt).toLocaleString("en-IN")}
           </div>
         </div>
       )}
