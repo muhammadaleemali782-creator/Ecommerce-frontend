@@ -179,9 +179,19 @@ export default function PasswordHelp({ setPage }) {
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-3.5">
               <div>
-                <label className="text-[10px] font-mono uppercase text-stone-300 font-bold block mb-1">
-                  6-Digit OTP (EDUCA Mail Inbox me check karein):
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-mono uppercase text-stone-300 font-bold block">
+                    6-Digit OTP (EDUCA Mail Inbox):
+                  </label>
+                  <a
+                    href="http://localhost:3000"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9.5px] text-amber-400 hover:underline font-mono"
+                  >
+                    Open Webmail ↗
+                  </a>
+                </div>
                 <input
                   type="text"
                   required

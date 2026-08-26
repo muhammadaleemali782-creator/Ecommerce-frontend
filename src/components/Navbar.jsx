@@ -484,6 +484,18 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         <div className={`px-3 py-3 border-t shrink-0 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
+          {/* Quick Launch EDUCA Mail Server */}
+          <a
+            href="http://localhost:3000"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full mb-2.5 py-2.5 px-3 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all no-underline"
+            title="Open EDUCA Mail Server"
+          >
+            <span>📧 OPEN EDUCA MAIL</span>
+            <span className="text-[10px] opacity-70">↗</span>
+          </a>
+
           {loggedIn ? (
             <div className="flex items-center gap-2">
               <button
