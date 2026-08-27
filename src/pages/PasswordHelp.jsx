@@ -60,7 +60,7 @@ export default function PasswordHelp({ setPage }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/mail-reset/verify-and-reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, otp: otp.trim(), newPassword: newPassword.trim() })
+        body: JSON.stringify({ userId, identifier: identifier.trim(), otp: otp.trim(), newPassword: newPassword.trim() })
       })
       const data = await res.json()
       if (res.ok) {
