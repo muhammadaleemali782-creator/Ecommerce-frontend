@@ -355,6 +355,30 @@ export default function Login({ setPage }) {
           </div>
         )}
 
+        {/* ── 🌟 BUTTON 1: LOGIN WITH EDUCA MAIL (GOOGLE OAUTH STYLE) ── */}
+        {!showChangePassword && (
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => setShowEducaSSO(true)}
+              className="relative group overflow-hidden w-full py-3 px-4 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:scale-[0.98] border border-white/15 hover:border-amber-400/50 text-white text-xs font-black uppercase tracking-wider shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
+            >
+              <span className="text-base">📧</span>
+              <span className="tracking-widest">LOGIN WITH EDUCA MAIL</span>
+              <span className="text-amber-400 text-xs">➔</span>
+            </button>
+
+            {/* Subtle Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-[1px] bg-white/[0.08]" />
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+                or sign in with password
+              </span>
+              <div className="flex-1 h-[1px] bg-white/[0.08]" />
+            </div>
+          </div>
+        )}
+
         {/* ── STANDARD CREDENTIAL LOGIN FORM ── */}
         {!showChangePassword && (
           <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
@@ -465,7 +489,7 @@ export default function Login({ setPage }) {
           </form>
         )}
 
-        {/* ── CHANGE PASSWORD FORM ── */}
+        {/* ── CHANGE PASSWORD FORM (FIRST TIME LOGIN / TEMP PASS) ── */}
         {showChangePassword && (
           <form onSubmit={handleChangePassword} className="flex flex-col gap-3 pt-2">
             <div className="text-center">
@@ -478,7 +502,7 @@ export default function Login({ setPage }) {
             </div>
 
             <div className="flex flex-col gap-1.5 mt-2">
-              <label className="text-[10px] font-mono text-slate-300 uppercase">New Password</label>
+              <label className="text-[10px] font-mono text-slate-300 uppercase">New Permanent Password</label>
               <input
                 type="password"
                 required
@@ -490,7 +514,7 @@ export default function Login({ setPage }) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-mono text-slate-300 uppercase">Confirm Password</label>
+              <label className="text-[10px] font-mono text-slate-300 uppercase">Confirm Permanent Password</label>
               <input
                 type="password"
                 required
@@ -503,9 +527,9 @@ export default function Login({ setPage }) {
 
             <button
               type="submit"
-              className="w-full mt-2 py-3 bg-white text-black font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-slate-200 active:scale-95 transition-all cursor-pointer"
+              className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-black font-black text-xs uppercase tracking-wider rounded-xl hover:from-emerald-400 hover:to-green-400 active:scale-95 transition-all cursor-pointer shadow-lg"
             >
-              Save Password
+              Save Permanent Password & Continue ➔
             </button>
           </form>
         )}
@@ -540,25 +564,26 @@ export default function Login({ setPage }) {
           </div>
         </div>
 
-        {/* Back Link */}
-        <div className="text-center pt-0.5">
+        {/* Visit Website / Back to Home Link */}
+        <div className="text-center pt-2 border-t border-white/[0.08]">
           <button
             type="button"
             onClick={() => setPage("home")}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+            className="text-xs text-amber-400 hover:text-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto font-bold"
           >
-            ← Back to Home
+            <span>🌐</span>
+            <span>Visit Website / Back to Home</span>
           </button>
         </div>
 
       </div>
 
       {/* ══════════════════════════════════════════════════════════
-          REAL EDUCA MAIL SSO KEYRING RESOLVER MODAL
+          REAL EDUCA MAIL SSO LOGIN MODAL
       ══════════════════════════════════════════════════════════ */}
       {showEducaSSO && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
-          <div className="relative max-w-md w-full bg-[#0c100e] border border-white/10 p-6 rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.95)] flex flex-col gap-4 text-white">
+          <div className="relative max-w-md w-full bg-[#0c100e] border border-white/10 p-6 sm:p-8 rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.95)] flex flex-col gap-4 text-white">
             
             <button
               onClick={() => setShowEducaSSO(false)}
@@ -568,10 +593,10 @@ export default function Login({ setPage }) {
             </button>
 
             <div className="flex items-center gap-3">
-              <EducaLogo size={32} />
+              <EducaLogo size={36} />
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Continue with EDUCA Mail
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                  Login with EDUCA Mail
                 </h3>
                 <p className="text-[10px] font-mono text-amber-400">
                   Single Sign-On (SSO) Portal
@@ -584,37 +609,43 @@ export default function Login({ setPage }) {
                 e.preventDefault()
                 const mailInput = e.target.educaMailInput.value
                 const passInput = e.target.educaPassInput?.value
-                if (!mailInput) return
+                if (!mailInput || !passInput) return
                 try {
                   setError("")
                   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/educa-sso`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ identifier: mailInput.trim(), password: passInput ? passInput.trim() : undefined })
+                    body: JSON.stringify({ identifier: mailInput.trim(), password: passInput.trim() })
                   })
                   const data = await res.json()
-                  if (res.ok && data.token) {
-                    localStorage.setItem("token", data.token)
-                    localStorage.setItem("user", JSON.stringify(data.user))
-                    window.location.reload()
+                  if (res.ok) {
+                    if (data.changePasswordRequired) {
+                      setShowEducaSSO(false)
+                      setTempUserId(data.userId)
+                      setShowChangePassword(true)
+                    } else if (data.token) {
+                      localStorage.setItem("token", data.token)
+                      localStorage.setItem("user", JSON.stringify(data.user))
+                      window.location.reload()
+                    }
                   } else {
-                    setError(data.message || "EDUCA Mail authentication failed")
+                    setError(data.message || "EDUCA Mail credentials invalid")
                   }
                 } catch (err) {
                   setError("EDUCA Mail connection error")
                 }
               }}
-              className="space-y-3 pt-2"
+              className="space-y-3.5 pt-2"
             >
               <div>
                 <label className="text-[10px] font-mono text-stone-300 font-bold block mb-1">
-                  EDUCA Mail Address / System ID:
+                  Company User ID / EDUCA Mail:
                 </label>
                 <input
                   name="educaMailInput"
                   type="text"
                   required
-                  placeholder="name@educaveda.com ya DS001"
+                  placeholder="e.g. DS001 ya name@educaveda.com"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
@@ -641,10 +672,23 @@ export default function Login({ setPage }) {
               </button>
             </form>
 
-            <div className="text-center pt-1 border-t border-white/[0.08]">
-              <p className="text-[10px] text-stone-400">
-                Aapke phone me EDUCA Mail app install hone par 1-click automatic identity detection active rehta hai.
-              </p>
+            <div className="text-center pt-2 border-t border-white/[0.08] flex items-center justify-between text-[10px]">
+              <a
+                href="https://messages-frontend-brown.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-stone-400 hover:text-white flex items-center gap-1"
+              >
+                <span>📧 Open Mailbox</span>
+                <span>↗</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => { setShowEducaSSO(false); setPage("home"); }}
+                className="text-amber-400 hover:underline cursor-pointer"
+              >
+                🌐 Visit Website
+              </button>
             </div>
           </div>
         </div>
