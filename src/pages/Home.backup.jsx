@@ -150,7 +150,7 @@ export function ProductCard({
 
       <div className="p-3.5 flex flex-col justify-between flex-1">
         <div>
-          <div className="flex items-center gap-0.5 text-amber-500 text-xs mb-1">
+          <div className="flex items-center gap-0.5 text-blue-500 text-xs mb-1">
             {"★".repeat(Math.min(5, Math.floor(rating)))}
             <span className="text-[10px] text-gray-400 ml-1">({rating})</span>
           </div>
@@ -451,7 +451,7 @@ export default function Home({ setPage }) {
                           {realm.title}
                         </h3>
                         <div className="flex items-center text-[11px] font-bold text-black shrink-0">
-                          <span className="text-amber-500">★</span>
+                          <span className="text-blue-500">★</span>
                           <span className="ml-0.5">{realm.rating}</span>
                         </div>
                       </div>

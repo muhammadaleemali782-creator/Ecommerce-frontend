@@ -132,7 +132,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
           <button
             onClick={() => setEditing(!editing)}
             className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-              editing ? "bg-amber-500 text-black border-amber-500" : isDark ? "bg-stone-900 border-white/[0.12] hover:bg-stone-800" : "bg-stone-100 border-stone-300 hover:bg-stone-200"
+              editing ? "bg-blue-600 text-black border-blue-500" : isDark ? "bg-stone-900 border-white/[0.12] hover:bg-stone-800" : "bg-stone-100 border-stone-300 hover:bg-stone-200"
             }`}
           >
             ⚙️ {editing ? "Cancel Edit" : "Configure Settings"}
@@ -140,7 +140,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
           <button
             onClick={() => setShowDisburseModal(true)}
             disabled={current.accumulatedPoolPPC <= 0}
-            className="px-5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             💸 Disburse Monthly Pool
           </button>
@@ -158,9 +158,9 @@ export default function AdminRoyaltyManagement({ setPage }) {
       {/* ── SETTINGS EDIT DRAWER ── */}
       {editing && (
         <div className={`p-6 rounded-3xl border shadow-lg space-y-4 ${
-          isDark ? "bg-stone-900 border-amber-500/30" : "bg-amber-50/50 border-amber-300"
+          isDark ? "bg-stone-900 border-blue-500/30" : "bg-amber-50/50 border-amber-300"
         }`}>
-          <h3 className="text-sm font-black text-amber-500 uppercase tracking-wider">⚙️ Royalty Pool Settings</h3>
+          <h3 className="text-sm font-black text-blue-500 uppercase tracking-wider">⚙️ Royalty Pool Settings</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold block mb-1">Royalty Percentage (% of total company PPC):</label>
@@ -176,7 +176,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
                     isDark ? "bg-black/50 border-white/[0.12]" : "bg-white border-stone-300"
                   }`}
                 />
-                <span className="font-bold text-amber-500">%</span>
+                <span className="font-bold text-blue-500">%</span>
               </div>
             </div>
             <div>
@@ -197,7 +197,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
           <button
             onClick={handleSaveSettings}
             disabled={savingSettings}
-            className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-black text-xs shadow hover:bg-amber-400"
+            className="px-6 py-2.5 rounded-xl bg-blue-600 text-black font-black text-xs shadow hover:bg-blue-500"
           >
             {savingSettings ? "Saving..." : "Save Settings"}
           </button>
@@ -215,10 +215,10 @@ export default function AdminRoyaltyManagement({ setPage }) {
         </div>
 
         <div className={`p-5 rounded-3xl border ${
-          isDark ? "bg-[#111713] border-amber-500/30 shadow-lg shadow-amber-500/5" : "bg-amber-50/50 border-amber-200"
+          isDark ? "bg-[#111713] border-blue-500/30 shadow-lg shadow-amber-500/5" : "bg-amber-50/50 border-amber-200"
         }`}>
-          <p className="text-[10px] font-mono uppercase text-amber-500 font-bold">Active Royalty Pool ({data.poolPercentage}%)</p>
-          <p className="text-2xl font-black mt-1 text-amber-500">{Math.round(current.accumulatedPoolPPC || 0)} <span className="text-xs">PPC</span></p>
+          <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Active Royalty Pool ({data.poolPercentage}%)</p>
+          <p className="text-2xl font-black mt-1 text-blue-500">{Math.round(current.accumulatedPoolPPC || 0)} <span className="text-xs">PPC</span></p>
           <p className="text-xs font-bold text-emerald-500 mt-1">≈ ₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
         </div>
 
@@ -312,7 +312,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
       {showDisburseModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
-            isDark ? "bg-stone-900 border-amber-500/40 text-white" : "bg-white border-stone-300 text-stone-900"
+            isDark ? "bg-stone-900 border-blue-500/40 text-white" : "bg-white border-stone-300 text-stone-900"
           }`}>
             <div className="text-center space-y-2">
               <span className="text-4xl">👑</span>
@@ -322,7 +322,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
               </p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1">
+            <div className="p-3 rounded-2xl bg-blue-600/10 border border-blue-500/30 text-xs space-y-1">
               <div className="flex justify-between font-bold">
                 <span>Per Distributor Payout:</span>
                 <span className="text-emerald-500">₹{(current.projectedSharePerDistributorRupees || 0).toLocaleString("en-IN")}</span>
@@ -340,7 +340,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
               <button
                 onClick={handleDisburse}
                 disabled={disbursing}
-                className="px-5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow"
+                className="px-5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow"
               >
                 {disbursing ? "Processing Payout..." : "Confirm & Disburse"}
               </button>

@@ -110,7 +110,7 @@ export default function PasswordHelp({ setPage }) {
     <div className="max-w-md mx-auto my-8 p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 bg-[#0c100e] text-white border-white/[0.1]">
       <div className="flex flex-col items-center text-center gap-2">
         <EducaLogo size={44} />
-        <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-amber-400 uppercase">
+        <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-blue-400 uppercase">
           EDUCA VEDA · SELF-SERVICE PORTAL
         </span>
         <h2 className="text-xl font-black">Password Reset Assistance</h2>
@@ -124,7 +124,7 @@ export default function PasswordHelp({ setPage }) {
           onClick={() => { setTab("mail_otp"); setStep(1); setError(""); setMsg(""); }}
           className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
             tab === "mail_otp"
-              ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-md font-black"
+              ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow-md font-black"
               : "text-stone-400 hover:text-white"
           }`}
         >
@@ -135,7 +135,7 @@ export default function PasswordHelp({ setPage }) {
           onClick={() => { setTab("admin_request"); setAdminMsg(""); }}
           className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
             tab === "admin_request"
-              ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-md font-black"
+              ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow-md font-black"
               : "text-stone-400 hover:text-white"
           }`}
         >
@@ -169,13 +169,13 @@ export default function PasswordHelp({ setPage }) {
                   placeholder="e.g. user@educaveda.com ya DS001"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !identifier.trim()}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 disabled:opacity-50"
               >
                 {loading ? "Sending OTP..." : "📨 Send OTP to EDUCA Mail"}
               </button>
@@ -191,7 +191,7 @@ export default function PasswordHelp({ setPage }) {
                     href="https://messages-frontend-brown.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[9.5px] text-amber-400 hover:underline font-mono"
+                    className="text-[9.5px] text-blue-400 hover:underline font-mono"
                   >
                     Open Webmail ↗
                   </a>
@@ -203,7 +203,7 @@ export default function PasswordHelp({ setPage }) {
                   placeholder="123456"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-amber-500/50 text-center font-mono text-base font-bold text-amber-400 placeholder:text-stone-600 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-blue-500/50 text-center font-mono text-base font-bold text-blue-400 placeholder:text-stone-600 focus:outline-none"
                 />
               </div>
               <div>
@@ -216,7 +216,7 @@ export default function PasswordHelp({ setPage }) {
                   placeholder="Naya secret password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex gap-2">
@@ -258,7 +258,7 @@ export default function PasswordHelp({ setPage }) {
               placeholder="user@example.com"
               value={adminEmail}
               onChange={(e) => setAdminEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -270,13 +270,13 @@ export default function PasswordHelp({ setPage }) {
               placeholder="9876543210"
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <button
             type="submit"
             disabled={loading || !adminEmail.trim()}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 disabled:opacity-50"
           >
             {loading ? "Submitting..." : "📩 Submit Request to Admin"}
           </button>
@@ -294,7 +294,7 @@ export default function PasswordHelp({ setPage }) {
               window.location.reload()
             }
           }}
-          className="text-xs text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer"
+          className="text-xs text-blue-400 hover:text-amber-300 font-bold underline cursor-pointer"
         >
           ← Back to Login Portal
         </button>

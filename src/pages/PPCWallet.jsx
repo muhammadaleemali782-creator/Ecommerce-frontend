@@ -572,13 +572,13 @@ export default function PPCWallet({ setPage }) {
               <div className="bg-white rounded-2xl shadow-md p-6 border border-amber-200/60 mt-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-mono text-[10px] font-bold uppercase mb-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 font-mono text-[10px] font-bold uppercase mb-1">
                       🌟 Unified Seller Progression
                     </div>
                     <h3 className="text-lg font-black text-gray-900">Direct Seller Achievement Rewards</h3>
                     <p className="text-xs text-gray-500">User orders + Team seller orders dono ka PPC ek sath judkar milestones unlock karta hai!</p>
                   </div>
-                  <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black text-right shrink-0">
+                  <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black text-right shrink-0">
                     <span className="text-[10px] font-bold uppercase tracking-wider block">Combined Total</span>
                     <span className="text-lg font-black">{ppc} PPC</span>
                   </div>
@@ -600,7 +600,7 @@ export default function PPCWallet({ setPage }) {
                       <strong className="text-sm">{walletData.wallets?.sellerWallet?.ppcCount || 0} PPC</strong>
                     </div>
                     <span className="text-xl font-black text-amber-600">=</span>
-                    <div className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black border border-amber-300 flex items-center gap-1.5 shadow-sm">
+                    <div className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black border border-amber-300 flex items-center gap-1.5 shadow-sm">
                       <span>🌟 Total Combined:</span>
                       <strong className="text-sm">{ppc} PPC</strong>
                     </div>

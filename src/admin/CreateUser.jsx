@@ -121,7 +121,7 @@ export default function CreateUser() {
           name="name"
           placeholder="e.g. John Doe"
           className={`w-full p-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
-            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
           }`}
           value={form.name}
           onChange={handleChange}
@@ -140,7 +140,7 @@ export default function CreateUser() {
           type="email"
           placeholder="e.g. john@company.com"
           className={`w-full p-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
-            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
           }`}
           value={form.email}
           onChange={handleChange}
@@ -159,7 +159,7 @@ export default function CreateUser() {
           type="password"
           placeholder="••••••••"
           className={`w-full p-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
-            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
           }`}
           value={form.password}
           onChange={handleChange}
@@ -176,7 +176,7 @@ export default function CreateUser() {
         <select
           name="role"
           className={`w-full p-2.5 rounded-xl border text-xs font-bold focus:outline-none ${
-            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
           }`}
           value={form.role}
           onChange={handleChange}
@@ -210,7 +210,7 @@ export default function CreateUser() {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 disabled:opacity-50"
+        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 disabled:opacity-50"
       >
         {loading ? "Creating..." : "✓ Create User Account"}
       </button>

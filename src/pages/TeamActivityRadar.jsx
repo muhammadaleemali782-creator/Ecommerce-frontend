@@ -192,7 +192,7 @@ export default function TeamActivityRadar({ setPage }) {
             placeholder="Search member name, ID, phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+            className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
             }`}
           />
@@ -204,7 +204,7 @@ export default function TeamActivityRadar({ setPage }) {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
         {[
           { id: "all", label: "All Team", count: data?.totalTeamCount || 0, color: "text-stone-400", bg: "hover:border-stone-500" },
-          { id: "follow_up_needed", label: "🟡 Inactive 7+ Days", count: counts.follow_up_needed || 0, color: "text-amber-500", bg: "border-amber-500/40 bg-amber-500/5" },
+          { id: "follow_up_needed", label: "🟡 Inactive 7+ Days", count: counts.follow_up_needed || 0, color: "text-blue-500", bg: "border-blue-500/40 bg-blue-600/5" },
           { id: "dormant", label: "🔴 Dormant 30+ Days", count: counts.dormant || 0, color: "text-red-500", bg: "border-red-500/40 bg-red-500/5" },
           { id: "new_onboarding", label: "⚪ New (0 Sales)", count: counts.new_onboarding || 0, color: "text-sky-400", bg: "border-sky-500/40 bg-sky-500/5" },
           { id: "active", label: "🟢 Active Recently", count: counts.active || 0, color: "text-emerald-500", bg: "border-emerald-500/40 bg-emerald-500/5" },
@@ -214,7 +214,7 @@ export default function TeamActivityRadar({ setPage }) {
             onClick={() => setActiveTab(tab.id)}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
               activeTab === tab.id
-                ? "border-amber-500 bg-amber-500/15 shadow-md"
+                ? "border-blue-500 bg-blue-600/15 shadow-md"
                 : isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
             }`}
           >
@@ -237,7 +237,7 @@ export default function TeamActivityRadar({ setPage }) {
           {filteredMembers.map((member) => {
             const statusBadge =
               member.activityStatus === "follow_up_needed"
-                ? { label: `⚠️ Inactive ${member.daysInactive}d`, cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" }
+                ? { label: `⚠️ Inactive ${member.daysInactive}d`, cls: "bg-blue-600/15 text-amber-600 dark:text-blue-400 border-blue-500/30" }
                 : member.activityStatus === "dormant"
                 ? { label: `🚨 Dormant ${member.daysInactive}d`, cls: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" }
                 : member.activityStatus === "new_onboarding"
@@ -251,7 +251,7 @@ export default function TeamActivityRadar({ setPage }) {
                   member.activityStatus === "dormant"
                     ? isDark ? "bg-[#111713] border-red-500/30" : "bg-white border-red-200"
                     : member.activityStatus === "follow_up_needed"
-                    ? isDark ? "bg-[#111713] border-amber-500/30" : "bg-white border-amber-200"
+                    ? isDark ? "bg-[#111713] border-blue-500/30" : "bg-white border-amber-200"
                     : isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
                 }`}
               >
@@ -293,7 +293,7 @@ export default function TeamActivityRadar({ setPage }) {
                     <div className={`p-2.5 rounded-xl border text-[11px] ${
                       isDark ? "bg-stone-900 border-white/[0.08] text-stone-300" : "bg-amber-50/60 border-amber-200 text-stone-700"
                     }`}>
-                      <span className="font-bold text-amber-500 mr-1">📝 Last Note:</span>
+                      <span className="font-bold text-blue-500 mr-1">📝 Last Note:</span>
                       "{member.lastNote.note}"
                       <span className="block text-[9px] text-stone-400 font-mono mt-1">
                         by {member.lastNote.createdByFullName || member.lastNote.createdByName} · {new Date(member.lastNote.createdAt).toLocaleDateString("en-IN")}
@@ -320,7 +320,7 @@ export default function TeamActivityRadar({ setPage }) {
                   </button>
                   <button
                     onClick={() => openNotesModal(member)}
-                    className="flex items-center justify-center gap-1 py-2 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 text-xs font-black hover:bg-amber-500/25 transition-all"
+                    className="flex items-center justify-center gap-1 py-2 rounded-xl bg-blue-600/15 text-blue-500 border border-blue-500/30 text-xs font-black hover:bg-blue-600/25 transition-all"
                   >
                     <span>📝</span> Notes ({member.notesCount || 0})
                   </button>
@@ -355,13 +355,13 @@ export default function TeamActivityRadar({ setPage }) {
 
             {/* Add New Note Box */}
             <div className="space-y-2">
-              <label className="text-xs font-bold block text-amber-500">Naya Follow-Up Remark Likhein:</label>
+              <label className="text-xs font-bold block text-blue-500">Naya Follow-Up Remark Likhein:</label>
               <textarea
                 rows={2}
                 placeholder="Jaise: Spoke on call, promised to place order by Friday, needs product catalog..."
                 value={newNoteText}
                 onChange={(e) => setNewNoteText(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
                 }`}
               />
@@ -381,7 +381,7 @@ export default function TeamActivityRadar({ setPage }) {
                 <button
                   onClick={handleSaveNote}
                   disabled={savingNote || !newNoteText.trim()}
-                  className="px-4 py-1.5 rounded-xl bg-amber-500 text-black font-black text-xs shadow hover:bg-amber-400 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-xl bg-blue-600 text-black font-black text-xs shadow hover:bg-blue-500 disabled:opacity-50"
                 >
                   {savingNote ? "Saving..." : "Save Note"}
                 </button>

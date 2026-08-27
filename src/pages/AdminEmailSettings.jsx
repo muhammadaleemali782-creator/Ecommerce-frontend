@@ -173,7 +173,7 @@ export default function AdminEmailSettings() {
             Set Enforced Domain Name
           </label>
 
-          <div className={`flex items-center gap-2 border rounded-2xl p-1.5 focus-within:border-amber-500 transition-colors ${
+          <div className={`flex items-center gap-2 border rounded-2xl p-1.5 focus-within:border-blue-500 transition-colors ${
             isDark ? "bg-black/40 border-white/10" : "bg-stone-50 border-stone-300"
           }`}>
             <span className={`font-mono font-bold text-base pl-3 ${isDark ? "text-stone-400" : "text-stone-500"}`}>@</span>
@@ -189,7 +189,7 @@ export default function AdminEmailSettings() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 disabled:opacity-50 whitespace-nowrap"
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 disabled:opacity-50 whitespace-nowrap"
             >
               {saving ? "Saving..." : "Save Domain"}
             </button>

@@ -44,7 +44,7 @@ export default function MyCreatedUsers() {
           return (
             <div key={r._id} className={`border-l-4 rounded-lg p-4 shadow-sm ${
               isForMe
-                ? "border-amber-400 bg-amber-50"
+                ? "border-blue-400 bg-amber-50"
                 : "border-green-400 bg-green-50"
             }`}>
 

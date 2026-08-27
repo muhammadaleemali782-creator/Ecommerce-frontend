@@ -193,7 +193,7 @@ export default function Services({ setPage }) {
       ═══════════════════════════════════════════ */}
       <section className="relative rounded-[2.5rem] overflow-hidden p-8 md:p-14 emerald-glass-panel border border-emerald-500/30 text-center shadow-2xl">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-amber-400/50 text-[11px] font-black text-amber-300 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-blue-400/50 text-[11px] font-black text-amber-300 uppercase tracking-widest">
             <span>✨</span>
             <span>CONCIERGE ECOSYSTEM SERVICES</span>
           </div>
@@ -224,7 +224,7 @@ export default function Services({ setPage }) {
             onClick={() => setSelectedPillar(tab.id)}
             className={"px-5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 " + (
               selectedPillar === tab.id
-                ? "bg-amber-400 text-slate-950 font-black shadow-lg scale-105 border-2 border-amber-300"
+                ? "bg-blue-500 text-slate-950 font-black shadow-lg scale-105 border-2 border-amber-300"
                 : "emerald-glass-panel text-slate-300 hover:text-white hover:bg-emerald-950/70"
             )}
           >
@@ -241,7 +241,7 @@ export default function Services({ setPage }) {
         {filteredServices.map(srv => (
           <div
             key={srv.id}
-            className="emerald-glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-emerald-500/20 hover:border-amber-400/50 transition-all duration-300 shadow-xl group overflow-hidden"
+            className="emerald-glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-emerald-500/20 hover:border-blue-400/50 transition-all duration-300 shadow-xl group overflow-hidden"
           >
             <div>
               {/* Image & Tag */}
@@ -252,10 +252,10 @@ export default function Services({ setPage }) {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#031911] via-transparent to-transparent opacity-80" />
-                <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black bg-amber-400 text-slate-950 uppercase tracking-wider shadow">
+                <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black bg-blue-500 text-slate-950 uppercase tracking-wider shadow">
                   {srv.badge}
                 </span>
-                <span className="absolute bottom-3 right-3 px-3 py-1 rounded-xl text-xs font-black bg-[#021810]/90 text-amber-300 border border-amber-400/40">
+                <span className="absolute bottom-3 right-3 px-3 py-1 rounded-xl text-xs font-black bg-[#021810]/90 text-amber-300 border border-blue-400/40">
                   {srv.price}
                 </span>
               </div>
@@ -270,7 +270,7 @@ export default function Services({ setPage }) {
               <div className="space-y-2 pt-4 mt-4 border-t border-emerald-900/60">
                 {srv.features.map((feat, idx) => (
                   <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-200">
-                    <span className="text-amber-400 font-bold">✓</span>
+                    <span className="text-blue-400 font-bold">✓</span>
                     <span>{feat}</span>
                   </div>
                 ))}
@@ -317,7 +317,7 @@ export default function Services({ setPage }) {
                     <span className="text-2xl">{bookingModal.icon}</span>
                     <div>
                       <div className="font-bold text-sm text-white">{bookingModal.title}</div>
-                      <div className="text-[10px] text-amber-400">{bookingModal.price} • {bookingModal.turnaround}</div>
+                      <div className="text-[10px] text-blue-400">{bookingModal.price} • {bookingModal.turnaround}</div>
                     </div>
                   </div>
                   <button
@@ -339,7 +339,7 @@ export default function Services({ setPage }) {
                       placeholder="e.g. Dr. Aryan Sharma"
                       value={bookingForm.name}
                       onChange={e => setBookingForm({ ...bookingForm, name: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-400"
                     />
                   </div>
 
@@ -353,7 +353,7 @@ export default function Services({ setPage }) {
                       placeholder="+91 98765 43210"
                       value={bookingForm.phone}
                       onChange={e => setBookingForm({ ...bookingForm, phone: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-400"
                     />
                   </div>
 
@@ -365,7 +365,7 @@ export default function Services({ setPage }) {
                       type="date"
                       value={bookingForm.date}
                       onChange={e => setBookingForm({ ...bookingForm, date: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-400"
                     />
                   </div>
 
@@ -378,7 +378,7 @@ export default function Services({ setPage }) {
                       placeholder="Describe any current health symptoms or requirements..."
                       value={bookingForm.notes}
                       onChange={e => setBookingForm({ ...bookingForm, notes: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                      className="w-full px-4 py-3 rounded-xl bg-[#02130c] border border-emerald-900 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-400"
                     />
                   </div>
 

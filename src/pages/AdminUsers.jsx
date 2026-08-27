@@ -341,7 +341,7 @@ export default function AdminUsers() {
             className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
               isDark
                 ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
             }`}
           />
         </div>
@@ -466,7 +466,7 @@ export default function AdminUsers() {
                       ? "bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/30"
                       : user.role === "seller"
                       ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
-                      : "bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30"
+                      : "bg-blue-600/15 text-amber-600 dark:text-amber-300 border-blue-500/30"
                   }`}>
                     {roleLabel}
                   </span>
@@ -517,7 +517,7 @@ export default function AdminUsers() {
                       className={`py-1.5 px-2.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 border ${
                         user.isBlocked
                           ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25"
-                          : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-500/25"
+                          : "bg-blue-600/15 text-amber-700 dark:text-amber-300 border-blue-500/30 hover:bg-blue-600/25"
                       }`}
                     >
                       {user.isBlocked ? "Unblock" : "Block"}
@@ -674,7 +674,7 @@ export default function AdminUsers() {
                   setSelectedUser(null)
                   handleOpenEdit(u)
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
               >
                 ✏️ Edit Profile
               </button>
@@ -726,7 +726,7 @@ export default function AdminUsers() {
                   onChange={e => setEditForm({ ...editForm, fullName: e.target.value })}
                   placeholder="e.g. Muhammad Aleem Ali"
                   className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
-                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -740,7 +740,7 @@ export default function AdminUsers() {
                   onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                   placeholder="e.g. DB001"
                   className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-mono ${
-                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -754,7 +754,7 @@ export default function AdminUsers() {
                   onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
                   placeholder="e.g. 9876543210"
                   className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
-                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -768,7 +768,7 @@ export default function AdminUsers() {
                   onChange={e => setEditForm({ ...editForm, address: e.target.value })}
                   placeholder="e.g. City, State, Pincode"
                   className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none ${
-                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                    isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                   }`}
                 />
               </div>

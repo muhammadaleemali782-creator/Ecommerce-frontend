@@ -161,7 +161,7 @@ export default function AdminBannerManagement({ setPage }) {
 
   const mediaBadge = (type) => ({
     image: { emoji: "🖼️", label: "Image", bg: "bg-sky-500/15 text-sky-300 border-sky-500/30" },
-    gif:   { emoji: "🎞️", label: "GIF",   bg: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+    gif:   { emoji: "🎞️", label: "GIF",   bg: "bg-blue-600/15 text-amber-300 border-blue-500/30" },
     video: { emoji: "🎬", label: "Video", bg: "bg-purple-500/15 text-purple-300 border-purple-500/30" },
   }[type] || { emoji: "📄", label: type || "Media", bg: "bg-stone-500/15 text-stone-300 border-stone-500/30" })
 
@@ -201,7 +201,7 @@ export default function AdminBannerManagement({ setPage }) {
 
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
+          className="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
         >
           ➕ Add New Banner
         </button>
@@ -240,7 +240,7 @@ export default function AdminBannerManagement({ setPage }) {
                 value={form.placement}
                 onChange={e => setForm(f => ({ ...f, placement: e.target.value }))}
                 className={`w-full p-3 rounded-xl font-bold border focus:outline-none ${
-                  isDark ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]" : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 shadow-sm"
+                  isDark ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]" : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 shadow-sm"
                 }`}
               >
                 <option value="hero">🖼️ Top Hero Banner (Full width main banner)</option>
@@ -354,7 +354,7 @@ export default function AdminBannerManagement({ setPage }) {
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Festival Mega Sale"
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>
@@ -370,7 +370,7 @@ export default function AdminBannerManagement({ setPage }) {
                   onChange={e => setForm(f => ({ ...f, eyebrow: e.target.value }))}
                   placeholder="e.g. ⭐ 4.8/5 Rating · 50% OFF"
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>
@@ -387,7 +387,7 @@ export default function AdminBannerManagement({ setPage }) {
                 onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
                 placeholder="e.g. Claim exclusive discounts and rewards today"
                 className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                 }`}
               />
             </div>
@@ -405,7 +405,7 @@ export default function AdminBannerManagement({ setPage }) {
                   onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))}
                   placeholder="e.g. Shop Now"
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>
@@ -420,7 +420,7 @@ export default function AdminBannerManagement({ setPage }) {
                   value={form.linkType}
                   onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))}
                   className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 >
                   <option value="internal">📱 Internal Route (In-App)</option>
@@ -439,7 +439,7 @@ export default function AdminBannerManagement({ setPage }) {
                     value={form.buttonLink}
                     onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
                     className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                     }`}
                   >
                     <option value="">— Select internal page —</option>
@@ -451,7 +451,7 @@ export default function AdminBannerManagement({ setPage }) {
                     onChange={e => setForm(f => ({ ...f, buttonLink: e.target.value }))}
                     placeholder="https://example.com/promo"
                     className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                     }`}
                   />
                 )}
@@ -470,7 +470,7 @@ export default function AdminBannerManagement({ setPage }) {
                   value={form.align}
                   onChange={e => setForm(f => ({ ...f, align: e.target.value }))}
                   className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 >
                   <option value="left">⬅️ Left Aligned</option>
@@ -489,7 +489,7 @@ export default function AdminBannerManagement({ setPage }) {
                   value={form.order}
                   onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>
@@ -501,7 +501,7 @@ export default function AdminBannerManagement({ setPage }) {
                   type="checkbox"
                   checked={form.overlay}
                   onChange={e => setForm(f => ({ ...f, overlay: e.target.checked }))}
-                  className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-amber-500"
+                  className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-blue-500"
                 />
                 Apply Dark Gradient Overlay
               </label>

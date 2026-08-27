@@ -151,7 +151,7 @@ export default function AdminRequestHistory() {
               className={`w-full pl-9 pr-8 py-2.5 rounded-2xl text-xs font-semibold focus:outline-none transition-colors border ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:bg-white shadow-sm"
+                  : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-sm"
               }`}
             />
             {search && (
@@ -193,7 +193,7 @@ export default function AdminRequestHistory() {
               className={`w-full p-2.5 rounded-xl text-xs font-bold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
               }`}
             >
               <option value="">🔘 All Decisions</option>
@@ -215,7 +215,7 @@ export default function AdminRequestHistory() {
               className={`w-full p-2.5 rounded-xl text-xs font-bold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
               }`}
             >
               <option value="">👥 All Roles</option>
@@ -240,7 +240,7 @@ export default function AdminRequestHistory() {
               className={`w-full p-2.5 rounded-xl text-xs font-semibold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
               }`}
             />
           </div>
@@ -259,7 +259,7 @@ export default function AdminRequestHistory() {
               className={`w-full p-2.5 rounded-xl text-xs font-semibold focus:outline-none border cursor-pointer ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                  : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
               }`}
             />
           </div>
@@ -270,7 +270,7 @@ export default function AdminRequestHistory() {
         {isAnyFilterActive && (
           <div className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-2 flex-wrap font-semibold ${
             isDark
-              ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+              ? "bg-blue-600/10 border-blue-500/20 text-amber-300"
               : "bg-amber-50 border-amber-200 text-amber-900 shadow-xs"
           }`}>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -487,4 +487,4 @@ export default function AdminRequestHistory() {
   )
 }
 
-
+

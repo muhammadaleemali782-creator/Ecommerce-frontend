@@ -112,8 +112,8 @@ export default function AdminAnalytics({ setPage }) {
             onClick={() => setPage("admin-network")}
             className={`self-start sm:self-auto px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer active:scale-95 shrink-0 border ${
               isDark
-                ? "bg-amber-500/10 hover:bg-amber-500/20 text-[#fbbf24] border-[#fbbf24]/30"
-                : "bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 border-amber-500/30 shadow-sm"
+                ? "bg-blue-600/10 hover:bg-blue-600/20 text-[#fbbf24] border-[#fbbf24]/30"
+                : "bg-blue-600/15 hover:bg-blue-600/25 text-amber-800 border-blue-500/30 shadow-sm"
             }`}
           >
             <span>🌐 View Full Tree Map</span>
@@ -172,14 +172,14 @@ export default function AdminAnalytics({ setPage }) {
         {/* Users */}
         <div className={`p-4 sm:p-5 rounded-2xl border relative overflow-hidden group transition-all ${
           isDark
-            ? "bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-transparent border-amber-500/20 hover:border-amber-500/40"
+            ? "bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-transparent border-blue-500/20 hover:border-blue-500/40"
             : "bg-amber-50/70 border-amber-200 hover:border-amber-300 shadow-sm"
         }`}>
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 font-mono">
+            <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-blue-400 font-mono">
               CUSTOMERS / USERS
             </span>
-            <span className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-300 flex items-center justify-center text-base border border-amber-500/20">
+            <span className="w-8 h-8 rounded-xl bg-blue-600/10 text-amber-600 dark:text-amber-300 flex items-center justify-center text-base border border-blue-500/20">
               👤
             </span>
           </div>

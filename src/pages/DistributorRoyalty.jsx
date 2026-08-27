@@ -88,10 +88,10 @@ export default function DistributorRoyalty({ setPage }) {
         </div>
 
         <div className={`p-5 rounded-3xl border ${
-          isDark ? "bg-[#111713] border-amber-500/30" : "bg-amber-50/50 border-amber-200"
+          isDark ? "bg-[#111713] border-blue-500/30" : "bg-amber-50/50 border-amber-200"
         }`}>
-          <p className="text-[10px] font-mono uppercase text-amber-500 font-bold">Total Company Pool Fund</p>
-          <p className="text-xl font-black mt-1 text-amber-500">₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
+          <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Total Company Pool Fund</p>
+          <p className="text-xl font-black mt-1 text-blue-500">₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
           <p className="text-xs font-mono text-stone-400 mt-1">{Math.round(current.accumulatedPoolPPC || 0)} PPC ({data.poolPercentage}% Pool)</p>
         </div>
 

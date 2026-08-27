@@ -234,7 +234,7 @@ export default function Store({ setPage }) {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-700 dark:text-amber-300 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                   <span>✦</span>
                   <span>100% AYUSH CERTIFIED</span>
                 </span>
@@ -260,7 +260,7 @@ export default function Store({ setPage }) {
             {totalCartCount > 0 && (
               <button
                 onClick={() => setPage && setPage("cart")}
-                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md active:scale-95 transition-all cursor-pointer text-xs font-black shrink-0 uppercase tracking-wider"
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 shadow-md active:scale-95 transition-all cursor-pointer text-xs font-black shrink-0 uppercase tracking-wider"
               >
                 <span>🛍️ CART ({totalCartCount})</span>
                 <span>➔</span>
@@ -283,7 +283,7 @@ export default function Store({ setPage }) {
                 className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none border transition-all ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:bg-white shadow-sm"
+                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-sm"
                 }`}
               />
               {search && (
@@ -304,7 +304,7 @@ export default function Store({ setPage }) {
                 className={`w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                    : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 shadow-sm"
+                    : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 shadow-sm"
                 }`}
               >
                 <option value="rating">★ Top Rated Formulations</option>
@@ -326,7 +326,7 @@ export default function Store({ setPage }) {
                   onClick={() => setCategory(cat)}
                   className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 cursor-pointer ${
                     isSelected
-                      ? "bg-amber-500 text-stone-950 font-black shadow-sm"
+                      ? "bg-blue-600 text-stone-950 font-black shadow-sm"
                       : isDark
                         ? "bg-white/[0.06] text-stone-300 hover:bg-white/10 border border-white/10"
                         : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 shadow-xs"
@@ -350,12 +350,12 @@ export default function Store({ setPage }) {
             isDark ? "text-stone-400" : "text-stone-500"
           }`}>
             Showing <span className={`font-black ${isDark ? "text-white" : "text-stone-950"}`}>{visibleProducts.length}</span> Products
-            {category !== "all" && <span> in <span className="text-amber-600 dark:text-amber-400 font-bold">{category}</span></span>}
+            {category !== "all" && <span> in <span className="text-amber-600 dark:text-blue-400 font-bold">{category}</span></span>}
           </div>
           {(category !== "all" || search) && (
             <button
               onClick={() => { setCategory("all"); setSearch("") }}
-              className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors cursor-pointer"
+              className="text-[11px] font-bold text-amber-600 dark:text-blue-400 hover:underline transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
@@ -374,7 +374,7 @@ export default function Store({ setPage }) {
             </p>
             <button
               onClick={() => { setCategory("all"); setSearch("") }}
-              className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer shadow-sm"
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-stone-950 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer shadow-sm"
             >
               Show All Products
             </button>
@@ -462,14 +462,14 @@ export default function Store({ setPage }) {
                         <div>
                           {/* Rating & Tap to Flip Prompt */}
                           <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs mb-1">
-                            <div className="flex items-center gap-1 text-amber-500 font-bold">
+                            <div className="flex items-center gap-1 text-blue-500 font-bold">
                               <span>★</span>
                               <span className={isDark ? "text-white" : "text-stone-900"}>{rating}</span>
                               <span className="text-stone-400 text-[9px] sm:text-[10px]">({reviews})</span>
                             </div>
                             <span
                               onClick={(e) => toggleFlip(productId, e)}
-                              className="text-[9px] font-mono font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                              className="text-[9px] font-mono font-bold text-amber-600 dark:text-blue-400 hover:underline cursor-pointer"
                             >
                               Details ➔
                             </span>
@@ -507,7 +507,7 @@ export default function Store({ setPage }) {
                               cartQty > 0
                                 ? "bg-emerald-600 text-white hover:bg-emerald-500"
                                 : isDark
-                                  ? "bg-amber-500 hover:bg-amber-400 text-stone-950"
+                                  ? "bg-blue-600 hover:bg-blue-500 text-stone-950"
                                   : "bg-stone-950 hover:bg-stone-800 text-white"
                             }`}
                           >
@@ -522,18 +522,18 @@ export default function Store({ setPage }) {
                     <div
                       onClick={(e) => toggleFlip(productId, e)}
                       className={`backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl p-3 sm:p-4 border shadow-xl flex flex-col justify-between cursor-pointer ${
-                        isDark ? "bg-[#141b16] border-amber-500/30 text-white" : "bg-stone-900 border-stone-800 text-white"
+                        isDark ? "bg-[#141b16] border-blue-500/30 text-white" : "bg-stone-900 border-stone-800 text-white"
                       }`}
                     >
                       <div>
                         {/* Back Header with Prominent Return Button */}
                         <div className="flex items-center justify-between gap-2 border-b border-stone-800 pb-2 mb-2">
-                          <span className="text-[9px] font-mono font-black uppercase tracking-widest text-amber-400">
+                          <span className="text-[9px] font-mono font-black uppercase tracking-widest text-blue-400">
                             🌿 FORMULATION DOSSIER
                           </span>
                           <button
                             onClick={(e) => toggleFlip(productId, e)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer"
                           >
                             <span>↩</span>
                             <span>Photo</span>
@@ -583,7 +583,7 @@ export default function Store({ setPage }) {
                         </button>
                         <button
                           onClick={(e) => handleAddToCart(product, e)}
-                          className="flex-1 py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer truncate shadow-md"
+                          className="flex-1 py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer truncate shadow-md"
                         >
                           ADD ₹{Number(price).toLocaleString("en-IN")}
                         </button>

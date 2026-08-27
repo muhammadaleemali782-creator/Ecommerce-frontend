@@ -69,7 +69,7 @@ export default function Admin({ setPage }) {
           desc: "Add, update price, edit AYUSH certifications & inventory",
           icon: "📦",
           tag: "CATALOG",
-          accent: isDark ? "from-amber-500/20 to-transparent text-amber-300 border-amber-500/30" : "from-amber-500/10 to-amber-500/5 text-amber-800 border-amber-300",
+          accent: isDark ? "from-amber-500/20 to-transparent text-amber-300 border-blue-500/30" : "from-amber-500/10 to-amber-500/5 text-amber-800 border-amber-300",
         },
         {
           id: "admin-orders",
@@ -114,7 +114,7 @@ export default function Admin({ setPage }) {
           desc: "Fast 1-click approvals for seller & distributor join requests",
           icon: "⏳",
           tag: "APPROVALS",
-          accent: isDark ? "from-amber-500/20 to-transparent text-amber-300 border-amber-500/30" : "from-amber-500/10 to-amber-500/5 text-amber-800 border-amber-300",
+          accent: isDark ? "from-amber-500/20 to-transparent text-amber-300 border-blue-500/30" : "from-amber-500/10 to-amber-500/5 text-amber-800 border-amber-300",
         },
         {
           id: "admin-requests-history",
@@ -312,10 +312,10 @@ export default function Admin({ setPage }) {
             </div>
 
             <div className={`p-3 sm:p-4 rounded-2xl border text-center transition-colors ${
-              isDark ? "bg-[#121714]/80 border-amber-500/20" : "bg-white border-amber-200 shadow-sm"
+              isDark ? "bg-[#121714]/80 border-blue-500/20" : "bg-white border-amber-200 shadow-sm"
             }`}>
               <span className="text-base sm:text-xl block mb-1">👤</span>
-              <div className="text-lg sm:text-2xl font-black text-amber-500 dark:text-[#fbbf24] tracking-tight">
+              <div className="text-lg sm:text-2xl font-black text-blue-500 dark:text-[#fbbf24] tracking-tight">
                 {networkStats.users}
               </div>
               <div className={`text-[9px] sm:text-[11px] font-bold uppercase tracking-wider font-mono ${
@@ -381,7 +381,7 @@ export default function Admin({ setPage }) {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm focus:outline-none transition-colors border ${
                     isDark
                       ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                      : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                      : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -389,7 +389,7 @@ export default function Admin({ setPage }) {
               {searchModule && (
                 <button
                   onClick={() => setSearchModule("")}
-                  className="px-3 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-300 text-xs font-bold hover:bg-amber-500/20 cursor-pointer"
+                  className="px-3 py-2 rounded-xl bg-blue-600/10 text-amber-600 dark:text-amber-300 text-xs font-bold hover:bg-blue-600/20 cursor-pointer"
                 >
                   Reset Filter
                 </button>
@@ -423,7 +423,7 @@ export default function Admin({ setPage }) {
                         className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group shadow-sm hover:scale-[1.01] active:scale-[0.99] ${
                           isDark
                             ? `bg-gradient-to-br ${item.accent} bg-[#111713] border-white/[0.08] hover:border-white/20`
-                            : `bg-gradient-to-br ${item.accent} bg-white border-stone-200 hover:border-amber-400 hover:shadow-md`
+                            : `bg-gradient-to-br ${item.accent} bg-white border-stone-200 hover:border-blue-400 hover:shadow-md`
                         }`}
                       >
                         <div>

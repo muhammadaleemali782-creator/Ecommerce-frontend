@@ -315,7 +315,7 @@ export default function Login({ setPage }) {
             <EducaLogo size={46} />
           </div>
           
-          <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-amber-400 uppercase">
+          <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-blue-400 uppercase">
             EDUCA VEDA · PORTAL
           </span>
           
@@ -361,11 +361,11 @@ export default function Login({ setPage }) {
             <button
               type="button"
               onClick={() => setShowEducaSSO(true)}
-              className="relative group overflow-hidden w-full py-3 px-4 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:scale-[0.98] border border-white/15 hover:border-amber-400/50 text-white text-xs font-black uppercase tracking-wider shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
+              className="relative group overflow-hidden w-full py-3 px-4 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:scale-[0.98] border border-white/15 hover:border-blue-400/50 text-white text-xs font-black uppercase tracking-wider shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
             >
               <span className="text-base">📧</span>
               <span className="tracking-widest">LOGIN WITH EDUCA MAIL</span>
-              <span className="text-amber-400 text-xs">➔</span>
+              <span className="text-blue-400 text-xs">➔</span>
             </button>
 
             {/* Subtle Divider */}
@@ -419,7 +419,7 @@ export default function Login({ setPage }) {
                 <button
                   type="button"
                   onClick={() => setPage("password-help")}
-                  className="text-[9.5px] text-amber-400 hover:underline transition-colors cursor-pointer"
+                  className="text-[9.5px] text-blue-400 hover:underline transition-colors cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -472,7 +472,7 @@ export default function Login({ setPage }) {
               className={`w-full mt-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
                 loading || lockoutTimer > 0
                   ? "bg-white/10 text-slate-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black hover:from-amber-400 hover:to-yellow-300 active:scale-[0.98]"
+                  : "bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black hover:from-indigo-500 hover:to-blue-400 active:scale-[0.98]"
               }`}
             >
               {loading ? (
@@ -569,7 +569,7 @@ export default function Login({ setPage }) {
           <button
             type="button"
             onClick={() => setPage("home")}
-            className="text-xs text-amber-400 hover:text-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto font-bold"
+            className="text-xs text-blue-400 hover:text-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto font-bold"
           >
             <span>🌐</span>
             <span>Visit Website / Back to Home</span>
@@ -598,7 +598,7 @@ export default function Login({ setPage }) {
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">
                   Login with EDUCA Mail
                 </h3>
-                <p className="text-[10px] font-mono text-amber-400">
+                <p className="text-[10px] font-mono text-blue-400">
                   Single Sign-On (SSO) Portal
                 </p>
               </div>
@@ -619,8 +619,8 @@ export default function Login({ setPage }) {
               if (savedSSO && savedSSO.token && savedSSO.user) {
                 const daysRemaining = Math.ceil((savedSSO.expiresAt - Date.now()) / (24 * 60 * 60 * 1000));
                 return (
-                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2 mb-3">
-                    <div className="text-[11px] font-bold text-amber-400">
+                  <div className="p-3.5 rounded-2xl bg-blue-600/10 border border-blue-500/30 text-center space-y-2 mb-3">
+                    <div className="text-[11px] font-bold text-blue-400">
                       ⚡ Active 30-Day EDUCA Mail Session ({daysRemaining} days remaining)
                     </div>
                     <div className="text-xs text-white font-mono">
@@ -633,7 +633,7 @@ export default function Login({ setPage }) {
                         localStorage.setItem("user", JSON.stringify(savedSSO.user));
                         window.location.reload();
                       }}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 transition-all cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 transition-all cursor-pointer"
                     >
                       🚀 Continue 1-Click Login ➔
                     </button>
@@ -703,7 +703,7 @@ export default function Login({ setPage }) {
                   type="text"
                   required
                   placeholder="e.g. DS001 ya name@educaveda.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -716,13 +716,13 @@ export default function Login({ setPage }) {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>⚡ Sign In with EDUCA Mail</span>
                 <span>➔</span>
@@ -742,7 +742,7 @@ export default function Login({ setPage }) {
               <button
                 type="button"
                 onClick={() => { setShowEducaSSO(false); setPage("home"); }}
-                className="text-amber-400 hover:underline cursor-pointer"
+                className="text-blue-400 hover:underline cursor-pointer"
               >
                 🌐 Visit Website
               </button>

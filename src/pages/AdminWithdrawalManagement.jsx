@@ -423,7 +423,7 @@ export default function AdminWithdrawalManagement() {
 
                   <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border self-start sm:self-auto ${
                     rc.status === "pending"
-                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30"
+                      ? "bg-blue-600/15 text-amber-600 dark:text-amber-300 border-blue-500/30"
                       : rc.status === "paid"
                         ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
                         : "bg-red-500/15 text-red-600 dark:text-red-300 border-red-500/30"
@@ -539,7 +539,7 @@ export default function AdminWithdrawalManagement() {
 
                     <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border self-start sm:self-auto ${
                       req.status === "pending"
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30"
+                        ? "bg-blue-600/15 text-amber-600 dark:text-amber-300 border-blue-500/30"
                         : req.status === "approved"
                           ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
                           : "bg-red-500/15 text-red-600 dark:text-red-300 border-red-500/30"
@@ -582,13 +582,13 @@ export default function AdminWithdrawalManagement() {
                   {/* Locked PPC Banner */}
                   {req.ppcRateAtRequest > 0 && (
                     <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
-                      isDark ? "bg-amber-950/30 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+                      isDark ? "bg-amber-950/30 border-blue-500/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
                     }`}>
                       <div>
                         <span className="font-bold">🔒 Locked Exchange Rate:</span> 1 PPC = ₹{req.ppcRateAtRequest} @ {req.percentageAtRequest}% share
                       </div>
                       <div className={`font-black px-2 py-0.5 rounded border ${
-                        isDark ? "text-white bg-black/40 border-amber-500/30" : "text-stone-900 bg-white border-amber-300"
+                        isDark ? "text-white bg-black/40 border-blue-500/30" : "text-stone-900 bg-white border-amber-300"
                       }`}>
                         Payout: ₹{rupeeVal}
                       </div>
@@ -700,7 +700,7 @@ export default function AdminWithdrawalManagement() {
                   value={modalData.transactionId}
                   onChange={(e) => setModalData({ ...modalData, transactionId: e.target.value })}
                   className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
                   }`}
                   placeholder="e.g. UTR123456789 / IMPS Ref"
                 />
@@ -718,7 +718,7 @@ export default function AdminWithdrawalManagement() {
                 onChange={(e) => setModalData({ ...modalData, note: e.target.value })}
                 rows="3"
                 className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
-                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500"
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
                 }`}
                 placeholder={modalData.action === "approve" ? "Add transaction note..." : "State why this request is rejected..."}
               />

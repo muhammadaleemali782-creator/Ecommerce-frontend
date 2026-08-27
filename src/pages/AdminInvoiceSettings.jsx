@@ -247,7 +247,7 @@ export default function AdminInvoiceSettings() {
       <input type={type} value={form[key]||""} placeholder={ph}
         onChange={e=>setForm(p=>({...p,[key]:e.target.value}))}
         className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-medium ${
-          isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+          isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
         }`}
       />
     </div>
@@ -292,7 +292,7 @@ export default function AdminInvoiceSettings() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap disabled:opacity-50"
+          className="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap disabled:opacity-50"
         >
           {saved ? "✅ Saved Successfully!" : saving ? "Saving..." : "💾 Save Invoice Settings"}
         </button>
@@ -354,7 +354,7 @@ export default function AdminInvoiceSettings() {
                   className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all ${
                     isDark
                       ? "border-white/15 bg-black/30 hover:border-[#fbbf24]"
-                      : "border-stone-300 bg-stone-50 hover:border-amber-500"
+                      : "border-stone-300 bg-stone-50 hover:border-blue-500"
                   }`}
                 >
                   <div className="text-2xl mb-1">📁</div>
@@ -384,7 +384,7 @@ export default function AdminInvoiceSettings() {
                   onChange={e=>{setForm(p=>({...p,logo:e.target.value}));setLogoPreview(e.target.value)}}
                   placeholder="https://yoursite.com/logo.png"
                   className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none font-medium ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>
@@ -397,7 +397,7 @@ export default function AdminInvoiceSettings() {
                 type="checkbox"
                 checked={!!form.showLogo}
                 onChange={e=>setForm(p=>({...p,showLogo:e.target.checked}))}
-                className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-amber-500"
+                className="rounded border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-black/50 text-blue-500"
               />
               Display logo on invoice headers
             </label>
@@ -585,7 +585,7 @@ export default function AdminInvoiceSettings() {
                     previewStatus===s.k
                       ? isDark
                         ? "border-[#fbbf24] text-white bg-white/[0.04]"
-                        : "border-amber-500 text-stone-900 bg-amber-500/10"
+                        : "border-blue-500 text-stone-900 bg-blue-600/10"
                       : isDark
                         ? "border-transparent text-stone-500 hover:text-stone-300"
                         : "border-transparent text-stone-400 hover:text-stone-700"

@@ -208,7 +208,7 @@ export default function AdminProductList() {
       }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 dark:text-amber-300 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ INVENTORY & PERMISSIONS
             </span>
           </div>
@@ -233,7 +233,7 @@ export default function AdminProductList() {
             className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
               isDark
                 ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
             }`}
           />
         </div>
@@ -403,7 +403,7 @@ export default function AdminProductList() {
                   onClick={() => removeFromUsers(p._id)}
                   className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 border ${
                     isDark
-                      ? "bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border-amber-500/30"
+                      ? "bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border-blue-500/30"
                       : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
                   }`}
                 >
@@ -427,4 +427,4 @@ export default function AdminProductList() {
     </div>
   )
 }
-
+

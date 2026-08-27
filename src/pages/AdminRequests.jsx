@@ -162,7 +162,7 @@ export default function AdminRequests() {
       }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 dark:text-amber-300 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ ONBOARDING QUEUE
             </span>
           </div>
@@ -174,7 +174,7 @@ export default function AdminRequests() {
           <p className={`text-xs font-medium mt-0.5 ${
             isDark ? "text-stone-400" : "text-stone-600"
           }`}>
-            Pending in queue: <span className="text-amber-600 dark:text-amber-400 font-bold">{requests.length}</span> · Automated email validation active
+            Pending in queue: <span className="text-amber-600 dark:text-blue-400 font-bold">{requests.length}</span> · Automated email validation active
           </p>
         </div>
       </div>
@@ -278,7 +278,7 @@ export default function AdminRequests() {
                     👤 Raised by: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedBy?.name || "Unknown"}</b> ({r.requestedBy?.role || "user"})
                   </span>
                   {r.requestedForId ? (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300">
+                    <span className="px-2 py-0.5 rounded-md bg-blue-600/10 border border-blue-500/20 text-amber-600 dark:text-amber-300">
                       🎯 Target: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedForId?.name}</b> ({r.requestedForId?.role})
                     </span>
                   ) : (

@@ -18,7 +18,7 @@ const sortKids  = (arr) => [...(arr||[])].sort((a,b)=>(ROLE_SORT[a.role]??9)-(RO
 
 function LevelBadge({ level }) {
   const cfgs = [null,
-    { bg:"bg-amber-500/15", color:"text-amber-300", border:"border-amber-500/30", label:"L1 · Commission" },
+    { bg:"bg-blue-600/15", color:"text-amber-300", border:"border-blue-500/30", label:"L1 · Commission" },
     { bg:"bg-emerald-500/15", color:"text-emerald-300", border:"border-emerald-500/30", label:"L2 · Commission" },
     { bg:"bg-sky-500/15", color:"text-sky-300", border:"border-sky-500/30", label:"L3 · Commission" },
     { bg:"bg-pink-500/15", color:"text-pink-300", border:"border-pink-500/30", label:"L4 · Coins" },
@@ -71,7 +71,7 @@ function InlineAnalytics({ userId, userName, userRole }) {
               { label:"Orders", val:data.ordersCount??0, color:"text-sky-300", bg:"bg-sky-950/40 border-sky-500/20" },
               { label:"Sales Volume", val:`₹${Number(data.totalSales??0).toLocaleString()}`, color:"text-emerald-300", bg:"bg-emerald-950/40 border-emerald-500/20" },
               { label:"Connected", val:data.subUsersCount??0, color:"text-purple-300", bg:"bg-purple-950/40 border-purple-500/20" },
-              { label:"Products", val:data.assignedProducts?.length??0, color:"text-amber-300", bg:"bg-amber-950/40 border-amber-500/20" },
+              { label:"Products", val:data.assignedProducts?.length??0, color:"text-amber-300", bg:"bg-amber-950/40 border-blue-500/20" },
             ].map((s,i)=>(
               <div key={i} className={`p-2.5 rounded-xl border text-center ${s.bg}`}>
                 <div className="text-[9px] font-mono uppercase text-stone-400 font-bold">{s.label}</div>
@@ -81,7 +81,7 @@ function InlineAnalytics({ userId, userName, userRole }) {
           </div>
 
           {data.topProduct && (
-            <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/20 text-xs flex items-center justify-between gap-2">
+            <div className="p-2.5 rounded-xl bg-amber-950/30 border border-blue-500/20 text-xs flex items-center justify-between gap-2">
               <span className="font-bold text-amber-300">🏆 Top: {data.topProduct.name}</span>
               <span className="text-[10px] font-mono text-stone-400">
                 {data.topProduct.count} units · ₹{Number(data.topProduct.total).toLocaleString()}
@@ -532,7 +532,7 @@ export default function AdminNetworkView() {
                   { label:"Orders Fulfilled", val:analytics.ordersCount??0, color:"text-sky-600 dark:text-sky-300", bg: isDark ? "bg-sky-950/30 border-sky-500/20" : "bg-sky-50 border-sky-200" },
                   { label:"Gross Sales", val:`₹${Number(analytics.totalSales??0).toLocaleString()}`, color:"text-emerald-600 dark:text-emerald-300", bg: isDark ? "bg-emerald-950/30 border-emerald-500/20" : "bg-emerald-50 border-emerald-200" },
                   { label:"Downstream Users", val:analytics.subUsersCount??0, color:"text-purple-600 dark:text-purple-300", bg: isDark ? "bg-purple-950/30 border-purple-500/20" : "bg-purple-50 border-purple-200" },
-                  { label:"Inventory Count", val:analytics.assignedProducts?.length??0, color:"text-amber-600 dark:text-amber-300", bg: isDark ? "bg-amber-950/30 border-amber-500/20" : "bg-amber-50 border-amber-200" },
+                  { label:"Inventory Count", val:analytics.assignedProducts?.length??0, color:"text-amber-600 dark:text-amber-300", bg: isDark ? "bg-amber-950/30 border-blue-500/20" : "bg-amber-50 border-amber-200" },
                 ].map((card,i)=>(
                   <div key={i} className={`p-4 rounded-2xl border ${card.bg}`}>
                     <div className={`text-[10px] font-mono uppercase font-bold ${isDark ? "text-stone-400" : "text-stone-500"}`}>{card.label}</div>

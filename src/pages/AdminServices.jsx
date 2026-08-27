@@ -152,7 +152,7 @@ export default function AdminServices({ setPage }) {
 
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
+          className="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 whitespace-nowrap"
         >
           ➕ Add New Service
         </button>
@@ -192,7 +192,7 @@ export default function AdminServices({ setPage }) {
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 placeholder="e.g. Free Doctor Consultation, Refer & Earn..."
                 className={`w-full p-3 rounded-xl border font-bold focus:outline-none ${
-                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                 }`}
               />
             </div>
@@ -209,7 +209,7 @@ export default function AdminServices({ setPage }) {
                 placeholder="Short tagline shown on the service card..."
                 rows={2}
                 className={`w-full p-3 rounded-xl border focus:outline-none ${
-                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                 }`}
               />
             </div>
@@ -225,7 +225,7 @@ export default function AdminServices({ setPage }) {
                   value={form.linkType}
                   onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))}
                   className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 >
                   <option value="external">🔗 External Web URL (Opens in new tab)</option>
@@ -243,7 +243,7 @@ export default function AdminServices({ setPage }) {
                   value={form.type}
                   onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
                   className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 >
                   <option value="square">⬛ Square Card</option>
@@ -267,7 +267,7 @@ export default function AdminServices({ setPage }) {
                 placeholder="e.g. Health Consultations, Blogs, Exclusive Offers..."
                 list="category-suggestions"
                 className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                  isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                 }`}
               />
               <datalist id="category-suggestions">
@@ -286,7 +286,7 @@ export default function AdminServices({ setPage }) {
                   value={form.link}
                   onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
                   className={`w-full p-2.5 font-bold rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 >
                   <option value="">— Select internal screen —</option>
@@ -298,7 +298,7 @@ export default function AdminServices({ setPage }) {
                   onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
                   placeholder="https://consultation.example.com"
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               )}
@@ -316,7 +316,7 @@ export default function AdminServices({ setPage }) {
                   value={form.order}
                   onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
                   className={`w-full p-2.5 rounded-xl border focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                 />
               </div>

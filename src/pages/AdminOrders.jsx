@@ -6,7 +6,7 @@ const StatusBadge = ({ status }) => {
   const map = {
     confirmed:     { label: "Confirmed",      bg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30", dot: "bg-emerald-500" },
     dist_approved: { label: "Dist. Approved", bg: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30",         dot: "bg-sky-500" },
-    pending:       { label: "Pending",        bg: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",     dot: "bg-amber-500" },
+    pending:       { label: "Pending",        bg: "bg-blue-600/15 text-amber-600 dark:text-blue-400 border-blue-500/30",     dot: "bg-blue-600" },
     rejected:      { label: "Rejected",       bg: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30",           dot: "bg-red-500" },
   }
   const m = map[status] || { label: status || "Unknown", bg: "bg-stone-500/15 text-stone-700 dark:text-stone-300 border-stone-500/30", dot: "bg-stone-500" }
@@ -138,7 +138,7 @@ export default function AdminOrders() {
 
   const FILTERS = [
     { key: "all",           label: "All Orders",    color: "bg-white/10 text-white border-white/20" },
-    { key: "pending",       label: "Pending",        color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+    { key: "pending",       label: "Pending",        color: "bg-blue-600/20 text-amber-300 border-blue-500/30" },
     { key: "dist_approved", label: "Dist. Approved", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" },
     { key: "confirmed",     label: "Confirmed",      color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
     { key: "rejected",      label: "Rejected",       color: "bg-red-500/20 text-red-300 border-red-500/30" },
@@ -191,7 +191,7 @@ export default function AdminOrders() {
             className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
               isDark
                 ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
             }`}
           />
         </div>
@@ -200,7 +200,7 @@ export default function AdminOrders() {
       {/* ── STATS CARDS ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Pending",       count: counts.pending,       border: "border-amber-500/30", text: "text-amber-500 dark:text-amber-400", icon: "⏳" },
+          { label: "Pending",       count: counts.pending,       border: "border-blue-500/30", text: "text-blue-500 dark:text-blue-400", icon: "⏳" },
           { label: "Dist Approved", count: counts.dist_approved, border: "border-sky-500/30",   text: "text-sky-500 dark:text-sky-400",   icon: "🏢" },
           { label: "Confirmed",     count: counts.confirmed,     border: "border-emerald-500/30", text: "text-emerald-500 dark:text-emerald-400", icon: "✅" },
           { label: "Rejected",      count: counts.rejected,      border: "border-red-500/30",   text: "text-red-500 dark:text-red-400",   icon: "❌" },
@@ -313,7 +313,7 @@ export default function AdminOrders() {
                             👤 {order.sellerId.fullName || order.sellerId.name}
                           </div>
                           {order.onBehalfOfId && (
-                            <div className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20">
+                            <div className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-600/10 text-amber-600 dark:text-amber-300 border border-blue-500/20">
                               {order.placedByName} {order.placedByFullName && `(${order.placedByFullName})`} → {order.onBehalfOfName} {order.onBehalfOfFullName && `(${order.onBehalfOfFullName})`}
                             </div>
                           )}
@@ -363,7 +363,7 @@ export default function AdminOrders() {
                     <td className="p-3.5 whitespace-nowrap">
                       <StatusBadge status={order.status} />
                       {order.approvedByAdmin && order.status === "confirmed" && (
-                        <div className="text-[9px] text-amber-600 dark:text-amber-400 font-bold mt-1">👑 Admin Approved</div>
+                        <div className="text-[9px] text-amber-600 dark:text-blue-400 font-bold mt-1">👑 Admin Approved</div>
                       )}
                     </td>
 
@@ -428,7 +428,7 @@ export default function AdminOrders() {
                 placeholder="Add instructions or delivery note..."
                 rows={3}
                 className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
-                  isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-amber-500"
+                  isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-[#fbbf24]" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
                 }`}
               />
             </div>

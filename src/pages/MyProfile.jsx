@@ -151,7 +151,7 @@ export default function MyProfile() {
         }`}>
           {/* Ambient Glow */}
           <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full pointer-events-none opacity-40 blur-2xl ${
-            profile.role === "admin" ? "bg-amber-500" :
+            profile.role === "admin" ? "bg-blue-600" :
             profile.role === "distributor" ? "bg-sky-500" :
             profile.role === "seller" ? "bg-emerald-500" : "bg-purple-500"
           }`} />
@@ -161,7 +161,7 @@ export default function MyProfile() {
             <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center text-3xl sm:text-4xl font-black shrink-0 border shadow-lg ${
               isDark
                 ? "bg-[#1a241e] text-[#fbbf24] border-[#fbbf24]/40 shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                : "bg-white text-stone-900 border-amber-400 shadow-md"
+                : "bg-white text-stone-900 border-blue-400 shadow-md"
             }`}>
               {initials}
             </div>
@@ -170,7 +170,7 @@ export default function MyProfile() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mb-1.5">
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-widest border ${
-                  profile.role === "admin" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" :
+                  profile.role === "admin" ? "bg-blue-600/15 text-amber-600 dark:text-blue-400 border-blue-500/30" :
                   profile.role === "distributor" ? "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30" :
                   profile.role === "seller" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" :
                   "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30"
@@ -213,7 +213,7 @@ export default function MyProfile() {
               onClick={handleCopyId}
               className={`px-2.5 py-1 rounded-lg font-mono font-black text-xs border flex items-center gap-1.5 transition-all cursor-pointer ${
                 isDark
-                  ? "bg-white/[0.06] hover:bg-white/[0.12] text-amber-300 border-amber-500/30"
+                  ? "bg-white/[0.06] hover:bg-white/[0.12] text-amber-300 border-blue-500/30"
                   : "bg-white hover:bg-stone-100 text-amber-900 border-amber-300 shadow-xs"
               }`}
               title="Click to copy System ID"
@@ -227,7 +227,7 @@ export default function MyProfile() {
             onClick={handleShare}
             className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 ${
               isDark
-                ? "bg-amber-500 hover:bg-amber-400 text-black font-black"
+                ? "bg-blue-600 hover:bg-blue-500 text-black font-black"
                 : "bg-stone-900 hover:bg-stone-800 text-white"
             }`}
           >
@@ -332,7 +332,7 @@ export default function MyProfile() {
                   className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
                     isDark
                       ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
                   }`}
                   value={form.fullName}
                   onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))}
@@ -366,7 +366,7 @@ export default function MyProfile() {
                   className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
                     isDark
                       ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
                   }`}
                   value={form.phone}
                   onChange={e => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
@@ -385,7 +385,7 @@ export default function MyProfile() {
                   className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
                     isDark
                       ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-amber-500 focus:bg-white shadow-sm"
+                      : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 focus:bg-white shadow-sm"
                   }`}
                   rows={3}
                   value={form.address}

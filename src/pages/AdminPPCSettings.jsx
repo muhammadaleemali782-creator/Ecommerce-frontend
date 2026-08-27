@@ -293,7 +293,7 @@ export default function AdminPPCSettings() {
       }`}>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#fbbf24]/10 text-amber-600 dark:text-[#fbbf24] border border-amber-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#fbbf24]/10 text-amber-600 dark:text-[#fbbf24] border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
               ✦ COMMISSION & LEVEL ENGINE
             </span>
           </div>
@@ -379,7 +379,7 @@ export default function AdminPPCSettings() {
             <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
               isDark ? "text-white" : "text-stone-900"
             }`}>
-              <span className="text-amber-500">💰</span> Base PPC Valuation & Payout Constraints
+              <span className="text-blue-500">💰</span> Base PPC Valuation & Payout Constraints
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -397,7 +397,7 @@ export default function AdminPPCSettings() {
                   onChange={(e) => setFormData({ ...formData, basePPCValue: e.target.value })}
                   required
                   className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
-                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                   placeholder="40"
                 />
@@ -418,7 +418,7 @@ export default function AdminPPCSettings() {
                   onChange={(e) => setFormData({ ...formData, minimumWithdrawal: e.target.value })}
                   required
                   className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
-                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                   placeholder="100"
                 />
@@ -493,7 +493,7 @@ export default function AdminPPCSettings() {
               </div>
             </div>
 
-            <div className="text-[11px] p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-between">
+            <div className="text-[11px] p-2.5 rounded-xl bg-blue-600/10 border border-blue-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-between">
               <span>⚠️ Must sum to exactly 100%</span>
               <span className="font-mono font-bold">
                 Current Total: {(Number(formData.directRate || 0) + Number(formData.parentRate || 0) + Number(formData.distributorRate || 0))}%
@@ -529,7 +529,7 @@ export default function AdminPPCSettings() {
                   onChange={(e) => setFormData({ ...formData, userOrderDirectRate: e.target.value })}
                   required
                   className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
-                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                   placeholder="50"
                 />
@@ -547,7 +547,7 @@ export default function AdminPPCSettings() {
                   onChange={(e) => setFormData({ ...formData, userOrderDistributorRate: e.target.value })}
                   required
                   className={`w-full px-3.5 py-2.5 font-bold border rounded-xl focus:outline-none ${
-                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-amber-500 shadow-sm"
+                    isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
                   placeholder="50"
                 />
@@ -833,7 +833,7 @@ export default function AdminPPCSettings() {
             <div className={`p-3.5 rounded-xl border ${
               isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
             }`}>
-              <p className="text-[10px] font-mono text-amber-600 dark:text-amber-400 uppercase">Min Withdraw</p>
+              <p className="text-[10px] font-mono text-amber-600 dark:text-blue-400 uppercase">Min Withdraw</p>
               <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>₹{settings.minimumWithdrawal}</p>
             </div>
           </div>

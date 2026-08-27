@@ -487,7 +487,7 @@ export default function WithdrawalRequest() {
             <div className="flex gap-2 px-4 py-3 border-b border-gray-100 overflow-x-auto">
               {[
                 { key: "all",      label: "All",      color: "bg-gray-700" },
-                { key: "pending",  label: "⏳ Pending", color: "bg-yellow-500" },
+                { key: "pending",  label: "⏳ Pending", color: "bg-blue-600" },
                 { key: "approved", label: "✅ Approved", color: "bg-green-600" },
                 { key: "rejected", label: "❌ Rejected", color: "bg-red-600" },
               ].map(tab => (

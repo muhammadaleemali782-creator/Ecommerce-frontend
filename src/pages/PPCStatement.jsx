@@ -141,11 +141,11 @@ export default function PPCStatement({ setPage }) {
         {/* User Badge or Admin Picker */}
         {isAdmin ? (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">Inspect User:</span>
+            <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">Inspect User:</span>
             <select
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
-              className={`text-xs font-semibold px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+              className={`text-xs font-semibold px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
               }`}
             >
@@ -161,7 +161,7 @@ export default function PPCStatement({ setPage }) {
           <div className={`px-4 py-2 rounded-2xl border flex items-center gap-3 ${
             isDark ? "bg-stone-900 border-white/[0.08]" : "bg-stone-50 border-stone-200"
           }`}>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-500 flex items-center justify-center font-bold text-xs">
               {(statementData?.user?.fullName || statementData?.user?.name || "U")[0].toUpperCase()}
             </div>
             <div>
@@ -183,8 +183,8 @@ export default function PPCStatement({ setPage }) {
         <div className={`p-4 rounded-2xl border ${
           isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
         }`}>
-          <p className="text-[10px] font-mono uppercase text-amber-500">Total Filtered PPC</p>
-          <p className="text-xl font-black mt-1 text-amber-500">+{totalFilteredPPC} <span className="text-xs">PPC</span></p>
+          <p className="text-[10px] font-mono uppercase text-blue-500">Total Filtered PPC</p>
+          <p className="text-xl font-black mt-1 text-blue-500">+{totalFilteredPPC} <span className="text-xs">PPC</span></p>
         </div>
         <div className={`p-4 rounded-2xl border ${
           isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
@@ -218,7 +218,7 @@ export default function PPCStatement({ setPage }) {
               onClick={() => setDateFilter(t.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 dateFilter === t.id
-                  ? "bg-amber-500 text-black shadow-sm"
+                  ? "bg-blue-600 text-black shadow-sm"
                   : isDark ? "bg-stone-900 text-stone-300 hover:bg-stone-800" : "bg-stone-100 text-stone-700 hover:bg-stone-200"
               }`}
             >
@@ -252,7 +252,7 @@ export default function PPCStatement({ setPage }) {
             placeholder="Search by name, ID, order..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+            className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300"
             }`}
           />
@@ -299,7 +299,7 @@ export default function PPCStatement({ setPage }) {
               </thead>
               <tbody className={`divide-y ${isDark ? "divide-white/[0.04]" : "divide-stone-100"}`}>
                 {filteredLedger.map((row) => (
-                  <tr key={row._id} className="hover:bg-amber-500/[0.02] transition-colors">
+                  <tr key={row._id} className="hover:bg-blue-600/[0.02] transition-colors">
                     <td className="py-3 px-4 font-mono text-[11px] text-stone-400">
                       {new Date(row.date).toLocaleString("en-IN", {
                         day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
@@ -329,10 +329,10 @@ export default function PPCStatement({ setPage }) {
                     <td className="py-3 px-4 font-mono text-[11px] text-stone-400">
                       {row.order?._id ? `#${row.order._id.slice(-6)}` : "—"}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-amber-500">
+                    <td className="py-3 px-4 font-mono font-bold text-blue-500">
                       {row.percentageShare}%
                     </td>
-                    <td className="py-3 px-4 font-black text-amber-400 text-sm">
+                    <td className="py-3 px-4 font-black text-blue-400 text-sm">
                       +{row.ppcCount} PPC
                     </td>
                     <td className="py-3 px-4 text-right font-black text-emerald-500 text-sm">
@@ -358,7 +358,7 @@ export default function PPCStatement({ setPage }) {
                     )}
                   </div>
                   <div className="text-right">
-                    <span className="font-black text-amber-500 text-base">+{row.ppcCount} PPC</span>
+                    <span className="font-black text-blue-500 text-base">+{row.ppcCount} PPC</span>
                     <div className="font-bold text-xs text-emerald-500">₹{row.rupeeValue.toLocaleString("en-IN")}</div>
                   </div>
                 </div>
@@ -366,7 +366,7 @@ export default function PPCStatement({ setPage }) {
                 <div className="flex items-center justify-between text-[10px] text-stone-400 pt-1">
                   <span>{new Date(row.date).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                   <span className="font-mono">{row.order?._id ? `Order #${row.order._id.slice(-6)}` : ""}</span>
-                  <span className="font-bold text-amber-400">{row.percentageShare}% Share</span>
+                  <span className="font-bold text-blue-400">{row.percentageShare}% Share</span>
                 </div>
               </div>
             ))}

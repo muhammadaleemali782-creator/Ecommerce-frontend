@@ -54,7 +54,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
   const roleNavItems = {
     admin: {
       label: "ADMIN",
-      color: isDark ? "text-amber-400" : "text-amber-700",
+      color: isDark ? "text-blue-400" : "text-amber-700",
       links: [
         { label: "ADMIN PANEL", pg: "admin" },
         { label: "👑 ROYALTY POOL", pg: "admin-royalty" },
@@ -134,7 +134,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         onClick={() => go(pg, section)}
         className={`relative px-3 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
           isActive
-            ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black border-amber-300 font-black shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105"
+            ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black border-amber-300 font-black shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105"
             : isDark
               ? "bg-white/[0.04] hover:bg-white/[0.12] text-slate-300 hover:text-white border-transparent hover:border-white/10"
               : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-black border-stone-200"
@@ -198,7 +198,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                   ? "bg-[#fbbf24] text-black shadow-[0_0_18px_rgba(251,191,36,0.45)] font-black scale-105"
                   : isDark
                     ? "bg-white/[0.08] hover:bg-white/[0.18] text-white border border-white/15 hover:border-[#fbbf24]/50"
-                    : "bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 hover:border-amber-500"
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 hover:border-blue-500"
               }`}
               aria-label="Toggle Nav"
             >
@@ -248,7 +248,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                   className={`px-3 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider hover:scale-105 transition-all cursor-pointer ${
                     isDark
                       ? "bg-[#1a1a1a] border-[#fbbf24]/40 text-[#fbbf24]"
-                      : "bg-amber-50 border-amber-400 text-amber-900 shadow-xs"
+                      : "bg-amber-50 border-blue-400 text-amber-900 shadow-xs"
                   }`}
                   title={role === "admin" ? "Admin Panel" : "Dashboard"}
                 >
@@ -267,7 +267,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                 onClick={() => go("login")}
                 className={`px-3.5 py-1.5 rounded-full text-[10.5px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
                   isDark
-                    ? "bg-amber-500 hover:bg-amber-400 text-black border-amber-500"
+                    ? "bg-blue-600 hover:bg-blue-500 text-black border-blue-500"
                     : "bg-stone-900 hover:bg-stone-800 text-white border-stone-800 shadow-sm"
                 }`}
               >
@@ -338,7 +338,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
           {loggedIn ? (
             <div className="flex items-center gap-2.5 min-w-0 pr-1 cursor-pointer" onClick={() => go("my-profile")}>
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0 border shadow-sm ${
-                role === "admin" ? "bg-amber-400/20 text-amber-500 border-amber-500/40" :
+                role === "admin" ? "bg-blue-500/20 text-blue-500 border-blue-500/40" :
                 role === "distributor" ? "bg-sky-400/20 text-sky-500 border-sky-500/40" :
                 role === "seller" ? "bg-emerald-400/20 text-emerald-500 border-emerald-500/40" :
                 "bg-violet-400/20 text-violet-500 border-violet-500/40"
@@ -353,7 +353,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                     {safeUser?.fullName || safeUser?.name || "User"}
                   </span>
                   <span className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded border shrink-0 ${
-                    role === "admin" ? "bg-amber-500/15 text-amber-600 dark:text-[#fbbf24] border-amber-500/30" :
+                    role === "admin" ? "bg-blue-600/15 text-amber-600 dark:text-[#fbbf24] border-blue-500/30" :
                     role === "distributor" ? "bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/30" :
                     role === "seller" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30" :
                     "bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/30"
@@ -423,7 +423,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                     onClick={() => go(link.pg, link.section)}
                     className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 text-[11px] uppercase tracking-wider group ${
                       isActive
-                        ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
+                        ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
                         : isDark
                           ? "hover:bg-white/[0.07] text-slate-200 hover:text-white font-bold"
                           : "hover:bg-stone-100 text-stone-800 hover:text-black font-bold"
@@ -463,7 +463,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                       onClick={() => go(link.pg)}
                       className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 text-[11px] uppercase tracking-wider group ${
                         isActive
-                          ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
+                          ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
                           : isDark
                             ? "text-slate-300 hover:text-white hover:bg-white/[0.07] font-bold"
                             : "text-stone-700 hover:text-black hover:bg-stone-100 font-bold"
@@ -490,7 +490,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                 onClick={() => go("my-profile")}
                 className={`flex-1 py-3 px-3 rounded-xl font-black text-xs transition-colors cursor-pointer uppercase flex items-center justify-center gap-2 border ${
                   isDark
-                    ? "bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/30 text-[#fbbf24]"
+                    ? "bg-blue-600/15 hover:bg-blue-600/25 border-blue-500/30 text-[#fbbf24]"
                     : "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900 shadow-xs"
                 }`}
                 title="View Profile"
