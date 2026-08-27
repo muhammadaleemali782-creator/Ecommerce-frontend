@@ -145,7 +145,7 @@ function AppContent() {
         case "cart":     return <Cart setPage={setPage} />
         case "checkout": return <Checkout setPage={setPage} />
         case "orders":   return loggedIn ? <Orders /> : <Login setPage={setPage} />
-        case "password-help": return <PasswordHelp />
+        case "password-help": return <PasswordHelp setPage={setPage} />
         case "login":    return <Login setPage={setPage} />
 
         // ── COMMON LOGGED-IN ──

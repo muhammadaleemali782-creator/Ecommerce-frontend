@@ -66,8 +66,12 @@ export default function PasswordHelp({ setPage }) {
       if (res.ok) {
         setMsg("🎉 Password changed successfully! Redirecting to login...")
         setTimeout(() => {
-          if (typeof setPage === "function") setPage("login")
-        }, 2000)
+          if (typeof setPage === "function") {
+            setPage("login")
+          } else {
+            window.location.reload()
+          }
+        }, 1200)
       } else {
         setError(data.message || "Invalid OTP")
       }
@@ -283,7 +287,13 @@ export default function PasswordHelp({ setPage }) {
       <div className="pt-2 text-center border-t border-white/[0.08]">
         <button
           type="button"
-          onClick={() => { if (typeof setPage === "function") setPage("login") }}
+          onClick={() => {
+            if (typeof setPage === "function") {
+              setPage("login")
+            } else {
+              window.location.reload()
+            }
+          }}
           className="text-xs text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer"
         >
           ← Back to Login Portal
