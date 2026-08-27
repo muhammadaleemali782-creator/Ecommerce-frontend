@@ -3,127 +3,164 @@ import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 
-// Fallback Curated Formulations (non-exported const fixes Vite HMR Fast Refresh)
-const DEFAULT_AYURVEDIC_PRODUCTS = [
+// Official WCNA Curriculum Books & Master Course Offerings
+const WCNA_STORE_PRODUCTS = [
   {
-    id: "himalayan-shilajit-gold",
-    title: "Pure Shilajit Rasayana Resin",
-    category: "Rasayana & Vitality",
-    price: 1499,
-    mrp: 1999,
-    rating: 4.9,
-    reviews: 328,
-    image: "/moss_oil.jpg",
-    tag: "BESTSELLER",
-    dosha: "Tridosha Balance",
-    description: "Purified Himalayan resin rich in fulvic acid and 84+ minerals for sustained vitality, strength, and stamina.",
-    ingredients: ["Pure Shilajit", "Swarna Bhasma", "Ashwagandha"],
-    benefits: "Enhances stamina, immunity, and natural metabolic energy."
-  },
-  {
-    id: "triphala-deep-cleanser",
-    title: "Triphala Botanical Facial Cleanser",
-    category: "Skin & Hair",
-    price: 649,
-    mrp: 850,
-    rating: 4.8,
-    reviews: 214,
-    image: "/moss_foam.jpg",
-    tag: "AYUSH CERTIFIED",
-    dosha: "Pitta & Kapha",
-    description: "Gentle purifying foam infused with Amalaki, Haritaki, and Bibhitaki to cleanse deep impurities.",
-    ingredients: ["Amalaki", "Haritaki", "Bibhitaki", "Aloe Vera"],
-    benefits: "Purifies toxins, restores skin balance, and soothes redness."
-  },
-  {
-    id: "kumkumadi-radiance-serum",
-    title: "Kumkumadi Miracle Face Elixir",
-    category: "Oils & Serums",
-    price: 1899,
-    mrp: 2499,
+    id: "wcna-master-course-18m",
+    title: "WCNA — Master Certification Course",
+    category: "Certification Courses",
+    price: 24999,
+    mrp: 35000,
     rating: 5.0,
-    reviews: 452,
-    image: "/moss_serum.jpg",
-    tag: "PREMIUM",
-    dosha: "Vata & Pitta",
-    description: "Traditional 26-herb Ayurvedic serum infused with Kashmiri Saffron and Sandalwood for natural radiance.",
-    ingredients: ["Kashmiri Saffron", "Rakta Chandana", "Manjistha", "Goat Milk"],
-    benefits: "Brightens complexion, reduces blemishes, and evens tone."
+    reviews: 540,
+    image: "/books/wcna_master_course.jpg",
+    tag: "18-MONTH PROGRAM",
+    duration: "18 Months + 6 Mo Internship",
+    description: "Comprehensive career-focused training in Wellness Consultancy of Naturopathy & Ayurveda. Includes 1:1 mentorship, online notes, clinical case studies, and offline marathon workshops.",
+    subjects: [
+      "Anatomy & Physiology",
+      "Rogshashtra",
+      "Principal of Ayurveda",
+      "Principal of Naturopathy",
+      "Diet & Nutrition",
+      "Yoga Science"
+    ],
+    benefits: "Full consultancy license readiness, 20+ clinical case studies, wellness center setup guidance."
   },
   {
-    id: "bhringraj-kesh-taila",
-    title: "Bhringraj Herb Enriched Hair Oil",
-    category: "Skin & Hair",
-    price: 799,
+    id: "book-1-wellness-coaching",
+    title: "Book 1: Wellness Coaching Introduction",
+    category: "Curriculum Books",
+    price: 499,
+    mrp: 799,
+    rating: 4.9,
+    reviews: 218,
+    image: "/books/book1_wellness_coaching.jpg",
+    tag: "BOOK 01",
+    duration: "Foundation Module",
+    description: "Core principles of wellness coaching, holistic health paradigms, client psychology, and habit transformation frameworks.",
+    subjects: ["Holistic Health Principles", "Client Mindset Shifts", "Goal Setting", "Wellness Dimensions"],
+    benefits: "Builds fundamental coaching competence and consultation structure."
+  },
+  {
+    id: "book-2-naturopathy-basics",
+    title: "Book 2: Naturopathy Basics",
+    category: "Curriculum Books",
+    price: 549,
+    mrp: 849,
+    rating: 4.9,
+    reviews: 194,
+    image: "/books/book2_naturopathy_basics.jpg",
+    tag: "BOOK 02",
+    duration: "Nature Cure Theory",
+    description: "Detailed study of Panchamahabhuta (5 Elements), nature cure therapies, hydrotherapy, mud packs, and natural body detoxification.",
+    subjects: ["5 Elements Therapy", "Hydrotherapy", "Mud Therapy", "Fasting & Detoxification"],
+    benefits: "Master natural non-invasive healing modalities and vital force activation."
+  },
+  {
+    id: "book-3-ayurveda-basics",
+    title: "Book 3: Ayurveda Basics",
+    category: "Curriculum Books",
+    price: 599,
+    mrp: 899,
+    rating: 5.0,
+    reviews: 312,
+    image: "/books/book3_ayurveda_basics.jpg",
+    tag: "BOOK 03",
+    duration: "Tridosha Science",
+    description: "Foundational Ayurveda: Vata, Pitta, Kapha assessment, Sapta Dhatu, Agni (digestive fire), and individual Prakriti diagnostics.",
+    subjects: ["Tridosha Analysis", "Dhatu & Mala Science", "Prakriti Assessment", "Agni & Ama Diagnostics"],
+    benefits: "Accurately identify body constitutions and underlying root causes of imbalance."
+  },
+  {
+    id: "book-5-client-assessment",
+    title: "Book 5: Client Assessment",
+    category: "Curriculum Books",
+    price: 649,
+    mrp: 949,
+    rating: 4.8,
+    reviews: 165,
+    image: "/books/book5_client_assessment.jpg",
+    tag: "BOOK 05",
+    duration: "Clinical Diagnostic",
+    description: "Comprehensive diagnostic framework for patient intake, medical history evaluation, physical signs analysis, and symptom mapping.",
+    subjects: ["Health Intake Forms", "Nadi & Tongue Observation", "Vital Marker Analysis", "Lifestyle Stress Auditing"],
+    benefits: "Develop systematic, high-accuracy client evaluation workflows."
+  },
+  {
+    id: "book-6-diet-planning",
+    title: "Book 6: Diet Planning",
+    category: "Curriculum Books",
+    price: 599,
+    mrp: 899,
+    rating: 4.9,
+    reviews: 280,
+    image: "/books/book6_diet_planning.jpg",
+    tag: "BOOK 06",
+    duration: "Nutrition Module",
+    description: "Scientific and Ayurvedic meal planning: Ahara Vidhi, seasonal nutrition, macronutrient distribution, and disease-specific dietary charts.",
+    subjects: ["Ahara Vidhi", "Sattvic Nutrition", "Therapeutic Diet Charts", "Calorie & Micro-nutrient Balance"],
+    benefits: "Formulate personalized diet blueprints for sustainable wellness results."
+  },
+  {
+    id: "book-7-lifestyle-coaching",
+    title: "Book 7: Lifestyle & Routine Coaching",
+    category: "Curriculum Books",
+    price: 499,
+    mrp: 799,
+    rating: 4.9,
+    reviews: 175,
+    image: "/books/book7_lifestyle_coaching.jpg",
+    tag: "BOOK 07",
+    duration: "Circadian Science",
+    description: "Mastering Dinacharya (daily routine), Ratricharya (night routine), circadian alignment, sleep hygiene, and stress-reduction practices.",
+    subjects: ["Dinacharya Protocol", "Circadian Rhythm Biology", "Sleep Architecture", "Stress & Breathwork"],
+    benefits: "Guide clients toward frictionless daily routines that prevent chronic illness."
+  },
+  {
+    id: "book-8-managing-diseases",
+    title: "Book 8: Managing Common Lifestyle Diseases",
+    category: "Clinical Manuals",
+    price: 749,
+    mrp: 1099,
+    rating: 5.0,
+    reviews: 420,
+    image: "/books/book8_managing_diseases.jpg",
+    tag: "BOOK 08",
+    duration: "Reversal Protocols",
+    description: "Evidence-backed integrative protocols for reversing Type-2 Diabetes, Hypertension, Thyroid disorders, Obesity, and Gut dysbiosis.",
+    subjects: ["Metabolic Syndrome", "Hypertension Protocols", "Thyroid Management", "Gut & Acid Reflux Protocols"],
+    benefits: "Practical case-tested reversal guidelines for the most common modern conditions."
+  },
+  {
+    id: "book-9-herbs-supplements",
+    title: "Book 9: Herbs & Supplements Guidance",
+    category: "Clinical Manuals",
+    price: 699,
     mrp: 999,
     rating: 4.9,
-    reviews: 189,
-    image: "/moss_shampoo.jpg",
-    tag: "HAIR CARE",
-    dosha: "Pitta Pacifying",
-    description: "Slow-cooked Mahabhringraj oil in sesame and virgin coconut base to nourish roots and strengthen hair.",
-    ingredients: ["Mahabhringraj", "Amla", "Brahmi", "Sesame Oil"],
-    benefits: "Strengthens roots, controls hair fall, and calms scalp."
+    reviews: 230,
+    image: "/books/book9_herbs_supplements.jpg",
+    tag: "BOOK 09",
+    duration: "Botanical Materia",
+    description: "Comprehensive handbook of medicinal herbs, classical formulations, safe dosage administration, contraindications, and supplement synergies.",
+    subjects: ["Classical Formulations", "Herb Synergy & Anupana", "Dosage & Toxicity Safety", "Modern Supplement Pairings"],
+    benefits: "Safely recommend therapeutic herbal solutions with total clinical confidence."
   },
   {
-    id: "ashwagandha-ksheer-extract",
-    title: "Organic Ashwagandha Root Churna",
-    category: "Rasayana & Vitality",
-    price: 899,
-    mrp: 1199,
-    rating: 4.8,
-    reviews: 276,
-    image: "/natgeo_jadibooti.jpg",
-    tag: "WELLNESS",
-    dosha: "Vata Harmonizer",
-    description: "Pure Withania Somnifera root extract to regulate daily stress and support deep restorative rest.",
-    ingredients: ["Organic Ashwagandha", "Pipali Extract"],
-    benefits: "Relieves stress, boosts endurance, and supports rest."
-  },
-  {
-    id: "neem-chandan-purifying-mask",
-    title: "Neem & Chandan Purifying Lepam",
-    category: "Skin & Hair",
-    price: 749,
-    mrp: 950,
-    rating: 4.7,
-    reviews: 165,
-    image: "/moss_mask.jpg",
-    tag: "DETOX",
-    dosha: "Pitta Cooling",
-    description: "Medicinal clay blended with fresh organic Neem and Sandalwood to cool and clarify skin.",
-    ingredients: ["Fullers Earth", "Neem Leaf", "Chandan", "Haldi"],
-    benefits: "Draws out deep impurities, clears pores, and cools skin."
-  },
-  {
-    id: "herbal-vitality-oil",
-    title: "Maha Narayana Muscle Relief Oil",
-    category: "Oils & Serums",
-    price: 1199,
-    mrp: 1499,
-    rating: 4.9,
-    reviews: 310,
-    image: "/moss_hands.jpg",
-    tag: "JOINT RELIEF",
-    dosha: "Vata Soother",
-    description: "Traditional therapeutic blend of herbs to relieve muscular tension and support flexible joint mobility.",
-    ingredients: ["Dashamoola", "Bala", "Ashwagandha", "Shatavari"],
-    benefits: "Relieves stiffness, eases aches, and restores mobility."
-  },
-  {
-    id: "himalayan-amrit-nectar",
-    title: "Brahm Rasayana Herbal Nectar",
-    category: "Rasayana & Vitality",
-    price: 2199,
-    mrp: 2799,
+    id: "book-10-client-communication",
+    title: "Book 10: Client Communication & Coaching Skills",
+    category: "Clinical Manuals",
+    price: 599,
+    mrp: 899,
     rating: 5.0,
-    reviews: 140,
-    image: "/hero_moss_bottles.jpg",
-    tag: "SIGNATURE",
-    dosha: "Tridoshic",
-    description: "Ayurvedic rejuvenating blend made with fresh wild amla, cardamom, and pure forest honey.",
-    ingredients: ["Wild Amla", "Pipali", "Shankhpushpi", "Forest Honey"],
-    benefits: "Promotes longevity, daily vigor, and natural immunity."
+    reviews: 285,
+    image: "/books/book10_client_communication.jpg",
+    tag: "BOOK 10",
+    duration: "Practice Setup",
+    description: "Professional consultancy development: counseling psychology, handling client objections, structured follow-ups, and setting up a wellness center.",
+    subjects: ["Counseling Psychology", "Objection Handling", "Client Retention System", "Wellness Center Setup"],
+    benefits: "Turn clinical knowledge into a thriving, high-impact professional consultancy practice."
   }
 ]
 
@@ -135,470 +172,356 @@ export default function Store({ setPage }) {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("all")
   const [sortBy, setSortBy] = useState("rating")
-  const [flippedCardId, setFlippedCardId] = useState(null)
+  const [selectedBookModal, setSelectedBookModal] = useState(null)
   const [addedToast, setAddedToast] = useState(null)
 
-  // Merge backend products with fallback list if backend is empty
-  const allProducts = useMemo(() => {
+  // Merge database products with curated WCNA items
+  const allStoreProducts = useMemo(() => {
     if (products && products.length > 0) {
-      return products
+      // Check if db products already have WCNA items
+      const isWcna = products.some(p => (p.title || "").includes("WCNA") || (p.title || "").includes("Book"));
+      if (isWcna) return products;
     }
-    return DEFAULT_AYURVEDIC_PRODUCTS
-  }, [products])
+    return WCNA_STORE_PRODUCTS;
+  }, [products]);
 
-  // Extract unique categories safely
   const categories = useMemo(() => {
-    const cats = allProducts.map(p => p.category).filter(Boolean)
-    return ["all", ...new Set(cats)]
-  }, [allProducts])
+    return [
+      { id: "all", label: "All Curriculum & Books", count: allStoreProducts.length },
+      { id: "Certification Courses", label: "Master Certification", count: allStoreProducts.filter(p => p.category === "Certification Courses").length },
+      { id: "Curriculum Books", label: "Curriculum Books (01 - 07)", count: allStoreProducts.filter(p => p.category === "Curriculum Books").length },
+      { id: "Clinical Manuals", label: "Clinical & Coaching (08 - 10)", count: allStoreProducts.filter(p => p.category === "Clinical Manuals").length }
+    ]
+  }, [allStoreProducts]);
 
-  // Filtered and sorted products
-  const visibleProducts = useMemo(() => {
-    let list = allProducts.filter(p => {
-      const q = search.trim().toLowerCase()
-      const title = (p.title || p.name || "").toLowerCase()
-      const cat = (p.category || "").toLowerCase()
-      const desc = (p.description || p.desc || "").toLowerCase()
-      
-      const matchesSearch = !q || title.includes(q) || cat.includes(q) || desc.includes(q)
-      const matchesCategory = category === "all" || p.category === category
-      return matchesSearch && matchesCategory
-    })
+  const filteredProducts = useMemo(() => {
+    return allStoreProducts
+      .filter(product => {
+        const matchesCategory = category === "all" || product.category === category
+        const matchesSearch = !search ||
+          (product.title && product.title.toLowerCase().includes(search.toLowerCase())) ||
+          (product.description && product.description.toLowerCase().includes(search.toLowerCase())) ||
+          (product.tag && product.tag.toLowerCase().includes(search.toLowerCase()))
+        return matchesCategory && matchesSearch
+      })
+      .sort((a, b) => {
+        if (sortBy === "price-low") return a.price - b.price
+        if (sortBy === "price-high") return b.price - a.price
+        if (sortBy === "reviews") return (b.reviews || 0) - (a.reviews || 0)
+        return (b.rating || 5) - (a.rating || 5)
+      })
+  }, [allStoreProducts, category, search, sortBy]);
 
-    if (sortBy === "price-low") {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0))
-    } else if (sortBy === "price-high") {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0))
-    } else if (sortBy === "rating") {
-      list.sort((a, b) => (b.rating || 5) - (a.rating || 5))
-    } else if (sortBy === "newest") {
-      list.reverse()
+  const handleAddToCart = useCallback((product) => {
+    if (addToCart) {
+      addToCart(product)
     }
-
-    return list
-  }, [allProducts, search, category, sortBy])
-
-  // Handle Add To Cart with instant micro-toast
-  const handleAddToCart = useCallback((product, e) => {
-    if (e) e.stopPropagation()
-    if (addToCart) addToCart(product)
-    setAddedToast(product.title || product.name || "Product")
-    setTimeout(() => {
-      setAddedToast(null)
-    }, 2200)
-  }, [addToCart])
-
-  // Toggle card flip state smoothly
-  const toggleFlip = useCallback((productId, e) => {
-    if (e) e.stopPropagation()
-    setFlippedCardId(prev => (prev === productId ? null : productId))
-  }, [])
-
-  // Cart total count
-  const totalCartCount = useMemo(() => {
-    return (cart || []).reduce((sum, item) => sum + (Number(item.qty) || 1), 0)
-  }, [cart])
+    setAddedToast(product.title)
+    setTimeout(() => setAddedToast(null), 2400)
+  }, [addToCart]);
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 pb-16 select-none ${
-      isDark ? "bg-[#0d120e] text-white" : "bg-[#fcfbf9] text-stone-900"
-    }`}>
+    <div className={`min-h-screen ${isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"} font-sans antialiased`}>
       
-      {/* ── Toast Notification for Added Item ── */}
+      {/* Toast */}
       {addedToast && (
-        <div className="fixed bottom-5 right-5 z-50 bg-stone-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/15 flex items-center gap-3 max-w-[90vw]">
-          <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-black shrink-0">
-            ✓
-          </span>
-          <div className="text-xs truncate">
-            <span className="font-bold text-white block truncate">{addedToast}</span>
-            <span className="text-stone-400 text-[10px]">Added to Cart</span>
-          </div>
-          <button
-            onClick={() => setPage && setPage("cart")}
-            className="ml-2 px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shrink-0"
-          >
-            CART ➔
-          </button>
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-bounce">
+          <span>✓ Added to Cart:</span>
+          <strong>{addedToast}</strong>
         </div>
       )}
 
-      {/* ── Top Header & Apothecary Title ── */}
-      <section className={`pt-6 sm:pt-8 pb-6 border-b transition-colors ${
-        isDark
-          ? "bg-[#111713] border-white/[0.08]"
-          : "bg-white border-stone-200 shadow-sm"
-      }`}>
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-700 dark:text-amber-300 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                  <span>✦</span>
-                  <span>100% AYUSH CERTIFIED</span>
-                </span>
-                <span className={`text-[11px] font-semibold ${isDark ? "text-stone-400" : "text-stone-500"}`}>
-                  Pure Ayurvedic Formulations
-                </span>
-              </div>
-              
-              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight uppercase ${
-                isDark ? "text-white" : "text-stone-900"
-              }`}>
-                Ayurvedic Formulations & Apothecary
-              </h1>
-              
-              <p className={`mt-1 text-xs sm:text-sm font-medium ${
-                isDark ? "text-stone-400" : "text-stone-600"
-              }`}>
-                Natural herbal products crafted for vitality, immunity, and daily wellness.
-              </p>
+      {/* Hero Banner (Poster Style) */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white py-14 px-4 sm:px-6 lg:px-8 border-b border-emerald-800/40">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-2xl space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+              <span>🌿 EDUCA VEDA INSTITUTE OF CONSULTANCY</span>
             </div>
-
-            {/* Floating Quick Cart Access */}
-            {totalCartCount > 0 && (
-              <button
-                onClick={() => setPage && setPage("cart")}
-                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 shadow-md active:scale-95 transition-all cursor-pointer text-xs font-black shrink-0 uppercase tracking-wider"
-              >
-                <span>🛍️ CART ({totalCartCount})</span>
-                <span>➔</span>
-              </button>
-            )}
-          </div>
-
-          {/* ── Search & Filter Controls ── */}
-          <div className={`mt-5 pt-4 border-t flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 ${
-            isDark ? "border-white/[0.06]" : "border-stone-100"
-          }`}>
-            
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">🔍</span>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search herbal products, ingredients, doshas..."
-                className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none border transition-all ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-sm"
-                }`}
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-200 dark:bg-white/10 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px] font-bold cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Sort Select (Most Popular removed, clean sort options) */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className={`w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                    : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 shadow-sm"
-                }`}
-              >
-                <option value="rating">★ Top Rated Formulations</option>
-                <option value="price-low">💰 Price: Low to High</option>
-                <option value="price-high">💎 Price: High to Low</option>
-                <option value="newest">✨ Newest Arrivals</option>
-              </select>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              WCNA — Wellness Consultancy of <span className="text-emerald-400">Naturopathy & Ayurveda</span>
+            </h1>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Official 18-Month Career Focused Training Course (Theory + Practical) + 6 Month Internship. Learn, Heal &amp; Inspire a Better Future with comprehensive study manuals and direct faculty mentorship.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <span className="px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold">
+                ✓ 10 Comprehensive Books
+              </span>
+              <span className="px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold">
+                ✓ 20+ Clinical Case Studies
+              </span>
+              <span className="px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold">
+                ✓ 24x7 Faculty Support
+              </span>
             </div>
           </div>
 
-          {/* ── Category Filter Rail ── */}
-          <div className="mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {categories.map(cat => {
-              const isSelected = category === cat
-              const label = cat === "all" ? "All Products" : cat
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 cursor-pointer ${
-                    isSelected
-                      ? "bg-blue-600 text-stone-950 font-black shadow-sm"
-                      : isDark
-                        ? "bg-white/[0.06] text-stone-300 hover:bg-white/10 border border-white/10"
-                        : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 shadow-xs"
-                  }`}
-                >
-                  {label}
-                </button>
-              )
-            })}
+          <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => {
+                const flagship = WCNA_STORE_PRODUCTS.find(p => p.id === "wcna-master-course-18m")
+                if (flagship) setSelectedBookModal(flagship)
+              }}
+              className="px-6 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all text-center"
+            >
+              🎓 View Master Course ➔
+            </button>
+            <a
+              href="#store-grid"
+              className="px-6 py-3.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm transition-all text-center"
+            >
+              📚 Browse Books
+            </a>
           </div>
-
         </div>
       </section>
 
-      {/* ── Main Catalog Grid (2 Columns Mobile, 3 Tablet, 4 Desktop) ── */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6">
+      {/* Main Store Catalog */}
+      <main id="store-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        {/* Count and Reset */}
-        <div className="flex items-center justify-between mb-4">
-          <div className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${
-            isDark ? "text-stone-400" : "text-stone-500"
-          }`}>
-            Showing <span className={`font-black ${isDark ? "text-white" : "text-stone-950"}`}>{visibleProducts.length}</span> Products
-            {category !== "all" && <span> in <span className="text-amber-600 dark:text-blue-400 font-bold">{category}</span></span>}
+        {/* Controls Row */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+          
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setCategory(cat.id)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                  category === cat.id
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                    : isDark
+                    ? "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+                }`}
+              >
+                {cat.label} ({cat.count})
+              </button>
+            ))}
           </div>
-          {(category !== "all" || search) && (
-            <button
-              onClick={() => { setCategory("all"); setSearch("") }}
-              className="text-[11px] font-bold text-amber-600 dark:text-blue-400 hover:underline transition-colors cursor-pointer"
+
+          {/* Search & Sort */}
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <input
+                type="text"
+                placeholder="Search books & subjects..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={`w-full px-4 py-2 pl-9 text-xs rounded-full border outline-none transition-all ${
+                  isDark
+                    ? "bg-slate-900 border-slate-800 text-white focus:border-emerald-500"
+                    : "bg-white border-slate-200 text-slate-900 focus:border-emerald-500"
+                }`}
+              />
+              <span className="absolute left-3 top-2.5 text-xs opacity-50">🔍</span>
+            </div>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className={`px-3 py-2 text-xs rounded-full border outline-none font-semibold ${
+                isDark
+                  ? "bg-slate-900 border-slate-800 text-white"
+                  : "bg-white border-slate-200 text-slate-800"
+              }`}
             >
-              Reset Filters
-            </button>
-          )}
+              <option value="rating">Top Rated</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="reviews">Most Reviewed</option>
+            </select>
+          </div>
         </div>
 
-        {/* Empty State */}
-        {visibleProducts.length === 0 ? (
-          <div className={`text-center py-20 px-4 rounded-3xl border max-w-md mx-auto shadow-sm ${
-            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
-          }`}>
-            <div className="text-4xl mb-3">🍃</div>
-            <h3 className={`text-base font-bold uppercase ${isDark ? "text-white" : "text-stone-900"}`}>Koi Product Nahi Mila</h3>
-            <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
-              Doosra keyword ya category choose karke dekhein.
-            </p>
-            <button
-              onClick={() => { setCategory("all"); setSearch("") }}
-              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-stone-950 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer shadow-sm"
-            >
-              Show All Products
-            </button>
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+            <span className="text-4xl mb-2 block">📚</span>
+            <h3 className="text-lg font-bold">No books match your filter</h3>
+            <p className="text-sm text-slate-500 mt-1">Try clearing search or choosing another category</p>
           </div>
         ) : (
-          /* Responsive 2-Column Mobile, 3-Col Tablet, 4-Col Desktop */
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-            {visibleProducts.map(product => {
-              const productId = product.id || product._id || product.title
-              const isFlipped = flippedCardId === productId
-              const title = product.title || product.name || "Ayurvedic Product"
-              const price = product.price || product.finalPrice || 0
-              const mrp = product.mrp || Math.round(price * 1.25)
-              const discountPct = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0
-              const image = product.image || product.img || "/natgeo_jadibooti.jpg"
-              const tag = product.tag || product.category || "AYUSH"
-              const rating = product.rating || 4.9
-              const reviews = product.reviews || 85
-              const desc = product.description || product.desc || "Pure botanical formulation for vitality."
-              const dosha = product.dosha || "Tridosha Balance"
-              const ingredients = product.ingredients || (product.category ? [product.category] : ["Ayurvedic Herbs"])
-
-              const cartItem = (cart || []).find(c => (c.id || c._id || c.productId) === productId)
-              const cartQty = cartItem ? cartItem.qty : 0
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map(product => {
+              const isFlagship = product.category === "Certification Courses"
 
               return (
                 <div
-                  key={productId}
-                  className="perspective-1000 w-full min-h-[310px] sm:min-h-[360px] relative select-none"
-                  style={{ contain: "content" }}
+                  key={product.id || product._id}
+                  className={`group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1 ${
+                    isFlagship ? "sm:col-span-2 lg:col-span-2 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-emerald-500/40 shadow-xl" :
+                    isDark
+                      ? "bg-slate-900 border border-slate-800 hover:border-slate-700"
+                      : "bg-white border border-slate-200 hover:border-slate-300 shadow-sm"
+                  }`}
                 >
-                  <div
-                    className={`preserve-3d relative w-full h-full rounded-2xl ${
-                      isFlipped ? "rotate-y-180" : ""
-                    }`}
-                    style={{ minHeight: "inherit" }}
-                  >
-                    
-                    {/* ════════ FRONT SIDE OF CARD ════════ */}
-                    <div
-                      className={`backface-hidden absolute inset-0 w-full h-full rounded-2xl border transition-colors flex flex-col justify-between ${
-                        isDark
-                          ? "bg-[#111713] border-white/[0.08] hover:border-white/20 shadow-md"
-                          : "bg-white border-stone-200 hover:border-stone-300 shadow-sm"
-                      }`}
-                    >
-                      {/* Image Container */}
-                      <div
-                        onClick={(e) => toggleFlip(productId, e)}
-                        className="relative aspect-square w-full rounded-t-2xl overflow-hidden bg-stone-100 dark:bg-stone-900 cursor-pointer group"
-                      >
-                        <img
-                          src={image}
-                          alt={title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                          decoding="async"
-                        />
+                  {/* Book Cover Image */}
+                  <div className="relative aspect-[4/5] overflow-hidden bg-slate-950 cursor-pointer" onClick={() => setSelectedBookModal(product)}>
+                    <img
+                      src={product.image || "/books/wcna_master_course.jpg"}
+                      alt={product.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.target.src = "/books/wcna_master_course.jpg" }}
+                    />
+                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      <span className="px-2.5 py-1 rounded-md bg-slate-950/80 backdrop-blur text-emerald-300 font-extrabold text-[10px] tracking-wider uppercase border border-emerald-400/30">
+                        {product.tag || "OFFICIAL MATERIAL"}
+                      </span>
+                    </div>
+                    {product.mrp && (
+                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[10px]">
+                        SAVE {Math.round(((product.mrp - product.price) / product.mrp) * 100)}%
+                      </span>
+                    )}
+                  </div>
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start pointer-events-none">
-                          <span className="px-2 py-0.5 rounded-md bg-stone-950/90 text-[8.5px] sm:text-[9.5px] font-black text-white uppercase tracking-wider shadow-sm">
-                            {tag}
+                  {/* Details Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span>⭐ {product.rating || "5.0"} ({product.reviews || 120})</span>
+                        <span>{product.duration || "Study Manual"}</span>
+                      </div>
+                      <h3 className={`font-extrabold text-base line-clamp-2 ${isFlagship ? "text-white" : isDark ? "text-white" : "text-slate-900"}`}>
+                        {product.title}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
+                    </div>
+
+                    {/* Price & Buy Actions */}
+                    <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-black text-emerald-500">
+                            ₹{Number(product.price).toLocaleString()}
                           </span>
-                          {discountPct > 0 && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-[8px] sm:text-[8.5px] font-black text-white uppercase">
-                              {discountPct}% OFF
+                          {product.mrp && (
+                            <span className="text-xs line-through text-slate-400">
+                              ₹{Number(product.mrp).toLocaleString()}
                             </span>
                           )}
                         </div>
-
-                        {/* Flip Hint Button */}
-                        <button
-                          onClick={(e) => toggleFlip(productId, e)}
-                          title="Tap to see herbal ingredients & dosha details"
-                          className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-white/95 hover:bg-white text-stone-900 text-[9.5px] sm:text-[10.5px] font-black shadow-md flex items-center gap-1 cursor-pointer transition-transform active:scale-90"
-                        >
-                          <span>ℹ️</span>
-                          <span className="hidden sm:inline">Details</span>
-                        </button>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-2.5 sm:p-3.5 flex flex-col justify-between flex-1">
-                        <div>
-                          {/* Rating & Tap to Flip Prompt */}
-                          <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs mb-1">
-                            <div className="flex items-center gap-1 text-blue-500 font-bold">
-                              <span>★</span>
-                              <span className={isDark ? "text-white" : "text-stone-900"}>{rating}</span>
-                              <span className="text-stone-400 text-[9px] sm:text-[10px]">({reviews})</span>
-                            </div>
-                            <span
-                              onClick={(e) => toggleFlip(productId, e)}
-                              className="text-[9px] font-mono font-bold text-amber-600 dark:text-blue-400 hover:underline cursor-pointer"
-                            >
-                              Details ➔
-                            </span>
-                          </div>
-
-                          {/* Title */}
-                          <h3 className={`text-xs sm:text-sm font-bold line-clamp-2 leading-tight ${
-                            isDark ? "text-white" : "text-stone-950"
-                          }`}>
-                            {title}
-                          </h3>
-                        </div>
-
-                        {/* Price & Add to Cart */}
-                        <div className={`mt-2.5 pt-2 border-t ${
-                          isDark ? "border-white/[0.06]" : "border-stone-100"
-                        }`}>
-                          <div className="flex items-baseline gap-1.5 mb-2">
-                            <span className={`text-sm sm:text-base font-black ${
-                              isDark ? "text-white" : "text-stone-950"
-                            }`}>
-                              ₹{Number(price).toLocaleString("en-IN")}
-                            </span>
-                            {mrp > price && (
-                              <span className="text-[10px] sm:text-xs text-stone-400 line-through">
-                                ₹{Number(mrp).toLocaleString("en-IN")}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Action Button */}
-                          <button
-                            onClick={(e) => handleAddToCart(product, e)}
-                            className={`w-full py-2 px-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95 cursor-pointer ${
-                              cartQty > 0
-                                ? "bg-emerald-600 text-white hover:bg-emerald-500"
-                                : isDark
-                                  ? "bg-blue-600 hover:bg-blue-500 text-stone-950"
-                                  : "bg-stone-950 hover:bg-stone-800 text-white"
-                            }`}
-                          >
-                            <span>{cartQty > 0 ? `ADDED (${cartQty}) +` : "ADD TO CART"}</span>
-                          </button>
-                        </div>
-
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedBookModal(product)}
+                          className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:opacity-80 transition-all"
+                          title="Syllabus Details"
+                        >
+                          📖 Details
+                        </button>
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all"
+                        >
+                          Add to Cart
+                        </button>
                       </div>
                     </div>
-
-                    {/* ════════ BACK SIDE OF CARD (FAST ULTRA-SMOOTH FLIP DETAILS) ════════ */}
-                    <div
-                      onClick={(e) => toggleFlip(productId, e)}
-                      className={`backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl p-3 sm:p-4 border shadow-xl flex flex-col justify-between cursor-pointer ${
-                        isDark ? "bg-[#141b16] border-blue-500/30 text-white" : "bg-stone-900 border-stone-800 text-white"
-                      }`}
-                    >
-                      <div>
-                        {/* Back Header with Prominent Return Button */}
-                        <div className="flex items-center justify-between gap-2 border-b border-stone-800 pb-2 mb-2">
-                          <span className="text-[9px] font-mono font-black uppercase tracking-widest text-blue-400">
-                            🌿 FORMULATION DOSSIER
-                          </span>
-                          <button
-                            onClick={(e) => toggleFlip(productId, e)}
-                            className="px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>↩</span>
-                            <span>Photo</span>
-                          </button>
-                        </div>
-
-                        {/* Title */}
-                        <h4 className="text-xs sm:text-sm font-black text-white line-clamp-1">
-                          {title}
-                        </h4>
-
-                        {/* Dosha Tag */}
-                        <div className="mt-1.5 px-2 py-1 rounded-md bg-stone-800 text-[9px] sm:text-[10px] font-bold text-amber-300">
-                          Dosha: {dosha}
-                        </div>
-
-                        {/* Description */}
-                        <p className="mt-2 text-[10.5px] sm:text-xs text-stone-300 line-clamp-3 leading-relaxed">
-                          {desc}
-                        </p>
-
-                        {/* Botanicals List */}
-                        {ingredients && ingredients.length > 0 && (
-                          <div className="mt-2">
-                            <div className="text-[9px] font-bold text-stone-400 uppercase">Botanicals:</div>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {ingredients.slice(0, 3).map((ing, i) => (
-                                <span
-                                  key={i}
-                                  className="px-1.5 py-0.5 rounded bg-stone-800 text-[8.5px] text-stone-200"
-                                >
-                                  🌿 {ing}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Back Footer Actions with explicit Return & Add To Cart */}
-                      <div className="pt-2 mt-2 border-t border-stone-800 flex items-center gap-2">
-                        <button
-                          onClick={(e) => toggleFlip(productId, e)}
-                          className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-[10px] font-black uppercase tracking-wider cursor-pointer whitespace-nowrap"
-                        >
-                          ↩ Photo
-                        </button>
-                        <button
-                          onClick={(e) => handleAddToCart(product, e)}
-                          className="flex-1 py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-stone-950 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer truncate shadow-md"
-                        >
-                          ADD ₹{Number(price).toLocaleString("en-IN")}
-                        </button>
-                      </div>
-
-                    </div>
-
                   </div>
                 </div>
               )
             })}
           </div>
         )}
-
       </main>
+
+      {/* Book / Course Details Modal */}
+      {selectedBookModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 relative">
+            
+            <button
+              onClick={() => setSelectedBookModal(null)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold flex items-center justify-center hover:opacity-80"
+            >
+              ✕
+            </button>
+
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="w-full sm:w-44 flex-shrink-0 aspect-[4/5] rounded-2xl overflow-hidden bg-slate-950">
+                <img
+                  src={selectedBookModal.image || "/books/wcna_master_course.jpg"}
+                  alt={selectedBookModal.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="flex-1 space-y-3">
+                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px] uppercase tracking-wider">
+                  {selectedBookModal.tag || "OFFICIAL MATERIAL"}
+                </span>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                  {selectedBookModal.title}
+                </h2>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                    ₹{Number(selectedBookModal.price).toLocaleString()}
+                  </span>
+                  {selectedBookModal.mrp && (
+                    <span className="text-sm line-through text-slate-400">
+                      ₹{Number(selectedBookModal.mrp).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {selectedBookModal.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Syllabus / Key Subjects */}
+            {selectedBookModal.subjects && (
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-3">
+                  Core Subjects &amp; Learning Modules
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {selectedBookModal.subjects.map((sub, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs font-semibold">
+                      <span className="text-emerald-500">✓</span>
+                      <span>{sub}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Learning Outcomes */}
+            {selectedBookModal.benefits && (
+              <div className="mt-4 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-300 font-medium">
+                <strong>💡 Outcomes:</strong> {selectedBookModal.benefits}
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setSelectedBookModal(null)}
+                className="px-5 py-2.5 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  handleAddToCart(selectedBookModal)
+                  setSelectedBookModal(null)
+                }}
+                className="px-6 py-2.5 rounded-full text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30"
+              >
+                Add to Cart ➔
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   )
