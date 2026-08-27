@@ -604,6 +604,56 @@ export default function Login({ setPage }) {
               </div>
             </div>
 
+            {/* 30-Day Quick SSO Fast-Track */}
+            {(() => {
+              const savedSSO = (() => {
+                try {
+                  const s = localStorage.getItem("educa_sso_session");
+                  if (!s) return null;
+                  const parsed = JSON.parse(s);
+                  if (parsed.expiresAt && Date.now() < parsed.expiresAt) return parsed;
+                  return null;
+                } catch(e) { return null; }
+              })();
+
+              if (savedSSO && savedSSO.token && savedSSO.user) {
+                const daysRemaining = Math.ceil((savedSSO.expiresAt - Date.now()) / (24 * 60 * 60 * 1000));
+                return (
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2 mb-3">
+                    <div className="text-[11px] font-bold text-amber-400">
+                      ⚡ Active 30-Day EDUCA Mail Session ({daysRemaining} days remaining)
+                    </div>
+                    <div className="text-xs text-white font-mono">
+                      {savedSSO.user.fullName || savedSSO.user.name} ({savedSSO.user.email})
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem("token", savedSSO.token);
+                        localStorage.setItem("user", JSON.stringify(savedSSO.user));
+                        window.location.reload();
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-amber-400 hover:to-yellow-300 transition-all cursor-pointer"
+                    >
+                      🚀 Continue 1-Click Login ➔
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.removeItem("educa_sso_session");
+                        setSuccessMsg("Session reset. Please enter credentials.");
+                        setTimeout(() => setSuccessMsg(""), 2000);
+                      }}
+                      className="text-[10px] text-stone-400 hover:text-white underline cursor-pointer"
+                    >
+                      Switch Account / Re-enter Password
+                    </button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <form
               onSubmit={async (e) => {
                 e.preventDefault()
@@ -626,6 +676,13 @@ export default function Login({ setPage }) {
                     } else if (data.token) {
                       localStorage.setItem("token", data.token)
                       localStorage.setItem("user", JSON.stringify(data.user))
+                      // Save 30-Day SSO Session for Instant Fast-Track Login
+                      localStorage.setItem("educa_sso_session", JSON.stringify({
+                        token: data.token,
+                        user: data.user,
+                        identifier: mailInput.trim(),
+                        expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000)
+                      }))
                       window.location.reload()
                     }
                   } else {
