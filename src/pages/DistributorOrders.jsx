@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
+import EducaLogo from "../components/EducaLogo"
 
 export default function DistributorOrders() {
   const [tab,         setTab]         = useState("pending")
@@ -258,7 +259,10 @@ export default function DistributorOrders() {
 
       {/* Header */}
       <div style={{ background:"linear-gradient(135deg,#065f46,#047857)", borderRadius:14, padding:"20px", marginBottom:12, color:"#fff" }}>
-        <h1 style={{ margin:0, fontSize: isMobile ? 18 : 22, fontWeight:800 }}>📦 Orders Dashboard</h1>
+        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
+          <EducaLogo size={36} />
+          <h1 style={{ margin:0, fontSize: isMobile ? 18 : 22, fontWeight:800 }}>Orders Dashboard</h1>
+        </div>
         <p style={{ margin:"4px 0 0", fontSize:12, opacity:0.8 }}>
           Aapka approval Stage 1 hai — Admin Stage 2 pe PPC + Sales trigger karega
         </p>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
 
 /* ── Collapsible Source Card ── */
 function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {

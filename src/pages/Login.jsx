@@ -307,11 +307,11 @@ export default function Login({ setPage }) {
         {/* Sleek Minimalist Header with Official Logo */}
         <div className="flex flex-col items-center text-center gap-2">
           <div className="mb-1">
-            <EducaLogo size={46} />
+            <EducaLogo size={68} />
           </div>
           
-          <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-blue-400 uppercase">
-            EDUCA VEDA · PORTAL
+          <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-amber-400 uppercase">
+            EDUCA-VEDA · WE GIVE RESULTS NOT PROMISES
           </span>
           
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">

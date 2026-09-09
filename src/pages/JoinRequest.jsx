@@ -243,11 +243,16 @@ export default function JoinRequest({ setPage }) {
       <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* Brand Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0" }}>
-          <EducaLogo size={32} />
-          <span style={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.15em", textTransform: "uppercase", color: isDark ? "#fbbf24" : "#b45309" }}>
-            EDUCA VEDA
-          </span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "10px 0" }}>
+          <EducaLogo size={42} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.15em", textTransform: "uppercase", color: isDark ? "#fbbf24" : "#b45309" }}>
+              EDUCA-VEDA
+            </span>
+            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: isDark ? "#94a3b8" : "#64748b" }}>
+              WE GIVE RESULTS NOT PROMISES
+            </span>
+          </div>
         </div>
 
         {/* ── REFERRAL VERIFIED BANNER ── */}

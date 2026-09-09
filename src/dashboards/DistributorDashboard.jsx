@@ -3,6 +3,7 @@ import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import InlineLoader from "../components/InlineLoader"
+import EducaLogo from "../components/EducaLogo"
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid
 } from "recharts"
@@ -168,7 +169,7 @@ export default function DistributorDashboard({ setPage }) {
                   ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-inner"
                   : "bg-white/20 text-white border-white/30"
               }`}>
-                {(user.fullName || user.name || "D")[0].toUpperCase()}
+                <EducaLogo size={34} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">

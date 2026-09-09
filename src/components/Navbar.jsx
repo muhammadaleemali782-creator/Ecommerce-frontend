@@ -326,16 +326,23 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
           <div
             className="flex items-center gap-2.5 cursor-pointer group min-w-0 overflow-hidden"
             onClick={() => go("home")}
-            title="EDUCA VEDA"
+            title="EDUCA-VEDA · We Give Results Not Promises"
           >
             <div className="shrink-0">
-              <EducaLogo size={28} />
+              <EducaLogo size={32} />
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none transition-all duration-200 ${
-              isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
-            }`}>
-              EDUCA VEDA
-            </span>
+            <div className="flex flex-col min-w-0">
+              <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-tight transition-all duration-200 ${
+                isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+              }`}>
+                EDUCA-VEDA
+              </span>
+              <span className={`text-[7.5px] font-mono font-bold tracking-widest uppercase truncate ${
+                isDark ? "text-stone-400" : "text-stone-500"
+              }`}>
+                RESULTS NOT PROMISES
+              </span>
+            </div>
           </div>
 
           <button
@@ -434,12 +441,19 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
       >
         <div className="px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-pointer group shrink-0" onClick={() => go("home")}>
-            <EducaLogo size={28} />
-            <span className={`text-[12px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none ${
-              isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
-            }`}>
-              EDUCA VEDA
-            </span>
+            <EducaLogo size={32} />
+            <div className="flex flex-col min-w-0">
+              <span className={`text-[12px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-tight ${
+                isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+              }`}>
+                EDUCA-VEDA
+              </span>
+              <span className={`text-[7.5px] font-mono font-bold tracking-widest uppercase truncate ${
+                isDark ? "text-stone-400" : "text-stone-500"
+              }`}>
+                RESULTS NOT PROMISES
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

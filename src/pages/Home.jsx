@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useStore } from "../context/StoreContext";
 import { useAuth } from "../context/AuthContext";
+import EducaLogo from "../components/EducaLogo";
 
 // ══════════════════════════════════════════════════════════
 // 4 SOVEREIGN REALMS (DIFFERENTIATED SUBTAG & CATEGORY, ZERO NUMBERS)
@@ -534,8 +535,13 @@ export default function Home({ setPage }) {
             </button>
           </div>
 
+          <div className="flex items-center justify-center gap-2 pt-1 pb-0.5">
+            <EducaLogo size={22} />
+            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-white">EDUCA-VEDA</span>
+          </div>
+
           <p className="text-[9.5px] text-center text-slate-500 font-sans tracking-wide">
-            © 2026 EDUCA VEDA · AYUSH Certified Formulations
+            © 2026 EDUCA-VEDA · We Give Results Not Promises
           </p>
         </div>
       </div>
@@ -920,13 +926,13 @@ export default function Home({ setPage }) {
         </section>
 
         {/* Desktop Global Footer Section */}
-        <footer className="bg-[#080808] px-8 py-10 text-slate-400">
+        <footer className="bg-[#080808] px-8 py-10 text-slate-400 border-t border-white/[0.06]">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-5 h-7 border-[2.5px] border-[#fbbf24] flex items-center justify-center bg-transparent rounded-[1px]" />
+              <EducaLogo size={38} />
               <div>
-                <span className="text-sm font-black uppercase tracking-[0.2em] text-white">EDUCA VEDA</span>
-                <p className="text-[10px] text-slate-500 font-mono mt-0.5">Ayurvedic Sovereignty & Clinical Excellence</p>
+                <span className="text-sm font-black uppercase tracking-[0.2em] text-white">EDUCA-VEDA</span>
+                <p className="text-[10px] text-slate-500 font-mono mt-0.5">We Give Results Not Promises · Ayurvedic Sovereignty</p>
               </div>
             </div>
 

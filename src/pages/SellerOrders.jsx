@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
+import EducaLogo from "../components/EducaLogo"
 import InlineLoader from "../components/InlineLoader"
 
 const STAGES = [

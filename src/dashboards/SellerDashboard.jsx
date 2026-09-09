@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext"
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import Store from "../pages/Store"
+import EducaLogo from "../components/EducaLogo"
 import InlineLoader from "../components/InlineLoader"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from "recharts"
 
@@ -151,7 +152,7 @@ export default function SellerDashboard({ setPage }) {
               color: isDark ? "#60a5fa" : "#fff",
               flexShrink: 0
             }}>
-              {(user.fullName || user.name || "S")[0].toUpperCase()}
+              <EducaLogo size={34} />
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{color:isDark?"#93c5fd":"rgba(255,255,255,0.75)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>

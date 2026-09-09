@@ -116,9 +116,9 @@ export default function PasswordHelp({ setPage }) {
   return (
     <div className="max-w-md mx-auto my-8 p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 bg-[#0c100e] text-white border-white/[0.1]">
       <div className="flex flex-col items-center text-center gap-2">
-        <EducaLogo size={44} />
-        <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-blue-400 uppercase">
-          EDUCA VEDA · SELF-SERVICE PORTAL
+        <EducaLogo size={60} />
+        <span className="text-[10px] font-mono font-bold tracking-[0.25em] text-amber-400 uppercase">
+          EDUCA-VEDA · WE GIVE RESULTS NOT PROMISES
         </span>
         <h2 className="text-xl font-black">Password Reset Assistance</h2>
         <p className="text-xs text-stone-400">Apne EDUCA Mail par OTP mangwayein ya Admin ko request bhejein.</p>

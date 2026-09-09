@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
 
 export default function PPCWallet({ setPage }) {
   const { isDark } = useTheme()
