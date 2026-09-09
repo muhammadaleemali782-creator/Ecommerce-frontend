@@ -1,16 +1,25 @@
 import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel } from "../utils/roleLabels"
 
 /* ── Role config ── */
 const RC = {
-  admin:       { bg:"#f5f3ff", border:"#7c3aed", dot:"#7c3aed", icon:"👑",  label:"Admin" },
-  distributor: { bg:"#f0fdf4", border:"#16a34a", dot:"#16a34a", icon:"🏢",  label:"Distributor" },
-  seller:      { bg:"#eff6ff", border:"#3b82f6", dot:"#3b82f6", icon:"🛒",  label:"Seller" },
-  user:        { bg:"#f8fafc", border:"#94a3b8", dot:"#94a3b8", icon:"👤",  label:"User" },
+  admin:       { bg:"#f5f3ff", border:"#7c3aed", dot:"#7c3aed", icon:"👑", label:"Admin",       darkBg:"#2e1065", darkText:"#c4b5fd" },
+  distributor: { bg:"#f0fdf4", border:"#16a34a", dot:"#16a34a", icon:"🏢", label:"Distributor", darkBg:"#052e16", darkText:"#86efac" },
+  seller:      { bg:"#eff6ff", border:"#3b82f6", dot:"#3b82f6", icon:"🛒", label:"Seller",      darkBg:"#172554", darkText:"#93c5fd" },
+  user:        { bg:"#f8fafc", border:"#94a3b8", dot:"#94a3b8", icon:"👤", label:"User",        darkBg:"#1e293b", darkText:"#cbd5e1" },
 }
-const getRC   = (role) => RC[role] || RC.user
-const RSORT   = { distributor:0, seller:1, user:2, admin:3 }
+const getRC = (role) => RC[role] || RC.user
+const RSORT = { distributor:0, seller:1, user:2, admin:3 }
+
+/* ── What can each role create via referral ── */
+const REF_ROLES = {
+  admin:       ["distributor", "seller", "user"],
+  distributor: ["distributor", "seller"],
+  seller:      ["seller", "user"],
+  user:        ["user"],
+}
 
 function LevelBadge({ level }) {
   const cfgs = [null,
@@ -20,10 +29,10 @@ function LevelBadge({ level }) {
     { bg:"#fce7f3", color:"#9d174d", label:"L4" },
   ]
   const c = cfgs[level] || { bg:"#f1f5f9", color:"#475569", label:`L${level}` }
-  return <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", borderRadius:99, background:c.bg, color:c.color, border:`1px solid ${c.color}22` }}>{c.label}</span>
+  return <span style={{ fontSize:9, fontWeight:700, padding:"1px 6px", borderRadius:99, background:c.bg, color:c.color, border:`1px solid ${c.color}33` }}>{c.label}</span>
 }
 
-function NetworkPicker({ downline, selected, onSelect, callerRole }) {
+function NetworkPicker({ downline, selected, onSelect }) {
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
 
@@ -43,76 +52,53 @@ function NetworkPicker({ downline, selected, onSelect, callerRole }) {
   }, [downline, filter, search])
 
   if (downline.length === 0)
-    return <div style={{ padding:"16px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>Aapke neeche koi member nahi hai</div>
+    return <div style={{ padding:"20px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>Aapke neeche koi member nahi hai</div>
 
   return (
     <div>
-      {/* Search */}
-      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", background:"#f8fafc", borderRadius:8, border:"1px solid #e2e8f0", marginBottom:10 }}>
-        <span style={{ color:"#94a3b8" }}>🔍</span>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name..."
+      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", background:"#f8fafc", borderRadius:10, border:"1px solid #e2e8f0", marginBottom:10 }}>
+        <span style={{ color:"#94a3b8", fontSize:14 }}>🔍</span>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Naam se search karo..."
           style={{ flex:1, border:"none", outline:"none", background:"transparent", fontSize:13, color:"#334155" }} />
-        {search && <button type="button" onClick={()=>setSearch("")} style={{ border:"none", background:"none", cursor:"pointer", color:"#94a3b8", fontSize:12 }}>✕</button>}
+        {search && <button type="button" onClick={()=>setSearch("")} style={{ border:"none", background:"none", cursor:"pointer", color:"#94a3b8", fontSize:13 }}>✕</button>}
       </div>
-
-      {/* Filter tabs */}
       <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:10 }}>
         {tabs.map(tab => {
           const isA = filter===tab.key
           const dot = tab.key==="all" ? "#64748b" : getRC(tab.key).dot
           return (
             <button key={tab.key} type="button" onClick={()=>setFilter(tab.key)}
-              style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:99, fontSize:12, fontWeight:isA?700:500, cursor:"pointer",
-                border:`1.5px solid ${isA?dot:"#e2e8f0"}`, background:isA?`${dot}12`:"#fff", color:isA?dot:"#64748b",
-                boxShadow:isA?`0 0 0 2px ${dot}22`:"none" }}>
-              {tab.key!=="all" && <span style={{ width:7, height:7, borderRadius:"50%", background:isA?dot:"#94a3b8", display:"inline-block" }} />}
+              style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:99, fontSize:11, fontWeight:isA?700:500, cursor:"pointer",
+                border:`1.5px solid ${isA?dot:"#e2e8f0"}`, background:isA?`${dot}15`:"#fff", color:isA?dot:"#64748b" }}>
+              {tab.key!=="all" && <span style={{ width:6, height:6, borderRadius:"50%", background:isA?dot:"#94a3b8", display:"inline-block" }} />}
               {tab.label}
               <span style={{ fontSize:10, fontWeight:700, padding:"0 5px", borderRadius:99, background:isA?`${dot}20`:"#f1f5f9", color:isA?dot:"#94a3b8" }}>{tab.count}</span>
             </button>
           )
         })}
       </div>
-
-      {/* List */}
-      <div style={{ maxHeight:260, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
-        {/* Apne liye — distributor ke liye bhi show karo (woh apne liye dist/seller bana sakta hai) */}
+      <div style={{ maxHeight:240, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
         <div onClick={()=>onSelect(null)}
-          style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", borderRadius:9, cursor:"pointer",
+          style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 12px", borderRadius:10, cursor:"pointer",
             border:`1.5px solid ${!selected?"#3b82f6":"#e2e8f0"}`, background:!selected?"#eff6ff":"#fff" }}>
           <span style={{ fontSize:16 }}>🧑‍💼</span>
           <span style={{ fontSize:13, fontWeight:600, color:!selected?"#1d4ed8":"#334155", flex:1 }}>Apne liye (default)</span>
           {!selected && <span style={{ fontSize:10, color:"#3b82f6", fontWeight:700 }}>✓ Selected</span>}
         </div>
-
         {shown.map(d => {
           const c = getRC(d.role)
           const isSel = selected?._id === d._id
-          // No one is disabled — sab ke liye select karna allowed
-          // Type dropdown mein hi restriction lagegi
-          const isDisabled = false
-
           return (
-            <div key={d._id}
-              onClick={() => !isDisabled && onSelect(d)}
-              title={isDisabled ? "Distributor ke liye request nahi kar sakte" : ""}
-              style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", borderRadius:9,
-                cursor: isDisabled ? "not-allowed" : "pointer", transition:"all 0.12s",
-                border:`1.5px solid ${isDisabled?"#e2e8f0":isSel?c.border:"#e2e8f0"}`,
-                background: isDisabled?"#f8fafc":isSel?c.bg:"#fff",
-                opacity: isDisabled ? 0.45 : 1,
+            <div key={d._id} onClick={()=>onSelect(d)}
+              style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 12px", borderRadius:10, cursor:"pointer", transition:"all 0.12s",
+                border:`1.5px solid ${isSel?c.border:"#e2e8f0"}`, background:isSel?c.bg:"#fff",
                 paddingLeft:12+(d.level-1)*14 }}>
               {d.level > 1 && <span style={{ color:"#e2e8f0", fontSize:12 }}>└</span>}
-              <span style={{ fontSize:13, filter:isDisabled?"grayscale(1)":"none" }}>{c.icon}</span>
-              <span style={{ fontSize:13, fontWeight:600, color:isDisabled?"#94a3b8":isSel?c.border:"#334155", flex:1 }}>{d.name}</span>
+              <span style={{ fontSize:14 }}>{c.icon}</span>
+              <span style={{ fontSize:13, fontWeight:600, color:isSel?c.border:"#334155", flex:1 }}>{d.name}</span>
               <LevelBadge level={d.level} />
-              {isDisabled ? (
-                <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99,
-                  background:"#f1f5f9", color:"#94a3b8", border:"1px solid #e2e8f0" }}>🚫 N/A</span>
-              ) : (
-                <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99,
-                  background:`${c.dot}15`, color:c.dot, border:`1px solid ${c.dot}30` }}>{c.label}</span>
-              )}
-              {isSel && !isDisabled && <span style={{ fontSize:11, color:c.dot, fontWeight:700 }}>✓</span>}
+              <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99, background:`${c.dot}15`, color:c.dot, border:`1px solid ${c.dot}30` }}>{c.label}</span>
+              {isSel && <span style={{ fontSize:11, color:c.dot, fontWeight:700 }}>✓</span>}
             </div>
           )
         })}
@@ -125,6 +111,7 @@ function NetworkPicker({ downline, selected, onSelect, callerRole }) {
 /* ── Main ── */
 export default function RaiseUserRequest() {
   const { user } = useAuth()
+  const { isDark } = useTheme()
 
   const [type, setType]               = useState("seller")
   const [emailName, setEmailName]     = useState("")
@@ -151,6 +138,10 @@ export default function RaiseUserRequest() {
   const [downline, setDownline]       = useState([])
   const [downlineLoading, setDownlineLoading] = useState(false)
 
+  // Referral role selector
+  const refRoles = REF_ROLES[user?.role] || ["user"]
+  const [refRole, setRefRole] = useState(refRoles[0])
+
   const fullEmail = emailDomain ? `${emailName.trim()}${emailDomain}` : freeEmail.trim()
   const isValidEmail = (val) => val ? /^[^\s@]+@[^\s@]+/.test(val.trim()) : false
 
@@ -162,7 +153,6 @@ export default function RaiseUserRequest() {
     return idType === "aadhar" ? AADHAR_REGEX.test(v) : PAN_REGEX.test(v)
   }
 
-  // Load domain
   useEffect(() => {
     const load = async () => {
       try {
@@ -178,7 +168,6 @@ export default function RaiseUserRequest() {
     load()
   }, [])
 
-  // Load downline when picker opens
   useEffect(() => {
     if (!showPicker || !canUsePicker || downline.length > 0) return
     const load = async () => {
@@ -196,60 +185,31 @@ export default function RaiseUserRequest() {
     load()
   }, [showPicker, canUsePicker])
 
-  // Auto-set type based on selected member
   useEffect(() => {
     const types = allowedTypes()
-    // Agar current type allowed nahi hai to pehla allowed type set karo
     if (!types.includes(type)) setType(types[0] || "seller")
   }, [onBehalfOf, user])
 
-  // ══════════════════════════════════════════════════
-  // SAHI RULES — behalf ki role ke hisaab se:
-  //
-  // Distributor:
-  //   apne liye (no selection) → distributor, seller
-  //   neeche distributor       → distributor, seller
-  //   neeche seller            → seller, user
-  //   neeche user              → user
-  //
-  // Seller:
-  //   apne liye / neeche seller → seller, user
-  //   neeche user               → user
-  //
-  // User:
-  //   apne liye / kisi ke liye  → user
-  //
-  // Admin → sab kuch
-  // ══════════════════════════════════════════════════
   const allowedTypes = () => {
     const myRole     = user?.role
-    const behalfRole = onBehalfOf?.role   // undefined = apne liye
-
+    const behalfRole = onBehalfOf?.role
     if (myRole === "admin") return ["distributor", "seller", "user"]
-
     if (myRole === "distributor") {
-      if (!onBehalfOf)                    return ["distributor", "seller"]  // apne liye
-      if (behalfRole === "distributor")   return ["distributor", "seller"]  // dist ke liye
-      if (behalfRole === "seller")        return ["seller", "user"]          // seller ke liye
-      if (behalfRole === "user")          return ["user"]                    // user ke liye
+      if (!onBehalfOf)                  return ["distributor", "seller"]
+      if (behalfRole === "distributor") return ["distributor", "seller"]
+      if (behalfRole === "seller")      return ["seller", "user"]
+      if (behalfRole === "user")        return ["user"]
       return ["distributor", "seller"]
     }
-
     if (myRole === "seller") {
-      if (!onBehalfOf)                    return ["seller", "user"]  // apne liye
-      if (behalfRole === "seller")        return ["seller", "user"]  // seller ke liye
-      if (behalfRole === "user")          return ["user"]            // user ke liye
+      if (!onBehalfOf)                  return ["seller", "user"]
+      if (behalfRole === "seller")      return ["seller", "user"]
+      if (behalfRole === "user")        return ["user"]
       return ["seller", "user"]
     }
-
-    if (myRole === "user") {
-      return ["user"]  // sirf user — hamesha
-    }
-
     return ["user"]
   }
 
-  // Load products (admin only)
   useEffect(() => {
     if (user?.role !== "admin") return
     const load = async () => {
@@ -265,7 +225,6 @@ export default function RaiseUserRequest() {
     load()
   }, [user])
 
-  // Auto ID
   useEffect(() => {
     const load = async () => {
       try {
@@ -281,7 +240,6 @@ export default function RaiseUserRequest() {
     load()
   }, [type])
 
-  // Email check
   useEffect(() => {
     setEmailExists(false)
     if (!isValidEmail(fullEmail)) return
@@ -339,254 +297,336 @@ export default function RaiseUserRequest() {
   const isDisabled = loading || emailExists || emailChecking || !isValidEmail(fullEmail) || !isValidIdNumber()
   const selectedRC = onBehalfOf ? getRC(onBehalfOf.role) : null
 
-  if (domainLoading) return <div className="p-6 text-gray-400">Loading...</div>
+  if (domainLoading) return (
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"center", minHeight:200, color:"#94a3b8", fontSize:14, gap:8 }}>
+      <span style={{ display:"inline-block", width:20, height:20, borderRadius:"50%", border:"2px solid #e2e8f0", borderTopColor:"#3b82f6", animation:"spin 0.8s linear infinite" }} />
+      Loading...
+    </div>
+  )
 
-  // ── Referral link (ponytail: window.location only, no backend needed) ──
-  const refLink = `${window.location.origin}?ref=${user?.name || ""}&role=${user?.role || ""}`
-  const roleToCreates = {
-    admin:       "Distributor / Seller / User ban sakte hain",
-    distributor: "Distributor ya Seller ban sakte hain",
-    seller:      "Seller ya User ban sakte hain",
-    user:        "User ban sakte hain",
-  }
-  const createsLabel = roleToCreates[user?.role] || "Join kar sakte hain"
+  // ── Referral link ──
+  const refLink = `${window.location.origin}?ref=${user?.name || ""}&createAs=${refRole}`
+  const refRC = getRC(refRole)
 
   const copyLink = () => {
     navigator.clipboard.writeText(refLink)
       .then(() => alert("✅ Link copy ho gaya!"))
-      .catch(() => alert("Copy nahi hua, manually copy karo:\n" + refLink))
+      .catch(() => alert("Manually copy karo:\n" + refLink))
   }
-
   const shareLink = () => {
     if (navigator.share) {
-      navigator.share({ title: "EDUCA VEDA — Join karo", text: `Is link se ${createsLabel}`, url: refLink })
+      navigator.share({ title: "EDUCA VEDA — Join karo", text: `Is link se ${refRC.label} ban sakte ho`, url: refLink })
     } else {
       copyLink()
     }
   }
 
+  // ── Theme tokens ──
+  const card  = isDark ? { bg:"#0f172a", border:"#1e293b", text:"#f1f5f9", sub:"#94a3b8" }
+                       : { bg:"#ffffff", border:"#e2e8f0", text:"#0f172a", sub:"#64748b" }
+  const page  = isDark ? "#060a14" : "#f1f5f9"
+  const input = isDark ? { bg:"#1e293b", border:"#334155", text:"#f1f5f9", placeholder:"#475569" }
+                       : { bg:"#f8fafc", border:"#e2e8f0", text:"#0f172a", placeholder:"#94a3b8" }
+
+  const InputStyle = {
+    width:"100%", padding:"10px 14px", borderRadius:10, fontSize:13, fontWeight:500,
+    background:input.bg, border:`1.5px solid ${input.border}`, color:input.text,
+    outline:"none", boxSizing:"border-box", transition:"border-color 0.15s",
+    fontFamily:"inherit"
+  }
+  const LabelStyle = {
+    display:"block", fontSize:11, fontWeight:700, letterSpacing:"0.06em",
+    textTransform:"uppercase", color:card.sub, marginBottom:6
+  }
+
   return (
-    <>
-      {/* ── REFERRAL LINK CARD ── */}
-      <div style={{ maxWidth: 448, marginBottom: 16, background: "#f0fdf4", border: "1.5px solid #16a34a", borderRadius: 12, padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-          <span style={{ fontSize: 18 }}>🔗</span>
-          <span style={{ fontWeight: 700, fontSize: 14, color: "#15803d" }}>Apna Referral Link Share Karo</span>
-        </div>
-        <p style={{ fontSize: 12, color: "#166534", marginBottom: 10, lineHeight: 1.5 }}>
-          Is link se join karne wale log <b>aapke neeche</b> aayenge.<br />
-          <span style={{ background: "#dcfce7", padding: "1px 6px", borderRadius: 99, fontWeight: 600 }}>
-            {user?.role === "distributor" ? "🏢 Distributor" : user?.role === "seller" ? "🛒 Seller" : user?.role === "admin" ? "👑 Admin" : "👤 User"}
-          </span>{" "}
-          ke roop mein aap share kar rahe hain — is link se <b>{createsLabel}</b>.
-        </p>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", background: "#fff", border: "1px solid #bbf7d0", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
-          <span style={{ flex: 1, fontSize: 11, color: "#374151", fontFamily: "monospace", wordBreak: "break-all" }}>{refLink}</span>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button type="button" onClick={copyLink}
-            style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1.5px solid #16a34a", background: "#16a34a", color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
-            📋 Copy Link
-          </button>
-          <button type="button" onClick={shareLink}
-            style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1.5px solid #16a34a", background: "#fff", color: "#16a34a", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
-            📤 Share
-          </button>
-        </div>
-      </div>
+    <div style={{ minHeight:"100vh", background:page, padding:"24px 16px 60px", fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+      <div style={{ maxWidth:520, margin:"0 auto", display:"flex", flexDirection:"column", gap:16 }}>
 
+        {/* ── PAGE HEADER ── */}
+        <div style={{ marginBottom:4 }}>
+          <h1 style={{ fontSize:22, fontWeight:800, color:card.text, margin:0, letterSpacing:"-0.02em" }}>
+            Naya User Banao
+          </h1>
+          <p style={{ fontSize:13, color:card.sub, margin:"4px 0 0", lineHeight:1.5 }}>
+            Admin ko request bhejo — approved hone ke baad account ban jayega
+          </p>
+        </div>
 
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow max-w-md space-y-4">
-      <h2 className="font-bold text-xl">Request New User</h2>
+        {/* ══════════════════════════════════════
+            REFERRAL LINK CARD
+        ══════════════════════════════════════ */}
+        <div style={{ background:card.bg, border:`1.5px solid ${card.border}`, borderRadius:16, padding:"18px 20px", boxShadow: isDark?"none":"0 1px 4px #0000000a" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+            <span style={{ fontSize:18 }}>🔗</span>
+            <span style={{ fontSize:14, fontWeight:800, color:card.text, letterSpacing:"-0.01em" }}>Referral Link Share Karo</span>
+          </div>
 
-      {/* ── NETWORK PICKER ── */}
-      {canUsePicker && (
-        <div>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
-            <span style={{ fontSize:13, fontWeight:700, color:"#1e293b" }}>👥 Kiske liye request hai?</span>
-            <button type="button" onClick={()=>setShowPicker(p=>!p)}
-              style={{ fontSize:12, padding:"4px 12px", borderRadius:99, border:`1.5px solid ${showPicker?"#ef4444":"#3b82f6"}`,
-                background:showPicker?"#fff":"#3b82f6", color:showPicker?"#ef4444":"#fff", cursor:"pointer", fontWeight:600 }}>
-              {showPicker ? "✕ Band karo" : "🔽 Select karo"}
+          {/* Role selector */}
+          <div style={{ marginBottom:14 }}>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.06em", textTransform:"uppercase", color:card.sub, marginBottom:8 }}>
+              Kiska link share karna hai?
+            </div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {refRoles.map(r => {
+                const rc = getRC(r)
+                const isActive = refRole === r
+                return (
+                  <button key={r} type="button" onClick={() => setRefRole(r)}
+                    style={{
+                      display:"flex", alignItems:"center", gap:6, padding:"7px 14px", borderRadius:99,
+                      fontSize:12, fontWeight:700, cursor:"pointer", transition:"all 0.15s",
+                      border:`1.5px solid ${isActive ? rc.border : (isDark?"#334155":"#e2e8f0")}`,
+                      background: isActive ? (isDark ? rc.darkBg : `${rc.dot}12`) : (isDark?"#1e293b":"#f8fafc"),
+                      color: isActive ? (isDark ? rc.darkText : rc.dot) : card.sub,
+                      boxShadow: isActive ? `0 0 0 3px ${rc.dot}20` : "none"
+                    }}>
+                    <span>{rc.icon}</span>
+                    {rc.label}
+                    {isActive && <span style={{ fontSize:10 }}>✓</span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Info text */}
+          <div style={{ fontSize:12, color:card.sub, marginBottom:12, lineHeight:1.6, padding:"10px 12px", borderRadius:10, background: isDark?"#1e293b":"#f8fafc", border:`1px solid ${isDark?"#334155":"#e2e8f0"}` }}>
+            Aap <span style={{ fontWeight:700, color: isDark ? refRC.darkText : refRC.dot }}>{getRC(user?.role).icon} {getRC(user?.role).label}</span> ke roop mein share kar rahe ho
+            {" → "} is link se <span style={{ fontWeight:700, color: isDark ? refRC.darkText : refRC.dot }}>{refRC.icon} {refRC.label}</span> ban sakta hai
+          </div>
+
+          {/* Link display */}
+          <div style={{ display:"flex", alignItems:"center", gap:8, background: isDark?"#0f172a":"#f1f5f9", border:`1px solid ${isDark?"#334155":"#e2e8f0"}`, borderRadius:10, padding:"10px 14px", marginBottom:12 }}>
+            <span style={{ flex:1, fontSize:11, color:card.sub, fontFamily:"'SF Mono',monospace", wordBreak:"break-all", lineHeight:1.5 }}>{refLink}</span>
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display:"flex", gap:8 }}>
+            <button type="button" onClick={copyLink}
+              style={{ flex:1, padding:"10px 0", borderRadius:10, border:"none", background: isDark ? refRC.darkText : refRC.dot, color: isDark ? "#000" : "#fff", fontWeight:700, fontSize:12, cursor:"pointer", transition:"opacity 0.15s", letterSpacing:"0.03em" }}>
+              📋 Copy Link
+            </button>
+            <button type="button" onClick={shareLink}
+              style={{ flex:1, padding:"10px 0", borderRadius:10, border:`1.5px solid ${isDark ? refRC.darkText : refRC.dot}`, background:"transparent", color: isDark ? refRC.darkText : refRC.dot, fontWeight:700, fontSize:12, cursor:"pointer", letterSpacing:"0.03em" }}>
+              📤 Share
             </button>
           </div>
+        </div>
 
-          {/* Selected display */}
-          {!showPicker && (
-            <div style={{ padding:"8px 12px", borderRadius:9, border:`1.5px solid ${onBehalfOf?selectedRC.border:"#3b82f6"}`,
-              background:onBehalfOf?selectedRC.bg:"#eff6ff", display:"flex", alignItems:"center", gap:8 }}>
-              <span style={{ fontSize:16 }}>{onBehalfOf?selectedRC.icon:"🧑‍💼"}</span>
-              <span style={{ fontSize:13, fontWeight:600, color:onBehalfOf?selectedRC.border:"#1d4ed8" }}>
-                {onBehalfOf ? onBehalfOf.name : "Apne liye (default)"}
-              </span>
-              {onBehalfOf && (
-                <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99,
-                  background:`${selectedRC.dot}15`, color:selectedRC.dot, border:`1px solid ${selectedRC.dot}30` }}>
-                  {selectedRC.label}
+        {/* ══════════════════════════════════════
+            REQUEST FORM CARD
+        ══════════════════════════════════════ */}
+        <form onSubmit={handleSubmit}
+          style={{ background:card.bg, border:`1.5px solid ${card.border}`, borderRadius:16, padding:"20px", boxShadow: isDark?"none":"0 1px 4px #0000000a", display:"flex", flexDirection:"column", gap:18 }}>
+
+          <div>
+            <h2 style={{ fontSize:16, fontWeight:800, color:card.text, margin:0, letterSpacing:"-0.01em" }}>Request Form</h2>
+            <p style={{ fontSize:12, color:card.sub, margin:"3px 0 0" }}>Admin approve karega tab account create hoga</p>
+          </div>
+
+          {/* ── NETWORK PICKER ── */}
+          {canUsePicker && (
+            <div>
+              <label style={LabelStyle}>👥 Kiske liye request hai?</label>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, flex:1,
+                  padding:"10px 14px", borderRadius:10, border:`1.5px solid ${onBehalfOf ? selectedRC.border : (isDark?"#334155":"#3b82f6")}`,
+                  background: onBehalfOf ? (isDark ? onBehalfOf && getRC(onBehalfOf.role).darkBg : selectedRC.bg) : (isDark?"#172554":"#eff6ff"),
+                  cursor:"pointer" }} onClick={() => !showPicker && setShowPicker(true)}>
+                  <span style={{ fontSize:16 }}>{onBehalfOf ? selectedRC.icon : "🧑‍💼"}</span>
+                  <span style={{ fontSize:13, fontWeight:600, color: onBehalfOf ? (isDark ? selectedRC.darkText : selectedRC.border) : (isDark?"#93c5fd":"#1d4ed8"), flex:1 }}>
+                    {onBehalfOf ? onBehalfOf.name : "Apne liye (default)"}
+                  </span>
+                  {onBehalfOf && (
+                    <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99,
+                      background:`${selectedRC.dot}20`, color:selectedRC.dot, border:`1px solid ${selectedRC.dot}30` }}>
+                      {selectedRC.label}
+                    </span>
+                  )}
+                </div>
+                <button type="button" onClick={()=>setShowPicker(p=>!p)}
+                  style={{ marginLeft:8, padding:"10px 14px", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer",
+                    border:`1.5px solid ${showPicker?(isDark?"#f87171":"#ef4444"):(isDark?"#334155":"#e2e8f0")}`,
+                    background: showPicker?(isDark?"#450a0a":"#fef2f2"):(isDark?"#1e293b":"#f8fafc"),
+                    color:showPicker?(isDark?"#f87171":"#ef4444"):(isDark?"#94a3b8":"#64748b") }}>
+                  {showPicker ? "✕" : "🔽"}
+                </button>
+              </div>
+              {showPicker && (
+                <div style={{ border:`1.5px solid ${isDark?"#334155":"#e2e8f0"}`, borderRadius:12, padding:14, background: isDark?"#1e293b":"#fff", boxShadow:"0 4px 20px #0002" }}>
+                  {downlineLoading ? (
+                    <div style={{ textAlign:"center", padding:"20px", color:"#94a3b8", fontSize:13 }}>⏳ Loading...</div>
+                  ) : (
+                    <NetworkPicker downline={downline} selected={onBehalfOf} callerRole={user?.role}
+                      onSelect={(d) => { setOnBehalfOf(d); setShowPicker(false) }} />
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── TYPE ── */}
+          <div>
+            <label style={LabelStyle}>
+              {onBehalfOf ? `${onBehalfOf.name} ke liye kya banana hai` : "Kya banana hai"}
+            </label>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {allowedTypes().map(t => {
+                const rc = getRC(t)
+                const isA = type === t
+                return (
+                  <button key={t} type="button" onClick={() => setType(t)}
+                    style={{ flex:1, minWidth:90, padding:"10px 8px", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer", transition:"all 0.15s",
+                      border:`1.5px solid ${isA ? rc.border : (isDark?"#334155":"#e2e8f0")}`,
+                      background: isA ? (isDark ? rc.darkBg : `${rc.dot}10`) : (isDark?"#1e293b":"#f8fafc"),
+                      color: isA ? (isDark ? rc.darkText : rc.dot) : card.sub,
+                      display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                    <span>{rc.icon}</span> {rc.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* ── NAME ── */}
+          <div>
+            <label style={LabelStyle}>Full Name</label>
+            <input style={InputStyle} placeholder="Poora naam likho"
+              value={name} onChange={e=>setName(e.target.value)} />
+            {generatedId && (
+              <div style={{ marginTop:6, fontSize:11, color:card.sub }}>
+                System ID: <span style={{ fontFamily:"monospace", color:isDark?"#93c5fd":"#3b82f6", fontWeight:700 }}>{generatedId}</span>
+                <span style={{ marginLeft:4, color:card.sub }}>(auto-assigned)</span>
+              </div>
+            )}
+          </div>
+
+          {/* ── EMAIL ── */}
+          <div>
+            <label style={LabelStyle}>
+              Email
+              {emailDomain && (
+                <span style={{ marginLeft:8, fontSize:10, background:isDark?"#172554":"#dbeafe", color:isDark?"#93c5fd":"#2563eb", padding:"1px 8px", borderRadius:99, fontWeight:700, textTransform:"none", letterSpacing:0 }}>
+                  Domain: {emailDomain}
                 </span>
               )}
-            </div>
-          )}
+            </label>
+            {emailDomain ? (
+              <div style={{ display:"flex", alignItems:"center", borderRadius:10, overflow:"hidden", border:`1.5px solid ${emailExists?(isDark?"#f87171":"#ef4444"):input.border}`, background:input.bg }}>
+                <input style={{ flex:1, padding:"10px 14px", border:"none", outline:"none", background:"transparent", fontSize:13, color:input.text, fontFamily:"inherit" }}
+                  placeholder="sirf naam (e.g. john)"
+                  value={emailName} onChange={e=>setEmailName(e.target.value.replace(/\s|@/g,""))} />
+                <span style={{ padding:"10px 14px", background:isDark?"#334155":"#f1f5f9", color:card.sub, fontSize:12, fontWeight:600, borderLeft:`1px solid ${isDark?"#475569":"#e2e8f0"}` }}>
+                  {emailDomain}
+                </span>
+              </div>
+            ) : (
+              <input style={{...InputStyle, border:`1.5px solid ${emailExists?(isDark?"#f87171":"#ef4444"):input.border}`}}
+                placeholder="abc@gmail.com" value={freeEmail} onChange={e=>setFreeEmail(e.target.value)} />
+            )}
+            {emailDomain && emailName && (
+              <div style={{ marginTop:5, fontSize:11, color:card.sub }}>📧 <b style={{color:card.text}}>{fullEmail}</b></div>
+            )}
+            {isValidEmail(fullEmail) && emailChecking && (
+              <div style={{ marginTop:5, fontSize:11, color:card.sub }}>🔄 Checking...</div>
+            )}
+            {isValidEmail(fullEmail) && !emailChecking && emailExists && (
+              <div style={{ marginTop:5, fontSize:11, color:isDark?"#f87171":"#dc2626", fontWeight:600 }}>❌ Already registered</div>
+            )}
+            {isValidEmail(fullEmail) && !emailChecking && !emailExists && (
+              <div style={{ marginTop:5, fontSize:11, color:isDark?"#4ade80":"#16a34a", fontWeight:600 }}>✅ Available</div>
+            )}
+          </div>
 
-          {/* Picker dropdown */}
-          {showPicker && (
-            <div style={{ border:"1.5px solid #e2e8f0", borderRadius:12, padding:12, background:"#fff", boxShadow:"0 4px 20px #0001" }}>
-              {downlineLoading ? (
-                <div style={{ textAlign:"center", padding:"20px", color:"#94a3b8", fontSize:13 }}>⏳ Loading...</div>
-              ) : (
-                <NetworkPicker
-                  downline={downline}
-                  selected={onBehalfOf}
-                  callerRole={user?.role}
-                  onSelect={(d) => { setOnBehalfOf(d); setShowPicker(false) }}
-                />
+          {/* ── PHONE ── */}
+          <div>
+            <label style={LabelStyle}>Phone Number</label>
+            <input style={InputStyle} placeholder="10 digit mobile number"
+              value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,"").slice(0,10))} maxLength={10} />
+          </div>
+
+          {/* ── ADDRESS ── */}
+          <div>
+            <label style={LabelStyle}>Address</label>
+            <textarea style={{...InputStyle, resize:"vertical", lineHeight:1.6}} placeholder="Poora address likho"
+              rows={3} value={address} onChange={e=>setAddress(e.target.value)} />
+          </div>
+
+          {/* ── AADHAR / PAN ── */}
+          <div>
+            <label style={LabelStyle}>Identity Proof <span style={{ color:"#ef4444" }}>*</span></label>
+            <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+              {["aadhar","pan"].map(t => (
+                <button key={t} type="button" onClick={()=>{ setIdType(t); setIdNumber("") }}
+                  style={{ flex:1, padding:"9px 0", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer", transition:"all 0.15s",
+                    border:`1.5px solid ${idType===t?(isDark?"#93c5fd":"#3b82f6"):(isDark?"#334155":"#e2e8f0")}`,
+                    background: idType===t?(isDark?"#172554":"#eff6ff"):(isDark?"#1e293b":"#f8fafc"),
+                    color: idType===t?(isDark?"#93c5fd":"#2563eb"):card.sub }}>
+                  {t === "aadhar" ? "🪪 Aadhar" : "💳 PAN"}
+                </button>
+              ))}
+            </div>
+            <input style={InputStyle}
+              placeholder={idType === "aadhar" ? "12 digit Aadhar number" : "e.g. ABCDE1234F"}
+              value={idNumber}
+              maxLength={idType === "aadhar" ? 12 : 10}
+              onChange={e => {
+                const v = idType === "aadhar"
+                  ? e.target.value.replace(/\D/g,"").slice(0,12)
+                  : e.target.value.toUpperCase().slice(0,10)
+                setIdNumber(v)
+              }} />
+            {idNumber && !isValidIdNumber() && (
+              <div style={{ marginTop:5, fontSize:11, color:isDark?"#f87171":"#dc2626", fontWeight:600 }}>
+                {idType === "aadhar" ? "❌ 12 digit hona chahiye" : "❌ Format sahi nahi (e.g. ABCDE1234F)"}
+              </div>
+            )}
+            {idNumber && isValidIdNumber() && (
+              <div style={{ marginTop:5, fontSize:11, color:isDark?"#4ade80":"#16a34a", fontWeight:600 }}>✅ Sahi format</div>
+            )}
+            <div style={{ marginTop:6, fontSize:11, color:card.sub, lineHeight:1.5 }}>
+              Aadhar ya PAN — koi ek zaroori hai, unique hona chahiye
+            </div>
+          </div>
+
+          {/* ── PRODUCTS (admin only) ── */}
+          {user?.role === "admin" && products.length > 0 && (
+            <div style={{ border:`1.5px solid ${isDark?"#334155":"#e2e8f0"}`, borderRadius:12, padding:14, background: isDark?"#1e293b":"#f8fafc" }}>
+              <div style={{ fontSize:13, fontWeight:700, color:card.text, marginBottom:10 }}>📦 Assign Products</div>
+              <label style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10, cursor:"pointer", fontSize:13, color:card.sub }}>
+                <input type="checkbox" checked={assignAllProducts}
+                  onChange={e=>{ setAssignAllProducts(e.target.checked); setProductIds(e.target.checked ? products.map(p=>p._id) : []) }} />
+                Sab products assign karo
+              </label>
+              {!assignAllProducts && (
+                <div style={{ maxHeight:160, overflowY:"auto", display:"flex", flexDirection:"column", gap:6 }}>
+                  {products.map(p => (
+                    <label key={p._id} style={{ display:"flex", gap:8, alignItems:"center", cursor:"pointer", fontSize:12, color:card.text }}>
+                      <input type="checkbox" checked={productIds.includes(p._id)}
+                        onChange={()=>setProductIds(prev=>prev.includes(p._id)?prev.filter(id=>id!==p._id):[...prev,p._id])} />
+                      {p.title} — <span style={{ color:isDark?"#4ade80":"#16a34a", fontWeight:700 }}>₹{p.price}</span>
+                    </label>
+                  ))}
+                </div>
               )}
             </div>
           )}
-        </div>
-      )}
 
-      {/* ── TYPE ── */}
-      <div>
-        {onBehalfOf && (
-          <p className="text-xs text-gray-500 mb-1">
-            <b>{onBehalfOf.name}</b> ke liye kya banana hai:
-          </p>
-        )}
-
-        <select className="border p-2 w-full rounded" value={type} onChange={e=>setType(e.target.value)}
-          disabled={allowedTypes().length === 0}>
-          {allowedTypes().length === 0 ? (
-            <option>— Allowed nahi —</option>
-          ) : (
-            allowedTypes().map(t => (
-              <option key={t} value={t}>{getRoleLabel(t)}</option>
-            ))
-          )}
-        </select>
-      </div>
-
-      {/* ── NAME ── */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-1">Full Name</label>
-        <input className="border p-2 w-full rounded" placeholder="Apna poora naam likho"
-          value={name} onChange={e=>setName(e.target.value)} />
-        {generatedId && (
-          <p className="text-xs text-gray-400 mt-1">
-            System ID: <span className="font-mono text-blue-600">{generatedId}</span> (auto-assigned)
-          </p>
-        )}
-      </div>
-
-      {/* ── EMAIL ── */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-1">
-          Email
-          {emailDomain && (
-            <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-normal">
-              Domain: {emailDomain}
-            </span>
-          )}
-        </label>
-        {emailDomain ? (
-          <div className="flex items-center border rounded overflow-hidden">
-            <input className="flex-1 p-2 outline-none text-sm" placeholder="sirf naam likho (e.g. john)"
-              value={emailName} onChange={e=>setEmailName(e.target.value.replace(/\s|@/g,""))} />
-            <span className="bg-gray-100 text-gray-500 px-3 py-2 text-sm border-l font-medium">{emailDomain}</span>
-          </div>
-        ) : (
-          <input className="border p-2 w-full rounded text-sm" placeholder="Full email (e.g. abc@gmail.com)"
-            value={freeEmail} onChange={e=>setFreeEmail(e.target.value)} />
-        )}
-        {emailDomain && emailName && <p className="text-xs text-gray-500 mt-1">📧 Full: <b>{fullEmail}</b></p>}
-        {isValidEmail(fullEmail) && emailChecking && <p className="text-xs text-gray-400 mt-1">🔄 Checking...</p>}
-        {isValidEmail(fullEmail) && !emailChecking && emailExists && <p className="text-xs text-red-500 mt-1 font-medium">❌ Already registered</p>}
-        {isValidEmail(fullEmail) && !emailChecking && !emailExists && <p className="text-xs text-green-600 mt-1">✅ Available</p>}
-      </div>
-
-      {/* ── PHONE ── */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-1">Phone Number</label>
-        <input className="border p-2 w-full rounded" placeholder="Mobile number likho"
-          value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,"").slice(0,10))} maxLength={10} />
-      </div>
-
-      {/* ── ADDRESS ── */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-1">Address</label>
-        <textarea className="border p-2 w-full rounded text-sm" placeholder="Poora address likho"
-          rows={3} value={address} onChange={e=>setAddress(e.target.value)} />
-      </div>
-
-      {/* ── AADHAR / PAN (ek zaroori, unique) ── */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-1">
-          Identity Proof <span className="text-red-500">*</span>
-        </label>
-        <div className="flex gap-2 mb-2">
-          <button type="button" onClick={()=>{ setIdType("aadhar"); setIdNumber("") }}
-            className={`flex-1 py-1.5 rounded text-sm font-semibold border ${idType==="aadhar" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300"}`}>
-            Aadhar Card
+          {/* ── SUBMIT ── */}
+          <button type="submit" disabled={isDisabled}
+            style={{ width:"100%", padding:"13px 0", borderRadius:12, border:"none", fontWeight:800, fontSize:14, letterSpacing:"0.02em",
+              cursor: isDisabled ? "not-allowed" : "pointer", transition:"all 0.2s",
+              background: isDisabled ? (isDark?"#1e293b":"#e2e8f0") : "linear-gradient(135deg,#3b82f6,#2563eb)",
+              color: isDisabled ? card.sub : "#fff",
+              boxShadow: isDisabled ? "none" : "0 4px 14px #3b82f640" }}>
+            {loading ? "⏳ Sending..." : "Send Request →"}
           </button>
-          <button type="button" onClick={()=>{ setIdType("pan"); setIdNumber("") }}
-            className={`flex-1 py-1.5 rounded text-sm font-semibold border ${idType==="pan" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300"}`}>
-            PAN Card
-          </button>
-        </div>
-        <input
-          className="border p-2 w-full rounded text-sm tracking-wider"
-          placeholder={idType === "aadhar" ? "12 digit Aadhar number" : "e.g. ABCDE1234F"}
-          value={idNumber}
-          maxLength={idType === "aadhar" ? 12 : 10}
-          onChange={e => {
-            const v = idType === "aadhar"
-              ? e.target.value.replace(/\D/g,"").slice(0,12)
-              : e.target.value.toUpperCase().slice(0,10)
-            setIdNumber(v)
-          }}
-        />
-        {idNumber && !isValidIdNumber() && (
-          <p className="text-xs text-red-500 mt-1">
-            {idType === "aadhar" ? "❌ Aadhar 12 digit ka hona chahiye" : "❌ Format sahi nahi hai (e.g. ABCDE1234F)"}
-          </p>
-        )}
-        {idNumber && isValidIdNumber() && (
-          <p className="text-xs text-green-600 mt-1">✅ Sahi format hai</p>
-        )}
-        <p className="text-xs text-gray-400 mt-1">Aadhar ya PAN — koi ek dena zaroori hai, aur ye unique hona chahiye (dobara use nahi ho sakta)</p>
+        </form>
       </div>
 
-      {/* ── PRODUCTS (admin only) ── */}
-      {user?.role === "admin" && products.length > 0 && (
-        <div className="border p-3 rounded bg-gray-50">
-          <h3 className="font-semibold mb-2">Assign Products</h3>
-          <label className="flex gap-2 items-center mb-2">
-            <input type="checkbox" checked={assignAllProducts}
-              onChange={e=>{ setAssignAllProducts(e.target.checked); setProductIds(e.target.checked ? products.map(p=>p._id) : []) }} />
-            Assign ALL Products
-          </label>
-          {!assignAllProducts && (
-            <div className="max-h-40 overflow-auto border p-2 rounded space-y-1">
-              {products.map(p => (
-                <label key={p._id} className="flex gap-2 items-center text-sm">
-                  <input type="checkbox" checked={productIds.includes(p._id)}
-                    onChange={()=>setProductIds(prev=>prev.includes(p._id)?prev.filter(id=>id!==p._id):[...prev,p._id])} />
-                  {p.title} ₹{p.price}
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── SUBMIT ── */}
-      <button type="submit" disabled={isDisabled}
-        className={`w-full py-2 rounded text-white font-medium transition ${
-          isDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-        }`}>
-        {loading ? "Sending..." : "Send Request"}
-      </button>
-    </form>
-    </>
+      {/* Spin animation */}
+      <style>{`@keyframes spin { to { transform:rotate(360deg) } }`}</style>
+    </div>
   )
 }
