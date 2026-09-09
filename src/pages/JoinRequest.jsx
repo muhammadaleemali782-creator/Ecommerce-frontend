@@ -17,8 +17,7 @@ export default function JoinRequest({ setPage }) {
   // Form states
   const [name, setName] = useState("")
   const [emailName, setEmailName] = useState("")
-  const [emailDomain, setEmailDomain] = useState("")
-  const [freeEmail, setFreeEmail] = useState("")
+  const [emailDomain, setEmailDomain] = useState("@educa.com")
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
   const [idType, setIdType] = useState("aadhar")
@@ -28,7 +27,7 @@ export default function JoinRequest({ setPage }) {
   const [emailExists, setEmailExists] = useState(false)
   const [emailChecking, setEmailChecking] = useState(false)
 
-  const fullEmail = emailDomain ? `${emailName.trim()}${emailDomain}` : freeEmail.trim()
+  const fullEmail = emailName.trim() ? `${emailName.trim()}${emailDomain || "@educa.com"}` : ""
   const isValidEmail = (val) => Boolean(val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim()))
 
   const AADHAR_REGEX = /^[0-9]{12}$/
@@ -315,21 +314,15 @@ export default function JoinRequest({ setPage }) {
                 </span>
               )}
             </label>
-            {emailDomain ? (
-              <div style={{ display: "flex", alignItems: "center", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${emailExists ? "#ef4444" : inputBorder}`, background: inputBg }}>
-                <input style={{ flex: 1, padding: "11px 14px", border: "none", outline: "none", background: "transparent", fontSize: 13, color: inputText, fontFamily: "inherit" }}
-                  placeholder="sirf username (e.g. john)" required
-                  value={emailName} onChange={e => setEmailName(e.target.value.replace(/\s|@/g, ""))} />
-                <span style={{ padding: "11px 14px", background: isDark ? "#334155" : "#f1f5f9", color: card.sub, fontSize: 12, fontWeight: 600, borderLeft: `1px solid ${isDark ? "#475569" : "#e2e8f0"}` }}>
-                  {emailDomain}
-                </span>
-              </div>
-            ) : (
-              <input style={{ ...InputStyle, border: `1.5px solid ${emailExists ? "#ef4444" : inputBorder}` }}
-                placeholder="youremail@gmail.com" type="email" required
-                value={freeEmail} onChange={e => setFreeEmail(e.target.value)} />
-            )}
-            {emailDomain && emailName && <div style={{ marginTop: 4, fontSize: 11, color: card.sub }}>📧 Full Email: <b style={{ color: card.text }}>{fullEmail}</b></div>}
+            <div style={{ display: "flex", alignItems: "center", borderRadius: 10, overflow: "hidden", border: `1.5px solid ${emailExists ? "#ef4444" : inputBorder}`, background: inputBg }}>
+              <input style={{ flex: 1, padding: "11px 14px", border: "none", outline: "none", background: "transparent", fontSize: 13, color: inputText, fontFamily: "inherit" }}
+                placeholder="sirf username likho (e.g. rahul)" required
+                value={emailName} onChange={e => setEmailName(e.target.value.replace(/\s|@/g, ""))} />
+              <span style={{ padding: "11px 14px", background: isDark ? "#334155" : "#f1f5f9", color: card.sub, fontSize: 13, fontWeight: 700, borderLeft: `1px solid ${isDark ? "#475569" : "#e2e8f0"}` }}>
+                {emailDomain || "@educa.com"}
+              </span>
+            </div>
+            {emailName && <div style={{ marginTop: 4, fontSize: 11, color: card.sub }}>📧 Full Email: <b style={{ color: card.text }}>{fullEmail}</b></div>}
             {isValidEmail(fullEmail) && emailChecking && <div style={{ marginTop: 4, fontSize: 11, color: card.sub }}>🔄 Email check ho raha hai...</div>}
             {isValidEmail(fullEmail) && !emailChecking && emailExists && <div style={{ marginTop: 4, fontSize: 11, color: "#ef4444", fontWeight: 700 }}>❌ Ye email already registered hai</div>}
             {isValidEmail(fullEmail) && !emailChecking && !emailExists && <div style={{ marginTop: 4, fontSize: 11, color: "#16a34a", fontWeight: 700 }}>✅ Email available hai</div>}

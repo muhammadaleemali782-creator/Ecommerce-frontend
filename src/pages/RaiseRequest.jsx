@@ -115,8 +115,8 @@ export default function RaiseUserRequest() {
 
   const [type, setType]               = useState("seller")
   const [emailName, setEmailName]     = useState("")
-  const [emailDomain, setEmailDomain] = useState("")
-  const [domainLoading, setDomainLoading] = useState(true)
+  const [emailDomain, setEmailDomain] = useState("@educa.com")
+  const [domainLoading, setDomainLoading] = useState(false)
   const [freeEmail, setFreeEmail]     = useState("")
   const [loading, setLoading]         = useState(false)
   const [emailExists, setEmailExists] = useState(false)
@@ -512,19 +512,14 @@ export default function RaiseUserRequest() {
                 </span>
               )}
             </label>
-            {emailDomain ? (
-              <div style={{ display:"flex", alignItems:"center", borderRadius:10, overflow:"hidden", border:`1.5px solid ${emailExists?(isDark?"#f87171":"#ef4444"):input.border}`, background:input.bg }}>
-                <input style={{ flex:1, padding:"10px 14px", border:"none", outline:"none", background:"transparent", fontSize:13, color:input.text, fontFamily:"inherit" }}
-                  placeholder="sirf naam (e.g. john)"
-                  value={emailName} onChange={e=>setEmailName(e.target.value.replace(/\s|@/g,""))} />
-                <span style={{ padding:"10px 14px", background:isDark?"#334155":"#f1f5f9", color:card.sub, fontSize:12, fontWeight:600, borderLeft:`1px solid ${isDark?"#475569":"#e2e8f0"}` }}>
-                  {emailDomain}
-                </span>
-              </div>
-            ) : (
-              <input style={{...InputStyle, border:`1.5px solid ${emailExists?(isDark?"#f87171":"#ef4444"):input.border}`}}
-                placeholder="abc@gmail.com" value={freeEmail} onChange={e=>setFreeEmail(e.target.value)} />
-            )}
+            <div style={{ display:"flex", alignItems:"center", borderRadius:10, overflow:"hidden", border:`1.5px solid ${emailExists?(isDark?"#f87171":"#ef4444"):input.border}`, background:input.bg }}>
+              <input style={{ flex:1, padding:"10px 14px", border:"none", outline:"none", background:"transparent", fontSize:13, color:input.text, fontFamily:"inherit" }}
+                placeholder="sirf naam (e.g. john)"
+                value={emailName} onChange={e=>setEmailName(e.target.value.replace(/\s|@/g,""))} />
+              <span style={{ padding:"10px 14px", background:isDark?"#334155":"#f1f5f9", color:card.sub, fontSize:12, fontWeight:700, borderLeft:`1px solid ${isDark?"#475569":"#e2e8f0"}` }}>
+                {emailDomain || "@educa.com"}
+              </span>
+            </div>
             {emailDomain && emailName && (
               <div style={{ marginTop:5, fontSize:11, color:card.sub }}>📧 <b style={{color:card.text}}>{fullEmail}</b></div>
             )}
