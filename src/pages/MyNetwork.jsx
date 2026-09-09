@@ -1,10 +1,21 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel, getRoleLabelPlural } from "../utils/roleLabels"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import InlineLoader from "../components/InlineLoader"
 
 const STYLE = `
+  :root {
+    --mn-tb-bg: #f8fafc;
+    --mn-tb-border: #e2e8f0;
+    --mn-canvas-bg: linear-gradient(135deg,#f8fafc 0%,#f0f4ff 100%);
+  }
+  .dark {
+    --mn-tb-bg: #111417;
+    --mn-tb-border: rgba(255,255,255,0.08);
+    --mn-canvas-bg: radial-gradient(circle at 50% 50%, #111417 0%, #090b0c 100%);
+  }
   @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
   @keyframes slideUp { from{opacity:1;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
   @keyframes dtNodeIn {
@@ -49,7 +60,18 @@ const RC = {
   seller:      { bg:"#eff6ff", border:"#3b82f6", text:"#1d4ed8", dot:"#3b82f6", label:"Seller"      },
   user:        { bg:"#f8fafc", border:"#94a3b8", text:"#475569", dot:"#94a3b8", label:"User"        },
 }
-const getRC    = r => RC[r] || RC.user
+const getRC = (r, isDark = false) => {
+  if (isDark) {
+    const d = {
+      admin:       { bg: "rgba(22,163,74,0.18)",  border: "#22c55e", text: "#4ade80", dot: "#22c55e", label: "Admin" },
+      distributor: { bg: "rgba(16,185,129,0.18)", border: "#10b981", text: "#34d399", dot: "#10b981", label: "Distributor" },
+      seller:      { bg: "rgba(59,130,246,0.18)",  border: "#3b82f6", text: "#60a5fa", dot: "#3b82f6", label: "Seller" },
+      user:        { bg: "rgba(148,163,184,0.15)", border: "#64748b", text: "#cbd5e1", dot: "#94a3b8", label: "User" },
+    };
+    return d[r] || d.user;
+  }
+  return RC[r] || RC.user;
+}
 const sortKids = arr => [...(arr||[])].sort((a,b)=>(ROLE_SORT[a.role]??9)-(ROLE_SORT[b.role]??9))
 
 // Level colors — depth se decide hoga
@@ -320,6 +342,7 @@ function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false
 }
 
 function ConnectedUsers({ subtree }) {
+  const { isDark } = useTheme() || {}
   const [collapsed, setCollapsed]       = useState(false)
   const [activeFilter, setActiveFilter] = useState("all")
   const [search, setSearch]             = useState("")
@@ -348,10 +371,10 @@ function ConnectedUsers({ subtree }) {
   ].filter(Boolean)
   if (raw.length===0) return <div style={{padding:20,textAlign:"center",color:"#94a3b8",fontSize:13,background:"#f8fafc",borderRadius:12,border:"1px dashed #e2e8f0"}}>Aapke neeche koi connected user nahi hai</div>
   return (
-    <div style={{background:"#fff",borderRadius:12,border:"1px solid #e8eef4",boxShadow:"0 2px 12px rgba(0,0,0,0.06)",overflow:"hidden"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:"1px solid #f1f5f9",background:"#fafbfc"}}>
+    <div style={{background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`,boxShadow:"0 2px 12px rgba(0,0,0,0.08)",overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#181c20":"#fafbfc"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:14,fontWeight:700,color:"#1e293b"}}>👥 Connected Users</span>
+          <span style={{fontSize:14,fontWeight:700,color:isDark?"#f1f5f9":"#1e293b"}}>👥 Connected Users</span>
           <span style={{fontSize:11,fontWeight:700,padding:"2px 9px",borderRadius:99,background:"#e0e7ff",color:"#4338ca"}}>{tot} total</span>
           <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:99,background:"#f0fdf4",color:"#16a34a"}}>{raw.length} direct</span>
         </div>
@@ -374,9 +397,9 @@ function ConnectedUsers({ subtree }) {
               )
             })}
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"#f8fafc",borderRadius:8,border:"1px solid #e2e8f0",marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:isDark?"#181c20":"#f8fafc",borderRadius:8,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,marginBottom:10}}>
             <span style={{color:"#94a3b8",fontSize:14}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name..." style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:"#334155"}}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name..." style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:isDark?"#f1f5f9":"#334155"}}/>
             {search&&<button onClick={()=>setSearch("")} className="mn-btn" style={{background:"none",color:"#94a3b8",fontSize:12,border:"none"}}>✕</button>}
           </div>
           <div style={{maxHeight:320,overflowY:"auto",paddingRight:4}}>
@@ -392,6 +415,7 @@ function ConnectedUsers({ subtree }) {
 }
 
 function AnalyticsPanel({ selectedUser, treeData, onClose }) {
+  const { isDark } = useTheme() || {}
   const [analytics, setAnalytics] = useState(null)
   const [aLoading, setALoading]   = useState(false)
   const [aError, setAError]       = useState(null)
@@ -420,14 +444,14 @@ function AnalyticsPanel({ selectedUser, treeData, onClose }) {
     load()
   },[selectedUser, range])
   const tl=analytics?.timeline?.length?analytics.timeline:Array.from({length:7},(_,i)=>({label:`Day ${i+1}`,total:0}))
-  const c=getRC(selectedUser.role)
+  const c=getRC(selectedUser.role, isDark)
   const subtree=useMemo(()=>{
     const uid=selectedUser?.id||selectedUser?._id
     for(const root of treeData){const f=(function find(n){if(!n)return null;if(String(n.id||n._id)===String(uid))return n;for(const ch of(n.children||[])){const r=find(ch);if(r)return r}return null})(root);if(f)return f}
     return null
   },[selectedUser,treeData])
   return (
-    <div style={{padding:16,borderTop:"2px solid #e0e7ff",background:"#fff"}}>
+    <div style={{padding:16,borderTop:`2px solid ${isDark?"rgba(99,102,241,0.3)":"#e0e7ff"}`,background:isDark?"#111417":"#fff"}}>
       <div style={{fontSize:14,fontWeight:700,color:"#475569",marginBottom:12}}>
         Selected: <span style={{color:c.text}}>{selectedUser.name}</span>
         <span style={{marginLeft:8,fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:99,background:c.bg,color:c.dot,border:`1px solid ${c.border}`}}>{c.label}</span>
@@ -511,6 +535,7 @@ function AnalyticsPanel({ selectedUser, treeData, onClose }) {
 }
 
 function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRole, onReset }) {
+  const { isDark } = useTheme() || {}
   const [search, setSearch]     = useState("")
   const [nodeOpen, setNodeOpen] = useState(false)
   const ref = useRef(null)
@@ -520,28 +545,28 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
   },[])
   const filtered=useMemo(()=>{const q=search.toLowerCase().trim();return allNodes.filter(n=>n.name.toLowerCase().includes(q)||n.role.toLowerCase().includes(q)).sort((a,b)=>(ROLE_ORDER[a.role]??9)-(ROLE_ORDER[b.role]??9))},[search,allNodes])
   const sel=allNodes.find(n=>String(n.id)===String(selectedId))
-  const sc=sel?getRC(sel.role):null
+  const sc=sel?getRC(sel.role, isDark):null
   const hasF=selectedId||(roleFilter&&roleFilter!=="all")
   const roleTabs=(()=>{const nr=sel?.role;if(!nr||nr==="admin"||nr==="distributor")return[{key:"all",label:"All"},{key:"distributor",label:getRoleLabelPlural("distributor")},{key:"seller",label:getRoleLabelPlural("seller")}];if(nr==="seller")return[{key:"all",label:"All"},{key:"seller",label:getRoleLabelPlural("seller")},{key:"user",label:getRoleLabelPlural("user")}];return[{key:"all",label:"All"}]})()
   return (
-    <div style={{display:"flex",flexDirection:"column",background:"#fff",borderRadius:12,border:"1px solid #e2e8f0",boxShadow:"0 2px 10px rgba(0,0,0,0.06)",padding:"12px 16px",marginBottom:16}}>
+    <div style={{display:"flex",flexDirection:"column",background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,boxShadow:"0 2px 10px rgba(0,0,0,0.08)",padding:"12px 16px",marginBottom:16}}>
       <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10}}>
-        <span style={{fontSize:13,fontWeight:600,color:"#475569",whiteSpace:"nowrap"}}>🔍 Select Node:</span>
+        <span style={{fontSize:13,fontWeight:600,color:isDark?"#94a3b8":"#475569",whiteSpace:"nowrap"}}>🔍 Select Node:</span>
         <div style={{position:"relative"}} ref={ref}>
           <button className="mn-btn" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,border:`1.8px solid ${sc?sc.border:"#cbd5e1"}`,background:sc?sc.bg:"#f8fafc",fontSize:13,fontWeight:500,minWidth:190,color:sc?sc.text:"#334155"}} onClick={()=>setNodeOpen(p=>!p)}>
             {sel?<><span style={{width:8,height:8,borderRadius:"50%",background:sc.dot,display:"inline-block",flexShrink:0}}/><span style={{fontWeight:600,flex:1}}>{sel.name}</span><span style={{fontSize:11,opacity:0.6}}>({getRoleLabel(sel.role)})</span></>:<span style={{color:"#94a3b8"}}>— Select a node —</span>}
             <span style={{fontSize:9,marginLeft:"auto",opacity:0.5}}>{nodeOpen?"▲":"▼"}</span>
           </button>
           {nodeOpen&&(
-            <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,minWidth:260,maxWidth:320,background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,0.13)",zIndex:100,overflow:"hidden"}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderBottom:"1px solid #f1f5f9",background:"#f8fafc"}}>
+            <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,minWidth:260,maxWidth:320,background:isDark?"#181c20":"#fff",border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,0.3)",zIndex:100,overflow:"hidden"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#111417":"#f8fafc"}}>
                 <span style={{fontSize:17,color:"#94a3b8"}}>⌕</span>
-                <input autoFocus style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:"#334155"}} placeholder="Search name or role…" value={search} onChange={e=>setSearch(e.target.value)}/>
+                <input autoFocus style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:isDark?"#f1f5f9":"#334155"}} placeholder="Search name or role…" value={search} onChange={e=>setSearch(e.target.value)}/>
                 {search&&<button style={{border:"none",background:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setSearch("")}>✕</button>}
               </div>
               <div style={{maxHeight:260,overflowY:"auto",padding:"6px 0"}}>
                 {filtered.length===0&&<div style={{padding:16,textAlign:"center",color:"#94a3b8",fontSize:13}}>No results</div>}
-                {filtered.map(n=>{const nc=getRC(n.role),active=String(n.id)===String(selectedId);return(
+                {filtered.map(n=>{const nc=getRC(n.role, isDark),active=String(n.id)===String(selectedId);return(
                   <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 14px",cursor:"pointer",borderLeft:`3px solid ${active?nc.border:"transparent"}`,background:active?nc.bg:"transparent"}}
                     onClick={()=>{onSelectNode(n.id);setNodeOpen(false);setSearch("")}}
                     onMouseEnter={e=>{if(!active)e.currentTarget.style.background="#f8fafc"}}
@@ -558,7 +583,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
         {hasF&&<button className="mn-btn" onClick={onReset} style={{padding:"6px 14px",borderRadius:999,border:"1.5px solid #fca5a5",background:"#fff1f2",color:"#dc2626",fontSize:12,fontWeight:600}}>✕ Reset</button>}
       </div>
       <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10,paddingTop:10,marginTop:8,borderTop:"1px solid #f1f5f9"}}>
-        <span style={{fontSize:13,fontWeight:600,color:"#475569",whiteSpace:"nowrap"}}>👥 Show only:</span>
+        <span style={{fontSize:13,fontWeight:600,color:isDark?"#94a3b8":"#475569",whiteSpace:"nowrap"}}>👥 Show only:</span>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {roleTabs.map(tab=>{const isA=roleFilter===tab.key;const tc=tab.key==="all"?{bg:"#f1f5f9",border:"#94a3b8",text:"#334155",dot:"#94a3b8"}:getRC(tab.key);return(
             <button key={tab.key} className="mn-btn" onClick={()=>onSelectRole(tab.key)} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:999,border:`1.5px solid ${isA?tc.border:"#e2e8f0"}`,background:isA?tc.bg:"#f8fafc",color:isA?tc.text:"#64748b",fontSize:12,fontWeight:isA?700:500,whiteSpace:"nowrap"}}>
@@ -590,6 +615,7 @@ const ZOOM_MAX = 6
 const ZOOM_STEP = 0.25
 
 function DesktopTree({ roots, onSelect }) {
+  const { isDark } = useTheme() || {}
   const [collapsed, setCollapsed] = useState({})
   const [lineColor, setLineColor] = useState("#7c3aed")
   const [highlightId, setHighlightId] = useState(null)
@@ -655,7 +681,8 @@ function DesktopTree({ roots, onSelect }) {
   return(
     <div style={{display:"flex",flexDirection:"column",width:"100%",height:"100%"}}>
       {/* ✅ Zoom controls + Color picker toolbar */}
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",background:"#f8fafc",borderBottom:"1px solid #e2e8f0",flexWrap:"wrap"}}>
+      {/* Zoom controls toolbar */}
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",background:"var(--mn-tb-bg, #f8fafc)",borderBottom:"1px solid var(--mn-tb-border, #e2e8f0)",flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:4,paddingRight:10,borderRight:"1px solid #e2e8f0"}}>
           <button onClick={zoomOut} disabled={zoomMult<=ZOOM_MIN} title="Zoom Out"
             style={{width:26,height:26,borderRadius:7,border:"1px solid #e2e8f0",background:"#fff",cursor:zoomMult<=ZOOM_MIN?"not-allowed":"pointer",fontSize:15,fontWeight:700,color:"#475569",display:"flex",alignItems:"center",justifyContent:"center",opacity:zoomMult<=ZOOM_MIN?0.4:1,flexShrink:0}}>−</button>
@@ -705,7 +732,7 @@ function DesktopTree({ roots, onSelect }) {
           matter how tall the toolbar gets, so nothing ever pushes the
           layout past the parent's box — it just scrolls internally instead. */}
       <div style={{flex:1,width:"100%",minHeight:0,position:"relative"}}>
-      <div ref={containerRef} style={{width:"100%",height:"100%",position:"relative",overflow:"auto",background:"linear-gradient(135deg,#f8fafc 0%,#f0f4ff 100%)"}}>
+      <div ref={containerRef} style={{width:"100%",height:"100%",position:"relative",overflow:"auto",background:"var(--mn-canvas-bg, linear-gradient(135deg,#f8fafc 0%,#f0f4ff 100%))"}}>
       <div style={{position:"relative",width:stageW,height:stageH}}>
       <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",pointerEvents:"none",opacity:0.4}}>
         <defs><pattern id="dtgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" strokeWidth="0.5"/></pattern></defs>
@@ -742,7 +769,7 @@ function DesktopTree({ roots, onSelect }) {
         </svg>
         {allNodes.map((layout,i)=>{
           const nodeId=String(layout.node.id||layout.node._id||i)
-          const c=getRC(layout.node.role);const hasKids=(layout.node.children||[]).length>0;const isColld=!!collapsed[nodeId]
+          const c=getRC(layout.node.role, isDark);const hasKids=(layout.node.children||[]).length>0;const isColld=!!collapsed[nodeId]
           const icon=c.label==="Distributor"?"🏢":c.label==="Seller"?"🛒":c.label==="Admin"?"👑":"👤"
           return(
             <div key={nodeId} style={{position:"absolute",left:layout.x,top:layout.y,width:DT.nodeW,height:DT.nodeH,animation:`dtNodeIn 0.3s cubic-bezier(.4,0,.2,1) ${i*0.02}s both`}}>

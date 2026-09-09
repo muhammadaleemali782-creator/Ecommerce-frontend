@@ -1,78 +1,114 @@
 import { useState, useEffect } from "react"
+import { useTheme } from "../context/ThemeContext"
 
 /* ── Collapsible Source Card ── */
-function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd }) {
+function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {
   const [open, setOpen] = useState(true)
 
   return (
-    <div style={{ background:"#fff", border:"1.5px solid #e2e8f0", borderRadius:14, overflow:"hidden", boxShadow:"0 1px 6px rgba(0,0,0,0.05)" }}>
+    <div className={`rounded-2xl border overflow-hidden transition-all ${
+      isDark ? "bg-[#14181c] border-white/[0.08] shadow-md" : "bg-white border-stone-200 shadow-sm"
+    }`}>
 
       {/* Header — click to collapse */}
       <div
         onClick={() => setOpen(p => !p)}
-        style={{ background:"#f8fafc", borderBottom: open ? "1px solid #e2e8f0" : "none", padding:"10px 14px", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer", userSelect:"none" }}
+        className={`p-3 sm:p-4 flex items-center justify-between cursor-pointer select-none transition-colors ${
+          isDark ? "bg-[#181d22] hover:bg-[#1d232a]" : "bg-stone-50 hover:bg-stone-100/80"
+        } ${open ? (isDark ? "border-b border-white/[0.06]" : "border-b border-stone-200") : ""}`}
       >
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <span style={{ fontSize:16 }}>{orderBy.icon}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xl">{orderBy.icon}</span>
           <div>
-            <div style={{ fontSize:12, fontWeight:700, color:"#1e293b" }}>{orderBy.label}</div>
-            <div style={{ fontSize:10, color:"#94a3b8" }}>Is order se {src.remainingPPC} PPC mili</div>
+            <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+              {orderBy.label}
+            </div>
+            <div className="text-[10px] text-stone-400">
+              Is order se {src.remainingPPC} PPC mili
+            </div>
             {src.role === "user" && (
-              <div style={{ marginTop:4, fontSize:10, fontWeight:600, background:"#eff6ff", color:"#1d4ed8", border:"1px solid #bfdbfe", borderRadius:6, padding:"2px 7px", display:"inline-block" }}>
-                ℹ️ User ke paas koi wallet nahi hota — aapko mili PPC kyunki aap uske <b>Parent Seller</b> hain
+              <div className={`mt-1 text-[10px] font-semibold rounded-md px-2 py-0.5 inline-block border ${
+                isDark
+                  ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                  : "bg-blue-50 text-blue-700 border-blue-200"
+              }`}>
+                ℹ️ User wallet nahi hota — aapko mili PPC kyunki aap uske <b>Parent Seller</b> hain
               </div>
             )}
             {src.role === "distributor" && (
-              <div style={{ marginTop:4, fontSize:10, fontWeight:600, background:"#faf5ff", color:"#7c3aed", border:"1px solid #e9d5ff", borderRadius:6, padding:"2px 7px", display:"inline-block" }}>
+              <div className={`mt-1 text-[10px] font-semibold rounded-md px-2 py-0.5 inline-block border ${
+                isDark
+                  ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                  : "bg-purple-50 text-purple-700 border-purple-200"
+              }`}>
                 ℹ️ Aap is network ke <b>Parent Distributor</b> hain
               </div>
             )}
           </div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontWeight:800, fontSize:14, color:"#7c3aed" }}>{src.remainingPPC} PPC</div>
-            <div style={{ fontSize:11, color:"#16a34a", fontWeight:600 }}>Aapko ≈ ₹{myRupees.toFixed(2)}</div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="font-black text-sm text-purple-400">{src.remainingPPC} PPC</div>
+            <div className="text-xs text-emerald-500 font-bold">≈ ₹{myRupees.toFixed(2)}</div>
           </div>
-          <span style={{ fontSize:12, color:"#94a3b8", transition:"transform 0.2s", display:"inline-block", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+          <span className={`text-xs text-stone-400 transition-transform duration-200 inline-block ${
+            open ? "rotate-180" : "rotate-0"
+          }`}>▼</span>
         </div>
       </div>
 
       {/* Collapsible body */}
       {open && (
-        <div style={{ padding:"10px 14px" }}>
-          <div style={{ fontSize:10, color:"#94a3b8", fontWeight:600, marginBottom:6, letterSpacing:"0.05em" }}>
-            PPC DISTRIBUTION — {src.remainingPPC} PPC × ₹{rate}
+        <div className="p-3 sm:p-4 overflow-x-auto">
+          <div className="text-[10px] text-stone-400 font-bold tracking-wider uppercase mb-2">
+            PPC Distribution — {src.remainingPPC} PPC × ₹{rate}
           </div>
-          <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr style={{ borderBottom:"1px solid #f1f5f9" }}>
+              <tr className={`border-b ${isDark ? "border-white/[0.06]" : "border-stone-100"}`}>
                 {["System ID", "%", `PPC × ₹${rate} × %`, "Rupees"].map(h => (
-                  <th key={h} style={{ fontSize:9, fontWeight:700, color:"#94a3b8", padding:"4px 6px", textAlign:"left", whiteSpace:"nowrap" }}>{h}</th>
+                  <th key={h} className="text-[10px] font-bold text-stone-400 p-2 whitespace-nowrap">
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {chain.map((row, ri) => (
-                <tr key={ri} style={{ background: row.you ? "#faf5ff" : "transparent" }}>
-                  <td style={{ padding:"5px 6px", fontSize:12, fontWeight: row.you ? 800 : 500, color: row.you ? "#7c3aed" : "#374151" }}>
+                <tr
+                  key={ri}
+                  className={row.you ? (isDark ? "bg-purple-500/10" : "bg-purple-50") : "transparent"}
+                >
+                  <td className={`p-2 font-medium ${
+                    row.you ? "font-black text-purple-400" : isDark ? "text-stone-300" : "text-stone-700"
+                  }`}>
                     {row.you ? "⭐ " : ""}{row.who}
                   </td>
-                  <td style={{ padding:"5px 6px", fontSize:11, fontWeight:700, color: row.you ? "#7c3aed" : "#64748b" }}>
+                  <td className={`p-2 font-bold ${row.you ? "text-purple-400" : "text-stone-400"}`}>
                     {row.pct}%
                   </td>
-                  <td style={{ padding:"5px 6px", fontSize:10, color:"#94a3b8", whiteSpace:"nowrap" }}>
+                  <td className="p-2 text-stone-400 whitespace-nowrap text-[11px]">
                     {src.remainingPPC} × ₹{rate} × {row.pct}%
                   </td>
-                  <td style={{ padding:"5px 6px", fontSize:12, fontWeight: row.you ? 800 : 600, color: row.you ? "#16a34a" : "#64748b", whiteSpace:"nowrap" }}>
+                  <td className={`p-2 font-bold whitespace-nowrap ${
+                    row.you ? "text-emerald-400" : isDark ? "text-stone-300" : "text-stone-700"
+                  }`}>
                     ₹{row.rupee.toFixed(2)}
-                    {row.you && <span style={{ marginLeft:4, fontSize:9, background:"#f0fdf4", color:"#15803d", borderRadius:3, padding:"1px 4px" }}>← aapka</span>}
+                    {row.you && (
+                      <span className={`ml-1.5 text-[9px] px-1.5 py-0.5 rounded border ${
+                        isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      }`}>
+                        ← aapka
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
-              <tr style={{ borderTop:"1.5px solid #e2e8f0" }}>
-                <td colSpan={3} style={{ padding:"5px 6px", fontSize:11, fontWeight:800, color:"#1e293b" }}>Total</td>
-                <td style={{ padding:"5px 6px", fontSize:12, fontWeight:800, color:"#1e293b" }}>₹{(src.remainingPPC * rate).toFixed(2)}</td>
+              <tr className={`border-t font-black ${isDark ? "border-white/[0.08]" : "border-stone-200"}`}>
+                <td colSpan={3} className="p-2 text-xs">Total</td>
+                <td className="p-2 text-xs text-emerald-500">
+                  ₹{(src.remainingPPC * rate).toFixed(2)}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -83,30 +119,30 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd }) {
 }
 
 export default function WithdrawalRequest() {
-  
+  const { isDark } = useTheme()
   const [loading, setLoading] = useState(false)
   const [walletData, setWalletData] = useState(null)
   const [requests, setRequests] = useState([])
   const [settings, setSettings] = useState(null)
   const [historyFilter, setHistoryFilter] = useState("all")
   const [showHistory, setShowHistory] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     walletType: "",
     amount: "",
     paymentMethod: "",
     paymentDetails: ""
   })
-  
+
   const [message, setMessage] = useState({ type: "", text: "" })
-  
+
   useEffect(() => { fetchData() }, [])
-  
+
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token")
       if (!token) return
-      
+
       const [walletRes, reqRes, settingsRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/api/ppc/wallet/me`,          { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/my-requests`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -145,20 +181,9 @@ export default function WithdrawalRequest() {
     return key
   }
 
-  const posLabel = (type) => {
-    if (type === "direct")      return { text: "Direct Sale",   color: "bg-green-100 text-green-700" }
-    if (type === "parent")      return { text: "Parent Seller", color: "bg-blue-100 text-blue-700" }
-    if (type === "distributor") return { text: "Distributor",   color: "bg-purple-100 text-purple-700" }
-    return { text: type, color: "bg-gray-100 text-gray-600" }
-  }
-
-  // Per-SOURCE remaining PPC — group by fromUser + positionType (alag alag rakhna)
-  // ✅ FIX: Use backend FIFO remainingPPC directly — no proportional calculation
   const activeSources = (() => {
     if (!walletData?.history) return []
-
     const sourceMap = {}
-    // Backend already returns only entries with remainingPPC > 0 (FIFO deducted)
     walletData.history.filter(e => (e.remainingPPC || 0) > 0).forEach(entry => {
       const uid = (entry.fromUser?._id || "deleted") + "_" + (entry.positionType || "x")
       if (!sourceMap[uid]) {
@@ -175,14 +200,12 @@ export default function WithdrawalRequest() {
           chainInfo:       entry.chainInfo || {},
         }
       }
-      // ✅ Update chainInfo if backend sent better data (directSellerName filled)
       if (entry.chainInfo?.directSellerName) {
         sourceMap[uid].chainInfo = entry.chainInfo
       }
       if (entry.isUserOrder || entry.fromUser?.role === "user") {
         sourceMap[uid].isUserOrder = true
       }
-      // ✅ Sum the actual remainingPPC from FIFO backend calculation
       sourceMap[uid].remainingPPC += (entry.remainingPPC || 0)
       sourceMap[uid].totalRupees  += (entry.rupeeValue   || 0)
     })
@@ -192,7 +215,6 @@ export default function WithdrawalRequest() {
       .sort((a, b) => b.remainingPPC - a.remainingPPC)
   })()
 
-  // Filtered withdrawal history
   const filteredRequests = requests.filter(r =>
     historyFilter === "all" ? true : r.status === historyFilter
   )
@@ -227,68 +249,105 @@ export default function WithdrawalRequest() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5 px-2 sm:px-4">
+    <div className={`max-w-3xl mx-auto space-y-5 px-2 sm:px-4 pb-20 transition-colors ${
+      isDark ? "text-stone-200" : "text-stone-900"
+    }`}>
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-teal-600 rounded-lg shadow-lg p-5 text-white">
-        <h1 className="text-2xl font-bold mb-1">💸 Withdrawal Request</h1>
-        <p className="text-sm opacity-90">Request to withdraw your PPC earnings</p>
+      {/* ── Header Card ── */}
+      <div className={`p-6 rounded-3xl border transition-all ${
+        isDark
+          ? "bg-gradient-to-br from-[#121c16] via-[#101512] to-[#0c100e] border-emerald-500/25 shadow-xl shadow-emerald-950/20 text-white"
+          : "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white border-emerald-500/30 shadow-lg"
+      }`}>
+        <div className="flex items-center gap-3 mb-1">
+          <span className="text-2xl">💸</span>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight">Withdrawal Request</h1>
+        </div>
+        <p className={`text-xs font-medium ${isDark ? "text-stone-400" : "text-emerald-100/90"}`}>
+          Request to withdraw your PPC earnings into your bank account or UPI
+        </p>
       </div>
 
-      {/* Rate Info */}
+      {/* ── Rate Info Pill ── */}
       {settings && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
-          <strong>Min Withdrawal:</strong> ₹{settings.minimumWithdrawal}
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <strong>Current PPC Rate:</strong> 1 PPC = ₹{currentRate}
+        <div className={`p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 text-xs ${
+          isDark
+            ? "bg-blue-500/10 border-blue-500/20 text-blue-300"
+            : "bg-blue-50 border-blue-200 text-blue-800"
+        }`}>
+          <div>
+            <span className="font-bold">Min Withdrawal:</span> ₹{settings.minimumWithdrawal}
+          </div>
+          <div>
+            <span className="font-bold">Current PPC Rate:</span> 1 PPC = ₹{currentRate}
+          </div>
         </div>
       )}
 
-      {/* ===================== SUMMARY CARDS ===================== */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        
+      {/* ── SUMMARY CARDS & BREAKDOWN ── */}
+      <div className={`rounded-3xl border overflow-hidden shadow-xl ${
+        isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
+
         {/* Show only WITHDRAWABLE wallets */}
         {walletData?.wallets && (
-          <div className={`grid border-b border-gray-100 ${withdrawableWallets.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+          <div className={`grid border-b ${isDark ? "border-white/[0.06]" : "border-stone-100"} ${
+            withdrawableWallets.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}>
             {withdrawableWallets.map((w, idx) => (
-              <div key={w.key} className={`px-4 py-4 text-center bg-green-50 ${idx < withdrawableWallets.length - 1 ? "border-r border-gray-100" : ""}`}>
-                <p className="text-xs text-gray-500 mb-0.5">
+              <div
+                key={w.key}
+                className={`p-5 text-center ${
+                  isDark ? "bg-emerald-500/5" : "bg-emerald-50/60"
+                } ${idx < withdrawableWallets.length - 1 ? (isDark ? "border-r border-white/[0.06]" : "border-r border-stone-100") : ""}`}
+              >
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {w.key === "sellerWallet" ? "Direct Seller Wallet" :
                    w.key === "userWallet"   ? "User Wallet"   : "Wallet"} ✅
                 </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {w.ppcCount || 0} <span className="text-sm font-normal">PPC</span>
+                <p className="text-2xl sm:text-3xl font-black text-emerald-500">
+                  {w.ppcCount || 0} <span className="text-sm font-semibold">PPC</span>
                 </p>
-                <p className="text-xs text-green-500 mt-0.5">Withdraw kar sakte ho</p>
+                <p className="text-[11px] text-emerald-500/80 font-medium mt-1">Withdraw kar sakte ho</p>
               </div>
             ))}
           </div>
         )}
 
         {/* Small summary row */}
-        <div className="grid grid-cols-2 border-b border-gray-100 text-center text-xs text-gray-500 py-2 bg-white">
-          <div className="border-r border-gray-100 py-1">Total Earned: <span className="font-bold text-purple-600">{totalPPCEarned} PPC</span></div>
-          <div className="py-1">Withdrawn: <span className="font-bold text-red-400">{totalWithdrawn.toFixed(2)} PPC</span></div>
+        <div className={`grid grid-cols-2 border-b text-center text-xs py-3 ${
+          isDark ? "border-white/[0.06] bg-black/20 text-stone-400" : "border-stone-100 bg-stone-50 text-stone-600"
+        }`}>
+          <div className={isDark ? "border-r border-white/[0.06]" : "border-r border-stone-200"}>
+            Total Earned: <span className="font-black text-purple-400">{totalPPCEarned} PPC</span>
+          </div>
+          <div>
+            Withdrawn: <span className="font-black text-rose-400">{totalWithdrawn.toFixed(2)} PPC</span>
+          </div>
         </div>
 
-        {/* ===================== ACTIVE PPC SOURCES ===================== */}
-        <div className="px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">
+        {/* ── Active PPC Sources Breakdown ── */}
+        <div className="p-4 sm:p-6 space-y-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-stone-400">
             💎 Meri PPC Kahan Se Aayi — Breakdown
           </p>
 
           {currentBalance === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-3xl mb-2">🚀</p>
-              <p className="font-bold text-gray-700 text-lg">Shabash! Poori PPC withdraw kar li!</p>
-              <p className="text-sm text-gray-400 mt-1">Aur sell karo — nayi PPC aate hi yahan dikh jaayegi ✨</p>
+            <div className="text-center py-10">
+              <p className="text-4xl mb-3">🚀</p>
+              <p className={`font-black text-base ${isDark ? "text-white" : "text-stone-800"}`}>
+                Shabash! Poori PPC withdraw kar li!
+              </p>
+              <p className="text-xs text-stone-400 mt-1">
+                Aur sell karo — nayi PPC aate hi yahan dikh jaayegi ✨
+              </p>
             </div>
           ) : activeSources.length === 0 ? (
-            <p className="text-center text-gray-400 py-4 text-sm">Koi active PPC source nahi mila</p>
+            <p className="text-center text-stone-400 py-6 text-xs">Koi active PPC source nahi mila</p>
           ) : (
             <>
-              <p className="text-xs text-gray-400 mb-3">
-                Aapki <strong className="text-purple-700">{currentBalance} PPC</strong> neeche di gayi sales se aayi hai:
+              <p className="text-xs text-stone-400">
+                Aapki <strong className="text-purple-400">{currentBalance} PPC</strong> neeche di gayi sales se aayi hai:
               </p>
               <div className="space-y-3">
                 {activeSources.map((src, idx) => {
@@ -298,60 +357,54 @@ export default function WithdrawalRequest() {
                   const ci       = src.chainInfo || {}
                   const isUserOrd = src.isUserOrder || ci.isUserOrder || src.role === "user"
 
-                  // ✅ FIX: sellerName should ALWAYS be the seller, never the user
-                  // ci.directSellerName comes from backend — if user order, this is the seller above the user
-                  // If directSellerName is empty or same as user, fallback to src.name only if src is seller role
                   const sellerName = ci.directSellerName || (src.role === "seller" ? src.name : "—") || "—"
                   const parentName = ci.parentSellerName || ""
-                  // ✅ "You" = toUser (recipient of this commission)
-                  const myName     = src.toUserName || user?.name || "You"
+                  const myName     = src.toUserName || "You"
                   const distName   = ci.distributorName || "—"
 
-                  // ✅ FIX: Header label — for user orders show "User — <userName>"
-                  // src.name for user order = user's name, for seller order = seller's name
                   const orderBy =
-                    src.role === "user"   ? { icon:"👤", label:`User — ${src.name || "—"}` }
-                  : src.role === "seller" ? { icon:"🛍️", label:`Seller — ${sellerName || src.name || "—"}` }
-                  : { icon:"📦", label: src.name || "—" }
+                    src.role === "user"   ? { icon: "👤", label: `User — ${src.name || "—"}` }
+                  : src.role === "seller" ? { icon: "🛍️", label: `Seller — ${sellerName || src.name || "—"}` }
+                  : { icon: "📦", label: src.name || "—" }
 
                   const chain =
                     isUserOrd && src.positionType === "direct"
                       ? [
-                          { who:`${myName} (You)`, pct:50, rupee:src.remainingPPC*rate*0.50, you:true  },
-                          { who: distName,          pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
+                          { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                          { who: distName,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
                         ]
                     : isUserOrd && src.positionType === "distributor"
                       ? [
-                          { who: sellerName,         pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
-                          { who:`${myName} (You)`,   pct:50, rupee:src.remainingPPC*rate*0.50, you:true  },
+                          { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                          { who: `${myName} (You)`,   pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
                         ]
                     : src.positionType === "direct"
                       ? parentName
                         ? [
-                            { who:`${myName} (You)`, pct:50, rupee:src.remainingPPC*rate*0.50, you:true  },
-                            { who: parentName,        pct:25, rupee:src.remainingPPC*rate*0.25, you:false },
-                            { who: distName,          pct:25, rupee:src.remainingPPC*rate*0.25, you:false },
+                            { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                            { who: parentName,        pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                            { who: distName,          pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
                           ]
                         : [
-                            { who:`${myName} (You)`, pct:50, rupee:src.remainingPPC*rate*0.50, you:true  },
-                            { who: distName,          pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
+                            { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                            { who: distName,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
                           ]
                     : src.positionType === "parent"
                       ? [
-                          { who: sellerName,           pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
-                          { who:`${myName} (You)`,     pct:25, rupee:src.remainingPPC*rate*0.25, you:true  },
-                          { who: distName,             pct:25, rupee:src.remainingPPC*rate*0.25, you:false },
+                          { who: sellerName,           pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                          { who: `${myName} (You)`,     pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
+                          { who: distName,             pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
                         ]
                     : src.positionType === "distributor"
                       ? pct === 25
                         ? [
-                            { who: sellerName,         pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
-                            { who: parentName || "—",  pct:25, rupee:src.remainingPPC*rate*0.25, you:false },
-                            { who:`${myName} (You)`,   pct:25, rupee:src.remainingPPC*rate*0.25, you:true  },
+                            { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                            { who: parentName || "—",  pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                            { who: `${myName} (You)`,   pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
                           ]
                         : [
-                            { who: sellerName,         pct:50, rupee:src.remainingPPC*rate*0.50, you:false },
-                            { who:`${myName} (You)`,   pct:50, rupee:src.remainingPPC*rate*0.50, you:true  },
+                            { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                            { who: `${myName} (You)`,   pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
                           ]
                     : []
 
@@ -364,20 +417,24 @@ export default function WithdrawalRequest() {
                       chain={chain}
                       rate={rate}
                       isUserOrd={isUserOrd}
+                      isDark={isDark}
                     />
                   )
                 })}
               </div>
 
               {/* Total bar */}
-              <div style={{
-                marginTop:12, display:"flex", alignItems:"center", justifyContent:"space-between",
-                background:"#f5f3ff", border:"1.5px solid #c4b5fd", borderRadius:10, padding:"10px 14px"
-              }}>
-                <span style={{ fontSize:13, fontWeight:700, color:"#7c3aed" }}>💰 Total Withdraw Kar Sakte Ho</span>
-                <div style={{ textAlign:"right" }}>
-                  <span style={{ fontSize:16, fontWeight:800, color:"#7c3aed" }}>{currentBalance} PPC</span>
-                  <div style={{ fontSize:11, color:"#16a34a", fontWeight:600 }}>
+              <div className={`p-4 rounded-2xl border flex items-center justify-between ${
+                isDark ? "bg-purple-500/10 border-purple-500/25" : "bg-purple-50 border-purple-200"
+              }`}>
+                <span className="text-xs sm:text-sm font-bold text-purple-400">
+                  💰 Total Withdraw Kar Sakte Ho
+                </span>
+                <div className="text-right">
+                  <span className="text-base sm:text-lg font-black text-purple-400">
+                    {currentBalance} PPC
+                  </span>
+                  <div className="text-xs text-emerald-500 font-bold">
                     ≈ ₹{activeSources.reduce((s, src) => {
                       const rate = src.ppcBaseRate || walletData?.currentPPCRate || 0
                       const pct  = src.percentageShare || 0
@@ -391,27 +448,41 @@ export default function WithdrawalRequest() {
         </div>
       </div>
 
-      {/* ===================== NEW WITHDRAWAL FORM ===================== */}
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-5">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">New Withdrawal Request</h2>
-        
+      {/* ── NEW WITHDRAWAL FORM ── */}
+      <div className={`p-5 sm:p-6 rounded-3xl border shadow-xl ${
+        isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
+        <h2 className="text-base sm:text-lg font-bold mb-4">New Withdrawal Request</h2>
+
         {message.text && (
-          <div className={`p-3 rounded-lg mb-4 text-sm ${
-            message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}>{message.text}</div>
+          <div className={`p-3.5 rounded-xl mb-4 text-xs font-bold border ${
+            message.type === "success"
+              ? isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-800 border-red-200"
+          }`}>
+            {message.text}
+          </div>
         )}
-        
+
         {withdrawableWallets.length === 0 ? (
-          <div className="text-center py-6 text-gray-500 text-sm">
-            <p className="text-2xl mb-2">💳</p>
+          <div className="text-center py-8 text-stone-400 text-xs">
+            <p className="text-3xl mb-2">💳</p>
             <p>No withdrawable balance available</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Select Wallet *</label>
-              <select value={formData.walletType} onChange={e => setFormData({...formData, walletType: e.target.value})} required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              <label className="block text-xs font-bold mb-1 text-stone-400">Select Wallet *</label>
+              <select
+                value={formData.walletType}
+                onChange={e => setFormData({ ...formData, walletType: e.target.value })}
+                required
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white focus:border-emerald-500"
+                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500"
+                }`}
+              >
                 <option value="">-- Choose Wallet --</option>
                 {withdrawableWallets.map(w => (
                   <option key={w.key} value={w.key}>
@@ -420,30 +491,47 @@ export default function WithdrawalRequest() {
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (PPC) *</label>
-              <input type="number" step="1" min="1" required
-                value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})}
+              <label className="block text-xs font-bold mb-1 text-stone-400">Amount (PPC) *</label>
+              <input
+                type="number"
+                step="1"
+                min="1"
+                required
+                value={formData.amount}
+                onChange={e => setFormData({ ...formData, amount: e.target.value })}
                 placeholder="Kitne PPC withdraw karna hai"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white focus:border-emerald-500 placeholder-stone-500"
+                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500 placeholder-stone-400"
+                }`}
+              />
               {formData.amount && currentRate > 0 && (() => {
                 const selectedW = withdrawableWallets.find(w => w.key === formData.walletType)
                 const perPPC = selectedW && selectedW.ppcCount > 0
                   ? (selectedW.estimatedValue / selectedW.ppcCount)
                   : currentRate * 0.5
                 return (
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-[11px] text-emerald-400 font-bold mt-1">
                     ≈ ₹{(formData.amount * perPPC).toFixed(2)} estimated
                   </p>
                 )
               })()}
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-              <select value={formData.paymentMethod} onChange={e => setFormData({...formData, paymentMethod: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              <label className="block text-xs font-bold mb-1 text-stone-400">Payment Method</label>
+              <select
+                value={formData.paymentMethod}
+                onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white focus:border-emerald-500"
+                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500"
+                }`}
+              >
                 <option value="">-- Select Method --</option>
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="upi">UPI</option>
@@ -452,51 +540,74 @@ export default function WithdrawalRequest() {
                 <option value="gpay">Google Pay</option>
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Payment Details</label>
-              <textarea value={formData.paymentDetails} onChange={e => setFormData({...formData, paymentDetails: e.target.value})}
-                rows="2" placeholder="Bank account / UPI ID"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+              <label className="block text-xs font-bold mb-1 text-stone-400">Payment Details</label>
+              <textarea
+                value={formData.paymentDetails}
+                onChange={e => setFormData({ ...formData, paymentDetails: e.target.value })}
+                rows="2"
+                placeholder="Bank account details / UPI ID"
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white focus:border-emerald-500 placeholder-stone-500"
+                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500 placeholder-stone-400"
+                }`}
+              />
             </div>
-            
-            <button type="submit" disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-                loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-              }`}>
-              {loading ? "Submitting..." : "Submit Request"}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                loading
+                  ? "bg-stone-700 text-stone-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black shadow-lg shadow-emerald-500/20 active:scale-98"
+              }`}
+            >
+              {loading ? "Submitting..." : "Submit Withdrawal Request ➔"}
             </button>
           </form>
         )}
       </div>
 
-      {/* ===================== WITHDRAWAL HISTORY with FILTER ===================== */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        
-        {/* Toggle */}
-        <button onClick={() => setShowHistory(p => !p)}
-          className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition text-left">
-          <span className="text-base font-bold text-gray-800">📋 Withdrawal History</span>
-          <span className="text-gray-400">{showHistory ? "▲" : "▼"}</span>
+      {/* ── WITHDRAWAL HISTORY ── */}
+      <div className={`rounded-3xl border overflow-hidden shadow-xl ${
+        isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
+        <button
+          onClick={() => setShowHistory(p => !p)}
+          className={`w-full flex items-center justify-between p-4 sm:p-5 transition text-left cursor-pointer ${
+            isDark ? "hover:bg-white/[0.02]" : "hover:bg-stone-50"
+          }`}
+        >
+          <span className="text-sm sm:text-base font-bold">📋 Withdrawal History</span>
+          <span className="text-xs text-stone-400">{showHistory ? "▲" : "▼"}</span>
         </button>
 
         {showHistory && (
-          <div className="border-t border-gray-100">
-            
+          <div className={`border-t ${isDark ? "border-white/[0.06]" : "border-stone-100"}`}>
             {/* Filter Tabs */}
-            <div className="flex gap-2 px-4 py-3 border-b border-gray-100 overflow-x-auto">
+            <div className={`flex gap-1.5 p-3 border-b overflow-x-auto ${
+              isDark ? "border-white/[0.06]" : "border-stone-100"
+            }`}>
               {[
-                { key: "all",      label: "All",      color: "bg-gray-700" },
-                { key: "pending",  label: "⏳ Pending", color: "bg-blue-600" },
-                { key: "approved", label: "✅ Approved", color: "bg-green-600" },
-                { key: "rejected", label: "❌ Rejected", color: "bg-red-600" },
+                { key: "all",      label: "All" },
+                { key: "pending",  label: "⏳ Pending" },
+                { key: "approved", label: "✅ Approved" },
+                { key: "rejected", label: "❌ Rejected" },
               ].map(tab => (
-                <button key={tab.key} onClick={() => setHistoryFilter(tab.key)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                <button
+                  key={tab.key}
+                  onClick={() => setHistoryFilter(tab.key)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
                     historyFilter === tab.key
-                      ? `${tab.color} text-white shadow`
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}>
+                      ? "bg-emerald-500 text-black border-emerald-400"
+                      : isDark
+                        ? "bg-white/[0.04] text-stone-400 border-white/[0.08]"
+                        : "bg-stone-100 text-stone-600 border-stone-200"
+                  }`}
+                >
                   {tab.label}
                 </button>
               ))}
@@ -504,39 +615,47 @@ export default function WithdrawalRequest() {
 
             {/* List */}
             {filteredRequests.length === 0 ? (
-              <p className="text-center text-gray-400 py-8 text-sm">No {historyFilter === "all" ? "" : historyFilter} requests yet</p>
+              <p className="text-center text-stone-400 py-8 text-xs">
+                No {historyFilter === "all" ? "" : historyFilter} requests yet
+              </p>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className={`divide-y ${isDark ? "divide-white/[0.04]" : "divide-stone-100"}`}>
                 {filteredRequests.map(req => (
-                  <div key={req._id} className="px-4 py-3">
-                    <div className="flex items-start justify-between gap-2 mb-1">
+                  <div key={req._id} className="p-4 space-y-1">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-sm font-bold text-gray-800">
-                          {req.amount} <span className="text-xs text-purple-600 font-semibold">PPC</span>
+                        <p className="text-sm font-black">
+                          {req.amount} <span className="text-xs text-purple-400 font-bold">PPC</span>
                         </p>
                         {req.ppcRateAtRequest > 0 && (
-                          <p className="text-xs text-green-600">🔒 ₹{req.ppcRateAtRequest}/PPC → ₹{req.rupeeValueAtRequest?.toFixed(2)}</p>
+                          <p className="text-xs text-emerald-500 font-medium">
+                            🔒 ₹{req.ppcRateAtRequest}/PPC → ₹{req.rupeeValueAtRequest?.toFixed(2)}
+                          </p>
                         )}
-                        <p className="text-xs text-gray-400 capitalize mt-0.5">
-                          {req.paymentMethod?.replace("_"," ") || "—"} • {walletLabel(req.walletType?.replace("AsSeller",""))}
+                        <p className="text-[11px] text-stone-400 capitalize mt-0.5">
+                          {req.paymentMethod?.replace("_", " ") || "—"} • {walletLabel(req.walletType?.replace("AsSeller", ""))}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-bold flex-shrink-0 ${
-                        req.status === "pending"  ? "bg-yellow-100 text-yellow-700" :
-                        req.status === "approved" ? "bg-green-100 text-green-700"  :
-                        "bg-red-100 text-red-700"
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                        req.status === "pending"
+                          ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                          : req.status === "approved"
+                            ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                            : "bg-red-500/15 text-red-400 border-red-500/30"
                       }`}>
                         {req.status?.toUpperCase()}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400">
-                      {new Date(req.createdAt).toLocaleString("en-IN", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })}
+                    <p className="text-[10px] text-stone-400">
+                      {new Date(req.createdAt).toLocaleString("en-IN", {
+                        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+                      })}
                     </p>
                     {req.transactionId && (
-                      <p className="text-xs text-green-700 mt-1">✅ Txn: {req.transactionId}</p>
+                      <p className="text-xs text-emerald-400 font-mono mt-1">Txn: {req.transactionId}</p>
                     )}
                     {req.adminNote && (
-                      <p className="text-xs text-gray-500 mt-1 italic">Note: {req.adminNote}</p>
+                      <p className="text-xs text-stone-400 italic mt-1">Note: {req.adminNote}</p>
                     )}
                   </div>
                 ))}

@@ -1,9 +1,8 @@
-
-
 import { useState, useEffect, useCallback } from "react"
+import { useTheme } from "../context/ThemeContext"
 
 export default function PPCWallet({ setPage }) {
-  
+  const { isDark } = useTheme()
   const [loading, setLoading] = useState(true)
   const [walletData, setWalletData] = useState(null)
   const [error, setError] = useState("")
@@ -11,9 +10,9 @@ export default function PPCWallet({ setPage }) {
   const [showRoadmap, setShowRoadmap] = useState({})
   const [lastRefresh, setLastRefresh] = useState(null)
 
-  // ⭐ Reward claim state — walletType -> { [level]: { claimStatus, claimId } }
+  // Reward claim state — walletType -> { [level]: { claimStatus, claimId } }
   const [claimsMap, setClaimsMap] = useState({})
-  const [claimingKey, setClaimingKey] = useState("") // `${walletType}_${level}` currently in-flight
+  const [claimingKey, setClaimingKey] = useState("")
   const [claimMsg, setClaimMsg] = useState({ type: "", text: "" })
 
   const fetchClaims = useCallback(async () => {
@@ -21,7 +20,7 @@ export default function PPCWallet({ setPage }) {
       const token = localStorage.getItem("token")
       if (!token) return
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/rewards/my`, {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` }
       })
       if (!res.ok) return
       const data = await res.json()
@@ -50,7 +49,7 @@ export default function PPCWallet({ setPage }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ walletType, level })
       })
@@ -69,7 +68,6 @@ export default function PPCWallet({ setPage }) {
     }
   }
 
-  // ⭐ Level ke liye claim button/badge — reward achieve hone par dikhta hai
   const ClaimButton = ({ walletType, level }) => {
     const info = claimsMap[walletType]?.[level]
     const status = info?.claimStatus || "not_claimed"
@@ -77,331 +75,338 @@ export default function PPCWallet({ setPage }) {
 
     if (status === "paid") {
       return (
-        <span style={{ fontSize:10, fontWeight:700, background:"#dcfce7", color:"#15803d", borderRadius:6, padding:"3px 8px", marginTop:4, display:"inline-block" }}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border mt-1 inline-block ${
+          isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+        }`}>
           ✅ Paid
         </span>
       )
     }
     if (status === "pending") {
       return (
-        <span style={{ fontSize:10, fontWeight:700, background:"#fef9c3", color:"#92400e", borderRadius:6, padding:"3px 8px", marginTop:4, display:"inline-block" }}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border mt-1 inline-block ${
+          isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-800 border-amber-200"
+        }`}>
           ⏳ Admin approval pending
         </span>
       )
     }
-    // not_claimed or rejected → allow (re)claim
     return (
       <button
         onClick={() => handleClaimReward(walletType, level)}
         disabled={busy}
-        style={{
-          fontSize:10, fontWeight:700, marginTop:4,
-          background: busy ? "#e2e8f0" : "#7c3aed", color: busy ? "#94a3b8" : "#fff",
-          border:"none", borderRadius:6, padding:"4px 10px", cursor: busy ? "not-allowed" : "pointer"
-        }}
+        className={`text-[10px] font-bold mt-1 px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+          busy
+            ? "bg-stone-700 text-stone-500 border-stone-600 cursor-not-allowed"
+            : isDark
+              ? "bg-purple-600 hover:bg-purple-500 text-white border-purple-400/40 active:scale-95"
+              : "bg-purple-600 hover:bg-purple-700 text-white border-purple-600 active:scale-95"
+        }`}
       >
         {busy ? "Sending..." : status === "rejected" ? "🔁 Re-Claim Reward" : "🎁 Claim Reward"}
       </button>
     )
   }
-  
+
   const fetchWallet = useCallback(async (silent = false) => {
     try {
       if (!silent) setLoading(true)
-      
       const token = localStorage.getItem("token")
       if (!token) {
         setError("Please login first")
         setLoading(false)
         return
       }
-      
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ppc/wallet/me`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
-      
-      if (!res.ok) {
-        throw new Error("Failed to load wallet")
-      }
-      
+      if (!res.ok) throw new Error("Failed to fetch wallet")
       const data = await res.json()
       setWalletData(data)
       setLastRefresh(new Date())
       setError("")
-      
     } catch (err) {
-      console.error("Wallet fetch error:", err)
-      if (!silent) setError(err.message)
+      setError(err.message || "Failed to load wallet")
     } finally {
       if (!silent) setLoading(false)
     }
   }, [])
 
-  // First load
-  useEffect(() => {
-    fetchWallet(false)
-  }, [fetchWallet])
-
-  // ✅ Auto-refresh every 10s (silent — no loading spinner)
-  useEffect(() => {
-    const interval = setInterval(() => fetchWallet(true), 10000)
-    return () => clearInterval(interval)
-  }, [fetchWallet])
+  useEffect(() => { fetchWallet() }, [fetchWallet])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading wallet...</p>
+      <div className="flex justify-center items-center min-h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 sm:p-6 max-w-xl mx-auto">
+        <div className={`p-4 rounded-2xl border text-center ${
+          isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700"
+        }`}>
+          <p className="font-bold text-sm">Error: {error}</p>
+          <button
+            onClick={() => fetchWallet()}
+            className="mt-3 px-4 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
   }
-  
-  if (error) {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        <p className="font-semibold">Error</p>
-        <p>{error}</p>
-      </div>
-    )
-  }
-  
+
   if (!walletData) {
-    return <div className="text-center py-8">No wallet data found</div>
+    return <div className="text-center py-8 text-stone-400 text-xs">No wallet data found</div>
   }
-  
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6 px-2 sm:px-4">
-      
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-4 sm:p-6 text-white">
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+    <div className={`max-w-6xl mx-auto space-y-5 px-2 sm:px-4 pb-20 transition-colors ${
+      isDark ? "text-stone-200" : "text-stone-900"
+    }`}>
+
+      {/* ── Top Header ── */}
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-all ${
+        isDark
+          ? "bg-gradient-to-br from-[#121c16] via-[#101512] to-[#0c100e] border-emerald-500/25 shadow-xl shadow-emerald-950/20 text-white"
+          : "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white border-emerald-500/30 shadow-lg"
+      }`}>
+        <div className="flex justify-between items-start gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">💰 My PPC Wallet</h1>
-            <p className="text-sm sm:text-base opacity-90">Role: <span className="font-semibold uppercase">{walletData.role}</span></p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">💰</span>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight">My PPC Wallet</h1>
+            </div>
+            <p className={`text-xs font-medium ${isDark ? "text-stone-400" : "text-emerald-100/90"}`}>
+              Role: <span className="font-bold uppercase font-mono">{walletData.role}</span>
+            </p>
           </div>
           <button
             onClick={() => fetchWallet(false)}
-            style={{ background:"rgba(255,255,255,0.2)", border:"1px solid rgba(255,255,255,0.4)", color:"#fff", borderRadius:8, padding:"6px 14px", cursor:"pointer", fontSize:12, fontWeight:700 }}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center shrink-0 ${
+              isDark
+                ? "bg-white/[0.08] hover:bg-white/[0.15] border-white/15 text-white"
+                : "bg-white/20 hover:bg-white/30 border-white/30 text-white"
+            }`}
           >
-            🔄 Refresh
+            <span>🔄 Refresh</span>
             {lastRefresh && (
-              <span style={{ display:"block", fontSize:9, opacity:0.8, marginTop:1 }}>
-                {lastRefresh.toLocaleTimeString()}
+              <span className="text-[9px] opacity-75 font-mono">
+                {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
           </button>
         </div>
       </div>
-      
+
       {claimMsg.text && (
-        <div className={`p-3 rounded-lg text-sm font-semibold ${claimMsg.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+        <div className={`p-3 rounded-2xl text-xs font-bold border ${
+          claimMsg.type === "success"
+            ? isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-800 border-emerald-200"
+            : isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-800 border-red-200"
+        }`}>
           {claimMsg.text}
         </div>
       )}
 
-      {/* PPC Rate Info */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg shadow p-4 text-white">
+      {/* ── PPC Rate Info ── */}
+      <div className={`p-5 rounded-3xl border transition-all ${
+        isDark
+          ? "bg-gradient-to-r from-emerald-950/40 via-stone-900 to-teal-950/40 border-emerald-500/20 text-white shadow-lg"
+          : "bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md border-emerald-500/30"
+      }`}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm opacity-90">Current PPC Rate</p>
-            <p className="text-3xl font-bold">₹{walletData.currentPPCRate}</p>
-            <p className="text-xs opacity-75 mt-1">per PPC</p>
+            <p className="text-xs opacity-80 uppercase tracking-wider font-bold">Current PPC Rate</p>
+            <p className="text-2xl sm:text-3xl font-black mt-0.5">₹{walletData.currentPPCRate}</p>
+            <p className="text-[10px] opacity-75 mt-0.5">per PPC</p>
           </div>
           <div className="text-right">
-            <p className="text-sm opacity-90">Your Share</p>
-            <p className="text-2xl font-bold">
+            <p className="text-xs opacity-80 uppercase tracking-wider font-bold">Your Share</p>
+            <p className="text-2xl sm:text-3xl font-black mt-0.5">
               {walletData.role === "seller" ? "50%" : "25%"}
             </p>
-            <p className="text-xs opacity-75 mt-1">of PPC value</p>
+            <p className="text-[10px] opacity-75 mt-0.5">of PPC value</p>
           </div>
         </div>
       </div>
-      
-      {/* Summary Cards */}
+
+      {/* ── Summary Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        
         {/* Total PPC Earned */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className={`p-5 rounded-3xl border shadow-xl ${
+          isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total PPC Earned</p>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                {walletData.totalPPCEarned || 0} <span className="text-xl font-semibold text-green-400">PPC</span>
+              <p className="text-xs text-stone-400 uppercase tracking-wider font-bold mb-1">Total PPC Earned</p>
+              <p className="text-2xl sm:text-3xl font-black text-emerald-500">
+                {walletData.totalPPCEarned || 0} <span className="text-lg font-bold text-emerald-400/80">PPC</span>
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-stone-400 mt-1 font-medium">
                 Est: ₹{((walletData.totalPPCEarned || 0) * walletData.currentPPCRate * 0.5).toFixed(2)}
               </p>
             </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl border ${
+              isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-600 border-emerald-200"
+            }`}>
+              💰
             </div>
           </div>
         </div>
-        
+
         {/* Total Withdrawn */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className={`p-5 rounded-3xl border shadow-xl ${
+          isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Withdrawn</p>
-              <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                {walletData.totalWithdrawn || 0} <span className="text-xl font-semibold text-blue-400">PPC</span>
+              <p className="text-xs text-stone-400 uppercase tracking-wider font-bold mb-1">Total Withdrawn</p>
+              <p className="text-2xl sm:text-3xl font-black text-sky-500">
+                {walletData.totalWithdrawn || 0} <span className="text-lg font-bold text-sky-400/80">PPC</span>
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-stone-400 mt-1 font-medium">
                 Est: ₹{((walletData.totalWithdrawn || 0) * walletData.currentPPCRate * 0.25).toFixed(2)}
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl border ${
+              isDark ? "bg-sky-500/10 text-sky-400 border-sky-500/20" : "bg-sky-50 text-sky-600 border-sky-200"
+            }`}>
+              💳
             </div>
           </div>
         </div>
-        
       </div>
 
-      {/* ✅ NOTE: User Wallet aur Direct Seller Wallet ab poori tarah alag-alag
-          level settings use karte hain (admin PPC Settings se) — isliye combined
-          summary hata diya, ab har wallet apna level apne card ke andar dikhayega */}
-      
-      {/* Wallets Section */}
+      {/* ── Wallets Section ── */}
       {walletData.wallets && (
         <div className="space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Your Wallets</h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={{ alignItems:"stretch" }}>
-            
+          <h2 className="text-base sm:text-lg font-bold uppercase tracking-wider text-stone-400">Your Wallets</h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {Object.entries(walletData.wallets).map(([key, wallet]) => (
-              <div 
-                key={key} 
-                className={`
-                  bg-white rounded-lg shadow-md border-l-4 p-4 sm:p-6
-                  ${wallet.withdrawable ? 'border-green-500' : 'border-orange-500'}
-                `}
-                style={{ display:"flex", flexDirection:"column" }}
+              <div
+                key={key}
+                className={`p-5 sm:p-6 rounded-3xl border shadow-xl flex flex-col justify-between ${
+                  isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+                } ${wallet.withdrawable ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-amber-500"}`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-base font-bold">
                       {key === "distributorWallet" && "📊 Distributor Wallet"}
                       {key === "sellerWallet" && "💼 Direct Seller Wallet"}
                       {key === "userWallet" && "👤 User Wallet"}
                     </h3>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                      wallet.withdrawable
+                        ? isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-800 border-amber-200"
+                    }`}>
+                      {wallet.withdrawable ? "Withdrawable" : "Locked"}
+                    </span>
                   </div>
-                  
-                  {wallet.withdrawable ? (
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-semibold ml-2">
-                      Withdrawable
-                    </span>
-                  ) : (
-                    <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-semibold ml-2">
-                      Locked
-                    </span>
-                  )}
-                </div>
-                
-                {/* Distributor Wallet — Level Progression */}
-                {key === "distributorWallet" ? (
-                  <div>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                      <div>
-                        <div style={{ fontSize:11, fontWeight:700, color:"#f59e0b", textTransform:"uppercase", letterSpacing:"0.05em" }}>
-                          🔒 Distributor Wallet
-                        </div>
-                        <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>
+
+                  {/* Distributor Wallet — Level Progression */}
+                  {key === "distributorWallet" ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <div className="text-[10px] text-stone-400">
                           Withdraw nahi hoga — Level progression ke liye
                         </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                          isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}>
+                          Locked 🔒
+                        </span>
                       </div>
-                      <span style={{ fontSize:10, fontWeight:700, background:"#fff7ed", color:"#c2410c", border:"1px solid #fed7aa", borderRadius:99, padding:"2px 10px" }}>
-                        Locked 🔒
-                      </span>
-                    </div>
 
-                    {/* PPC Balance */}
-                    <div style={{ background:"linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius:10, padding:"12px 16px", marginBottom:12 }}>
-                      <div style={{ fontSize:11, color:"#94a3b8", marginBottom:4 }}>Network PPC Collected</div>
-                      <div style={{ fontSize:28, fontWeight:800, color:"#1e293b" }}>
-                        {wallet.ppcCount || 0} <span style={{ fontSize:14, fontWeight:500 }}>PPC</span>
-                      </div>
-                    </div>
-
-                    {/* Current Level Badge */}
-                    <div style={{ background:"linear-gradient(135deg,#7c3aed,#4f46e5)", borderRadius:10, padding:"10px 14px", marginBottom:12, color:"#fff" }}>
-                      <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
-                      <div style={{ fontSize:16, fontWeight:800 }}>
-                        {wallet.currentLevelName || "Distributor"}
-                      </div>
-                    </div>
-
-                    {/* Progress to next level */}
-                    {wallet.nextLevelName ? (
-                      <div style={{ marginBottom:12 }}>
-                        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                          <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
-                            Next: <span style={{ color:"#7c3aed" }}>{wallet.nextLevelName}</span>
-                          </span>
-                          <span style={{ fontSize:11, fontWeight:700, color:"#7c3aed" }}>
-                            {wallet.ppcCount || 0} / {wallet.nextThreshold} PPC
-                          </span>
+                      {/* PPC Balance */}
+                      <div className={`p-4 rounded-2xl border ${
+                        isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-100"
+                      }`}>
+                        <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mb-1">
+                          Network PPC Collected
                         </div>
-                        {/* Progress bar */}
-                        <div style={{ height:10, background:"#e9d5ff", borderRadius:99, overflow:"hidden" }}>
-                          <div style={{
-                            height:"100%",
-                            width:`${wallet.progress || 0}%`,
-                            background:"linear-gradient(90deg,#7c3aed,#a855f7)",
-                            borderRadius:99,
-                            transition:"width 0.5s ease"
-                          }}/>
-                        </div>
-                        <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
-                          {wallet.nextThreshold - (wallet.ppcCount || 0)} PPC aur chahiye level up ke liye
+                        <div className="text-2xl sm:text-3xl font-black">
+                          {wallet.ppcCount || 0} <span className="text-sm font-semibold text-stone-400">PPC</span>
                         </div>
                       </div>
-                    ) : (
-                      <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600 }}>
-                        🏆 Maximum level achieve kar liya!
-                      </div>
-                    )}
 
-                    {/* All levels + Rewards */}
-                    <div style={{ marginTop:8 }}>
-                      <button
-                        onClick={() => setShowRoadmap(p => ({ ...p, [key]: !p[key] }))}
-                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
-                      >
-                        <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
-                        <span style={{ fontSize:11, color:"#a78bfa", fontWeight:600 }}>{showRoadmap[key] ? "▲ Chhupao" : "▼ Dikhao"}</span>
-                      </button>
-                      {showRoadmap[key] && wallet.thresholds && Object.entries(wallet.thresholds).map(([lvlKey, threshold], li) => {
-                        const lvlNum   = parseInt(lvlKey.replace("level",""))
-                        const lvlName  = wallet.levelNames?.[lvlKey] || lvlKey
-                        const reward   = wallet.levelRewards?.[lvlKey] || ""
-                        const done     = (wallet.ppcCount || 0) >= threshold
-                        const current  = wallet.currentLevel === lvlNum
-                        return (
-                          <div key={lvlKey} style={{
-                            padding:"8px 10px", borderRadius:8, marginBottom:4,
-                            background: current ? "#f5f3ff" : done ? "#f0fdf4" : "#f8fafc",
-                            border: current ? "1.5px solid #c4b5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
-                          }}>
-                            <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
-                              <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>
-                                {done ? "✅" : current ? "🔵" : "⭕"}
-                              </span>
-                              <div style={{ flex:1, minWidth:0 }}>
-                                <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#7c3aed" : "#374151", lineHeight:"1.4" }}>
+                      {/* Current Level Badge */}
+                      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-3 text-white">
+                        <div className="text-[10px] opacity-75">Current Level</div>
+                        <div className="text-base font-black">{wallet.currentLevelName || "Distributor"}</div>
+                      </div>
+
+                      {/* Progress to next level */}
+                      {wallet.nextLevelName ? (
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs">
+                            <span className="font-medium text-stone-400">
+                              Next: <strong className="text-purple-400">{wallet.nextLevelName}</strong>
+                            </span>
+                            <span className="font-bold text-purple-400">
+                              {wallet.ppcCount || 0} / {wallet.nextThreshold} PPC
+                            </span>
+                          </div>
+                          <div className={`h-2.5 rounded-full overflow-hidden ${
+                            isDark ? "bg-purple-950/60" : "bg-purple-100"
+                          }`}>
+                            <div
+                              style={{ width: `${wallet.progress || 0}%` }}
+                              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+                            />
+                          </div>
+                          <div className="text-[10px] text-stone-400">
+                            {wallet.nextThreshold - (wallet.ppcCount || 0)} PPC aur chahiye level up ke liye
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`p-3 rounded-xl text-xs font-bold border ${
+                          isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}>
+                          🏆 Maximum level achieve kar liya!
+                        </div>
+                      )}
+
+                      {/* All levels + Rewards */}
+                      <div className="pt-2">
+                        <button
+                          onClick={() => setShowRoadmap(p => ({ ...p, [key]: !p[key] }))}
+                          className="w-full flex items-center justify-between text-[11px] font-bold text-stone-400 hover:text-stone-200 py-1 cursor-pointer"
+                        >
+                          <span className="uppercase tracking-wider">Level Roadmap & Rewards</span>
+                          <span className="text-purple-400">{showRoadmap[key] ? "▲ Chhupao" : "▼ Dikhao"}</span>
+                        </button>
+                        {showRoadmap[key] && wallet.thresholds && Object.entries(wallet.thresholds).map(([lvlKey, threshold]) => {
+                          const lvlNum   = parseInt(lvlKey.replace("level", ""))
+                          const lvlName  = wallet.levelNames?.[lvlKey] || lvlKey
+                          const reward   = wallet.levelRewards?.[lvlKey] || ""
+                          const done     = (wallet.ppcCount || 0) >= threshold
+                          const current  = wallet.currentLevel === lvlNum
+                          return (
+                            <div
+                              key={lvlKey}
+                              className={`p-3 rounded-xl border mb-2 flex items-start gap-3 ${
+                                current
+                                  ? isDark ? "bg-purple-500/15 border-purple-500/30" : "bg-purple-50 border-purple-200"
+                                  : done
+                                    ? isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200"
+                                    : isDark ? "bg-white/[0.02] border-white/[0.05]" : "bg-stone-50 border-stone-200"
+                              }`}
+                            >
+                              <span className="text-sm shrink-0">{done ? "✅" : current ? "🔵" : "⭕"}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className={`text-xs font-bold leading-tight ${current ? "text-purple-400" : ""}`}>
                                   {lvlName}
                                 </div>
                                 {reward && (
-                                  <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
+                                  <div className="text-[10px] text-stone-400 mt-1">
                                     {done ? "🎁 " : "💡 "}{reward}
                                   </div>
                                 )}
@@ -409,146 +414,95 @@ export default function PPCWallet({ setPage }) {
                                   <ClaimButton walletType="distributorWallet" level={lvlNum} />
                                 )}
                               </div>
-                              <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>
+                              <span className="text-[10px] font-mono text-stone-400 font-bold shrink-0">
                                 {threshold} PPC
                               </span>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    <div style={{ marginTop:10, fontSize:10, background:"#fff7ed", border:"1px solid #fed7aa", borderRadius:8, padding:"8px 12px", color:"#92400e" }}>
-                      ℹ️ Jab aapke neeche wale distributor ki network mein sale hoti hai, to yahan PPC add hoti hai.
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Regular Wallet — PPC Balance */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 mb-3">
-                      <p className="text-sm text-gray-600 mb-1">PPC Balance</p>
-                      <p className="text-3xl sm:text-4xl font-bold text-gray-900">
-                        {wallet.ppcCount || 0} <span className="text-xl">PPC</span>
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="text-xs text-gray-600">Your Share:</p>
-                        <p className="text-sm font-bold text-purple-600">{wallet.percentage}%</p>
+                          )
+                        })}
                       </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-600">Estimated Value:</p>
-                        <p className="text-lg font-bold text-green-600">
-                          ₹{wallet.estimatedValue?.toFixed(2) || "0.00"}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {/* Regular Wallet — PPC Balance */}
+                      <div className={`p-4 rounded-2xl border ${
+                        isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-100"
+                      }`}>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-1">PPC Balance</p>
+                        <p className="text-3xl font-black">
+                          {wallet.ppcCount || 0} <span className="text-sm font-semibold text-stone-400">PPC</span>
                         </p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        = {wallet.ppcCount} PPC × ₹{walletData.currentPPCRate} × {wallet.percentage}%
-                      </p>
-                    </div>
 
-                    {/* ✅ Distributor ke Direct Seller Wallet mein level roadmap */}
-                    {key === "sellerWallet" && walletData.role === "distributor" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
-                      const thresholds   = walletData.sellerLevelUpThresholds
-                      const levelNames   = walletData.sellerLevelNames   || {}
-                      const levelRewards = walletData.sellerLevelRewards || {}
-                      const ppc          = wallet.ppcCount || 0
-                      let currentLevel   = 0
-                      const sortedLevels = Object.entries(thresholds)
-                        .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
-                        .sort((a,b) => a.n - b.n)
-                      sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
-                      const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
-                      const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
-                      const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-                      const nextThreshold    = nextLvl?.v || null
-                      const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
-                      return (
-                        <div style={{ marginBottom:14 }}>
-                          {/* Current Level Badge */}
-                          <div style={{ background:"linear-gradient(135deg,#2563eb,#7c3aed)", borderRadius:10, padding:"10px 14px", marginBottom:10, color:"#fff" }}>
-                            <div style={{ fontSize:10, opacity:0.8, marginBottom:2 }}>Current Level</div>
-                            <div style={{ fontSize:16, fontWeight:800 }}>{currentLevelName}</div>
-                          </div>
-                          {/* Progress */}
-                          {nextLevelName ? (
-                            <div style={{ marginBottom:10 }}>
-                              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                                <span style={{ fontSize:11, fontWeight:600, color:"#374151" }}>
-                                  Next: <span style={{ color:"#2563eb" }}>{nextLevelName}</span>
-                                </span>
-                                <span style={{ fontSize:11, fontWeight:700, color:"#2563eb" }}>{ppc} / {nextThreshold} PPC</span>
-                              </div>
-                              <div style={{ height:10, background:"#bfdbfe", borderRadius:99, overflow:"hidden" }}>
-                                <div style={{ height:"100%", width:`${progress}%`, background:"linear-gradient(90deg,#2563eb,#7c3aed)", borderRadius:99, transition:"width 0.5s ease" }}/>
-                              </div>
-                              <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
-                                {nextThreshold - ppc} PPC aur chahiye level up ke liye
-                              </div>
+                      <div className={`p-3 rounded-2xl border space-y-2 text-xs ${
+                        isDark ? "bg-white/[0.02] border-white/[0.04]" : "bg-stone-50/70 border-stone-100"
+                      }`}>
+                        <div className="flex justify-between items-center">
+                          <span className="text-stone-400">Your Share:</span>
+                          <span className="font-bold text-purple-400">{wallet.percentage}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-stone-400">Estimated Value:</span>
+                          <span className="font-black text-emerald-500">
+                            ₹{wallet.estimatedValue?.toFixed(2) || "0.00"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Distributor Direct Seller Wallet Level Roadmap */}
+                      {key === "sellerWallet" && walletData.role === "distributor" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
+                        const thresholds   = walletData.sellerLevelUpThresholds
+                        const levelNames   = walletData.sellerLevelNames   || {}
+                        const levelRewards = walletData.sellerLevelRewards || {}
+                        const ppc          = wallet.ppcCount || 0
+                        let currentLevel   = 0
+                        const sortedLevels = Object.entries(thresholds)
+                          .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
+                          .sort((a,b) => a.n - b.n)
+                        sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
+                        const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
+                        const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
+                        const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
+                        const nextThreshold    = nextLvl?.v || null
+                        const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
+
+                        return (
+                          <div className="space-y-3 pt-2">
+                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-3 text-white">
+                              <div className="text-[10px] opacity-75">Current Level</div>
+                              <div className="text-base font-black">{currentLevelName}</div>
                             </div>
-                          ) : (
-                            <div style={{ background:"#fefce8", border:"1px solid #fde047", borderRadius:8, padding:"8px 12px", fontSize:11, color:"#92400e", fontWeight:600, marginBottom:10 }}>
-                              👑 Maximum level achieve kar liya!
-                            </div>
-                          )}
-                          {/* Roadmap collapsible */}
-                          <button
-                            onClick={() => setShowRoadmap(p => ({ ...p, [`${key}_dist`]: !p[`${key}_dist`] }))}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"6px 0 4px", marginBottom:2 }}
-                          >
-                            <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, letterSpacing:0.8 }}>LEVEL ROADMAP & REWARDS</span>
-                            <span style={{ fontSize:11, color:"#60a5fa", fontWeight:600 }}>{showRoadmap[`${key}_dist`] ? "▲ Chhupao" : "▼ Dikhao"}</span>
-                          </button>
-                          {showRoadmap[`${key}_dist`] && sortedLevels.map(({ n, v }) => {
-                            const lvlName = levelNames[`level${n}`]   || `Level ${n}`
-                            const reward  = levelRewards[`level${n}`] || ""
-                            const done    = ppc >= v
-                            const current = currentLevel === n
-                            return (
-                              <div key={n} style={{
-                                padding:"8px 10px", borderRadius:8, marginBottom:4,
-                                background: current ? "#eff6ff" : done ? "#f0fdf4" : "#f8fafc",
-                                border: current ? "1.5px solid #93c5fd" : done ? "1px solid #86efac" : "1px solid #e2e8f0"
-                              }}>
-                                <div style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
-                                  <span style={{ fontSize:15, marginTop:1, flexShrink:0 }}>{done ? "✅" : current ? "🔹" : "○"}</span>
-                                  <div style={{ flex:1, minWidth:0 }}>
-                                    <div style={{ fontSize:11, fontWeight: current ? 800 : 600, color: current ? "#1d4ed8" : "#374151", lineHeight:"1.4" }}>
-                                      {lvlName}
-                                    </div>
-                                    {reward && (
-                                      <div style={{ fontSize:10, color: done ? "#15803d" : "#94a3b8", marginTop:2, fontWeight:600, lineHeight:"1.4" }}>
-                                        {done ? "🎁 " : "💡 "}{reward}
-                                      </div>
-                                    )}
-                                    {done && (
-                                      <ClaimButton walletType="distSellerWallet" level={n} />
-                                    )}
-                                  </div>
-                                  <span style={{ fontSize:10, color:"#94a3b8", fontWeight:700, whiteSpace:"nowrap", flexShrink:0, marginTop:2 }}>{v} PPC</span>
+                            {nextLevelName && (
+                              <div className="space-y-1.5">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-stone-400">Next: <strong className="text-sky-400">{nextLevelName}</strong></span>
+                                  <span className="font-bold text-sky-400">{ppc} / {nextThreshold} PPC</span>
+                                </div>
+                                <div className={`h-2.5 rounded-full overflow-hidden ${isDark ? "bg-sky-950/60" : "bg-sky-100"}`}>
+                                  <div style={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full" />
                                 </div>
                               </div>
-                            )
-                          })}
-                        </div>
-                      )
-                    })()}
+                            )}
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
 
-                    {wallet.withdrawable && wallet.ppcCount > 0 && (
-                      <button
-                        onClick={() => setPage("withdrawal-request")}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mt-2"
-                      >
-                        Request Withdrawal
-                      </button>
-                    )}
-                  </>
+                {wallet.withdrawable && (wallet.ppcCount || 0) > 0 && (
+                  <button
+                    onClick={() => setPage("withdrawal-request")}
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black uppercase text-xs tracking-wider rounded-xl transition-all cursor-pointer shadow-lg active:scale-98"
+                  >
+                    Request Withdrawal ➔
+                  </button>
                 )}
               </div>
             ))}
           </div>
 
-          {/* ⭐ UNIFIED DIRECT SELLER REWARD ROADMAP */}
+          {/* Direct Seller Unified Reward Roadmap for Seller role */}
           {walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
             const thresholds = walletData.sellerLevelUpThresholds
             const levelNames = walletData.sellerLevelNames || {}
@@ -556,7 +510,7 @@ export default function PPCWallet({ setPage }) {
             const ppc = walletData.totalSellerPPC !== undefined
               ? walletData.totalSellerPPC
               : ((walletData.wallets?.userWallet?.ppcCount || 0) + (walletData.wallets?.sellerWallet?.ppcCount || 0))
-            
+
             let currentLevel = 0
             const sortedLevels = Object.entries(thresholds)
               .map(([k, v]) => ({ n: parseInt(k.replace("level", "")), v }))
@@ -569,150 +523,85 @@ export default function PPCWallet({ setPage }) {
             const progress = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
 
             return (
-              <div className="bg-white rounded-2xl shadow-md p-6 border border-amber-200/60 mt-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className={`p-6 rounded-3xl border shadow-xl mt-6 space-y-4 ${
+                isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+              }`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 font-mono text-[10px] font-bold uppercase mb-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase mb-1">
                       🌟 Unified Seller Progression
                     </div>
-                    <h3 className="text-lg font-black text-gray-900">Direct Seller Achievement Rewards</h3>
-                    <p className="text-xs text-gray-500">User orders + Team seller orders dono ka PPC ek sath judkar milestones unlock karta hai!</p>
+                    <h3 className="text-base sm:text-lg font-black">Direct Seller Achievement Rewards</h3>
+                    <p className="text-xs text-stone-400">User orders + Team seller orders dono ka PPC ek sath judkar milestones unlock karta hai!</p>
                   </div>
-                  <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black text-right shrink-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider block">Combined Total</span>
-                    <span className="text-lg font-black">{ppc} PPC</span>
+                  <div className={`px-4 py-2 rounded-2xl border text-right shrink-0 ${
+                    isDark ? "bg-white/[0.03] border-white/10" : "bg-stone-50 border-stone-200"
+                  }`}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block text-stone-400">Combined Total</span>
+                    <span className="text-xl font-black text-emerald-500">{ppc} PPC</span>
                   </div>
                 </div>
 
-                {/* 🧮 Clear Arithmetic "Plus Equation" Box */}
-                <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 border border-amber-300 rounded-xl p-4 mb-4 shadow-xs">
-                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800 mb-2">
-                    🧮 PPC UNIFIED REWARD CALCULATION FORMULA
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono font-bold">
-                    <div className="px-3 py-2 rounded-xl bg-sky-100 text-sky-800 border border-sky-300 flex items-center gap-1.5">
-                      <span>🛒 Direct User Sales:</span>
-                      <strong className="text-sm">{walletData.wallets?.userWallet?.ppcCount || 0} PPC</strong>
-                    </div>
-                    <span className="text-xl font-black text-amber-600">+</span>
-                    <div className="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5">
-                      <span>👥 Downline Team Sales:</span>
-                      <strong className="text-sm">{walletData.wallets?.sellerWallet?.ppcCount || 0} PPC</strong>
-                    </div>
-                    <span className="text-xl font-black text-amber-600">=</span>
-                    <div className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black border border-amber-300 flex items-center gap-1.5 shadow-sm">
-                      <span>🌟 Total Combined:</span>
-                      <strong className="text-sm">{ppc} PPC</strong>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-amber-900 mt-2.5 font-medium leading-relaxed">
-                    💡 <strong>Spasht Niyam:</strong> Aap chahein toh apni poori PPC target Direct User sales se complete karein ya Downline Team sales se — dono ka PPC ek sath judkar aapka reward unlock karta hai!
-                  </p>
-                </div>
-
-                {/* Current Level Banner */}
-                <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 rounded-xl p-4 mb-4 text-white">
-                  <div className="text-[11px] opacity-80 uppercase font-mono tracking-wider">Current Level Status</div>
-                  <div className="text-xl font-black">{currentLevelName}</div>
-                </div>
-
-                {/* Progress Bar */}
+                {/* Progress bar */}
                 {nextLevelName ? (
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs font-bold mb-1.5">
-                      <span className="text-gray-700">Next Target: <strong className="text-indigo-600">{nextLevelName}</strong></span>
-                      <span className="text-indigo-600 font-mono">{ppc} / {nextThreshold} PPC</span>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-stone-400">Next Milestone: <strong className="text-purple-400">{nextLevelName}</strong></span>
+                      <span className="text-purple-400">{ppc} / {nextThreshold} PPC</span>
                     </div>
-                    <div className="h-3 bg-indigo-100 rounded-full overflow-hidden">
+                    <div className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-purple-950/60" : "bg-purple-100"}`}>
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-amber-400 rounded-full transition-all duration-500"
                         style={{ width: `${progress}%` }}
+                        className="h-full bg-gradient-to-r from-purple-500 to-emerald-500 rounded-full transition-all duration-500"
                       />
                     </div>
-                    <p className="text-[11px] text-gray-500 mt-1.5">
-                      🎉 Sirf <strong>{nextThreshold - ppc} PPC</strong> aur chahiye <strong>{nextLevelName}</strong> reward unlock karne ke liye!
-                    </p>
                   </div>
                 ) : (
-                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-800 font-bold mb-4">
-                    👑 Congratulations! Aapne sabhi maximum milestone levels complete kar liye hain!
+                  <div className={`p-3 rounded-xl text-xs font-bold border ${
+                    isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
+                  }`}>
+                    👑 Maximum Level Achieved!
                   </div>
                 )}
-
-                {/* All 4 Level Milestone Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-                  {sortedLevels.map(({ n, v }) => {
-                    const lvlName = levelNames[`level${n}`] || `Level ${n}`
-                    const reward = levelRewards[`level${n}`] || ""
-                    const done = ppc >= v
-                    const current = currentLevel === n
-
-                    return (
-                      <div
-                        key={n}
-                        className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 ${
-                          current ? "bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-400/30" :
-                          done ? "bg-emerald-50/50 border-emerald-300" : "bg-gray-50 border-gray-200 opacity-80"
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-center justify-between text-xs font-bold mb-1">
-                            <span className={done ? "text-emerald-700" : current ? "text-indigo-700" : "text-gray-700"}>
-                              {done ? "✅ " : current ? "🔵 " : "⭕ "}{lvlName}
-                            </span>
-                            <span className="font-mono text-[10px] text-gray-500">{v} PPC</span>
-                          </div>
-                          {reward && (
-                            <p className={`text-xs mt-1 ${done ? "text-emerald-600 font-bold" : "text-gray-600"}`}>
-                              {done ? "🎁 " : "💡 "}{reward}
-                            </p>
-                          )}
-                        </div>
-
-                        {done && (
-                          <div className="pt-1">
-                            <ClaimButton walletType="sellerWalletAsSeller" level={n} />
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
               </div>
             )
           })()}
         </div>
       )}
-      
-      {/* Commission History - Collapsible */}
+
+      {/* ── Earnings History ── */}
       {walletData.history && walletData.history.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className={`rounded-3xl border overflow-hidden shadow-xl ${
+          isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+        }`}>
           <button
             onClick={() => setShowHistory(p => !p)}
-            className="w-full flex items-center justify-between px-4 sm:px-6 py-4 hover:bg-gray-50 transition text-left"
+            className={`w-full flex items-center justify-between p-5 transition text-left cursor-pointer ${
+              isDark ? "hover:bg-white/[0.02]" : "hover:bg-stone-50"
+            }`}
           >
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800">📋 Earnings History</h2>
-              <p style={{ fontSize:11, color:"#94a3b8", margin:"2px 0 0" }}>
+              <h2 className="text-base font-bold">📋 Earnings History</h2>
+              <p className="text-[11px] text-stone-400 mt-0.5">
                 Har entry mein — kahan se mila, kaunsa wallet, kya rate tha
               </p>
             </div>
-            <span className="text-gray-400 text-lg">{showHistory ? "▲" : "▼"}</span>
+            <span className="text-xs text-stone-400">{showHistory ? "▲" : "▼"}</span>
           </button>
 
           {showHistory && (
-            <div className="border-t border-gray-100 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">PPC Count</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Position / Source</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate × % = Value</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Wallet</th>
+            <div className={`border-t overflow-x-auto ${isDark ? "border-white/[0.06]" : "border-stone-100"}`}>
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className={`border-b ${isDark ? "border-white/[0.06] bg-black/20" : "border-stone-100 bg-stone-50"}`}>
+                    {["Date & Time", "PPC Count", "Position / Source", "Rate × % = Value", "Wallet"].map(h => (
+                      <th key={h} className="p-3 text-[10px] font-bold uppercase tracking-wider text-stone-400 whitespace-nowrap">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className={`divide-y ${isDark ? "divide-white/[0.04]" : "divide-stone-100"}`}>
                   {walletData.history.filter(i => (i.ppcCount || 0) > 0).map((item, idx) => {
                     const rate  = item.ppcBaseRate || walletData.currentPPCRate || 0
                     const pct   = item.percentageShare || 50
@@ -723,54 +612,37 @@ export default function PPCWallet({ setPage }) {
                     : item.walletType === "sellerWallet"         ? "Direct Seller Wallet"
                     : item.walletType || "—"
 
-                    const posColor =
-                      item.positionType === "direct"      ? { bg:"#f0fdf4", color:"#15803d", label:"Direct (user sale)" }
-                    : item.positionType === "parent"      ? { bg:"#eff6ff", color:"#1d4ed8", label:"Parent Seller"       }
-                    : item.positionType === "distributor" ? { bg:"#faf5ff", color:"#7c3aed", label:"Distributor"         }
-                    : { bg:"#f8fafc", color:"#64748b", label: item.positionType }
-
                     return (
-                      <tr key={idx} style={{ background: idx%2===0?"#fff":"#fafafa" }}>
-
-                        {/* Date */}
-                        <td style={{ padding:"10px 12px", fontSize:11, color:"#64748b", whiteSpace:"nowrap" }}>
+                      <tr key={idx} className={isDark ? "hover:bg-white/[0.02]" : "hover:bg-stone-50"}>
+                        <td className="p-3 text-stone-400 whitespace-nowrap text-[11px]">
                           <div>{new Date(item.createdAt).toLocaleDateString("en-IN")}</div>
-                          <div style={{ color:"#94a3b8" }}>{new Date(item.createdAt).toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" })}</div>
+                          <div className="text-[10px] opacity-70">
+                            {new Date(item.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
                         </td>
-
-                        {/* PPC Count */}
-                        <td style={{ padding:"10px 12px" }}>
-                          <span style={{ fontWeight:800, fontSize:14, color:"#7c3aed" }}>{item.ppcCount}</span>
-                          <span style={{ fontSize:11, color:"#94a3b8", marginLeft:3 }}>PPC</span>
+                        <td className="p-3 font-black text-purple-400 text-sm">
+                          {item.ppcCount} <span className="text-[10px] text-stone-400 font-normal">PPC</span>
                         </td>
-
-                        {/* Position */}
-                        <td style={{ padding:"10px 12px" }}>
-                          <span style={{ fontSize:11, fontWeight:700, background:posColor.bg, color:posColor.color, borderRadius:6, padding:"2px 8px" }}>
-                            {posColor.label}
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                            isDark ? "bg-white/[0.04] border-white/10 text-stone-300" : "bg-stone-100 border-stone-200 text-stone-700"
+                          }`}>
+                            {item.positionType || "direct"}
                           </span>
-                          <div style={{ fontSize:10, color:"#94a3b8", marginTop:3 }}>
-                            Share: <b>{pct}%</b>
+                        </td>
+                        <td className="p-3 font-bold text-emerald-500">
+                          ₹{rupee.toFixed(2)}
+                          <div className="text-[10px] text-stone-400 font-normal mt-0.5">
+                            {item.ppcCount} × ₹{rate} × {pct}%
                           </div>
                         </td>
-
-                        {/* Rate × % = Value */}
-                        <td style={{ padding:"10px 12px" }}>
-                          <div style={{ fontWeight:800, fontSize:13, color:"#16a34a" }}>
-                            ₹{rupee.toFixed(2)}
-                          </div>
-                          <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>
-                            {item.ppcCount} PPC × ₹{rate} × {pct}%
-                          </div>
-                        </td>
-
-                        {/* Wallet type */}
-                        <td style={{ padding:"10px 12px" }}>
-                          <span style={{ fontSize:10, background:"#f1f5f9", color:"#475569", borderRadius:4, padding:"2px 7px", fontWeight:600 }}>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono ${
+                            isDark ? "bg-white/[0.03] text-stone-400" : "bg-stone-100 text-stone-600"
+                          }`}>
                             {walletLabel}
                           </span>
                         </td>
-
                       </tr>
                     )
                   })}
@@ -780,7 +652,7 @@ export default function PPCWallet({ setPage }) {
           )}
         </div>
       )}
-      
+
     </div>
   )
 }

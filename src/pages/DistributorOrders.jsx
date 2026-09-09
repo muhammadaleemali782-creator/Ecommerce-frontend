@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
 
 export default function DistributorOrders() {
@@ -11,6 +12,7 @@ export default function DistributorOrders() {
   const [noteVisible, setNoteVisible] = useState(false)
   const [busy,        setBusy]        = useState(null)
   const [isMobile,    setIsMobile]    = useState(window.innerWidth < 768)
+  const { isDark } = useTheme() || {}
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -318,7 +320,7 @@ export default function DistributorOrders() {
                     : { label: order.status, bg:"#f8fafc", color:"#64748b", border:"#e2e8f0" }
 
                     return (
-                      <tr key={order._id} style={{ borderBottom:"1px solid #f1f5f9", background: i%2===0?"#fff":"#fafbfc" }}>
+                      <tr key={order._id} style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"}`, background: isDark ? (i%2===0 ? "#111417" : "#14181c") : (i%2===0 ? "#fff" : "#fafbfc") }}>
 
                         {/* ORDER ID + Date */}
                         <td style={{ padding:"12px 14px", whiteSpace:"nowrap" }}>

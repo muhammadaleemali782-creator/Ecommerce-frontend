@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
 import InlineLoader from "../components/InlineLoader"
 
@@ -142,14 +143,18 @@ export default function SellerOrders() {
       ) : (
         <div className="space-y-4">
           {orders.map(order => (
-            <div key={order._id} className="bg-white rounded-xl shadow p-5 space-y-4">
+            <div key={order._id} className={`rounded-2xl p-5 space-y-4 border transition-all ${
+              isDark
+                ? "bg-[#111417] border-white/[0.08] shadow-lg shadow-black/40"
+                : "bg-white border-stone-200 shadow-sm"
+            }`}>
 
               {/* Header */}
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-mono text-xs text-gray-400">#{order._id.slice(-6)}</p>
                   <p className="font-bold text-lg">₹{fmt(order.total)}</p>
-                  <div className="text-base font-bold text-gray-900">
+                  <div className={`text-base font-bold ${isDark ? "text-stone-100" : "text-gray-900"}`}>
                     {order.customerFullName || order.userId?.fullName || order.customerName || "Customer"}
                   </div>
                   {order.customerName && order.customerName !== (order.customerFullName || order.userId?.fullName) && (
@@ -224,10 +229,10 @@ export default function SellerOrders() {
                       const qty = item.qty || item.quantity || 1
                       const ppc = item.ppcReward || 0
                       return (
-                        <div key={i} style={{ background:"#f8fafc", borderRadius:8, padding:"8px 10px", border:"1px solid #e2e8f0" }}>
+                        <div key={i} style={{ background: isDark ? "#181c20" : "#f8fafc", borderRadius:10, padding:"8px 12px", border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}` }}>
                           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                             {/* ✅ Product Name — sab ko dikhao */}
-                            <span style={{ fontWeight:600, fontSize:13, color:"#1e293b" }}>
+                            <span style={{ fontWeight:600, fontSize:13, color: isDark ? "#f1f5f9" : "#1e293b" }}>
                               {item.title || item.name || "Product"} × {qty}
                             </span>
                             <span style={{ fontWeight:700, fontSize:13, color:"#16a34a" }}>

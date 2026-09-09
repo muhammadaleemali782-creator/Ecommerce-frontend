@@ -1,4 +1,5 @@
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import Store from "../pages/Store"
@@ -7,6 +8,7 @@ import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip,
 
 export default function SellerDashboard({ setPage }) {
   const { user } = useAuth()
+  const { isDark } = useTheme() || {}
   const { products = [] } = useStore()
   const [orders, setOrders]     = useState([])
   const [downline, setDownline] = useState([])
@@ -120,23 +122,46 @@ export default function SellerDashboard({ setPage }) {
     ]
 
     return (
-      <div style={{minHeight:"100vh",background:"#f8fafc",paddingBottom:72,fontFamily:"system-ui,sans-serif"}}>
+      <div className={`min-h-screen pb-24 transition-colors duration-200 ${
+        isDark ? "bg-[#090b0c] text-stone-200" : "bg-stone-50 text-stone-900"
+      }`} style={{fontFamily:"system-ui,sans-serif"}}>
 
         {/* ── Top Header ── */}
-        <div style={{background:"linear-gradient(135deg,#2563eb,#4f46e5)",padding:"20px 16px 24px",borderRadius:"0 0 28px 28px"}}>
+        <div style={{
+          background: isDark
+            ? "linear-gradient(135deg, #0f172a 0%, #111417 100%)"
+            : "linear-gradient(135deg,#2563eb,#4f46e5)",
+          padding: "20px 16px 24px",
+          borderRadius: "0 0 28px 28px",
+          borderBottom: isDark ? "1px solid rgba(59,130,246,0.2)" : "none",
+          boxShadow: isDark ? "0 8px 32px rgba(0,0,0,0.6)" : "0 4px 20px rgba(37,99,235,0.25)"
+        }}>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"#fff",flexShrink:0}}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: 16,
+              background: isDark ? "rgba(59,130,246,0.2)" : "rgba(255,255,255,0.2)",
+              border: isDark ? "1px solid rgba(59,130,246,0.4)" : "1px solid rgba(255,255,255,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              fontWeight: 800,
+              color: isDark ? "#60a5fa" : "#fff",
+              flexShrink: 0
+            }}>
               {(user.fullName || user.name || "S")[0].toUpperCase()}
             </div>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{color:"rgba(255,255,255,0.75)",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>
+              <div style={{color:isDark?"#93c5fd":"rgba(255,255,255,0.75)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>
                 {isUser?"User":"Seller"} Dashboard
               </div>
-              <div style={{color:"#fff",fontWeight:700,fontSize:16,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+              <div style={{color:"#fff",fontWeight:800,fontSize:17,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                 {user.fullName || user.name}
               </div>
               {user.name && user.name !== user.fullName && (
-                <div style={{color:"rgba(255,255,255,0.85)",fontSize:11,fontWeight:600,fontFamily:"monospace"}}>🆔 {user.name}</div>
+                <div style={{color:isDark?"#94a3b8":"rgba(255,255,255,0.85)",fontSize:11,fontWeight:600,fontFamily:"monospace"}}>🆔 {user.name}</div>
               )}
             </div>
           </div>
@@ -144,16 +169,24 @@ export default function SellerDashboard({ setPage }) {
           {/* Quick stat pills */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {[
-              {label:"Total Orders",value:orders.length,         icon:"🛒"},
-              {label:"Total Sales", value:`₹${totalSales.toLocaleString("en-IN")}`,icon:"💰"},
-              {label:"Pending",     value:pending,               icon:"⏳"},
-              {label:"Confirmed",   value:confirmed.length,      icon:"✅"},
+              {label:"Total Orders",value:orders.length,         icon:"🛒", color: isDark ? "#60a5fa" : "#fff"},
+              {label:"Total Sales", value:`₹${totalSales.toLocaleString("en-IN")}`,icon:"💰", color: isDark ? "#4ade80" : "#fff"},
+              {label:"Pending",     value:pending,               icon:"⏳", color: isDark ? "#fbbf24" : "#fff"},
+              {label:"Confirmed",   value:confirmed.length,      icon:"✅", color: isDark ? "#34d399" : "#fff"},
             ].map(s=>(
-              <div key={s.label} style={{background:"rgba(255,255,255,0.15)",borderRadius:14,padding:"10px 12px",display:"flex",alignItems:"center",gap:8}}>
+              <div key={s.label} style={{
+                background: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.15)",
+                borderRadius: 14,
+                padding: "10px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                border: isDark ? "1px solid rgba(255,255,255,0.08)" : "none"
+              }}>
                 <span style={{fontSize:20}}>{s.icon}</span>
                 <div>
-                  <div style={{color:"#fff",fontWeight:700,fontSize:15,lineHeight:1}}>{s.value}</div>
-                  <div style={{color:"rgba(255,255,255,0.7)",fontSize:10,marginTop:2}}>{s.label}</div>
+                  <div style={{color:s.color,fontWeight:800,fontSize:15,lineHeight:1}}>{s.value}</div>
+                  <div style={{color:isDark?"#94a3b8":"rgba(255,255,255,0.7)",fontSize:10,marginTop:2}}>{s.label}</div>
                 </div>
               </div>
             ))}
@@ -167,8 +200,14 @@ export default function SellerDashboard({ setPage }) {
           {tab==="overview" && (
             <>
               {/* Order Status */}
-              <div style={{background:"#fff",borderRadius:18,padding:16,boxShadow:"0 1px 8px #0001"}}>
-                <div style={{fontWeight:700,fontSize:13,color:"#1e293b",marginBottom:10}}>Order Summary</div>
+              <div style={{
+                background: isDark ? "#111417" : "#fff",
+                borderRadius: 18,
+                padding: 16,
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}`,
+                boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 1px 8px #0001"
+              }}>
+                <div style={{fontWeight:700,fontSize:13,color:isDark?"#f1f5f9":"#1e293b",marginBottom:10}}>Order Summary</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
                   {[
                     {label:"Pending",  v:pending,          bg:"#fffbeb",c:"#d97706"},
@@ -423,17 +462,35 @@ export default function SellerDashboard({ setPage }) {
           {tab==="store" && <div style={{background:"#fff",borderRadius:18,padding:12,boxShadow:"0 1px 8px #0001"}}><Store/></div>}
         </div>
 
-        {/* ── Bottom Tab Bar ── */}
-        <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#fff",borderTop:"1px solid #e2e8f0",display:"flex",zIndex:999,boxShadow:"0 -4px 20px #0001"}}>
-          {mobileTabs.map(t=>(
-            <button key={t.key} onClick={()=>setTab(t.key)}
-              style={{flex:1,padding:"10px 4px",border:"none",background:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,
-                color:tab===t.key?"#2563eb":"#94a3b8",transition:"color 0.2s"}}>
-              <span style={{fontSize:20}}>{t.icon}</span>
-              <span style={{fontSize:9,fontWeight:tab===t.key?700:500}}>{t.label}</span>
-              {tab===t.key && <div style={{width:4,height:4,borderRadius:"50%",background:"#2563eb"}}/>}
-            </button>
-          ))}
+        {/* ── Modern Floating Dock Bottom Nav ── */}
+        <div className="fixed bottom-3 inset-x-3 max-w-sm mx-auto z-40">
+          <div className={`p-1.5 rounded-2xl border backdrop-blur-xl flex items-center justify-around shadow-2xl transition-all ${
+            isDark
+              ? "bg-[#111417]/95 border-white/10 shadow-black/80"
+              : "bg-white/95 border-stone-200/90 shadow-stone-400/20"
+          }`}>
+            {mobileTabs.map(t => {
+              const isActive = tab === t.key
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
+                    isActive
+                      ? isDark
+                        ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                        : "bg-blue-50 text-blue-700 border border-blue-200"
+                      : isDark
+                        ? "text-stone-400 hover:text-stone-200"
+                        : "text-stone-500 hover:text-stone-900"
+                  }`}
+                >
+                  <span className="text-base leading-none">{t.icon}</span>
+                  <span className="text-[10px] font-bold leading-none tracking-wide mt-0.5">{t.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
     )
@@ -450,7 +507,8 @@ export default function SellerDashboard({ setPage }) {
   ]
 
   return (
-    <div style={{display:"flex",gap:24,maxWidth:1100,margin:"0 auto",padding:"32px 24px",fontFamily:"system-ui,sans-serif"}}>
+    <div className={`transition-colors duration-200 ${isDark ? "bg-[#090b0c] text-stone-200" : "bg-stone-50 text-stone-900"}`} style={{minHeight:"100vh",fontFamily:"system-ui,sans-serif"}}>
+    <div style={{display:"flex",gap:24,maxWidth:1100,margin:"0 auto",padding:"32px 24px"}}>
 
       {/* ── Sidebar ── */}
       <div style={{width:260,flexShrink:0,display:"flex",flexDirection:"column",gap:16}}>
@@ -468,7 +526,13 @@ export default function SellerDashboard({ setPage }) {
         </div>
 
         {/* Quick stats */}
-        <div style={{background:"#fff",borderRadius:20,padding:16,boxShadow:"0 2px 12px #0001"}}>
+        <div style={{
+          background: isDark ? "#111417" : "#fff",
+          borderRadius: 20,
+          padding: 16,
+          border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}`,
+          boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 2px 12px #0001"
+        }}>
           {[
             {label:"Total Orders",value:orders.length,          color:"#2563eb"},
             {label:"Total Sales", value:`₹${totalSales.toLocaleString("en-IN")}`,color:"#16a34a"},
@@ -484,11 +548,17 @@ export default function SellerDashboard({ setPage }) {
         </div>
 
         {/* Nav */}
-        <div style={{background:"#fff",borderRadius:20,padding:"8px",boxShadow:"0 2px 12px #0001"}}>
+        <div style={{
+          background: isDark ? "#111417" : "#fff",
+          borderRadius: 20,
+          padding: "8px",
+          border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}`,
+          boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 2px 12px #0001"
+        }}>
           {desktopTabs.map(t=>(
             <button key={t.key} onClick={()=>setTab(t.key)}
               style={{width:"100%",textAlign:"left",padding:"11px 14px",borderRadius:12,border:"none",cursor:"pointer",fontSize:13,fontWeight:600,marginBottom:2,
-                background:tab===t.key?"#eff6ff":"transparent",color:tab===t.key?"#2563eb":"#64748b",transition:"all 0.15s"}}>
+                background:tab===t.key?(isDark?"rgba(59,130,246,0.15)":"#eff6ff"):"transparent",color:tab===t.key?(isDark?"#60a5fa":"#2563eb"):(isDark?"#94a3b8":"#64748b"),transition:"all 0.15s"}}>
               {t.label}
             </button>
           ))}
@@ -765,5 +835,6 @@ export default function SellerDashboard({ setPage }) {
         {tab==="store" && <div style={{background:"#fff",borderRadius:20,padding:20,boxShadow:"0 2px 12px #0001"}}><Store/></div>}
       </div>
     </div>
+  </div>
   )
 }
