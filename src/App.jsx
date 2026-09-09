@@ -356,7 +356,7 @@ function AppContent() {
   return (
     <div
       className={`min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[220px]"
+        sidebarCollapsed ? "lg:ml-[64px]" : "lg:ml-[220px]"
       }`}
       style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >

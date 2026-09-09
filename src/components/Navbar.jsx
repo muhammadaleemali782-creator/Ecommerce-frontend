@@ -3,6 +3,34 @@ import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import NotificationBell from "./NotificationBell"
 import EducaLogo from "./EducaLogo"
+import {
+  Home,
+  Sparkles,
+  Stethoscope,
+  BookOpen,
+  Landmark,
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
+  Sun,
+  Moon,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
+  Crown,
+  Receipt,
+  Users,
+  Network,
+  Wallet,
+  Package,
+  ShoppingCart,
+  FileText,
+  Settings,
+  Image,
+  Wrench,
+  AlertTriangle,
+  Activity
+} from "lucide-react"
 
 export default function Navbar({ setPage, currentPage = "home", cartCount, pageBadge = {}, isCollapsed = false, onToggleCollapse }) {
   const { loggedIn, logout, user } = useAuth() || {}
@@ -113,7 +141,35 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
 
   const currentRoleData = loggedIn ? (roleNavItems[role] || roleNavItems.user) : null
 
-  // ── Shared nav link button ──
+  // ── Lucide Icon mapper for navigation items ──
+  const getNavIcon = (link) => {
+    const label = (link.label || "").toUpperCase()
+    if (link.pg === "home" && !link.section) return <Home size={18} strokeWidth={2} />
+    if (link.section === "billboard-ayurved") return <Sparkles size={18} strokeWidth={2} />
+    if (link.section === "billboard-rogsetu") return <Stethoscope size={18} strokeWidth={2} />
+    if (link.section === "billboard-gurukul") return <BookOpen size={18} strokeWidth={2} />
+    if (link.section === "billboard-banking") return <Landmark size={18} strokeWidth={2} />
+    if (link.pg === "store") return <ShoppingBag size={18} strokeWidth={2} />
+
+    if (label.includes("DASHBOARD") || label.includes("ADMIN PANEL")) return <LayoutDashboard size={18} strokeWidth={2} />
+    if (label.includes("ROYALTY")) return <Crown size={18} strokeWidth={2} />
+    if (label.includes("STATEMENT")) return <Receipt size={18} strokeWidth={2} />
+    if (label.includes("RADAR")) return <Activity size={18} strokeWidth={2} />
+    if (label.includes("ORDER")) return <ShoppingCart size={18} strokeWidth={2} />
+    if (label.includes("TEAM") || label.includes("USER")) return <Users size={18} strokeWidth={2} />
+    if (label.includes("NETWORK")) return <Network size={18} strokeWidth={2} />
+    if (label.includes("WALLET") || label.includes("WITHDRAWAL")) return <Wallet size={18} strokeWidth={2} />
+    if (label.includes("PRODUCT")) return <Package size={18} strokeWidth={2} />
+    if (label.includes("REQUEST") || label.includes("REQ")) return <FileText size={18} strokeWidth={2} />
+    if (label.includes("SETTING") || label.includes("INVOICE") || label.includes("EMAIL")) return <Settings size={18} strokeWidth={2} />
+    if (label.includes("BANNER")) return <Image size={18} strokeWidth={2} />
+    if (label.includes("SERVICE")) return <Wrench size={18} strokeWidth={2} />
+    if (label.includes("NUKE")) return <AlertTriangle size={18} strokeWidth={2} />
+
+    return <ChevronRight size={18} strokeWidth={2} />
+  }
+
+  // ── Shared nav link button (Expanded mode) ──
   const NavLink = ({ link, i }) => {
     const isActive = link.section
       ? (activeSection === link.section && currentPage === link.pg)
@@ -124,9 +180,11 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         onClick={() => go(link.pg, link.section)}
         className={`w-full text-left py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 text-[11px] uppercase tracking-wider group ${
           isActive
-            ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black shadow-md border border-amber-300 scale-[1.01]"
+            ? isDark
+              ? "bg-amber-400/15 text-amber-400 font-black border border-amber-400/35 shadow-[0_0_12px_rgba(251,191,36,0.15)] scale-[1.01]"
+              : "bg-amber-500/15 text-amber-900 font-black border border-amber-500/40 shadow-sm scale-[1.01]"
             : isDark
-              ? "hover:bg-white/[0.07] text-slate-200 hover:text-white font-bold"
+              ? "hover:bg-white/[0.07] text-stone-300 hover:text-white font-bold"
               : "hover:bg-stone-100 text-stone-800 hover:text-black font-bold"
         }`}
       >
@@ -134,15 +192,50 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
           {link.label}
           {link.badge && (
             <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-black ${
-              isActive ? "bg-black text-amber-300" : "bg-emerald-400 text-black"
+              isActive ? "bg-amber-400 text-black" : "bg-emerald-400 text-black"
             }`}>
               {link.badge}
             </span>
           )}
         </span>
         <span className={`text-sm ${
-          isActive ? "text-black font-black" : isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
+          isActive
+            ? isDark ? "text-amber-400 font-black" : "text-amber-800 font-black"
+            : isDark ? "text-white/20 group-hover:text-white/50" : "text-stone-300 group-hover:text-stone-600"
         }`}>›</span>
+      </button>
+    )
+  }
+
+  // ── Collapsed nav link button (Icon only, perfectly centered) ──
+  const CollapsedNavLink = ({ link, i }) => {
+    const isActive = link.section
+      ? (activeSection === link.section && currentPage === link.pg)
+      : (!link.section && activeSection === null && currentPage === link.pg)
+    const cleanLabel = link.label.replace(/^[\p{Emoji}\s]+/u, "").trim()
+
+    return (
+      <button
+        key={i}
+        onClick={() => go(link.pg, link.section)}
+        title={cleanLabel || link.label}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 group relative ${
+          isActive
+            ? isDark
+              ? "bg-amber-400/15 text-amber-400 border border-amber-400/40 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
+              : "bg-amber-500/15 text-amber-800 border border-amber-500/40 shadow-sm"
+            : isDark
+              ? "text-stone-400 hover:text-white hover:bg-white/[0.08] border border-transparent"
+              : "text-stone-500 hover:text-stone-900 hover:bg-stone-100 border border-transparent"
+        }`}
+      >
+        {isActive && (
+          <span className="absolute -left-2 top-2.5 bottom-2.5 w-1 rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+        )}
+        {getNavIcon(link)}
+        {link.badge && (
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#090c0a]" />
+        )}
       </button>
     )
   }
@@ -195,127 +288,85 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
           DESKTOP LEFT SIDEBAR (lg and above)
       ═══════════════════════════════════════════════ */}
       <aside className={`hidden lg:flex fixed top-0 left-0 h-screen z-50 flex-col border-r transition-all duration-300 ease-in-out ${
-        isCollapsed ? "w-[72px]" : "w-[220px]"
+        isCollapsed ? "w-[64px]" : "w-[220px]"
       } ${
         isDark
           ? "bg-[#090c0a] text-white border-white/[0.08]"
           : "bg-white text-stone-900 border-stone-200 shadow-md"
       }`}>
 
-        {/* Logo Header + Collapse Toggle Button */}
-        <div className={`flex items-center justify-between px-3.5 h-14 shrink-0 border-b relative ${
-          isDark ? "border-white/[0.08]" : "border-stone-200"
-        }`}>
-          <div
-            className="flex items-center gap-2.5 cursor-pointer group min-w-0 overflow-hidden"
-            onClick={() => go("home")}
-            title="EDUCA VEDA"
-          >
-            <div className="shrink-0">
-              <EducaLogo size={28} />
-            </div>
-            {!isCollapsed && (
-              <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none transition-all duration-200 ${
-                isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+        {/* Logo Header + Collapse / Expand Toggle */}
+        <div className={`h-14 shrink-0 border-b flex items-center ${
+          isCollapsed ? "justify-center px-1" : "justify-between px-3.5"
+        } ${isDark ? "border-white/[0.08]" : "border-stone-200"}`}>
+          {isCollapsed ? (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              title="Expand sidebar"
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer group relative ${
+                isDark
+                  ? "hover:bg-white/[0.08] text-stone-400 hover:text-amber-400"
+                  : "hover:bg-stone-100 text-stone-600 hover:text-amber-600"
+              }`}
+              aria-label="Expand sidebar"
+            >
+              <EducaLogo size={24} />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm ${
+                isDark ? "bg-[#090c0a] border-white/20 text-stone-300 group-hover:text-amber-400 group-hover:border-amber-400/50" : "bg-white border-stone-300 text-stone-600 group-hover:text-amber-600"
               }`}>
-                EDUCA VEDA
+                <ChevronRight size={10} strokeWidth={3} />
               </span>
-            )}
-          </div>
+            </button>
+          ) : (
+            <>
+              <div
+                className="flex items-center gap-2.5 cursor-pointer group min-w-0 overflow-hidden"
+                onClick={() => go("home")}
+                title="EDUCA VEDA"
+              >
+                <div className="shrink-0">
+                  <EducaLogo size={28} />
+                </div>
+                <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none transition-all duration-200 ${
+                  isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+                }`}>
+                  EDUCA VEDA
+                </span>
+              </div>
 
-          {/* Sidebar Collapse Toggle Button */}
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer border shrink-0 ${
-              isDark
-                ? "bg-white/[0.06] hover:bg-white/[0.14] text-stone-300 border-white/10"
-                : "bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-300 shadow-sm"
-            } ${isCollapsed ? "mx-auto" : ""}`}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {isCollapsed ? "»" : "«"}
-          </button>
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                title="Collapse sidebar"
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer border shrink-0 ${
+                  isDark
+                    ? "bg-white/[0.06] hover:bg-white/[0.14] text-stone-300 border-white/10 hover:text-white"
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-300 shadow-sm"
+                }`}
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft size={14} strokeWidth={2.5} />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Scrollable Links */}
         <div className="flex-1 overflow-y-auto overscroll-contain py-2 no-scrollbar">
           {isCollapsed ? (
-            <div className="px-2 space-y-1">
-              {publicLinks.map((link, i) => {
-                const isActive = link.section
-                  ? (activeSection === link.section && currentPage === link.pg)
-                  : (!link.section && activeSection === null && currentPage === link.pg)
-                return (
-                  <button
-                    key={i}
-                    onClick={() => go(link.pg, link.section)}
-                    title={link.label}
-                    className={`w-full py-2.5 px-0 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 group relative ${
-                      isActive
-                        ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow-md border border-amber-300"
-                        : isDark
-                          ? "hover:bg-white/[0.07] text-slate-200"
-                          : "hover:bg-stone-100 text-stone-800"
-                    }`}
-                  >
-                    <span className="text-sm font-bold">
-                      {link.label === "HOME" ? "🏠" :
-                       link.label === "HEALTH" ? "🌿" :
-                       link.label === "ROGSETU" ? "🩺" :
-                       link.label === "GURUKUL" ? "📚" :
-                       link.label === "FINANCE" ? "🏦" :
-                       link.label === "SHOP" ? "🛒" : "✦"}
-                    </span>
-                    {link.badge && (
-                      <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400"></span>
-                    )}
-                  </button>
-                )
-              })}
+            <div className="px-1.5 space-y-1.5 flex flex-col items-center">
+              {publicLinks.map((link, i) => (
+                <CollapsedNavLink key={i} link={link} i={i} />
+              ))}
 
               {loggedIn && currentRoleData && (
-                <div className={`pt-2 border-t mt-2 space-y-1 ${
-                  isDark ? "border-white/[0.06]" : "border-stone-200"
+                <div className={`pt-2 border-t mt-2 space-y-1.5 flex flex-col items-center w-full ${
+                  isDark ? "border-white/[0.08]" : "border-stone-200"
                 }`}>
-                  {currentRoleData.links.map((link, i) => {
-                    const isActive = currentPage === link.pg
-                    // Extract emoji or first letter for icon
-                    const iconMatch = link.label.match(/^(\p{Emoji})/u)
-                    const displayIcon = iconMatch ? iconMatch[0] : (
-                      link.label.includes("DASHBOARD") ? "📊" :
-                      link.label.includes("ORDER") ? "📦" :
-                      link.label.includes("TEAM") ? "👥" :
-                      link.label.includes("NETWORK") ? "🌐" :
-                      link.label.includes("WALLET") ? "💰" :
-                      link.label.includes("WITHDRAWAL") ? "💳" :
-                      link.label.includes("REQUEST") ? "📝" :
-                      link.label.includes("USER") ? "👤" :
-                      link.label.includes("PRODUCT") ? "🏷️" :
-                      link.label.includes("SETTING") ? "⚙️" :
-                      link.label.includes("BANNER") ? "🖼️" :
-                      link.label.includes("SERVICE") ? "🛠️" :
-                      link.label.includes("NUKE") ? "☢️" : "⭐"
-                    )
-
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => go(link.pg, link.section)}
-                        title={link.label}
-                        className={`w-full py-2.5 px-0 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 group ${
-                          isActive
-                            ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-black shadow-md border border-amber-300"
-                            : isDark
-                              ? "hover:bg-white/[0.07] text-slate-200"
-                              : "hover:bg-stone-100 text-stone-800"
-                        }`}
-                      >
-                        <span className="text-sm font-bold">{displayIcon}</span>
-                      </button>
-                    )
-                  })}
+                  {currentRoleData.links.map((link, i) => (
+                    <CollapsedNavLink key={i} link={link} i={i} />
+                  ))}
                 </div>
               )}
             </div>
@@ -324,78 +375,122 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
           )}
         </div>
 
-        {/* Bottom: theme + bell + user */}
-        <div className={`px-2 py-3 border-t shrink-0 space-y-2 ${
+        {/* Bottom Actions: Theme + Bell + User */}
+        <div className={`p-2 border-t shrink-0 flex flex-col items-center gap-2 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
-          {/* Theme toggle + notification bell */}
-          <div className={`flex items-center ${isCollapsed ? "flex-col gap-2" : "justify-between px-1"}`}>
-            <button
-              onClick={toggleTheme}
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              className={`rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
-                isCollapsed ? "w-9 h-9" : "p-1.5 gap-1"
-              } ${
-                isDark ? "bg-white/[0.06] border-white/10 text-amber-300" : "bg-stone-100 border-stone-300 text-amber-600"
-              }`}
-            >
-              {isCollapsed ? (isDark ? "☀️" : "🌙") : (isDark ? "☀️ Light" : "🌙 Dark")}
-            </button>
-            {loggedIn && <NotificationBell isMobile={false} />}
-          </div>
-
-          {loggedIn ? (
+          {isCollapsed ? (
             <>
-              {/* User card */}
+              {/* Theme toggle */}
               <button
-                onClick={() => go("my-profile")}
-                title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
-                className={`w-full flex items-center rounded-xl transition-all cursor-pointer border ${
-                  isCollapsed ? "justify-center p-1.5" : "gap-2.5 p-2"
-                } ${
-                  isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
+                onClick={toggleTheme}
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-white/[0.04] border-white/10 text-amber-300 hover:bg-white/[0.1] hover:text-amber-200"
+                    : "bg-stone-100 border-stone-200 text-amber-600 hover:bg-stone-200"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${avatarClass}`}>
-                  {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
-                </div>
-                {!isCollapsed && (
-                  <div className="min-w-0 text-left">
-                    <div className={`text-[10px] font-black truncate max-w-[120px] ${isDark ? "text-white" : "text-stone-900"}`}>
-                      {safeUser?.fullName || safeUser?.name || "User"}
-                    </div>
-                    <div className={`text-[8px] font-mono uppercase ${
-                      role === "admin" ? "text-amber-500" :
-                      role === "distributor" ? "text-sky-500" :
-                      role === "seller" ? "text-emerald-500" : "text-violet-500"
-                    }`}>{role}</div>
-                  </div>
-                )}
+                {isDark ? <Sun size={17} strokeWidth={2} /> : <Moon size={17} strokeWidth={2} />}
               </button>
 
-              {/* Sign out */}
-              <button
-                onClick={logout}
-                title="Sign Out"
-                className={`w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black transition-colors cursor-pointer uppercase border border-red-500/20 flex items-center justify-center ${
-                  isCollapsed ? "text-xs px-0" : "text-[10px]"
-                }`}
-              >
-                {isCollapsed ? "🚪" : "SIGN OUT"}
-              </button>
+              {/* Notification Bell */}
+              {loggedIn && <NotificationBell isMobile={false} />}
+
+              {loggedIn ? (
+                <>
+                  {/* User Profile Avatar */}
+                  <button
+                    onClick={() => go("my-profile")}
+                    title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 border cursor-pointer transition-all hover:scale-105 ${avatarClass}`}
+                  >
+                    {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
+                  </button>
+
+                  {/* Sign Out */}
+                  <button
+                    onClick={logout}
+                    title="Sign Out"
+                    className="w-10 h-10 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 flex items-center justify-center cursor-pointer transition-all"
+                  >
+                    <LogOut size={16} strokeWidth={2} />
+                  </button>
+                </>
+              ) : (
+                /* Clean Sign In Button */
+                <button
+                  onClick={() => go("login")}
+                  title="Sign In"
+                  className={`w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer transition-all shadow-sm ${
+                    isDark
+                      ? "bg-white text-black hover:bg-amber-400 hover:text-black border-white hover:border-amber-400"
+                      : "bg-stone-900 text-white hover:bg-stone-800 border-stone-900"
+                  }`}
+                >
+                  <LogIn size={16} strokeWidth={2} />
+                </button>
+              )}
             </>
           ) : (
-            <button
-              onClick={() => go("login")}
-              title="Sign In"
-              className={`w-full rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center ${
-                isCollapsed ? "py-2 text-[10px]" : "py-2.5"
-              } ${
-                isDark ? "bg-white text-black hover:bg-amber-50" : "bg-stone-900 text-white hover:bg-stone-800"
-              }`}
-            >
-              {isCollapsed ? "IN" : "SIGN IN"}
-            </button>
+            <div className="w-full space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <button
+                  onClick={toggleTheme}
+                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  className={`p-1.5 gap-1 rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
+                    isDark ? "bg-white/[0.06] border-white/10 text-amber-300" : "bg-stone-100 border-stone-300 text-amber-600"
+                  }`}
+                >
+                  {isDark ? "☀️ Light" : "🌙 Dark"}
+                </button>
+                {loggedIn && <NotificationBell isMobile={false} />}
+              </div>
+
+              {loggedIn ? (
+                <>
+                  <button
+                    onClick={() => go("my-profile")}
+                    title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
+                    className={`w-full flex items-center rounded-xl transition-all cursor-pointer border gap-2.5 p-2 ${
+                      isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${avatarClass}`}>
+                      {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <div className={`text-[10px] font-black truncate max-w-[120px] ${isDark ? "text-white" : "text-stone-900"}`}>
+                        {safeUser?.fullName || safeUser?.name || "User"}
+                      </div>
+                      <div className={`text-[8px] font-mono uppercase ${
+                        role === "admin" ? "text-amber-500" :
+                        role === "distributor" ? "text-sky-500" :
+                        role === "seller" ? "text-emerald-500" : "text-violet-500"
+                      }`}>{role}</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={logout}
+                    title="Sign Out"
+                    className="w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black transition-colors cursor-pointer uppercase border border-red-500/20 flex items-center justify-center text-[10px]"
+                  >
+                    SIGN OUT
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => go("login")}
+                  title="Sign In"
+                  className={`w-full rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center py-2.5 ${
+                    isDark ? "bg-white text-black hover:bg-amber-50" : "bg-stone-900 text-white hover:bg-stone-800"
+                  }`}
+                >
+                  SIGN IN
+                </button>
+              )}
+            </div>
           )}
         </div>
       </aside>
