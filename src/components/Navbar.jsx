@@ -12,6 +12,8 @@ import {
   ShoppingBag,
   ChevronLeft,
   ChevronRight,
+  PanelLeft,
+  PanelLeftClose,
   Sun,
   Moon,
   LogIn,
@@ -287,210 +289,134 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
       {/* ═══════════════════════════════════════════════
           DESKTOP LEFT SIDEBAR (lg and above)
       ═══════════════════════════════════════════════ */}
-      <aside className={`hidden lg:flex fixed top-0 left-0 h-screen z-50 flex-col border-r transition-all duration-300 ease-in-out ${
-        isCollapsed ? "w-[64px]" : "w-[220px]"
+      {/* ═══════════════════════════════════════════════
+          DESKTOP FLOATING TOGGLE (When Sidebar is Collapsed)
+      ═══════════════════════════════════════════════ */}
+      {isCollapsed && (
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          title="Open sidebar"
+          aria-label="Open sidebar"
+          className={`hidden lg:flex fixed top-3.5 left-4 z-40 w-9 h-9 rounded-xl items-center justify-center cursor-pointer transition-all duration-200 border shadow-lg backdrop-blur-md hover:scale-105 active:scale-95 ${
+            isDark
+              ? "bg-[#090c0a]/90 hover:bg-[#141815] text-stone-300 hover:text-amber-400 border-white/15 shadow-black/40"
+              : "bg-white/95 hover:bg-stone-50 text-stone-700 hover:text-amber-700 border-stone-300/80 shadow-stone-200/50"
+          }`}
+        >
+          <PanelLeft size={18} strokeWidth={2} />
+        </button>
+      )}
+
+      {/* ═══════════════════════════════════════════════
+          DESKTOP LEFT SIDEBAR (lg and above)
+      ═══════════════════════════════════════════════ */}
+      <aside className={`hidden lg:flex fixed top-0 left-0 h-screen w-[230px] z-50 flex-col border-r transition-transform duration-300 ease-out ${
+        isCollapsed ? "-translate-x-full pointer-events-none" : "translate-x-0 pointer-events-auto"
       } ${
         isDark
           ? "bg-[#090c0a] text-white border-white/[0.08]"
           : "bg-white text-stone-900 border-stone-200 shadow-md"
       }`}>
 
-        {/* Logo Header + Collapse / Expand Toggle */}
-        <div className={`h-14 shrink-0 border-b flex items-center ${
-          isCollapsed ? "justify-center px-1" : "justify-between px-3.5"
-        } ${isDark ? "border-white/[0.08]" : "border-stone-200"}`}>
-          {isCollapsed ? (
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              title="Expand sidebar"
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer group relative ${
-                isDark
-                  ? "hover:bg-white/[0.08] text-stone-400 hover:text-amber-400"
-                  : "hover:bg-stone-100 text-stone-600 hover:text-amber-600"
-              }`}
-              aria-label="Expand sidebar"
-            >
-              <EducaLogo size={24} />
-              <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm ${
-                isDark ? "bg-[#090c0a] border-white/20 text-stone-300 group-hover:text-amber-400 group-hover:border-amber-400/50" : "bg-white border-stone-300 text-stone-600 group-hover:text-amber-600"
-              }`}>
-                <ChevronRight size={10} strokeWidth={3} />
-              </span>
-            </button>
-          ) : (
-            <>
-              <div
-                className="flex items-center gap-2.5 cursor-pointer group min-w-0 overflow-hidden"
-                onClick={() => go("home")}
-                title="EDUCA VEDA"
-              >
-                <div className="shrink-0">
-                  <EducaLogo size={28} />
-                </div>
-                <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none transition-all duration-200 ${
-                  isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
-                }`}>
-                  EDUCA VEDA
-                </span>
-              </div>
+        {/* Logo Header + Collapse Button */}
+        <div className={`h-14 shrink-0 border-b flex items-center justify-between px-3.5 ${
+          isDark ? "border-white/[0.08]" : "border-stone-200"
+        }`}>
+          <div
+            className="flex items-center gap-2.5 cursor-pointer group min-w-0 overflow-hidden"
+            onClick={() => go("home")}
+            title="EDUCA VEDA"
+          >
+            <div className="shrink-0">
+              <EducaLogo size={28} />
+            </div>
+            <span className={`text-[11px] font-black uppercase tracking-[0.18em] whitespace-nowrap leading-none transition-all duration-200 ${
+              isDark ? "text-white group-hover:text-[#fbbf24]" : "text-stone-900 group-hover:text-amber-700"
+            }`}>
+              EDUCA VEDA
+            </span>
+          </div>
 
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                title="Collapse sidebar"
-                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer border shrink-0 ${
-                  isDark
-                    ? "bg-white/[0.06] hover:bg-white/[0.14] text-stone-300 border-white/10 hover:text-white"
-                    : "bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-300 shadow-sm"
-                }`}
-                aria-label="Collapse sidebar"
-              >
-                <ChevronLeft size={14} strokeWidth={2.5} />
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
+            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-pointer border shrink-0 hover:scale-105 active:scale-95 ${
+              isDark
+                ? "bg-white/[0.06] hover:bg-white/[0.14] text-stone-300 border-white/10 hover:text-amber-400"
+                : "bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-300 shadow-sm hover:text-amber-700"
+            }`}
+          >
+            <PanelLeftClose size={16} strokeWidth={2} />
+          </button>
         </div>
 
         {/* Scrollable Links */}
         <div className="flex-1 overflow-y-auto overscroll-contain py-2 no-scrollbar">
-          {isCollapsed ? (
-            <div className="px-1.5 space-y-1.5 flex flex-col items-center">
-              {publicLinks.map((link, i) => (
-                <CollapsedNavLink key={i} link={link} i={i} />
-              ))}
-
-              {loggedIn && currentRoleData && (
-                <div className={`pt-2 border-t mt-2 space-y-1.5 flex flex-col items-center w-full ${
-                  isDark ? "border-white/[0.08]" : "border-stone-200"
-                }`}>
-                  {currentRoleData.links.map((link, i) => (
-                    <CollapsedNavLink key={i} link={link} i={i} />
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <NavContent />
-          )}
+          <NavContent />
         </div>
 
         {/* Bottom Actions: Theme + Bell + User */}
-        <div className={`p-2 border-t shrink-0 flex flex-col items-center gap-2 ${
+        <div className={`p-2 border-t shrink-0 space-y-2 ${
           isDark ? "border-white/[0.08]" : "border-stone-200"
         }`}>
-          {isCollapsed ? (
+          <div className="flex items-center justify-between px-1">
+            <button
+              onClick={toggleTheme}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className={`p-1.5 gap-1 rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
+                isDark ? "bg-white/[0.06] border-white/10 text-amber-300" : "bg-stone-100 border-stone-300 text-amber-600"
+              }`}
+            >
+              {isDark ? "☀️ Light" : "🌙 Dark"}
+            </button>
+            {loggedIn && <NotificationBell isMobile={false} />}
+          </div>
+
+          {loggedIn ? (
             <>
-              {/* Theme toggle */}
               <button
-                onClick={toggleTheme}
-                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-white/[0.04] border-white/10 text-amber-300 hover:bg-white/[0.1] hover:text-amber-200"
-                    : "bg-stone-100 border-stone-200 text-amber-600 hover:bg-stone-200"
+                onClick={() => go("my-profile")}
+                title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
+                className={`w-full flex items-center rounded-xl transition-all cursor-pointer border gap-2.5 p-2 ${
+                  isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
                 }`}
               >
-                {isDark ? <Sun size={17} strokeWidth={2} /> : <Moon size={17} strokeWidth={2} />}
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${avatarClass}`}>
+                  {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
+                </div>
+                <div className="min-w-0 text-left">
+                  <div className={`text-[10px] font-black truncate max-w-[120px] ${isDark ? "text-white" : "text-stone-900"}`}>
+                    {safeUser?.fullName || safeUser?.name || "User"}
+                  </div>
+                  <div className={`text-[8px] font-mono uppercase ${
+                    role === "admin" ? "text-amber-500" :
+                    role === "distributor" ? "text-sky-500" :
+                    role === "seller" ? "text-emerald-500" : "text-violet-500"
+                  }`}>{role}</div>
+                </div>
               </button>
 
-              {/* Notification Bell */}
-              {loggedIn && <NotificationBell isMobile={false} />}
-
-              {loggedIn ? (
-                <>
-                  {/* User Profile Avatar */}
-                  <button
-                    onClick={() => go("my-profile")}
-                    title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 border cursor-pointer transition-all hover:scale-105 ${avatarClass}`}
-                  >
-                    {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
-                  </button>
-
-                  {/* Sign Out */}
-                  <button
-                    onClick={logout}
-                    title="Sign Out"
-                    className="w-10 h-10 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 flex items-center justify-center cursor-pointer transition-all"
-                  >
-                    <LogOut size={16} strokeWidth={2} />
-                  </button>
-                </>
-              ) : (
-                /* Clean Sign In Button */
-                <button
-                  onClick={() => go("login")}
-                  title="Sign In"
-                  className={`w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer transition-all shadow-sm ${
-                    isDark
-                      ? "bg-white text-black hover:bg-amber-400 hover:text-black border-white hover:border-amber-400"
-                      : "bg-stone-900 text-white hover:bg-stone-800 border-stone-900"
-                  }`}
-                >
-                  <LogIn size={16} strokeWidth={2} />
-                </button>
-              )}
+              <button
+                onClick={logout}
+                title="Sign Out"
+                className="w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black transition-colors cursor-pointer uppercase border border-red-500/20 flex items-center justify-center text-[10px]"
+              >
+                SIGN OUT
+              </button>
             </>
           ) : (
-            <div className="w-full space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <button
-                  onClick={toggleTheme}
-                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                  className={`p-1.5 gap-1 rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
-                    isDark ? "bg-white/[0.06] border-white/10 text-amber-300" : "bg-stone-100 border-stone-300 text-amber-600"
-                  }`}
-                >
-                  {isDark ? "☀️ Light" : "🌙 Dark"}
-                </button>
-                {loggedIn && <NotificationBell isMobile={false} />}
-              </div>
-
-              {loggedIn ? (
-                <>
-                  <button
-                    onClick={() => go("my-profile")}
-                    title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
-                    className={`w-full flex items-center rounded-xl transition-all cursor-pointer border gap-2.5 p-2 ${
-                      isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${avatarClass}`}>
-                      {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <div className={`text-[10px] font-black truncate max-w-[120px] ${isDark ? "text-white" : "text-stone-900"}`}>
-                        {safeUser?.fullName || safeUser?.name || "User"}
-                      </div>
-                      <div className={`text-[8px] font-mono uppercase ${
-                        role === "admin" ? "text-amber-500" :
-                        role === "distributor" ? "text-sky-500" :
-                        role === "seller" ? "text-emerald-500" : "text-violet-500"
-                      }`}>{role}</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={logout}
-                    title="Sign Out"
-                    className="w-full py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black transition-colors cursor-pointer uppercase border border-red-500/20 flex items-center justify-center text-[10px]"
-                  >
-                    SIGN OUT
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => go("login")}
-                  title="Sign In"
-                  className={`w-full rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center py-2.5 ${
-                    isDark ? "bg-white text-black hover:bg-amber-50" : "bg-stone-900 text-white hover:bg-stone-800"
-                  }`}
-                >
-                  SIGN IN
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => go("login")}
+              title="Sign In"
+              className={`w-full rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center py-2.5 ${
+                isDark ? "bg-white text-black hover:bg-amber-50" : "bg-stone-900 text-white hover:bg-stone-800"
+              }`}
+            >
+              SIGN IN
+            </button>
           )}
         </div>
       </aside>
