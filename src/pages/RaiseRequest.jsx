@@ -341,7 +341,61 @@ export default function RaiseUserRequest() {
 
   if (domainLoading) return <div className="p-6 text-gray-400">Loading...</div>
 
+  // ── Referral link (ponytail: window.location only, no backend needed) ──
+  const refLink = `${window.location.origin}?ref=${user?.name || ""}&role=${user?.role || ""}`
+  const roleToCreates = {
+    admin:       "Distributor / Seller / User ban sakte hain",
+    distributor: "Distributor ya Seller ban sakte hain",
+    seller:      "Seller ya User ban sakte hain",
+    user:        "User ban sakte hain",
+  }
+  const createsLabel = roleToCreates[user?.role] || "Join kar sakte hain"
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(refLink)
+      .then(() => alert("✅ Link copy ho gaya!"))
+      .catch(() => alert("Copy nahi hua, manually copy karo:\n" + refLink))
+  }
+
+  const shareLink = () => {
+    if (navigator.share) {
+      navigator.share({ title: "EDUCA VEDA — Join karo", text: `Is link se ${createsLabel}`, url: refLink })
+    } else {
+      copyLink()
+    }
+  }
+
   return (
+    <>
+      {/* ── REFERRAL LINK CARD ── */}
+      <div style={{ maxWidth: 448, marginBottom: 16, background: "#f0fdf4", border: "1.5px solid #16a34a", borderRadius: 12, padding: "14px 16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 18 }}>🔗</span>
+          <span style={{ fontWeight: 700, fontSize: 14, color: "#15803d" }}>Apna Referral Link Share Karo</span>
+        </div>
+        <p style={{ fontSize: 12, color: "#166534", marginBottom: 10, lineHeight: 1.5 }}>
+          Is link se join karne wale log <b>aapke neeche</b> aayenge.<br />
+          <span style={{ background: "#dcfce7", padding: "1px 6px", borderRadius: 99, fontWeight: 600 }}>
+            {user?.role === "distributor" ? "🏢 Distributor" : user?.role === "seller" ? "🛒 Seller" : user?.role === "admin" ? "👑 Admin" : "👤 User"}
+          </span>{" "}
+          ke roop mein aap share kar rahe hain — is link se <b>{createsLabel}</b>.
+        </p>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", background: "#fff", border: "1px solid #bbf7d0", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
+          <span style={{ flex: 1, fontSize: 11, color: "#374151", fontFamily: "monospace", wordBreak: "break-all" }}>{refLink}</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" onClick={copyLink}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1.5px solid #16a34a", background: "#16a34a", color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+            📋 Copy Link
+          </button>
+          <button type="button" onClick={shareLink}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1.5px solid #16a34a", background: "#fff", color: "#16a34a", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+            📤 Share
+          </button>
+        </div>
+      </div>
+
+
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow max-w-md space-y-4">
       <h2 className="font-bold text-xl">Request New User</h2>
 
@@ -533,5 +587,6 @@ export default function RaiseUserRequest() {
         {loading ? "Sending..." : "Send Request"}
       </button>
     </form>
+    </>
   )
 }

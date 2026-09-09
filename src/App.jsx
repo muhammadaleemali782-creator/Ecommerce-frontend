@@ -327,7 +327,7 @@ function AppContent() {
 
   return (
     <div
-      className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white"
+      className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white lg:ml-[220px]"
       style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
