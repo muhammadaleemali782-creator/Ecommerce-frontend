@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
+import { useAuth } from "./AuthContext"
 
 const NotificationContext = createContext(null)
 const API = `${import.meta.env.VITE_API_URL}/api/notifications`
@@ -7,6 +8,7 @@ const API = `${import.meta.env.VITE_API_URL}/api/notifications`
    PROVIDER
 ───────────────────────────────────────── */
 export function NotificationProvider({ children }) {
+  const { user, loggedIn } = useAuth() || {}
   const [notifications, setNotifications] = useState([])
   const [isOpen,        setIsOpenState]  = useState(false)
   const isOpenRef = useRef(false)
@@ -63,13 +65,21 @@ export function NotificationProvider({ children }) {
     }
   }, [])
 
-  /* ── Auto start/stop on login/logout ── */
+  /* ── Auto start/stop on login/logout or user change ── */
   useEffect(() => {
-    if (isLoggedIn()) startPolling()
+    const currentUserId = user?._id || user?.id
+    if (loggedIn && currentUserId && isLoggedIn()) {
+      setNotifications([]) // Clear previous user's notifications immediately
+      startPolling()
+    } else {
+      stopPolling()
+      setNotifications([])
+    }
 
     const onStorage = () => {
-      if (isLoggedIn()) startPolling()
-      else {
+      if (isLoggedIn()) {
+        startPolling()
+      } else {
         stopPolling()
         setNotifications([])
       }
@@ -79,7 +89,7 @@ export function NotificationProvider({ children }) {
       window.removeEventListener("storage", onStorage)
       stopPolling()
     }
-  }, [startPolling, stopPolling])
+  }, [loggedIn, user?._id, user?.id, startPolling, stopPolling])
 
   /* ── Delete single notification (on click/open) ── */
   const deleteNotif = useCallback(async (id) => {
