@@ -257,12 +257,6 @@ export default function Login({ setPage }) {
     }
   };
 
-  const quickFill = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError("");
-  };
-
   const handleChangePassword = async (e) => {
     if (e) e.preventDefault();
     if (!newPass || !confirmPass) {
@@ -552,36 +546,6 @@ export default function Login({ setPage }) {
             </button>
           </form>
         )}
-
-        {/* ── QUICK DEMO PRESETS ── */}
-        <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
-          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest text-center">
-            Quick demo presets
-          </span>
-          <div className="grid grid-cols-3 gap-1.5">
-            <button
-              type="button"
-              onClick={() => quickFill("admin@gmail.com", "12345")}
-              className="py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.09] text-slate-300 text-[10px] font-mono font-medium transition-colors cursor-pointer text-center"
-            >
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => quickFill("distributor@gmail.com", "12345")}
-              className="py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.09] text-slate-300 text-[10px] font-mono font-medium transition-colors cursor-pointer text-center"
-            >
-              Distributor
-            </button>
-            <button
-              type="button"
-              onClick={() => quickFill("seller@gmail.com", "12345")}
-              className="py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.09] text-slate-300 text-[10px] font-mono font-medium transition-colors cursor-pointer text-center"
-            >
-              Seller
-            </button>
-          </div>
-        </div>
 
         {/* Visit Website / Back to Home Link */}
         <div className="text-center pt-2 border-t border-white/[0.08]">

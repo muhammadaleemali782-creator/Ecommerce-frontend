@@ -82,22 +82,24 @@ export default function NotificationBell({ isMobile = false }) {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    width:  isMobile ? 36 : 38,
-    height: isMobile ? 36 : 38,
+    width:  isMobile ? 34 : 38,
+    height: isMobile ? 34 : 38,
     borderRadius: 10,
     border: isOpen
-      ? "2px solid #f59e0b"
+      ? "1.5px solid #f59e0b"
       : unreadCount > 0
-        ? "2px solid #fbbf24"
-        : isDark ? "2px solid rgba(255,255,255,0.12)" : "2px solid #e2e8f0",
+        ? isDark ? "1px solid rgba(251,191,36,0.4)" : "1.5px solid #fbbf24"
+        : isDark ? "1px solid rgba(255,255,255,0.12)" : "1px solid #e2e8f0",
     background: isOpen
       ? isDark ? "rgba(245,158,11,0.2)" : "#fef3c7"
       : unreadCount > 0
-        ? isDark ? "rgba(251,191,36,0.15)" : "#fffbeb"
-        : isDark ? "rgba(255,255,255,0.06)" : "#f8fafc",
+        ? isDark ? "rgba(251,191,36,0.12)" : "#fffbeb"
+        : isDark ? "rgba(255,255,255,0.07)" : "#f8fafc",
     cursor: "pointer",
-    boxShadow: unreadCount > 0 ? "0 0 0 3px rgba(251,191,36,0.2)" : "none",
-    transition: "all 0.2s",
+    boxShadow: unreadCount > 0
+      ? isDark ? "0 0 10px rgba(251,191,36,0.18)" : "0 0 0 3px rgba(251,191,36,0.15)"
+      : "none",
+    transition: "all 0.18s ease-out",
   }
 
   // Dropdown panel style based on portal & positioning
