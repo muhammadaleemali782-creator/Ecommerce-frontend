@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Navbar from "./components/Navbar"
 import HeroBanner from "./components/HeroBanner"
 import GrowthLoader from "./components/GrowthLoader"
@@ -80,6 +80,24 @@ function AppContent() {
   const [page, setPage] = useState("home")
   const [booting, setBooting] = useState(true)
   const [bootMsg, setBootMsg] = useState("")
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("sidebar_collapsed") === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleCollapse = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem("sidebar_collapsed", String(next))
+      } catch {}
+      return next
+    })
+  }, [])
+
   const { cart = [] }          = useStore() || {}
   const { loggedIn, user, logout, loading } = useAuth() || {}
   const { registerSetPage, pageBadge = {} } = useNotifications()
@@ -337,11 +355,21 @@ function AppContent() {
 
   return (
     <div
-      className="min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white lg:ml-[220px]"
+      className={`min-h-screen bg-transparent selection:bg-emerald-500 selection:text-white transition-all duration-300 ease-in-out ${
+        sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[220px]"
+      }`}
       style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >
       {(booting || loading) && <GrowthLoader subtitle={booting ? bootMsg : ""} />}
-      <Navbar setPage={setPage} currentPage={page} cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0} pageBadge={pageBadge} noBottomMargin={page === "home"} />
+      <Navbar
+        setPage={setPage}
+        currentPage={page}
+        cartCount={cart?.reduce((sum, item) => sum + (item.qty || 1), 0) || 0}
+        pageBadge={pageBadge}
+        noBottomMargin={page === "home"}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={toggleCollapse}
+      />
       {page === "home" && <HeroBanner setPage={setPage} />}
       <main className={page === "home" || page === "store" ? "w-full p-0 m-0 overflow-hidden" : "p-2 sm:p-6 pb-28 sm:pb-12 max-w-[1400px] mx-auto"}>
         {renderPage()}
