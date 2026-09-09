@@ -627,12 +627,12 @@ export default function DistributorDashboard({ setPage }) {
             ? "bg-gradient-to-br from-[#121c16] via-[#101412] to-[#0c100e] border-emerald-500/25 shadow-xl shadow-emerald-950/20"
             : "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white border-emerald-500/30 shadow-lg"
         }`}>
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black mb-3 border ${
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center p-1 mb-3 border overflow-hidden ${
             isDark
-              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
               : "bg-white/20 text-white border-white/30"
           }`}>
-            {(user.fullName || user.name || "D")[0].toUpperCase()}
+            <EducaLogo size={48} />
           </div>
           <div className="text-base font-black truncate">{user.fullName || user.name}</div>
           {user.name && (

@@ -391,8 +391,8 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                   isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${avatarClass}`}>
-                  {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border overflow-hidden p-0.5 ${avatarClass}`}>
+                  <EducaLogo size={26} />
                 </div>
                 <div className="min-w-0 text-left">
                   <div className={`text-[10px] font-black truncate max-w-[120px] ${isDark ? "text-white" : "text-stone-900"}`}>
@@ -513,8 +513,8 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         }`}>
           {loggedIn ? (
             <div className="flex items-center gap-2.5 min-w-0 pr-1 cursor-pointer" onClick={() => go("my-profile")}>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0 border shadow-sm ${avatarClass}`}>
-                {(safeUser?.fullName || safeUser?.name || "U")[0].toUpperCase()}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border shadow-sm overflow-hidden p-0.5 ${avatarClass}`}>
+                <EducaLogo size={30} />
               </div>
               <div className="min-w-0 text-left">
                 <div className="flex items-center gap-1.5 leading-tight">

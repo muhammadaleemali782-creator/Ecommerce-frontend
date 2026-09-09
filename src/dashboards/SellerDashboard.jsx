@@ -516,8 +516,8 @@ export default function SellerDashboard({ setPage }) {
 
         {/* Profile card */}
         <div style={{background:"linear-gradient(135deg,#2563eb,#4f46e5)",borderRadius:20,padding:20,color:"#fff",boxShadow:"0 4px 20px #2563eb30"}}>
-          <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:700,marginBottom:12}}>
-            {(user.fullName || user.name || "S")[0].toUpperCase()}
+          <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",padding:2,marginBottom:12,border:"1px solid rgba(255,255,255,0.35)",overflow:"hidden"}}>
+            <EducaLogo size={50} />
           </div>
           <div style={{fontWeight:700,fontSize:18}}>{user.fullName || user.name}</div>
           {user.name && user.name !== user.fullName && (

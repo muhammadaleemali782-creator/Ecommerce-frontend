@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext"
 import AdminAnalytics from "../admin/AdminAnalytics"
 import CreateUser from "../admin/CreateUser"
 import ShareButton from "../components/ShareButton"
+import EducaLogo from "../components/EducaLogo"
 
 /*
   ═════════════════════════════════════════════════════════════════════
@@ -231,8 +232,8 @@ export default function Admin({ setPage }) {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
             
             <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-[#fbbf24] to-amber-200 text-black flex items-center justify-center text-2xl sm:text-3xl font-black shadow-[0_0_25px_rgba(251,191,36,0.3)] shrink-0">
-                {user?.name ? user.name[0].toUpperCase() : "A"}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-[#fbbf24] to-amber-200 p-1 flex items-center justify-center shadow-[0_0_25px_rgba(251,191,36,0.35)] shrink-0 border border-amber-300/40">
+                <EducaLogo size={52} />
               </div>
 
               <div>

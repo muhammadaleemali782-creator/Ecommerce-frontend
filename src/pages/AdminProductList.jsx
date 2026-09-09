@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react"
 import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
 
 export default function AdminProductList() {
   const { isDark } = useTheme()
@@ -206,22 +207,27 @@ export default function AdminProductList() {
           ? "bg-[#121814] border-white/[0.08]"
           : "bg-white border-stone-200 shadow-sm"
       }`}>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 dark:text-amber-300 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
-              ✦ INVENTORY & PERMISSIONS
-            </span>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 mt-1">
+            <EducaLogo size={36} />
           </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 text-amber-600 dark:text-amber-300 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+                ✦ INVENTORY & PERMISSIONS
+              </span>
+            </div>
           <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
             isDark ? "text-white" : "text-stone-900"
           }`}>
             Product Management & User Assignment
           </h1>
-          <p className={`text-xs font-medium mt-0.5 ${
-            isDark ? "text-stone-400" : "text-stone-600"
-          }`}>
-            Total Available Products: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{products.length}</span> · Total Registered Users: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{users.length}</span>
-          </p>
+            <p className={`text-xs font-medium mt-0.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              Total Available Products: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{products.length}</span> · Total Registered Users: <span className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{users.length}</span>
+            </p>
+          </div>
         </div>
 
         {/* Search Input */}

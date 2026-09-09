@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel } from "../utils/roleLabels"
 import InlineLoader from "../components/InlineLoader"
+import EducaLogo from "../components/EducaLogo"
 
 export default function MyProfile() {
   const { user: authUser, updateUser } = useAuth()
@@ -158,12 +159,12 @@ export default function MyProfile() {
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-center gap-5 text-center sm:text-left">
             {/* Avatar with Glow Ring */}
-            <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center text-3xl sm:text-4xl font-black shrink-0 border shadow-lg ${
+            <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center p-1.5 shrink-0 border shadow-lg overflow-hidden ${
               isDark
-                ? "bg-[#1a241e] text-[#fbbf24] border-[#fbbf24]/40 shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                : "bg-white text-stone-900 border-blue-400 shadow-md"
+                ? "bg-[#1a241e] border-[#fbbf24]/40 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
+                : "bg-white border-blue-400 shadow-md"
             }`}>
-              {initials}
+              <EducaLogo size={76} />
             </div>
 
             {/* Name and Badges */}

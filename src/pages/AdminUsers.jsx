@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { getRoleLabel } from "../utils/roleLabels"
 import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
 
 export default function AdminUsers() {
   const { isDark } = useTheme()
@@ -314,22 +315,27 @@ export default function AdminUsers() {
           ? "bg-[#121814] border-white/[0.08]"
           : "bg-white border-stone-200 shadow-sm"
       }`}>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-300 border border-sky-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
-              ✦ USER ACCOUNTS & DIRECTORY
-            </span>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 mt-1">
+            <EducaLogo size={36} />
           </div>
-          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
-            isDark ? "text-white" : "text-stone-900"
-          }`}>
-            User Accounts & Team Management
-          </h1>
-          <p className={`text-xs font-medium mt-0.5 ${
-            isDark ? "text-stone-400" : "text-stone-600"
-          }`}>
-            Active Accounts: <span className="text-emerald-500 dark:text-emerald-400 font-bold">{activeUsers.length}</span> · Soft Deleted: <span className="text-red-500 dark:text-red-400 font-bold">{deletedUsers.length}</span>
-          </p>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-300 border border-sky-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+                ✦ USER ACCOUNTS & DIRECTORY
+              </span>
+            </div>
+            <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
+              User Accounts & Team Management
+            </h1>
+            <p className={`text-xs font-medium mt-0.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              Active Accounts: <span className="text-emerald-500 dark:text-emerald-400 font-bold">{activeUsers.length}</span> · Soft Deleted: <span className="text-red-500 dark:text-red-400 font-bold">{deletedUsers.length}</span>
+            </p>
+          </div>
         </div>
 
         {/* Search Input */}

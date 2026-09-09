@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
 import InvoiceModal from "../components/InvoiceModal"
 import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
 
 const StatusBadge = ({ status }) => {
   const map = {
@@ -165,22 +166,27 @@ export default function AdminOrders() {
       <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
         isDark ? "bg-[#121814] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
       }`}>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
-              ✦ DISPATCH & ORDER WORKFLOW
-            </span>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 mt-1">
+            <EducaLogo size={36} />
           </div>
-          <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
-            isDark ? "text-white" : "text-stone-900"
-          }`}>
-            Order Management & Invoicing Hub
-          </h1>
-          <p className={`text-xs font-medium mt-0.5 ${
-            isDark ? "text-stone-400" : "text-stone-600"
-          }`}>
-            Stage 1: Distributor Review → Stage 2: Admin Final Approval · Invoices Generated Instantaneously
-          </p>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 text-[9.5px] font-black uppercase tracking-widest font-mono">
+                ✦ DISPATCH & ORDER WORKFLOW
+              </span>
+            </div>
+            <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
+              Order Management & Invoicing Hub
+            </h1>
+            <p className={`text-xs font-medium mt-0.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              Stage 1: Distributor Review → Stage 2: Admin Final Approval · Invoices Generated Instantaneously
+            </p>
+          </div>
         </div>
 
         <div className="w-full md:w-72">

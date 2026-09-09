@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import InlineLoader from "../components/InlineLoader"
+import EducaLogo from "../components/EducaLogo"
 
 export default function Orders() {
   const { deleteOrder, printInvoice } = useStore()
@@ -109,8 +110,16 @@ export default function Orders() {
 
   /* ================= UI ================= */
   return (
-    <div style={{ background:"#fff", borderRadius:12, padding:"20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)", fontFamily:"system-ui,sans-serif" }}>
-      <h2 style={{ fontSize:17, fontWeight:800, color:"#1e293b", marginBottom:16 }}>📦 My Orders</h2>
+    <div style={{ background:"#fff", borderRadius:16, padding:"20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)", fontFamily:"system-ui,sans-serif" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, paddingBottom:12, borderBottom:"1px solid #f1f5f9" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <EducaLogo size={32} />
+          <div>
+            <h2 style={{ fontSize:17, fontWeight:800, color:"#1e293b", margin:0, lineHeight:1.2 }}>📦 My Orders</h2>
+            <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:0.8 }}>Customer Order History · EDUCA-VEDA</div>
+          </div>
+        </div>
+      </div>
 
       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
         {orders.map(o => (
