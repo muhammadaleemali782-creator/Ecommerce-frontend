@@ -89,6 +89,7 @@ export default function Login({ setPage }) {
   const [userId, setUserId] = useState("");
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [syncToEducaMail, setSyncToEducaMail] = useState(true);
 
   // Lockout countdown
   useEffect(() => {
@@ -281,7 +282,7 @@ export default function Login({ setPage }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/users/change-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, newPassword: newPass.trim() })
+        body: JSON.stringify({ userId, newPassword: newPass.trim(), syncToEducaMail })
       });
       const data = await res.json();
       if (!data.success) {
@@ -523,6 +524,24 @@ export default function Login({ setPage }) {
                 placeholder="Repeat password"
                 className="w-full py-2.5 px-3 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:border-emerald-500 outline-none"
               />
+            </div>
+
+            {/* Sync with EDUCA Mailbox Option */}
+            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-start gap-2.5 my-1">
+              <input
+                type="checkbox"
+                id="syncEducaMail"
+                checked={syncToEducaMail}
+                onChange={(e) => setSyncToEducaMail(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-blue-500 bg-black/50 border-white/20 focus:ring-0 cursor-pointer accent-blue-500"
+              />
+              <label htmlFor="syncEducaMail" className="text-[11px] text-stone-300 cursor-pointer leading-tight select-none">
+                <span className="font-bold text-white block mb-0.5">📧 EDUCA Mail Sync:</span>
+                Kya aap EDUCA Mail mein bhi yahi naya password chahte hain?
+                <span className="block text-[10px] text-stone-400 mt-0.5">
+                  {syncToEducaMail ? "✅ Naya password Mailbox pe bhi update ho jayega." : "⚠️ EDUCA Mail ka purana password waisa hi rahega."}
+                </span>
+              </label>
             </div>
 
             <button

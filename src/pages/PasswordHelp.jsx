@@ -12,6 +12,7 @@ export default function PasswordHelp({ setPage }) {
   const [userId, setUserId] = useState("")
   const [otp, setOtp] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [syncToEducaMail, setSyncToEducaMail] = useState(true)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState("")
   const [error, setError] = useState("")
@@ -60,7 +61,13 @@ export default function PasswordHelp({ setPage }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/mail-reset/verify-and-reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, identifier: identifier.trim(), otp: otp.trim(), newPassword: newPassword.trim() })
+        body: JSON.stringify({
+          userId,
+          identifier: identifier.trim(),
+          otp: otp.trim(),
+          newPassword: newPassword.trim(),
+          syncToEducaMail
+        })
       })
       const data = await res.json()
       if (res.ok) {
@@ -218,6 +225,24 @@ export default function PasswordHelp({ setPage }) {
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+
+              {/* Sync with EDUCA Mailbox Option */}
+              <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-start gap-2.5 my-2 text-left">
+                <input
+                  type="checkbox"
+                  id="syncEducaMailReset"
+                  checked={syncToEducaMail}
+                  onChange={(e) => setSyncToEducaMail(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded text-blue-500 bg-black/50 border-white/20 focus:ring-0 cursor-pointer accent-blue-500"
+                />
+                <label htmlFor="syncEducaMailReset" className="text-[11px] text-stone-300 cursor-pointer leading-tight select-none">
+                  <span className="font-bold text-white block mb-0.5">📧 EDUCA Mail Sync:</span>
+                  Kya aap EDUCA Mail mein bhi yahi naya password chahte hain?
+                  <span className="block text-[10px] text-stone-400 mt-0.5">
+                    {syncToEducaMail ? "✅ Naya password Mailbox pe bhi update ho jayega." : "⚠️ EDUCA Mail ka purana password waisa hi rahega."}
+                  </span>
+                </label>
               </div>
               <div className="flex gap-2">
                 <button
