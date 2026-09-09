@@ -20,6 +20,7 @@ import AdminAddProduct   from "./pages/AdminAddProduct"
 import AdminRequests     from "./pages/AdminRequests"
 import AdminEmailSettings from "./pages/AdminEmailSettings"
 import RaiseRequest      from "./pages/RaiseRequest"
+import JoinRequest       from "./pages/JoinRequest"
 import AdminRequestsHistory from "./pages/AdminRequestsHistory"
 import MyCreatedUsers    from "./pages/MyCreatedUsers"
 
@@ -90,6 +91,14 @@ function AppContent() {
     registerSetPage(setPage)
   }, [registerSetPage])
 
+  /* 🔗 Check if visitor arrived via referral link (e.g. ?ref=DB001) */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("ref")) {
+      setPage("join")
+    }
+  }, [])
+
   /* 🌱 App khulte hi backend ko "jaga" do (Render free-tier cold-start).
      Jab tak backend reply nahi karta ya 15s ho jate, GrowthLoader dikhta
      rehta hai — user ko lagta nahi ki app atak gaya hai. */
@@ -147,6 +156,7 @@ function AppContent() {
         case "orders":   return loggedIn ? <Orders /> : <Login setPage={setPage} />
         case "password-help": return <PasswordHelp setPage={setPage} />
         case "login":    return <Login setPage={setPage} />
+        case "join":     return <JoinRequest setPage={setPage} />
 
         // ── COMMON LOGGED-IN ──
         case "my-profile":

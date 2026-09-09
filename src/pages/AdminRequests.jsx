@@ -272,18 +272,20 @@ export default function AdminRequests() {
                 <div className={`mt-3 pt-2 border-t flex items-center gap-2 flex-wrap text-[10px] ${
                   isDark ? "border-white/[0.06]" : "border-stone-100"
                 }`}>
-                  <span className={`px-2 py-0.5 rounded-md border ${
-                    isDark ? "bg-white/[0.04] border-white/10 text-stone-400" : "bg-stone-100 border-stone-200 text-stone-600"
-                  }`}>
-                    👤 Raised by: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedBy?.name || "Unknown"}</b> ({r.requestedBy?.role || "user"})
-                  </span>
-                  {r.requestedForId ? (
-                    <span className="px-2 py-0.5 rounded-md bg-blue-600/10 border border-blue-500/20 text-amber-600 dark:text-amber-300">
-                      🎯 Target: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedForId?.name}</b> ({r.requestedForId?.role})
+                  {r.source === "referral_link" || r.referralCode ? (
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                      🔗 Referral Link se: <b className={isDark ? "text-white" : "text-stone-900"}>{r.referralCode || r.requestedBy?.name}</b> ({r.requestedBy?.role || "distributor"})
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-300">
-                      🙋 Self Registration
+                    <span className={`px-2 py-0.5 rounded-md border ${
+                      isDark ? "bg-white/[0.04] border-white/10 text-stone-400" : "bg-stone-100 border-stone-200 text-stone-600"
+                    }`}>
+                      👤 Raised by: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedBy?.name || "Unknown"}</b> ({r.requestedBy?.role || "user"})
+                    </span>
+                  )}
+                  {r.requestedForId && r.source !== "referral_link" && (
+                    <span className="px-2 py-0.5 rounded-md bg-blue-600/10 border border-blue-500/20 text-amber-600 dark:text-amber-300">
+                      🎯 Target: <b className={isDark ? "text-white" : "text-stone-900"}>{r.requestedForId?.name}</b> ({r.requestedForId?.role})
                     </span>
                   )}
                 </div>
