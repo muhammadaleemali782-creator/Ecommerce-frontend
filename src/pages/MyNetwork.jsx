@@ -86,24 +86,29 @@ const DEPTH_COLORS = [
 const getDepthColor = (depth) => DEPTH_COLORS[Math.min(depth || 0, DEPTH_COLORS.length - 1)]
 
 function OvalNode({ node, onSelect, width, height, fontSize = 12, subSize = 10, depth = 0 }) {
-  const c  = getRC(node.role)
+  const { isDark } = useTheme() || {}
+  const c  = getRC(node.role, isDark)
   const dc = getDepthColor(depth)
+  const displayName = node.fullName && node.fullName.trim() && node.fullName.toLowerCase() !== node.name.toLowerCase()
+    ? `${node.name} (${node.fullName})`
+    : node.name
   return (
     <div className="mn-card" onClick={() => onSelect(node)}
       style={{
         width, height, borderRadius: 999,
-        background: dc.bg, border: `1.8px solid ${dc.border}`,
+        background: isDark ? "rgba(255,255,255,0.06)" : dc.bg,
+        border: `1.8px solid ${isDark ? c.border : dc.border}`,
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
-        boxShadow: `0 1px 6px ${dc.dot}25`,
+        boxShadow: isDark ? `0 2px 10px rgba(0,0,0,0.5)` : `0 1px 6px ${dc.dot}25`,
         userSelect: "none", flexShrink: 0, padding: "0 12px",
       }}>
-      <div style={{ fontSize, fontWeight: 700, color: dc.text, lineHeight: 1.2,
+      <div style={{ fontSize, fontWeight: 700, color: isDark ? "#ffffff" : dc.text, lineHeight: 1.2,
         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         maxWidth: width - 16, textAlign: "center" }}>
-        {node.name}
+        {displayName}
       </div>
-      <div style={{ fontSize: subSize, color: dc.dot, fontWeight: 600, marginTop: 1 }}>
+      <div style={{ fontSize: subSize, color: c.dot, fontWeight: 600, marginTop: 1 }}>
         ({c.label})
       </div>
     </div>
@@ -233,6 +238,7 @@ function ImageTreeCanvas({ rows, onSelect, screenW }) {
 }
 
 function MiniAnalytics({ userId, onClose }) {
+  const { isDark } = useTheme() || {}
   const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -246,22 +252,22 @@ function MiniAnalytics({ userId, onClose }) {
   }, [userId])
   const tl = data?.timeline?.length ? data.timeline : Array.from({length:7},(_,i)=>({label:`D${i+1}`,total:0}))
   return (
-    <div style={{ marginLeft:26, marginBottom:6, marginTop:2, background:"#f8fafc", borderRadius:10, border:"1px solid #e2e8f0", padding:"12px 14px" }}>
+    <div style={{ marginLeft:26, marginBottom:6, marginTop:2, background:isDark?"#151a17":"#f8fafc", borderRadius:10, border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`, padding:"12px 14px" }}>
       {loading ? <InlineLoader minHeight={60} />
         : !data ? <div style={{ textAlign:"center", padding:16, color:"#94a3b8", fontSize:12 }}>Koi data nahi</div>
         : <>
           <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:6 }}>
-            <button onClick={onClose} className="mn-btn" style={{ background:"none", fontSize:12, color:"#94a3b8", fontWeight:700 }}>✕</button>
+            <button onClick={onClose} className="mn-btn" style={{ background:"none", fontSize:12, color:isDark?"#94a3b8":"#94a3b8", fontWeight:700 }}>✕</button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:10 }}>
             {[
-              {label:"Orders",    val:data.ordersCount??0,                              color:"#1d4ed8",bg:"#eff6ff"},
-              {label:"Sales",     val:`₹${Number(data.totalSales??0).toLocaleString()}`,color:"#15803d",bg:"#f0fdf4"},
-              {label:"Connected", val:data.subUsersCount??0,                             color:"#7c3aed",bg:"#faf5ff"},
-              {label:"Products",  val:data.assignedProducts?.length??0,                  color:"#b45309",bg:"#fffbeb"},
+              {label:"Orders",    val:data.ordersCount??0,                              color:isDark?"#60a5fa":"#1d4ed8",bg:isDark?"rgba(59,130,246,0.15)":"#eff6ff"},
+              {label:"Sales",     val:`₹${Number(data.totalSales??0).toLocaleString()}`,color:isDark?"#4ade80":"#15803d",bg:isDark?"rgba(34,197,94,0.15)":"#f0fdf4"},
+              {label:"Connected", val:data.subUsersCount??0,                             color:isDark?"#c084fc":"#7c3aed",bg:isDark?"rgba(168,85,247,0.15)":"#faf5ff"},
+              {label:"Products",  val:data.assignedProducts?.length??0,                  color:isDark?"#fbbf24":"#b45309",bg:isDark?"rgba(245,158,11,0.15)":"#fffbeb"},
             ].map((s,i) => (
-              <div key={i} style={{ background:s.bg, borderRadius:8, padding:"7px 10px" }}>
-                <div style={{ fontSize:9, color:"#64748b", fontWeight:600 }}>{s.label}</div>
+              <div key={i} style={{ background:s.bg, borderRadius:8, padding:"7px 10px", border:isDark?"1px solid rgba(255,255,255,0.05)":"none" }}>
+                <div style={{ fontSize:9, color:isDark?"#94a3b8":"#64748b", fontWeight:600 }}>{s.label}</div>
                 <div style={{ fontSize:16, fontWeight:800, color:s.color }}>{s.val}</div>
               </div>
             ))}
@@ -269,9 +275,9 @@ function MiniAnalytics({ userId, onClose }) {
           <div style={{ height:70 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={tl}>
-                <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" />
-                <XAxis dataKey="label" tick={{fontSize:7}} /><YAxis tick={{fontSize:7}} width={20}/>
-                <Tooltip contentStyle={{fontSize:10,borderRadius:6,padding:"3px 8px"}}/>
+                <CartesianGrid strokeDasharray="2 2" stroke={isDark?"rgba(255,255,255,0.06)":"#f1f5f9"} />
+                <XAxis dataKey="label" tick={{fontSize:7,fill:isDark?"#94a3b8":"#64748b"}} /><YAxis tick={{fontSize:7,fill:isDark?"#94a3b8":"#64748b"}} width={20}/>
+                <Tooltip contentStyle={{fontSize:10,borderRadius:6,padding:"3px 8px",background:isDark?"#1e2520":"#fff",border:`1px solid ${isDark?"rgba(255,255,255,0.1)":"#e2e8f0"}`,color:isDark?"#fff":"#1e293b"}}/>
                 <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} dot={false}/>
               </LineChart>
             </ResponsiveContainer>
@@ -289,18 +295,18 @@ function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false
   const [showMini, setShowMini] = useState(false)
   const kids    = sortKids(node.children || [])
   const hasKids = kids.length > 0
-  const c       = getRC(node.role)
+  const c       = getRC(node.role, isDark)
   const hidden  = hideIfNotUser && node.role !== "user" && node._hideSelf
   const summary = hasKids && !open ? (() => {
     const cnt = {}; kids.forEach(ch => { cnt[ch.role] = (cnt[ch.role]||0)+1 })
-    return Object.entries(cnt).map(([r,n]) => `${n} ${getRC(r).label}${n>1?"s":""}`).join(", ")
+    return Object.entries(cnt).map(([r,n]) => `${n} ${getRC(r, isDark).label}${n>1?"s":""}`).join(", ")
   })() : ""
   if (hidden) return <div>{kids.map((k,i) => <SubTreeNode key={k.id||k._id||i} node={k} depth={depth} isLast={i===kids.length-1} level={level} hideIfNotUser={hideIfNotUser} />)}</div>
   return (
     <div style={{ position:"relative" }}>
       {depth > 0 && (<>
-        <div style={{ position:"absolute", left:-17, top:0, bottom:isLast?"50%":0, width:2, background:"#e2e8f0" }} />
-        <div style={{ position:"absolute", left:-17, top:18, width:14, height:2, background:"#e2e8f0" }} />
+        <div style={{ position:"absolute", left:-17, top:0, bottom:isLast?"50%":0, width:2, background:isDark?"rgba(255,255,255,0.1)":"#e2e8f0" }} />
+        <div style={{ position:"absolute", left:-17, top:18, width:14, height:2, background:isDark?"rgba(255,255,255,0.1)":"#e2e8f0" }} />
       </>)}
 
       {/* ── Row: expand area + analytics button as separate siblings ── */}
@@ -309,25 +315,28 @@ function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false
         {/* Clickable expand area only */}
         <div onClick={() => hasKids && setOpen(p=>!p)}
           style={{ flex:1, display:"flex", alignItems:"center", gap:7, padding:"6px 10px",
-            borderRadius:9, background:open&&hasKids?c.bg:"#fff",
-            border:`1.5px solid ${open&&hasKids?c.border:"#e8eef4"}`,
+            borderRadius:9, background:open&&hasKids?c.bg:(isDark?"#151a17":"#fff"),
+            border:`1.5px solid ${open&&hasKids?c.border:(isDark?"rgba(255,255,255,0.08)":"#e8eef4")}`,
             cursor:hasKids?"pointer":"default", userSelect:"none",
-            boxShadow:"0 1px 3px rgba(0,0,0,0.04)", minWidth:0 }}>
-          <div style={{ width:18, height:18, borderRadius:5, background:hasKids?(open?c.dot:"#e2e8f0"):"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            {hasKids && <span style={{ fontSize:8, color:open?"#fff":"#94a3b8", fontWeight:700 }}>{open?"▼":"▶"}</span>}
+            boxShadow:isDark?"0 1px 4px rgba(0,0,0,0.3)":"0 1px 3px rgba(0,0,0,0.04)", minWidth:0 }}>
+          <div style={{ width:18, height:18, borderRadius:5, background:hasKids?(open?c.dot:(isDark?"rgba(255,255,255,0.1)":"#e2e8f0")):"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            {hasKids && <span style={{ fontSize:8, color:open?"#fff":(isDark?"#94a3b8":"#64748b"), fontWeight:700 }}>{open?"▼":"▶"}</span>}
           </div>
           <span style={{ fontSize:13, flexShrink:0 }}>{c.label==="Distributor"?"🏢":c.label==="Seller"?"🛒":c.label==="Admin"?"👑":"👤"}</span>
-          <span style={{ fontSize:13, fontWeight:600, color:isDark?"#ffffff":"#1e293b", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{node.name}{node.fullName ? ` (${node.fullName})` : ""}</span>
-          <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99, background:`${c.dot}15`, color:c.dot, border:`1px solid ${c.dot}30`, flexShrink:0 }}>{c.label}</span>
-          {summary && <span style={{ fontSize:10, color:"#94a3b8", whiteSpace:"nowrap", flexShrink:0 }}>({summary})</span>}
+          <span style={{ fontSize:13, fontWeight:600, color:isDark?"#ffffff":"#1e293b", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+            {node.name}{node.fullName && node.fullName.trim() && node.fullName.toLowerCase() !== node.name.toLowerCase() ? ` (${node.fullName})` : ""}
+          </span>
+          <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99, background:`${c.dot}18`, color:c.dot, border:`1px solid ${c.dot}30`, flexShrink:0 }}>{c.label}</span>
+          {summary && <span style={{ fontSize:10, color:isDark?"#94a3b8":"#64748b", whiteSpace:"nowrap", flexShrink:0 }}>({summary})</span>}
         </div>
 
         {/* Analytics button — completely outside, no event conflict */}
         <button
           onClick={() => setShowMini(p=>!p)}
-          style={{ flexShrink:0, width:32, height:32, borderRadius:8, border:"1px solid #e2e8f0",
-            background:showMini?"#eff6ff":"#f8fafc", cursor:"pointer",
-            display:"flex", alignItems:"center", justifyContent:"center", fontSize:15 }}>
+          style={{ flexShrink:0, width:32, height:32, borderRadius:8,
+            border:`1px solid ${isDark?"rgba(255,255,255,0.1)":"#e2e8f0"}`,
+            background:showMini?(isDark?"rgba(59,130,246,0.2)":"#eff6ff"):(isDark?"#151a17":"#f8fafc"),
+            cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:15 }}>
           📊
         </button>
       </div>
@@ -370,16 +379,16 @@ function ConnectedUsers({ subtree }) {
     sCnt>0&&{key:"seller",label:"Sellers",count:sCnt,dot:RC.seller.dot},
     {key:"user",label:"Users",count:uCnt,dot:RC.user.dot},
   ].filter(Boolean)
-  if (raw.length===0) return <div style={{padding:20,textAlign:"center",color:"#94a3b8",fontSize:13,background:"#f8fafc",borderRadius:12,border:"1px dashed #e2e8f0"}}>Aapke neeche koi connected user nahi hai</div>
+  if (raw.length===0) return <div style={{padding:20,textAlign:"center",color:isDark?"#94a3b8":"#64748b",fontSize:13,background:isDark?"#141a16":"#f8fafc",borderRadius:12,border:`1px dashed ${isDark?"rgba(255,255,255,0.1)":"#e2e8f0"}`}}>Aapke neeche koi connected user nahi hai</div>
   return (
-    <div style={{background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`,boxShadow:"0 2px 12px rgba(0,0,0,0.08)",overflow:"hidden"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#181c20":"#fafbfc"}}>
+    <div style={{background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`,boxShadow:isDark?"0 2px 16px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)",overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#161c18":"#fafbfc"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:14,fontWeight:700,color:isDark?"#f1f5f9":"#1e293b"}}>👥 Connected Users</span>
-          <span style={{fontSize:11,fontWeight:700,padding:"2px 9px",borderRadius:99,background:"#e0e7ff",color:"#4338ca"}}>{tot} total</span>
-          <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:99,background:"#f0fdf4",color:"#16a34a"}}>{raw.length} direct</span>
+          <span style={{fontSize:11,fontWeight:700,padding:"2px 9px",borderRadius:99,background:isDark?"rgba(99,102,241,0.2)":"#e0e7ff",color:isDark?"#a5b4fc":"#4338ca",border:isDark?"1px solid rgba(99,102,241,0.3)":"none"}}>{tot} total</span>
+          <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:99,background:isDark?"rgba(34,197,94,0.15)":"#f0fdf4",color:isDark?"#4ade80":"#16a34a",border:isDark?"1px solid rgba(34,197,94,0.3)":"none"}}>{raw.length} direct</span>
         </div>
-        <button className="mn-btn" onClick={()=>setCollapsed(p=>!p)} style={{fontSize:11,padding:"4px 12px",borderRadius:8,border:"1.5px solid #e2e8f0",background:"#fff",color:"#64748b",fontWeight:600}}>
+        <button className="mn-btn" onClick={()=>setCollapsed(p=>!p)} style={{fontSize:11,padding:"4px 12px",borderRadius:8,border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,background:isDark?"#181c20":"#fff",color:isDark?"#94a3b8":"#64748b",fontWeight:600}}>
           {collapsed?"▼ Show":"▲ Collapse"}
         </button>
       </div>
@@ -390,15 +399,15 @@ function ConnectedUsers({ subtree }) {
               const isA=activeFilter===tab.key, dc=tab.dot||"#64748b"
               return (
                 <button key={tab.key} className="mn-btn" onClick={()=>setActiveFilter(tab.key)}
-                  style={{display:"flex",alignItems:"center",gap:5,padding:"4px 12px",borderRadius:99,border:`1.5px solid ${isA?dc:"#e2e8f0"}`,background:isA?`${dc}12`:"#f8fafc",color:isA?dc:"#64748b",fontWeight:isA?700:500,fontSize:12}}>
+                  style={{display:"flex",alignItems:"center",gap:5,padding:"4px 12px",borderRadius:99,border:`1.5px solid ${isA?dc:(isDark?"rgba(255,255,255,0.1)":"#e2e8f0")}`,background:isA?`${dc}18`:(isDark?"#161c18":"#f8fafc"),color:isA?dc:(isDark?"#94a3b8":"#64748b"),fontWeight:isA?700:500,fontSize:12}}>
                   {tab.dot&&<span style={{width:7,height:7,borderRadius:"50%",background:isA?dc:"#94a3b8",display:"inline-block"}}/>}
                   {tab.label}
-                  <span style={{fontSize:10,fontWeight:700,padding:"0px 5px",borderRadius:99,background:isA?`${dc}20`:"#f1f5f9",color:isA?dc:"#94a3b8"}}>{tab.count}</span>
+                  <span style={{fontSize:10,fontWeight:700,padding:"0px 5px",borderRadius:99,background:isA?`${dc}25`:(isDark?"rgba(255,255,255,0.06)":"#f1f5f9"),color:isA?dc:(isDark?"#cbd5e1":"#94a3b8")}}>{tab.count}</span>
                 </button>
               )
             })}
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:isDark?"#181c20":"#f8fafc",borderRadius:8,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:isDark?"#161c18":"#f8fafc",borderRadius:8,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,marginBottom:10}}>
             <span style={{color:"#94a3b8",fontSize:14}}>🔍</span>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name..." style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:isDark?"#f1f5f9":"#334155"}}/>
             {search&&<button onClick={()=>setSearch("")} className="mn-btn" style={{background:"none",color:"#94a3b8",fontSize:12,border:"none"}}>✕</button>}
@@ -452,20 +461,24 @@ function AnalyticsPanel({ selectedUser, treeData, onClose }) {
     return null
   },[selectedUser,treeData])
   return (
-    <div style={{padding:16,borderTop:`2px solid ${isDark?"rgba(99,102,241,0.3)":"#e0e7ff"}`,background:isDark?"#111417":"#fff"}}>
-      <div style={{fontSize:14,fontWeight:700,color:"#475569",marginBottom:12}}>
-        Selected: <span style={{color:c.text}}>{selectedUser.name}</span>
-        <span style={{marginLeft:8,fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:99,background:c.bg,color:c.dot,border:`1px solid ${c.border}`}}>{c.label}</span>
+    <div style={{padding:16,borderTop:`2px solid ${isDark?"rgba(16,185,129,0.3)":"#e0e7ff"}`,background:isDark?"#111417":"#fff"}}>
+      <div style={{fontSize:14,fontWeight:700,color:isDark?"#cbd5e1":"#475569",marginBottom:12,display:"flex",alignItems:"center",flexWrap:"wrap",gap:6}}>
+        <span>Selected:</span>
+        <span style={{color:isDark?"#ffffff":c.text,fontWeight:800}}>{selectedUser.name}</span>
+        {selectedUser.fullName && selectedUser.fullName.trim() && selectedUser.fullName.toLowerCase() !== selectedUser.name.toLowerCase() && (
+          <span style={{color:isDark?"#94a3b8":"#64748b",fontWeight:600}}>({selectedUser.fullName})</span>
+        )}
+        <span style={{marginLeft:4,fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:99,background:c.bg,color:c.dot,border:`1px solid ${c.border}`}}>{c.label}</span>
       </div>
       <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:14,justifyContent:"flex-end"}}>
-        <select value={range} onChange={e=>setRange(e.target.value)} style={{fontSize:12,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",background:"#f8fafc",color:"#334155",cursor:"pointer"}}>
+        <select value={range} onChange={e=>setRange(e.target.value)} style={{fontSize:12,padding:"6px 10px",borderRadius:8,border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,background:isDark?"#161c18":"#f8fafc",color:isDark?"#f1f5f9":"#334155",cursor:"pointer"}}>
           <option value="today">📅 Aaj</option>
           <option value="week">📅 Hafte mein</option>
           <option value="month">📅 Is Mahine</option>
           <option value="year">📅 Is Saal</option>
           <option value="lifetime">♾️ Lifetime</option>
         </select>
-        <button onClick={onClose} className="mn-btn" style={{width:32,height:32,borderRadius:"50%",border:"1.5px solid #e2e8f0",background:"#f8fafc",color:"#94a3b8",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>✕</button>
+        <button onClick={onClose} className="mn-btn" style={{width:32,height:32,borderRadius:"50%",border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,background:isDark?"#161c18":"#f8fafc",color:isDark?"#cbd5e1":"#94a3b8",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>✕</button>
       </div>
       {aLoading && (
         <div style={{textAlign:"center",padding:24,color:"#94a3b8",fontSize:13}}>
@@ -483,47 +496,47 @@ function AnalyticsPanel({ selectedUser, treeData, onClose }) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10}}>
             {[
-              {label:"📦 Orders",   val:analytics.ordersCount??0,                               bg:"#eff6ff",color:"#1d4ed8"},
-              {label:"💰 Sales",    val:`₹${Number(analytics.totalSales??0).toLocaleString()}`,  bg:"#f0fdf4",color:"#15803d"},
-              {label:"👥 Connected",val:analytics.subUsersCount??0,                              bg:"#faf5ff",color:"#7c3aed"},
-              {label:"📋 Products", val:analytics.assignedProducts?.length??0,                   bg:"#fffbeb",color:"#b45309"},
+              {label:"📦 Orders",   val:analytics.ordersCount??0,                              bg:isDark?"rgba(59,130,246,0.15)":"#eff6ff", color:isDark?"#60a5fa":"#1d4ed8"},
+              {label:"💰 Sales",    val:`₹${Number(analytics.totalSales??0).toLocaleString()}`,  bg:isDark?"rgba(34,197,94,0.15)":"#f0fdf4",  color:isDark?"#4ade80":"#15803d"},
+              {label:"👥 Connected",val:analytics.subUsersCount??0,                             bg:isDark?"rgba(168,85,247,0.15)":"#faf5ff", color:isDark?"#c084fc":"#7c3aed"},
+              {label:"📋 Products", val:analytics.assignedProducts?.length??0,                  bg:isDark?"rgba(245,158,11,0.15)":"#fffbeb", color:isDark?"#fbbf24":"#b45309"},
             ].map((card,i)=>(
-              <div key={i} style={{background:card.bg,borderRadius:12,padding:"12px 14px",border:`1px solid ${card.color}22`}}>
-                <div style={{fontSize:11,color:"#64748b",fontWeight:600,marginBottom:4}}>{card.label}</div>
+              <div key={i} style={{background:card.bg,borderRadius:12,padding:"12px 14px",border:`1px solid ${isDark?"rgba(255,255,255,0.06)":card.color+"22"}`}}>
+                <div style={{fontSize:11,color:isDark?"#94a3b8":"#64748b",fontWeight:600,marginBottom:4}}>{card.label}</div>
                 <div style={{fontSize:22,fontWeight:800,color:card.color}}>{card.val}</div>
               </div>
             ))}
           </div>
           {analytics.topProduct&&(
-            <div style={{background:"#fff7ed",borderRadius:10,padding:"10px 14px",border:"1px solid #fed7aa"}}>
-              <div style={{fontSize:11,color:"#92400e",fontWeight:700,marginBottom:4}}>🏆 Best Selling Product</div>
-              <div style={{fontSize:14,fontWeight:700,color:"#c2410c"}}>{analytics.topProduct.name}</div>
-              <div style={{fontSize:12,color:"#78716c",marginTop:2}}>{analytics.topProduct.count} units · ₹{Number(analytics.topProduct.total).toLocaleString()}</div>
+            <div style={{background:isDark?"rgba(249,115,22,0.15)":"#fff7ed",borderRadius:10,padding:"10px 14px",border:`1px solid ${isDark?"rgba(249,115,22,0.3)":"#fed7aa"}`}}>
+              <div style={{fontSize:11,color:isDark?"#fb923c":"#92400e",fontWeight:700,marginBottom:4}}>🏆 Best Selling Product</div>
+              <div style={{fontSize:14,fontWeight:700,color:isDark?"#fdba74":"#c2410c"}}>{analytics.topProduct.name}</div>
+              <div style={{fontSize:12,color:isDark?"#cbd5e1":"#78716c",marginTop:2}}>{analytics.topProduct.count} units · ₹{Number(analytics.topProduct.total).toLocaleString()}</div>
             </div>
           )}
           <div>
-            <div style={{fontSize:13,fontWeight:700,color:"#1e293b",marginBottom:8}}>📦 Assigned Products</div>
+            <div style={{fontSize:13,fontWeight:700,color:isDark?"#f1f5f9":"#1e293b",marginBottom:8}}>📦 Assigned Products</div>
             {analytics.assignedProducts?.length>0
               ?<div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:160,overflowY:"auto"}}>
                 {analytics.assignedProducts.map(p=>(
-                  <div key={p._id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#f8fafc",borderRadius:8,border:"1px solid #e8eef4"}}>
-                    <span style={{fontSize:13,fontWeight:600,color:"#334155"}}>{p.title}</span>
-                    <span style={{fontSize:13,fontWeight:700,color:"#16a34a"}}>₹{p.price}</span>
+                  <div key={p._id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:isDark?"#161c18":"#f8fafc",borderRadius:8,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`}}>
+                    <span style={{fontSize:13,fontWeight:600,color:isDark?"#e2e8f0":"#334155"}}>{p.title}</span>
+                    <span style={{fontSize:13,fontWeight:700,color:isDark?"#4ade80":"#16a34a"}}>₹{p.price}</span>
                   </div>
                 ))}
               </div>
-              :<p style={{fontSize:12,color:"#94a3b8"}}>Koi product assign nahi</p>
+              :<p style={{fontSize:12,color:isDark?"#94a3b8":"#64748b"}}>Koi product assign nahi</p>
             }
           </div>
           {subtree&&<ConnectedUsers subtree={subtree}/>}
-          <div style={{background:"#f8fafc",borderRadius:12,padding:14,border:"1px solid #e8eef4"}}>
-            <div style={{fontSize:13,fontWeight:700,color:"#1e293b",marginBottom:10}}>📈 Sales Graph</div>
+          <div style={{background:isDark?"#161c18":"#f8fafc",borderRadius:12,padding:14,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`}}>
+            <div style={{fontSize:13,fontWeight:700,color:isDark?"#f1f5f9":"#1e293b",marginBottom:10}}>📈 Sales Graph</div>
             <div style={{height:150}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={tl}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
-                  <XAxis dataKey="label" tick={{fontSize:9}}/><YAxis tick={{fontSize:9}}/>
-                  <Tooltip contentStyle={{fontSize:11,borderRadius:8}}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark?"rgba(255,255,255,0.06)":"#f1f5f9"}/>
+                  <XAxis dataKey="label" tick={{fontSize:9,fill:isDark?"#94a3b8":"#64748b"}}/><YAxis tick={{fontSize:9,fill:isDark?"#94a3b8":"#64748b"}}/>
+                  <Tooltip contentStyle={{fontSize:11,borderRadius:8,background:isDark?"#1c221e":"#fff",border:`1px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,color:isDark?"#fff":"#1e293b"}}/>
                   <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2.5} dot={false}/>
                 </LineChart>
               </ResponsiveContainer>
@@ -550,16 +563,16 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
   const hasF=selectedId||(roleFilter&&roleFilter!=="all")
   const roleTabs=(()=>{const nr=sel?.role;if(!nr||nr==="admin"||nr==="distributor")return[{key:"all",label:"All"},{key:"distributor",label:getRoleLabelPlural("distributor")},{key:"seller",label:getRoleLabelPlural("seller")}];if(nr==="seller")return[{key:"all",label:"All"},{key:"seller",label:getRoleLabelPlural("seller")},{key:"user",label:getRoleLabelPlural("user")}];return[{key:"all",label:"All"}]})()
   return (
-    <div style={{display:"flex",flexDirection:"column",background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,boxShadow:"0 2px 10px rgba(0,0,0,0.08)",padding:"12px 16px",marginBottom:16}}>
+    <div style={{display:"flex",flexDirection:"column",background:isDark?"#111417":"#fff",borderRadius:12,border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`,boxShadow:isDark?"0 2px 16px rgba(0,0,0,0.4)":"0 2px 10px rgba(0,0,0,0.08)",padding:"12px 16px",marginBottom:16}}>
       <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10}}>
         <span style={{fontSize:13,fontWeight:600,color:isDark?"#94a3b8":"#475569",whiteSpace:"nowrap"}}>🔍 Select Node:</span>
         <div style={{position:"relative"}} ref={ref}>
-          <button className="mn-btn" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,border:`1.8px solid ${sc?sc.border:"#cbd5e1"}`,background:sc?sc.bg:"#f8fafc",fontSize:13,fontWeight:500,minWidth:190,color:sc?sc.text:"#334155"}} onClick={()=>setNodeOpen(p=>!p)}>
+          <button className="mn-btn" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,border:`1.8px solid ${sc?sc.border:(isDark?"rgba(255,255,255,0.15)":"#cbd5e1")}`,background:sc?sc.bg:(isDark?"#161c18":"#f8fafc"),fontSize:13,fontWeight:500,minWidth:190,color:sc?sc.text:(isDark?"#f1f5f9":"#334155")}} onClick={()=>setNodeOpen(p=>!p)}>
             {sel?<><span style={{width:8,height:8,borderRadius:"50%",background:sc.dot,display:"inline-block",flexShrink:0}}/><span style={{fontWeight:600,flex:1}}>{sel.name}{sel.fullName ? ` (${sel.fullName})` : ""}</span><span style={{fontSize:11,opacity:0.6}}>({getRoleLabel(sel.role)})</span></>:<span style={{color:isDark?"#94a3b8":"#94a3b8"}}>— Select a node —</span>}
             <span style={{fontSize:9,marginLeft:"auto",opacity:0.5}}>{nodeOpen?"▲":"▼"}</span>
           </button>
           {nodeOpen&&(
-            <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,minWidth:260,maxWidth:320,background:isDark?"#181c20":"#fff",border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,0.3)",zIndex:100,overflow:"hidden"}}>
+            <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,minWidth:260,maxWidth:320,background:isDark?"#181c20":"#fff",border:`1.5px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,0.4)",zIndex:100,overflow:"hidden"}}>
               <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#111417":"#f8fafc"}}>
                 <span style={{fontSize:17,color:"#94a3b8"}}>⌕</span>
                 <input autoFocus style={{flex:1,border:"none",outline:"none",background:"transparent",fontSize:13,color:isDark?"#f1f5f9":"#334155"}} placeholder="Search name or role…" value={search} onChange={e=>setSearch(e.target.value)}/>
@@ -570,7 +583,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
                 {filtered.map(n=>{const nc=getRC(n.role, isDark),active=String(n.id)===String(selectedId);return(
                   <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 14px",cursor:"pointer",borderLeft:`3px solid ${active?nc.border:"transparent"}`,background:active?nc.bg:"transparent"}}
                     onClick={()=>{onSelectNode(n.id);setNodeOpen(false);setSearch("")}}
-                    onMouseEnter={e=>{if(!active)e.currentTarget.style.background="#f8fafc"}}
+                    onMouseEnter={e=>{if(!active)e.currentTarget.style.background=isDark?"rgba(255,255,255,0.05)":"#f8fafc"}}
                     onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent"}}>
                     <span style={{width:8,height:8,borderRadius:"50%",background:nc.dot,display:"inline-block",flexShrink:0}}/>
                     <span style={{fontWeight:600,fontSize:13,flex:1,color:isDark?"#f1f5f9":nc.text}}>{n.name}{n.fullName ? ` (${n.fullName})` : ""}</span>
@@ -581,13 +594,13 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
             </div>
           )}
         </div>
-        {hasF&&<button className="mn-btn" onClick={onReset} style={{padding:"6px 14px",borderRadius:999,border:"1.5px solid #fca5a5",background:"#fff1f2",color:"#dc2626",fontSize:12,fontWeight:600}}>✕ Reset</button>}
+        {hasF&&<button className="mn-btn" onClick={onReset} style={{padding:"6px 14px",borderRadius:999,border:`1.5px solid ${isDark?"rgba(239,68,68,0.4)":"#fca5a5"}`,background:isDark?"rgba(239,68,68,0.15)":"#fff1f2",color:isDark?"#f87171":"#dc2626",fontSize:12,fontWeight:600}}>✕ Reset</button>}
       </div>
-      <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10,paddingTop:10,marginTop:8,borderTop:"1px solid #f1f5f9"}}>
+      <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10,paddingTop:10,marginTop:8,borderTop:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`}}>
         <span style={{fontSize:13,fontWeight:600,color:isDark?"#94a3b8":"#475569",whiteSpace:"nowrap"}}>👥 Show only:</span>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {roleTabs.map(tab=>{const isA=roleFilter===tab.key;const tc=tab.key==="all"?{bg:"#f1f5f9",border:"#94a3b8",text:"#334155",dot:"#94a3b8"}:getRC(tab.key);return(
-            <button key={tab.key} className="mn-btn" onClick={()=>onSelectRole(tab.key)} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:999,border:`1.5px solid ${isA?tc.border:"#e2e8f0"}`,background:isA?tc.bg:"#f8fafc",color:isA?tc.text:"#64748b",fontSize:12,fontWeight:isA?700:500,whiteSpace:"nowrap"}}>
+          {roleTabs.map(tab=>{const isA=roleFilter===tab.key;const tc=tab.key==="all"?(isDark?{bg:"rgba(255,255,255,0.08)",border:"#64748b",text:"#f1f5f9",dot:"#94a3b8"}:{bg:"#f1f5f9",border:"#94a3b8",text:"#334155",dot:"#94a3b8"}):getRC(tab.key, isDark);return(
+            <button key={tab.key} className="mn-btn" onClick={()=>onSelectRole(tab.key)} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:999,border:`1.5px solid ${isA?tc.border:(isDark?"rgba(255,255,255,0.1)":"#e2e8f0")}`,background:isA?tc.bg:(isDark?"#161c18":"#f8fafc"),color:isA?tc.text:(isDark?"#94a3b8":"#64748b"),fontSize:12,fontWeight:isA?700:500,whiteSpace:"nowrap"}}>
               {tab.key!=="all"&&<span style={{width:7,height:7,borderRadius:"50%",background:isA?tc.dot:"#94a3b8",display:"inline-block"}}/>}
               {tab.label}
             </button>
@@ -898,10 +911,13 @@ export default function MyNetwork() {
             <p style={{margin:0,fontSize:10,color:"#94a3b8"}}>Role: <strong style={{color:getRC(user?.role).dot}}>{user?.role||"unknown"}</strong>{" · Tap node for analytics"}</p>
           </div>
         </div>
-        <div style={{display:"flex",background:"#f1f5f9",borderRadius:12,padding:3,gap:2}}>
+        <div style={{display:"flex",background:isDark?"#161c18":"#f1f5f9",borderRadius:12,padding:3,gap:2}}>
           {[{key:"network",label:"Network"},{key:"graph",label:"Graph"},{key:"tree",label:"List"}].map(v=>(
             <button key={v.key} className="mn-btn" onClick={()=>setViewMode(v.key)}
-              style={{flex:1,padding:"7px 0",borderRadius:10,fontSize:12,fontWeight:700,background:viewMode===v.key?"#fff":"transparent",color:viewMode===v.key?"#1d4ed8":"#64748b",boxShadow:viewMode===v.key?"0 1px 6px rgba(0,0,0,0.10)":"none",border:"none"}}>
+              style={{flex:1,padding:"7px 0",borderRadius:10,fontSize:12,fontWeight:700,
+                background:viewMode===v.key?(isDark?"#10b981":"#fff"):"transparent",
+                color:viewMode===v.key?(isDark?"#000":"#1d4ed8"):(isDark?"#94a3b8":"#64748b"),
+                boxShadow:viewMode===v.key?"0 1px 6px rgba(0,0,0,0.10)":"none",border:"none"}}>
               {v.label}
             </button>
           ))}
@@ -909,54 +925,49 @@ export default function MyNetwork() {
       </div>
       <div style={{padding:"12px"}}>
         {loading&&<InlineLoader label="Tumhara network load ho raha hai 🌳" minHeight={200} />}
-        {error&&<div style={{padding:"12px 14px",background:"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:"1px solid #fecaca"}}>❌ {error}</div>}
+        {error&&<div style={{padding:"12px 14px",background:isDark?"rgba(220,38,38,0.15)":"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:`1px solid ${isDark?"rgba(220,38,38,0.3)":"#fecaca"}`}}>❌ {error}</div>}
         {viewMode==="graph"&&!loading&&(
-          <div style={{background:"#fff",borderRadius:14,boxShadow:"0 1px 8px rgba(0,0,0,0.06)",overflow:"hidden"}}>
-            <div style={{padding:"12px 14px",borderBottom:"1px solid #f1f5f9"}}>
+          <div style={{background:isDark?"#111417":"#fff",borderRadius:14,boxShadow:isDark?"0 1px 12px rgba(0,0,0,0.4)":"0 1px 8px rgba(0,0,0,0.06)",border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"transparent"}`,overflow:"hidden"}}>
+            <div style={{padding:"12px 14px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <span style={{fontSize:14,color:"#94a3b8"}}>🔍</span>
                 <select onChange={e=>{e.target.value?handleSelNode(e.target.value):handleReset()}} value={filteredId||""}
-                  style={{flex:1,border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 8px",fontSize:11,color:"#334155",outline:"none",background:"#f8fafc"}}>
+                  style={{flex:1,border:`1px solid ${isDark?"rgba(255,255,255,0.12)":"#e2e8f0"}`,borderRadius:8,padding:"6px 8px",fontSize:11,color:isDark?"#f1f5f9":"#334155",outline:"none",background:isDark?"#161c18":"#f8fafc"}}>
                   <option value="">— All nodes —</option>
                   {allNodes.map(n=><option key={n.id} value={n.id}>{n.name} ({getRoleLabel(n.role)})</option>)}
                 </select>
-                {filteredId&&<button className="mn-btn" onClick={handleReset} style={{padding:"5px 8px",borderRadius:8,border:"1px solid #fca5a5",background:"#fff1f2",color:"#dc2626",fontSize:11,fontWeight:700}}>✕</button>}
+                {filteredId&&<button className="mn-btn" onClick={handleReset} style={{padding:"5px 8px",borderRadius:8,border:"1.5px solid #fca5a5",background:"#fff1f2",color:"#dc2626",fontSize:11,fontWeight:700}}>✕</button>}
               </div>
             </div>
-            {/* ─────────────────────────────────────────────────────────
-                ✅ FIX: was using maxHeight + overflow:auto with no
-                definite height, so DesktopTree's height:"100%" couldn't
-                resolve correctly and its internal flex:1 measurement
-                was inconsistent across widths. Now gives a definite
-                height so the scale-to-fit math matches what's actually
-                visible (no scroll needed, the tree shrinks to fit).
-               ───────────────────────────────────────────────────────── */}
             <div style={{ padding:"8px 0", height:"calc(100vh - 280px)", minHeight:340, overflow:"hidden" }}>
               <DesktopTree roots={displayRoots} onSelect={handleClick}/>
             </div>
           </div>
         )}
         {viewMode==="network"&&!loading&&(
-          <div style={{background:"#fff",borderRadius:14,padding:12,boxShadow:"0 1px 8px rgba(0,0,0,0.06)"}}>
+          <div style={{background:isDark?"#111417":"#fff",borderRadius:14,padding:12,boxShadow:isDark?"0 1px 12px rgba(0,0,0,0.4)":"0 1px 8px rgba(0,0,0,0.06)",border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"transparent"}`}}>
             <ConnectedUsers subtree={networkSubtree}/>
           </div>
         )}
         {viewMode==="tree"&&!loading&&(
           <>
-            <div style={{display:"flex",background:"#f1f5f9",borderRadius:10,padding:3,gap:2,marginBottom:10}}>
+            <div style={{display:"flex",background:isDark?"#161c18":"#f1f5f9",borderRadius:10,padding:3,gap:2,marginBottom:10}}>
               {[["all","All"],["distributor","Dist"],["seller","Seller"],["user","User"]].map(([k,l])=>(
                 <button key={k} className="mn-btn" onClick={()=>setRoleFilter(k)}
-                  style={{flex:1,padding:"6px 0",borderRadius:8,fontSize:11,fontWeight:700,border:"none",background:roleFilter===k?"#fff":"transparent",color:roleFilter===k?"#1d4ed8":"#64748b",boxShadow:roleFilter===k?"0 1px 4px rgba(0,0,0,0.08)":"none"}}>
+                  style={{flex:1,padding:"6px 0",borderRadius:8,fontSize:11,fontWeight:700,border:"none",
+                    background:roleFilter===k?(isDark?"#10b981":"#fff"):"transparent",
+                    color:roleFilter===k?(isDark?"#000":"#1d4ed8"):(isDark?"#94a3b8":"#64748b"),
+                    boxShadow:roleFilter===k?"0 1px 4px rgba(0,0,0,0.08)":"none"}}>
                   {l} ({roleCounts[k]||0})
                 </button>
               ))}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:7}}>
-              {mobileFiltered.map(n=>{const c=getRC(n.role);return(
+              {mobileFiltered.map(n=>{const c=getRC(n.role, isDark);return(
                 <div key={n.id||n._id} className="mn-card" onClick={()=>setSelectedUser(n)}
                   style={{background:isDark?"#111613":"#fff",borderRadius:12,padding:"10px 12px",boxShadow:isDark?"0 2px 10px rgba(0,0,0,0.4)":"0 1px 4px rgba(0,0,0,0.05)",display:"flex",alignItems:"center",gap:10,borderLeft:`3px solid ${c.border}`}}>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:isDark?"#ffffff":"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.name}{n.fullName ? ` (${n.fullName})` : ""}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:isDark?"#ffffff":"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.name}{n.fullName && n.fullName.trim() && n.fullName.toLowerCase() !== n.name.toLowerCase() ? ` (${n.fullName})` : ""}</div>
                     <div style={{fontSize:11,color:c.dot,fontWeight:600}}>{n.role}{n.level>1?` · L${n.level}`:""}</div>
                   </div>
                   <span style={{fontSize:11,padding:"2px 7px",borderRadius:20,fontWeight:700,background:c.bg,color:c.text,flexShrink:0}}>📊</span>
@@ -969,13 +980,15 @@ export default function MyNetwork() {
         {tree.length===0&&!loading&&<div style={{textAlign:"center",padding:48,color:"#94a3b8"}}><div style={{fontSize:44,marginBottom:12}}>🕸️</div><p style={{margin:0,fontSize:14}}>Aapke network mein koi user nahi hai abhi</p></div>}
       </div>
       {selectedUser&&(
-        <div style={{marginTop:12,background:"#fff",borderRadius:16,boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid #e2e8f0"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid #f1f5f9",background:"#f8fafc",borderRadius:"16px 16px 0 0"}}>
+        <div style={{marginTop:12,background:isDark?"#0c100e":"#fff",borderRadius:16,boxShadow:isDark?"0 4px 30px rgba(0,0,0,0.7)":"0 2px 16px rgba(0,0,0,0.08)",border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#111613":"#f8fafc",borderRadius:"16px 16px 0 0"}}>
             <div>
-              <div style={{fontWeight:700,fontSize:14,color:"#1e293b"}}>{selectedUser.name}</div>
-              <div style={{fontSize:11,color:getRC(selectedUser.role).dot,fontWeight:600,textTransform:"capitalize"}}>{selectedUser.role}</div>
+              <div style={{fontWeight:700,fontSize:14,color:isDark?"#ffffff":"#1e293b"}}>
+                {selectedUser.name}{selectedUser.fullName && selectedUser.fullName.trim() && selectedUser.fullName.toLowerCase() !== selectedUser.name.toLowerCase() ? ` — ${selectedUser.fullName}` : ""}
+              </div>
+              <div style={{fontSize:11,color:getRC(selectedUser.role, isDark).dot,fontWeight:600,textTransform:"capitalize"}}>{selectedUser.role}</div>
             </div>
-            <button className="mn-btn" onClick={()=>setSelectedUser(null)} style={{width:30,height:30,borderRadius:"50%",border:"none",background:"#e2e8f0",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>✕</button>
+            <button className="mn-btn" onClick={()=>setSelectedUser(null)} style={{width:30,height:30,borderRadius:"50%",border:"none",background:isDark?"rgba(255,255,255,0.1)":"#e2e8f0",color:isDark?"#ffffff":"#334155",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>✕</button>
           </div>
           <AnalyticsPanel selectedUser={selectedUser} treeData={tree} onClose={()=>setSelectedUser(null)}/>
         </div>
@@ -984,27 +997,31 @@ export default function MyNetwork() {
   )
 
   return(
-    <div style={{background:"#fff",borderRadius:12,boxShadow:"0 2px 16px rgba(0,0,0,0.07)",overflow:"hidden",fontFamily:"system-ui,sans-serif"}}>
-      <div style={{padding:"14px 16px",background:"linear-gradient(135deg,#f8fafc,#f0f4ff)",borderBottom:"1px solid #e8eef4"}}>
-        <h2 style={{fontSize:16,fontWeight:800,color:"#1e293b",margin:0}}>🌐 My Network</h2>
-        <p style={{fontSize:11,color:"#94a3b8",margin:"2px 0 8px"}}>Role: <strong style={{color:getRC(user?.role).dot}}>{user?.role||"unknown"}</strong>{" · Kisi bhi user pe click karo"}</p>
+    <div style={{background:isDark?"#0e1210":"#fff",borderRadius:12,boxShadow:isDark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 16px rgba(0,0,0,0.07)",border:isDark?"1px solid rgba(255,255,255,0.08)":"none",overflow:"hidden",fontFamily:"system-ui,sans-serif"}}>
+      <div style={{padding:"14px 16px",background:isDark?"linear-gradient(135deg,#131a15,#0f1411)":"linear-gradient(135deg,#f8fafc,#f0f4ff)",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e8eef4"}`}}>
+        <h2 style={{fontSize:16,fontWeight:800,color:isDark?"#ffffff":"#1e293b",margin:0}}>🌐 My Network</h2>
+        <p style={{fontSize:11,color:"#94a3b8",margin:"2px 0 8px"}}>Role: <strong style={{color:getRC(user?.role, isDark).dot}}>{user?.role||"unknown"}</strong>{" · Kisi bhi user pe click karo"}</p>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {views.map(v=>(
             <button key={v.key} className="mn-btn" onClick={()=>setViewMode(v.key)}
-              style={{display:"flex",alignItems:"center",gap:5,padding:"7px 16px",borderRadius:99,fontSize:12,fontWeight:700,whiteSpace:"nowrap",border:viewMode===v.key?"2px solid #3b82f6":"2px solid #e2e8f0",background:viewMode===v.key?"#eff6ff":"#fff",color:viewMode===v.key?"#1d4ed8":"#64748b",boxShadow:viewMode===v.key?"0 0 0 3px #3b82f622":"none"}}>
+              style={{display:"flex",alignItems:"center",gap:5,padding:"7px 16px",borderRadius:99,fontSize:12,fontWeight:700,whiteSpace:"nowrap",
+                border:viewMode===v.key?(isDark?"2px solid #10b981":"2px solid #3b82f6"):(isDark?"1.5px solid rgba(255,255,255,0.12)":"2px solid #e2e8f0"),
+                background:viewMode===v.key?(isDark?"rgba(16,185,129,0.15)":"#eff6ff"):(isDark?"#161c18":"#fff"),
+                color:viewMode===v.key?(isDark?"#34d399":"#1d4ed8"):(isDark?"#94a3b8":"#64748b"),
+                boxShadow:viewMode===v.key?(isDark?"0 0 0 3px rgba(16,185,129,0.2)":"0 0 0 3px #3b82f622"):"none"}}>
               {v.label}
-              {v.recommended&&viewMode!==v.key&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:99,background:"#dcfce7",color:"#15803d"}}>✓</span>}
+              {v.recommended&&viewMode!==v.key&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:99,background:isDark?"rgba(34,197,94,0.2)":"#dcfce7",color:isDark?"#4ade80":"#15803d"}}>✓</span>}
             </button>
           ))}
         </div>
       </div>
       <div style={{padding:16}}>
         {loading&&<div style={{textAlign:"center",padding:32,color:"#94a3b8",fontSize:13}}><div style={{fontSize:28,marginBottom:8}}>⏳</div>Loading...</div>}
-        {error&&<div style={{padding:"12px 16px",background:"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:"1px solid #fecaca"}}>❌ {error}</div>}
+        {error&&<div style={{padding:"12px 16px",background:isDark?"rgba(220,38,38,0.15)":"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:`1px solid ${isDark?"rgba(220,38,38,0.3)":"#fecaca"}`}}>❌ {error}</div>}
         {viewMode==="network"&&!loading&&(
           <>
             <ConnectedUsers subtree={networkSubtree}/>
-            <div style={{marginTop:10,padding:"8px 12px",background:"#f0f9ff",borderRadius:8,border:"1px solid #bae6fd",fontSize:12,color:"#0369a1"}}>💡 📊 icon pe click karo kisi bhi user ki analytics dekhne ke liye</div>
+            <div style={{marginTop:10,padding:"8px 12px",background:isDark?"rgba(59,130,246,0.12)":"#f0f9ff",borderRadius:8,border:`1px solid ${isDark?"rgba(59,130,246,0.25)":"#bae6fd"}`,fontSize:12,color:isDark?"#60a5fa":"#0369a1"}}>💡 📊 icon pe click karo kisi bhi user ki analytics dekhne ke liye</div>
           </>
         )}
         {viewMode==="graph"&&!loading&&(
@@ -1028,7 +1045,7 @@ export default function MyNetwork() {
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 18px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#111613":"#f8fafc",borderRadius:"16px 16px 0 0"}}>
             <div>
               <div style={{fontWeight:700,fontSize:15,color:isDark?"#ffffff":"#1e293b"}}>
-                {selectedUser.name}{selectedUser.fullName ? ` — ${selectedUser.fullName}` : ""}
+                {selectedUser.name}{selectedUser.fullName && selectedUser.fullName.trim() && selectedUser.fullName.toLowerCase() !== selectedUser.name.toLowerCase() ? ` — ${selectedUser.fullName}` : ""}
               </div>
               <div style={{fontSize:12,color:getRC(selectedUser.role, isDark).dot,fontWeight:600,textTransform:"capitalize"}}>{selectedUser.role}</div>
             </div>
