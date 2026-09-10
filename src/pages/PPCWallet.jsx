@@ -464,6 +464,140 @@ export default function PPCWallet({ setPage }) {
               </div>
             ))}
           </div>
+
+          {/* ⭐ UNIFIED DIRECT SELLER REWARD ROADMAP */}
+          {walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
+            const thresholds = walletData.sellerLevelUpThresholds
+            const levelNames = walletData.sellerLevelNames || {}
+            const levelRewards = walletData.sellerLevelRewards || {}
+            const ppc = walletData.totalSellerPPC !== undefined
+              ? walletData.totalSellerPPC
+              : ((walletData.wallets?.userWallet?.ppcCount || 0) + (walletData.wallets?.sellerWallet?.ppcCount || 0))
+            
+            const sortedLevels = Object.entries(thresholds)
+              .map(([k, v]) => ({ n: parseInt(k.replace("level", "")), v: Number(v) }))
+              .filter(l => !isNaN(l.n) && !isNaN(l.v))
+              .sort((a, b) => a.n - b.n)
+
+            let currentLevel = 0
+            sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
+            const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Direct Seller" : `Level ${currentLevel}`)
+            const nextLvl = sortedLevels.find(l => l.n > currentLevel)
+            const nextLevelName = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
+            const nextThreshold = nextLvl?.v || null
+            const prevThreshold = currentLevel > 0 ? (thresholds[`level${currentLevel}`] || 0) : 0
+            const progress = nextThreshold
+              ? Math.min(100, Math.round(((ppc - prevThreshold) / (nextThreshold - prevThreshold)) * 100))
+              : 100
+
+            return (
+              <div className={`rounded-3xl border p-5 sm:p-7 shadow-xl space-y-5 ${
+                isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
+              }`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase mb-1.5 border ${
+                      isDark ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200"
+                    }`}>
+                      🌟 Unified Seller Progression
+                    </div>
+                    <h3 className="text-lg font-black tracking-tight">Direct Seller Achievement Rewards</h3>
+                    <p className="text-xs text-stone-400 mt-0.5">
+                      User orders + Direct Seller team orders dono ka PPC mil kar rewards unlock karta hai!
+                    </p>
+                  </div>
+                  <div className={`px-4 py-2.5 rounded-2xl border flex items-center justify-between sm:justify-end gap-3 ${
+                    isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-100"
+                  }`}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Combined Total:</span>
+                    <span className="text-xl font-black text-purple-400">{ppc} <span className="text-xs font-normal text-stone-400">PPC</span></span>
+                  </div>
+                </div>
+
+                {/* Current Level Status Banner */}
+                <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-lg">
+                  <div className="text-[10px] uppercase font-mono tracking-wider opacity-80">Current Rank</div>
+                  <div className="text-xl font-black mt-0.5">{currentLevelName}</div>
+                </div>
+
+                {/* Progress Bar to next level */}
+                {nextLevelName ? (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-medium text-stone-400">
+                        Agla Milestone: <strong className="text-purple-400">{nextLevelName}</strong>
+                      </span>
+                      <span className="font-bold text-purple-400">
+                        {ppc} / {nextThreshold} PPC
+                      </span>
+                    </div>
+                    <div className={`h-2.5 rounded-full overflow-hidden ${
+                      isDark ? "bg-purple-950/60" : "bg-purple-100"
+                    }`}>
+                      <div
+                        style={{ width: `${progress}%` }}
+                        className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-500"
+                      />
+                    </div>
+                    <p className="text-[11px] text-stone-400">
+                      🎉 Sirf <strong className="text-purple-400">{nextThreshold - ppc} PPC</strong> aur chahiye <strong>{nextLevelName}</strong> unlock karne ke liye!
+                    </p>
+                  </div>
+                ) : (
+                  <div className={`p-3.5 rounded-2xl text-xs font-bold border ${
+                    isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
+                  }`}>
+                    👑 Shandar! Aapne sabhi maximum achievement milestone levels complete kar liye hain!
+                  </div>
+                )}
+
+                {/* Milestone Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+                  {sortedLevels.map(({ n, v }) => {
+                    const lvlName = levelNames[`level${n}`] || `Level ${n}`
+                    const reward = levelRewards[`level${n}`] || ""
+                    const done = ppc >= v
+                    const current = currentLevel === n
+
+                    return (
+                      <div
+                        key={n}
+                        className={`p-4 rounded-2xl border flex flex-col justify-between space-y-3 transition-all ${
+                          current
+                            ? isDark ? "bg-purple-500/15 border-purple-500/40 shadow-lg shadow-purple-950/30" : "bg-purple-50 border-purple-300 shadow-sm"
+                            : done
+                              ? isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50/70 border-emerald-200"
+                              : isDark ? "bg-white/[0.02] border-white/[0.05] opacity-75" : "bg-stone-50 border-stone-200 opacity-80"
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between text-xs font-bold mb-1">
+                            <span className={done ? "text-emerald-400" : current ? "text-purple-400" : "text-stone-400"}>
+                              {done ? "✅ " : current ? "🔵 " : "⭕ "}{lvlName}
+                            </span>
+                            <span className="font-mono text-[10px] text-stone-400">{v} PPC</span>
+                          </div>
+                          {reward && (
+                            <p className={`text-xs mt-1 font-medium ${
+                              done ? "text-emerald-500 font-bold" : isDark ? "text-stone-400" : "text-stone-600"
+                            }`}>
+                              {done ? "🎁 " : "💡 "}{reward}
+                            </p>
+                          )}
+                        </div>
+
+                        {done && (
+                          <div className="pt-2 border-t border-white/[0.06]">
+                            <ClaimButton walletType="sellerWalletAsSeller" level={n} />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
 

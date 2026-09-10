@@ -12,53 +12,27 @@ export default function AdminPPCSettings() {
     directRate: "",
     parentRate: "",
     distributorRate: "",
-    // ⭐ NEW — jab plain "user" khud sale kare (no seller in between)
     userOrderDirectRate: "",
     userOrderDistributorRate: "",
     minimumWithdrawal: "",
-    level1Threshold: "",
-    level2Threshold: "",
-    level3Threshold: "",
-    level4Threshold: "",
-    level0Name: "",
-    level1Name: "",
-    level2Name: "",
-    level3Name: "",
-    level4Name: "",
-    // ✅ Level rewards — admin control
-    level1Reward: "",
-    level2Reward: "",
-    level3Reward: "",
-    level4Reward: "",
-    // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
-    userWalletLevel1Threshold: "",
-    userWalletLevel2Threshold: "",
-    userWalletLevel3Threshold: "",
-    userWalletLevel4Threshold: "",
-    userWalletLevel0Name: "",
-    userWalletLevel1Name: "",
-    userWalletLevel2Name: "",
-    userWalletLevel3Name: "",
-    userWalletLevel4Name: "",
-    userWalletLevel1Reward: "",
-    userWalletLevel2Reward: "",
-    userWalletLevel3Reward: "",
-    userWalletLevel4Reward: "",
-    // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
-    distSellerLevel1Threshold: "",
-    distSellerLevel2Threshold: "",
-    distSellerLevel3Threshold: "",
-    distSellerLevel4Threshold: "",
-    distSellerLevel0Name: "",
-    distSellerLevel1Name: "",
-    distSellerLevel2Name: "",
-    distSellerLevel3Name: "",
-    distSellerLevel4Name: "",
-    distSellerLevel1Reward: "",
-    distSellerLevel2Reward: "",
-    distSellerLevel3Reward: "",
-    distSellerLevel4Reward: "",
   })
+
+  // ✅ Dynamic Level Hierarchies
+  const [distLevels, setDistLevels] = useState([
+    { level: 0, name: "Distributor", threshold: 0, reward: "" },
+    { level: 1, name: "Senior Distributor", threshold: 100, reward: "🎁 ₹500 bonus credit" },
+    { level: 2, name: "Gold Distributor", threshold: 500, reward: "🎁 ₹1500 bonus credit" },
+    { level: 3, name: "Platinum Distributor", threshold: 1000, reward: "🎁 ₹3000 + free kit" },
+    { level: 4, name: "Diamond Distributor", threshold: 5000, reward: "🎁 ₹10000 + trip" },
+  ])
+
+  const [sellerLevels, setSellerLevels] = useState([
+    { level: 0, name: "Seller", threshold: 0, reward: "" },
+    { level: 1, name: "Silver Seller", threshold: 50, reward: "🎁 ₹250 bonus credit" },
+    { level: 2, name: "Gold Seller", threshold: 200, reward: "🎁 ₹750 bonus credit" },
+    { level: 3, name: "Platinum Seller", threshold: 500, reward: "🎁 ₹1500 + free kit" },
+    { level: 4, name: "Diamond Seller", threshold: 2000, reward: "🎁 ₹5000 + trip" },
+  ])
   
   useEffect(() => {
     fetchSettings()
@@ -77,76 +51,112 @@ export default function AdminPPCSettings() {
         const data = await res.json()
         setSettings(data)
         setFormData({
-          basePPCValue:      data.basePPCValue || "",
-          directRate:        data.distributionRates?.direct || "",
-          parentRate:        data.distributionRates?.parent || "",
-          distributorRate:   data.distributionRates?.distributor || "",
-          // ⭐ NEW
+          basePPCValue:             data.basePPCValue || "",
+          directRate:               data.distributionRates?.direct || "",
+          parentRate:               data.distributionRates?.parent || "",
+          distributorRate:          data.distributionRates?.distributor || "",
           userOrderDirectRate:      data.userOrderDistributionRates?.directSeller ?? 50,
           userOrderDistributorRate: data.userOrderDistributionRates?.distributor  ?? 50,
-          minimumWithdrawal: data.minimumWithdrawal || "",
-          level1Threshold:   data.levelUpThresholds?.level1 || 100,
-          level2Threshold:   data.levelUpThresholds?.level2 || 500,
-          level3Threshold:   data.levelUpThresholds?.level3 || 1000,
-          level4Threshold:   data.levelUpThresholds?.level4 || 5000,
-          level0Name:        data.levelNames?.level0 || "Distributor",
-          level1Name:        data.levelNames?.level1 || "Senior Distributor",
-          level2Name:        data.levelNames?.level2 || "Gold Distributor",
-          level3Name:        data.levelNames?.level3 || "Platinum Distributor",
-          level4Name:        data.levelNames?.level4 || "Diamond Distributor",
-          // ✅ Level rewards
-          level1Reward:      data.levelRewards?.level1 || "🎁 ₹500 bonus credit",
-          level2Reward:      data.levelRewards?.level2 || "🎁 ₹1500 bonus credit",
-          level3Reward:      data.levelRewards?.level3 || "🎁 ₹3000 + free kit",
-          level4Reward:      data.levelRewards?.level4 || "🎁 ₹10000 + trip",
-          // ✅ Seller Level Settings
-          sellerLevel1Threshold: data.sellerLevelUpThresholds?.level1 || 50,
-          sellerLevel2Threshold: data.sellerLevelUpThresholds?.level2 || 200,
-          sellerLevel3Threshold: data.sellerLevelUpThresholds?.level3 || 500,
-          sellerLevel4Threshold: data.sellerLevelUpThresholds?.level4 || 2000,
-          sellerLevel0Name:   data.sellerLevelNames?.level0 || "Seller",
-          sellerLevel1Name:   data.sellerLevelNames?.level1 || "Silver Seller",
-          sellerLevel2Name:   data.sellerLevelNames?.level2 || "Gold Seller",
-          sellerLevel3Name:   data.sellerLevelNames?.level3 || "Platinum Seller",
-          sellerLevel4Name:   data.sellerLevelNames?.level4 || "Diamond Seller",
-          sellerLevel1Reward: data.sellerLevelRewards?.level1 || "🎁 ₹250 bonus credit",
-          sellerLevel2Reward: data.sellerLevelRewards?.level2 || "🎁 ₹750 bonus credit",
-          sellerLevel3Reward: data.sellerLevelRewards?.level3 || "🎁 ₹1500 + free kit",
-          sellerLevel4Reward: data.sellerLevelRewards?.level4 || "🎁 ₹5000 + trip",
-          // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
-          userWalletLevel1Threshold: data.userWalletLevelUpThresholds?.level1 || 50,
-          userWalletLevel2Threshold: data.userWalletLevelUpThresholds?.level2 || 200,
-          userWalletLevel3Threshold: data.userWalletLevelUpThresholds?.level3 || 500,
-          userWalletLevel4Threshold: data.userWalletLevelUpThresholds?.level4 || 2000,
-          userWalletLevel0Name: data.userWalletLevelNames?.level0 || "User",
-          userWalletLevel1Name: data.userWalletLevelNames?.level1 || "Silver User",
-          userWalletLevel2Name: data.userWalletLevelNames?.level2 || "Gold User",
-          userWalletLevel3Name: data.userWalletLevelNames?.level3 || "Platinum User",
-          userWalletLevel4Name: data.userWalletLevelNames?.level4 || "Diamond User",
-          userWalletLevel1Reward: data.userWalletLevelRewards?.level1 || "🎁 ₹250 bonus credit",
-          userWalletLevel2Reward: data.userWalletLevelRewards?.level2 || "🎁 ₹750 bonus credit",
-          userWalletLevel3Reward: data.userWalletLevelRewards?.level3 || "🎁 ₹1500 + free kit",
-          userWalletLevel4Reward: data.userWalletLevelRewards?.level4 || "🎁 ₹5000 + trip",
-          // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
-          distSellerLevel1Threshold: data.distSellerLevelUpThresholds?.level1 || 50,
-          distSellerLevel2Threshold: data.distSellerLevelUpThresholds?.level2 || 200,
-          distSellerLevel3Threshold: data.distSellerLevelUpThresholds?.level3 || 500,
-          distSellerLevel4Threshold: data.distSellerLevelUpThresholds?.level4 || 2000,
-          distSellerLevel0Name: data.distSellerLevelNames?.level0 || "Seller",
-          distSellerLevel1Name: data.distSellerLevelNames?.level1 || "Silver Seller",
-          distSellerLevel2Name: data.distSellerLevelNames?.level2 || "Gold Seller",
-          distSellerLevel3Name: data.distSellerLevelNames?.level3 || "Platinum Seller",
-          distSellerLevel4Name: data.distSellerLevelNames?.level4 || "Diamond Seller",
-          distSellerLevel1Reward: data.distSellerLevelRewards?.level1 || "🎁 ₹250 bonus credit",
-          distSellerLevel2Reward: data.distSellerLevelRewards?.level2 || "🎁 ₹750 bonus credit",
-          distSellerLevel3Reward: data.distSellerLevelRewards?.level3 || "🎁 ₹1500 + free kit",
-          distSellerLevel4Reward: data.distSellerLevelRewards?.level4 || "🎁 ₹5000 + trip",
+          minimumWithdrawal:        data.minimumWithdrawal || "",
         })
+
+        // Parse distributor levels
+        const distThresholds = data.levelUpThresholds || { level1: 100, level2: 500, level3: 1000, level4: 5000 }
+        const distNames = data.levelNames || { level0: "Distributor", level1: "Senior Distributor", level2: "Gold Distributor", level3: "Platinum Distributor", level4: "Diamond Distributor" }
+        const distRewards = data.levelRewards || { level1: "🎁 ₹500 bonus credit", level2: "🎁 ₹1500 bonus credit", level3: "🎁 ₹3000 + free kit", level4: "🎁 ₹10000 + trip" }
+
+        const distNums = Array.from(new Set([
+          ...Object.keys(distThresholds).map(k => parseInt(k.replace("level", ""))),
+          ...Object.keys(distNames).map(k => parseInt(k.replace("level", ""))),
+          ...Object.keys(distRewards).map(k => parseInt(k.replace("level", "")))
+        ])).filter(n => !isNaN(n)).sort((a, b) => a - b)
+
+        if (!distNums.includes(0)) distNums.unshift(0)
+        if (distNums.length === 1) [1, 2, 3, 4].forEach(n => distNums.push(n))
+
+        setDistLevels(distNums.map(n => ({
+          level: n,
+          name: distNames[`level${n}`] || (n === 0 ? "Distributor" : `Level ${n}`),
+          threshold: n === 0 ? 0 : (distThresholds[`level${n}`] ?? ""),
+          reward: n === 0 ? "" : (distRewards[`level${n}`] ?? "")
+        })))
+
+        // Parse seller levels
+        const sThresholds = data.sellerLevelUpThresholds || { level1: 50, level2: 200, level3: 500, level4: 2000 }
+        const sNames = data.sellerLevelNames || { level0: "Seller", level1: "Silver Seller", level2: "Gold Seller", level3: "Platinum Seller", level4: "Diamond Seller" }
+        const sRewards = data.sellerLevelRewards || { level1: "🎁 ₹250 bonus credit", level2: "🎁 ₹750 bonus credit", level3: "🎁 ₹1500 + free kit", level4: "🎁 ₹5000 + trip" }
+
+        const sNums = Array.from(new Set([
+          ...Object.keys(sThresholds).map(k => parseInt(k.replace("level", ""))),
+          ...Object.keys(sNames).map(k => parseInt(k.replace("level", ""))),
+          ...Object.keys(sRewards).map(k => parseInt(k.replace("level", "")))
+        ])).filter(n => !isNaN(n)).sort((a, b) => a - b)
+
+        if (!sNums.includes(0)) sNums.unshift(0)
+        if (sNums.length === 1) [1, 2, 3, 4].forEach(n => sNums.push(n))
+
+        setSellerLevels(sNums.map(n => ({
+          level: n,
+          name: sNames[`level${n}`] || (n === 0 ? "Seller" : `Level ${n}`),
+          threshold: n === 0 ? 0 : (sThresholds[`level${n}`] ?? ""),
+          reward: n === 0 ? "" : (sRewards[`level${n}`] ?? "")
+        })))
       }
       
     } catch (err) {
       console.error("Fetch settings error:", err)
     }
+  }
+
+  // ✅ Dynamic Level Helpers
+  const addDistLevel = () => {
+    setDistLevels(prev => {
+      const maxLvl = prev.reduce((m, l) => Math.max(m, l.level), 0)
+      const nextLvl = maxLvl + 1
+      return [
+        ...prev,
+        {
+          level: nextLvl,
+          name: `Level ${nextLvl} Distributor`,
+          threshold: "",
+          reward: `🎁 ₹${(nextLvl * 2500)} bonus credit`
+        }
+      ]
+    })
+  }
+
+  const removeDistLevel = (lvlNum) => {
+    if (lvlNum <= 1) return
+    setDistLevels(prev => prev.filter(l => l.level !== lvlNum))
+  }
+
+  const updateDistLevel = (lvlNum, field, value) => {
+    setDistLevels(prev => prev.map(l => l.level === lvlNum ? { ...l, [field]: value } : l))
+  }
+
+  const addSellerLevel = () => {
+    setSellerLevels(prev => {
+      const maxLvl = prev.reduce((m, l) => Math.max(m, l.level), 0)
+      const nextLvl = maxLvl + 1
+      return [
+        ...prev,
+        {
+          level: nextLvl,
+          name: `Level ${nextLvl} Seller`,
+          threshold: "",
+          reward: `🎁 ₹${(nextLvl * 1000)} bonus credit`
+        }
+      ]
+    })
+  }
+
+  const removeSellerLevel = (lvlNum) => {
+    if (lvlNum <= 1) return
+    setSellerLevels(prev => prev.filter(l => l.level !== lvlNum))
+  }
+
+  const updateSellerLevel = (lvlNum, field, value) => {
+    setSellerLevels(prev => prev.map(l => l.level === lvlNum ? { ...l, [field]: value } : l))
   }
   
   const handleSubmit = async (e) => {
@@ -182,86 +192,34 @@ export default function AdminPPCSettings() {
             distributor:  formData.userOrderDistributorRate
           },
           minimumWithdrawal: formData.minimumWithdrawal,
-          levelUpThresholds: {
-            level1: Number(formData.level1Threshold),
-            level2: Number(formData.level2Threshold),
-            level3: Number(formData.level3Threshold),
-            level4: Number(formData.level4Threshold),
-          },
-          levelNames: {
-            level0: formData.level0Name,
-            level1: formData.level1Name,
-            level2: formData.level2Name,
-            level3: formData.level3Name,
-            level4: formData.level4Name,
-          },
-          // ✅ Level rewards — admin control
-          levelRewards: {
-            level1: formData.level1Reward,
-            level2: formData.level2Reward,
-            level3: formData.level3Reward,
-            level4: formData.level4Reward,
-          },
-          // ✅ Seller Level Settings
-          sellerLevelUpThresholds: {
-            level1: Number(formData.sellerLevel1Threshold),
-            level2: Number(formData.sellerLevel2Threshold),
-            level3: Number(formData.sellerLevel3Threshold),
-            level4: Number(formData.sellerLevel4Threshold),
-          },
-          sellerLevelNames: {
-            level0: formData.sellerLevel0Name,
-            level1: formData.sellerLevel1Name,
-            level2: formData.sellerLevel2Name,
-            level3: formData.sellerLevel3Name,
-            level4: formData.sellerLevel4Name,
-          },
-          sellerLevelRewards: {
-            level1: formData.sellerLevel1Reward,
-            level2: formData.sellerLevel2Reward,
-            level3: formData.sellerLevel3Reward,
-            level4: formData.sellerLevel4Reward,
-          },
-          // ✅ User Wallet Level Settings (separate from Direct Seller Wallet)
-          userWalletLevelUpThresholds: {
-            level1: Number(formData.userWalletLevel1Threshold),
-            level2: Number(formData.userWalletLevel2Threshold),
-            level3: Number(formData.userWalletLevel3Threshold),
-            level4: Number(formData.userWalletLevel4Threshold),
-          },
-          userWalletLevelNames: {
-            level0: formData.userWalletLevel0Name,
-            level1: formData.userWalletLevel1Name,
-            level2: formData.userWalletLevel2Name,
-            level3: formData.userWalletLevel3Name,
-            level4: formData.userWalletLevel4Name,
-          },
-          userWalletLevelRewards: {
-            level1: formData.userWalletLevel1Reward,
-            level2: formData.userWalletLevel2Reward,
-            level3: formData.userWalletLevel3Reward,
-            level4: formData.userWalletLevel4Reward,
-          },
-          // ✅ Distributor's OWN Direct Seller Wallet — separate from Seller's Direct Seller Wallet
-          distSellerLevelUpThresholds: {
-            level1: Number(formData.distSellerLevel1Threshold),
-            level2: Number(formData.distSellerLevel2Threshold),
-            level3: Number(formData.distSellerLevel3Threshold),
-            level4: Number(formData.distSellerLevel4Threshold),
-          },
-          distSellerLevelNames: {
-            level0: formData.distSellerLevel0Name,
-            level1: formData.distSellerLevel1Name,
-            level2: formData.distSellerLevel2Name,
-            level3: formData.distSellerLevel3Name,
-            level4: formData.distSellerLevel4Name,
-          },
-          distSellerLevelRewards: {
-            level1: formData.distSellerLevel1Reward,
-            level2: formData.distSellerLevel2Reward,
-            level3: formData.distSellerLevel3Reward,
-            level4: formData.distSellerLevel4Reward,
-          }
+          levelUpThresholds: Object.fromEntries(
+            distLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, Number(l.threshold) || 0])
+          ),
+          levelNames: Object.fromEntries(
+            distLevels.map(l => [`level${l.level}`, l.name || `Level ${l.level}`])
+          ),
+          levelRewards: Object.fromEntries(
+            distLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, l.reward || ""])
+          ),
+          sellerLevelUpThresholds: Object.fromEntries(
+            sellerLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, Number(l.threshold) || 0])
+          ),
+          sellerLevelNames: Object.fromEntries(
+            sellerLevels.map(l => [`level${l.level}`, l.name || `Level ${l.level}`])
+          ),
+          sellerLevelRewards: Object.fromEntries(
+            sellerLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, l.reward || ""])
+          ),
+          // Backward compatibility mirroring for user wallet settings
+          userWalletLevelUpThresholds: Object.fromEntries(
+            sellerLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, Number(l.threshold) || 0])
+          ),
+          userWalletLevelNames: Object.fromEntries(
+            sellerLevels.map(l => [`level${l.level}`, l.name || `Level ${l.level}`])
+          ),
+          userWalletLevelRewards: Object.fromEntries(
+            sellerLevels.filter(l => l.level > 0).map(l => [`level${l.level}`, l.reward || ""])
+          ),
         })
       })
       
@@ -555,148 +513,207 @@ export default function AdminPPCSettings() {
             </div>
           </div>
 
-          {/* Section 4: Distributor Level Up Settings */}
-          <div className={`p-5 rounded-2xl border space-y-4 ${
+          {/* Section 4: Distributor Level Up Settings (Dynamic) */}
+          <div className={`p-5 sm:p-6 rounded-2xl border space-y-4 ${
             isDark ? "bg-[#121814] border-purple-500/30" : "bg-purple-50/40 border-purple-200"
           }`}>
-            <h3 className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
-              <span>🏆</span> Distributor Level Hierarchy & Thresholds
-            </h3>
-
-            <div className="space-y-3">
-              {[0, 1, 2, 3, 4].map(lvl => (
-                <div key={lvl} className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
-                  isDark ? "bg-black/40 border-white/[0.04]" : "bg-white border-purple-100 shadow-sm"
-                }`}>
-                  <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
-                      Level {lvl} Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData[`level${lvl}Name`] || ""}
-                      onChange={e => setFormData({ ...formData, [`level${lvl}Name`]: e.target.value })}
-                      className={`w-full p-2 text-xs border rounded-lg focus:outline-none focus:border-purple-400 ${
-                        isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
-                      }`}
-                      placeholder={`Level ${lvl} Title`}
-                    />
-                  </div>
-                  {lvl > 0 ? (
-                    <div>
-                      <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      }`}>
-                        PPC Threshold for Level {lvl}
-                      </label>
-                      <input
-                        type="number"
-                        value={formData[`level${lvl}Threshold`] || ""}
-                        onChange={e => setFormData({ ...formData, [`level${lvl}Threshold`]: e.target.value })}
-                        className={`w-full p-2 text-xs font-mono border rounded-lg focus:outline-none focus:border-purple-400 ${
-                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
-                        }`}
-                        placeholder="e.g. 100"
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-stone-400 flex items-center pt-4">
-                      Initial starting rank (0 threshold)
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
+                  <span>🏆</span> Distributor Level Hierarchy & Rewards
+                </h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Distributor wallet ke PPC milestones aur unlockable rewards yahan se customize karein
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addDistLevel}
+                className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer self-start sm:self-auto"
+              >
+                <span>➕</span> Add Level
+              </button>
             </div>
 
-            {/* Distributor Rewards */}
-            <div className="pt-2 border-t border-purple-500/20 space-y-2">
-              <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">🎁 Level Milestone Rewards</h4>
-              {[1, 2, 3, 4].map(n => (
-                <div key={n} className="flex items-center gap-3 text-xs">
-                  <span className={`font-bold min-w-[70px] ${isDark ? "text-stone-400" : "text-stone-600"}`}>Level {n}:</span>
-                  <input
-                    type="text"
-                    value={formData[`level${n}Reward`] || ""}
-                    onChange={e => setFormData(p => ({ ...p, [`level${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. 🎁 ₹${[500, 1500, 3000, 10000][n-1]} bonus credit`}
-                    className={`flex-1 p-2 text-xs border rounded-lg focus:outline-none focus:border-emerald-400 ${
-                      isDark ? "bg-black/40 text-white border-emerald-500/30" : "bg-white text-stone-900 border-emerald-300"
-                    }`}
-                  />
+            <div className="space-y-3">
+              {distLevels.map(l => (
+                <div
+                  key={l.level}
+                  className={`p-4 rounded-2xl border transition-all ${
+                    isDark ? "bg-black/40 border-white/[0.06]" : "bg-white border-purple-100 shadow-sm"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-purple-500/10">
+                    <span className="font-bold text-xs text-purple-400 font-mono uppercase tracking-wider">
+                      {l.level === 0 ? "Initial Starting Rank (Level 0)" : `Level ${l.level} Milestone`}
+                    </span>
+                    {l.level > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeDistLevel(l.level)}
+                        className="text-[11px] font-bold text-red-500 hover:text-red-400 px-2 py-0.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition-all cursor-pointer"
+                      >
+                        🗑️ Delete Level
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={`grid grid-cols-1 ${l.level > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1"} gap-3`}>
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
+                        Rank Title
+                      </label>
+                      <input
+                        type="text"
+                        value={l.name}
+                        onChange={e => updateDistLevel(l.level, "name", e.target.value)}
+                        className={`w-full p-2.5 text-xs font-bold border rounded-xl focus:outline-none focus:border-purple-400 ${
+                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                        }`}
+                        placeholder={l.level === 0 ? "Distributor" : `Level ${l.level} Title`}
+                      />
+                    </div>
+
+                    {l.level > 0 && (
+                      <>
+                        <div>
+                          <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                            isDark ? "text-stone-400" : "text-stone-600"
+                          }`}>
+                            PPC Required
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={l.threshold}
+                            onChange={e => updateDistLevel(l.level, "threshold", e.target.value)}
+                            className={`w-full p-2.5 text-xs font-mono font-bold border rounded-xl focus:outline-none focus:border-purple-400 ${
+                              isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                            }`}
+                            placeholder="e.g. 100"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
+                            Milestone Reward
+                          </label>
+                          <input
+                            type="text"
+                            value={l.reward}
+                            onChange={e => updateDistLevel(l.level, "reward", e.target.value)}
+                            className={`w-full p-2.5 text-xs font-medium border rounded-xl focus:outline-none focus:border-emerald-400 ${
+                              isDark ? "bg-[#121814] text-white border-emerald-500/30" : "bg-stone-50 text-stone-900 border-emerald-200"
+                            }`}
+                            placeholder="e.g. 🎁 ₹500 bonus credit"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-
-          {/* Section 6: User Wallet Level Up Settings */}
-          <div className={`p-5 rounded-2xl border space-y-4 ${
-            isDark ? "bg-[#121814] border-pink-500/30" : "bg-pink-50/40 border-pink-200"
+          {/* Section 5: Direct Seller Level Up Settings (Dynamic) */}
+          <div className={`p-5 sm:p-6 rounded-2xl border space-y-4 ${
+            isDark ? "bg-[#121814] border-emerald-500/30" : "bg-emerald-50/40 border-emerald-200"
           }`}>
-            <h3 className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-wider flex items-center gap-2">
-              <span>👤</span> User Wallet Level Hierarchy & Rewards
-            </h3>
-
-            <div className="space-y-3">
-              {[0, 1, 2, 3, 4].map(lvl => (
-                <div key={lvl} className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
-                  isDark ? "bg-black/40 border-white/[0.04]" : "bg-white border-pink-100 shadow-sm"
-                }`}>
-                  <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1">
-                      User Level {lvl} Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData[`userWalletLevel${lvl}Name`] || ""}
-                      onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Name`]: e.target.value })}
-                      className={`w-full p-2 text-xs border rounded-lg focus:outline-none focus:border-pink-400 ${
-                        isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
-                      }`}
-                      placeholder={`User Level ${lvl} Title`}
-                    />
-                  </div>
-                  {lvl > 0 ? (
-                    <div>
-                      <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      }`}>
-                        PPC Threshold for User Level {lvl}
-                      </label>
-                      <input
-                        type="number"
-                        value={formData[`userWalletLevel${lvl}Threshold`] || ""}
-                        onChange={e => setFormData({ ...formData, [`userWalletLevel${lvl}Threshold`]: e.target.value })}
-                        className={`w-full p-2 text-xs font-mono border rounded-lg focus:outline-none focus:border-pink-400 ${
-                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
-                        }`}
-                        placeholder="e.g. 50"
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-stone-400 flex items-center pt-4">
-                      Initial starting rank (0 threshold)
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-2">
+                  <span>🌟</span> Direct Seller Level Hierarchy & Rewards (Unified)
+                </h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Direct seller ID ke user wallet + direct seller wallet total PPC milestones aur rewards yahan se customize karein
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addSellerLevel}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer self-start sm:self-auto"
+              >
+                <span>➕</span> Add Level
+              </button>
             </div>
 
-            {/* User Rewards */}
-            <div className="pt-2 border-t border-pink-500/20 space-y-2">
-              <h4 className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider">🎁 User Milestone Rewards</h4>
-              {[1, 2, 3, 4].map(n => (
-                <div key={n} className="flex items-center gap-3 text-xs">
-                  <span className={`font-bold min-w-[70px] ${isDark ? "text-stone-400" : "text-stone-600"}`}>Level {n}:</span>
-                  <input
-                    type="text"
-                    value={formData[`userWalletLevel${n}Reward`] || ""}
-                    onChange={e => setFormData(p => ({ ...p, [`userWalletLevel${n}Reward`]: e.target.value }))}
-                    placeholder={`e.g. 🎁 ₹${[250, 750, 1500, 5000][n-1]} bonus credit`}
-                    className={`flex-1 p-2 text-xs border rounded-lg focus:outline-none focus:border-pink-400 ${
-                      isDark ? "bg-black/40 text-white border-pink-500/30" : "bg-white text-stone-900 border-pink-300"
-                    }`}
-                  />
+            <div className="space-y-3">
+              {sellerLevels.map(l => (
+                <div
+                  key={l.level}
+                  className={`p-4 rounded-2xl border transition-all ${
+                    isDark ? "bg-black/40 border-white/[0.06]" : "bg-white border-emerald-100 shadow-sm"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-emerald-500/10">
+                    <span className="font-bold text-xs text-emerald-400 font-mono uppercase tracking-wider">
+                      {l.level === 0 ? "Initial Starting Rank (Level 0)" : `Level ${l.level} Milestone`}
+                    </span>
+                    {l.level > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSellerLevel(l.level)}
+                        className="text-[11px] font-bold text-red-500 hover:text-red-400 px-2 py-0.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition-all cursor-pointer"
+                      >
+                        🗑️ Delete Level
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={`grid grid-cols-1 ${l.level > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1"} gap-3`}>
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
+                        Rank Title
+                      </label>
+                      <input
+                        type="text"
+                        value={l.name}
+                        onChange={e => updateSellerLevel(l.level, "name", e.target.value)}
+                        className={`w-full p-2.5 text-xs font-bold border rounded-xl focus:outline-none focus:border-emerald-400 ${
+                          isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                        }`}
+                        placeholder={l.level === 0 ? "Seller" : `Level ${l.level} Title`}
+                      />
+                    </div>
+
+                    {l.level > 0 && (
+                      <>
+                        <div>
+                          <label className={`block text-[10px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                            isDark ? "text-stone-400" : "text-stone-600"
+                          }`}>
+                            PPC Required
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={l.threshold}
+                            onChange={e => updateSellerLevel(l.level, "threshold", e.target.value)}
+                            className={`w-full p-2.5 text-xs font-mono font-bold border rounded-xl focus:outline-none focus:border-emerald-400 ${
+                              isDark ? "bg-[#121814] text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-200"
+                            }`}
+                            placeholder="e.g. 50"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
+                            Milestone Reward
+                          </label>
+                          <input
+                            type="text"
+                            value={l.reward}
+                            onChange={e => updateSellerLevel(l.level, "reward", e.target.value)}
+                            className={`w-full p-2.5 text-xs font-medium border rounded-xl focus:outline-none focus:border-emerald-400 ${
+                              isDark ? "bg-[#121814] text-white border-emerald-500/30" : "bg-stone-50 text-stone-900 border-emerald-200"
+                            }`}
+                            placeholder="e.g. 🎁 ₹250 bonus credit"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
