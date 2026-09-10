@@ -449,44 +449,6 @@ export default function PPCWallet({ setPage }) {
                           </span>
                         </div>
                       </div>
-
-                      {/* Distributor Direct Seller Wallet Level Roadmap */}
-                      {key === "sellerWallet" && walletData.role === "distributor" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
-                        const thresholds   = walletData.sellerLevelUpThresholds
-                        const levelNames   = walletData.sellerLevelNames   || {}
-                        const levelRewards = walletData.sellerLevelRewards || {}
-                        const ppc          = wallet.ppcCount || 0
-                        let currentLevel   = 0
-                        const sortedLevels = Object.entries(thresholds)
-                          .map(([k,v]) => ({ n: parseInt(k.replace("level","")), v }))
-                          .sort((a,b) => a.n - b.n)
-                        sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
-                        const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Seller" : `Level ${currentLevel}`)
-                        const nextLvl          = sortedLevels.find(l => l.n > currentLevel)
-                        const nextLevelName    = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-                        const nextThreshold    = nextLvl?.v || null
-                        const progress         = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
-
-                        return (
-                          <div className="space-y-3 pt-2">
-                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-3 text-white">
-                              <div className="text-[10px] opacity-75">Current Level</div>
-                              <div className="text-base font-black">{currentLevelName}</div>
-                            </div>
-                            {nextLevelName && (
-                              <div className="space-y-1.5">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-stone-400">Next: <strong className="text-sky-400">{nextLevelName}</strong></span>
-                                  <span className="font-bold text-sky-400">{ppc} / {nextThreshold} PPC</span>
-                                </div>
-                                <div className={`h-2.5 rounded-full overflow-hidden ${isDark ? "bg-sky-950/60" : "bg-sky-100"}`}>
-                                  <div style={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full" />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })()}
                     </div>
                   )}
                 </div>
@@ -502,71 +464,6 @@ export default function PPCWallet({ setPage }) {
               </div>
             ))}
           </div>
-
-          {/* Direct Seller Unified Reward Roadmap for Seller role */}
-          {walletData.role === "seller" && walletData.sellerLevelUpThresholds && Object.keys(walletData.sellerLevelUpThresholds).length > 0 && (() => {
-            const thresholds = walletData.sellerLevelUpThresholds
-            const levelNames = walletData.sellerLevelNames || {}
-            const levelRewards = walletData.sellerLevelRewards || {}
-            const ppc = walletData.totalSellerPPC !== undefined
-              ? walletData.totalSellerPPC
-              : ((walletData.wallets?.userWallet?.ppcCount || 0) + (walletData.wallets?.sellerWallet?.ppcCount || 0))
-
-            let currentLevel = 0
-            const sortedLevels = Object.entries(thresholds)
-              .map(([k, v]) => ({ n: parseInt(k.replace("level", "")), v }))
-              .sort((a, b) => a.n - b.n)
-            sortedLevels.forEach(({ n, v }) => { if (ppc >= v) currentLevel = n })
-            const currentLevelName = levelNames[`level${currentLevel}`] || (currentLevel === 0 ? "Direct Seller" : `Level ${currentLevel}`)
-            const nextLvl = sortedLevels.find(l => l.n > currentLevel)
-            const nextLevelName = nextLvl ? (levelNames[`level${nextLvl.n}`] || `Level ${nextLvl.n}`) : null
-            const nextThreshold = nextLvl?.v || null
-            const progress = nextThreshold ? Math.min(100, Math.round(ppc / nextThreshold * 100)) : 100
-
-            return (
-              <div className={`p-6 rounded-3xl border shadow-xl mt-6 space-y-4 ${
-                isDark ? "bg-[#111417] border-white/[0.08]" : "bg-white border-stone-200"
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold uppercase mb-1">
-                      🌟 Unified Seller Progression
-                    </div>
-                    <h3 className="text-base sm:text-lg font-black">Direct Seller Achievement Rewards</h3>
-                    <p className="text-xs text-stone-400">User orders + Team seller orders dono ka PPC ek sath judkar milestones unlock karta hai!</p>
-                  </div>
-                  <div className={`px-4 py-2 rounded-2xl border text-right shrink-0 ${
-                    isDark ? "bg-white/[0.03] border-white/10" : "bg-stone-50 border-stone-200"
-                  }`}>
-                    <span className="text-[10px] font-bold uppercase tracking-wider block text-stone-400">Combined Total</span>
-                    <span className="text-xl font-black text-emerald-500">{ppc} PPC</span>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                {nextLevelName ? (
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-stone-400">Next Milestone: <strong className="text-purple-400">{nextLevelName}</strong></span>
-                      <span className="text-purple-400">{ppc} / {nextThreshold} PPC</span>
-                    </div>
-                    <div className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-purple-950/60" : "bg-purple-100"}`}>
-                      <div
-                        style={{ width: `${progress}%` }}
-                        className="h-full bg-gradient-to-r from-purple-500 to-emerald-500 rounded-full transition-all duration-500"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`p-3 rounded-xl text-xs font-bold border ${
-                    isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200"
-                  }`}>
-                    👑 Maximum Level Achieved!
-                  </div>
-                )}
-              </div>
-            )
-          })()}
         </div>
       )}
 
