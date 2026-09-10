@@ -822,6 +822,7 @@ function DesktopTree({ roots, onSelect }) {
 
 export default function MyNetwork() {
   const {user}=useAuth()||{}
+  const {isDark}=useTheme()||{}
   const [tree,setTree]=useState([])
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState(null)
