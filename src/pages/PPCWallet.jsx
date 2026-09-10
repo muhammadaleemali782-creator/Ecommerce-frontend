@@ -453,7 +453,7 @@ export default function PPCWallet({ setPage }) {
                   )}
                 </div>
 
-                {wallet.withdrawable && (wallet.ppcCount || 0) > 0 && (
+                {wallet.withdrawable && (
                   <button
                     onClick={() => setPage("withdrawal-request")}
                     className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black uppercase text-xs tracking-wider rounded-xl transition-all cursor-pointer shadow-lg active:scale-98"
