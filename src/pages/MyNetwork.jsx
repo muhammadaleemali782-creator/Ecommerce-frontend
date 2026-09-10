@@ -35,7 +35,7 @@ const STYLE = `
 
 function collectAllNodes(node, result = []) {
   if (!node) return result
-  result.push({ id: node.id || node._id || "", name: node.name || "Unnamed", role: node.role || "user" })
+  result.push({ id: node.id || node._id || "", name: node.name || "Unnamed", fullName: node.fullName || "", email: node.email || "", role: node.role || "user" })
   if (Array.isArray(node.children)) node.children.forEach(c => collectAllNodes(c, result))
   return result
 }
@@ -316,7 +316,7 @@ function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false
             {hasKids && <span style={{ fontSize:8, color:open?"#fff":"#94a3b8", fontWeight:700 }}>{open?"▼":"▶"}</span>}
           </div>
           <span style={{ fontSize:13, flexShrink:0 }}>{c.label==="Distributor"?"🏢":c.label==="Seller"?"🛒":c.label==="Admin"?"👑":"👤"}</span>
-          <span style={{ fontSize:13, fontWeight:600, color:"#1e293b", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{node.name}</span>
+          <span style={{ fontSize:13, fontWeight:600, color:isDark?"#ffffff":"#1e293b", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{node.name}{node.fullName ? ` (${node.fullName})` : ""}</span>
           <span style={{ fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:99, background:`${c.dot}15`, color:c.dot, border:`1px solid ${c.dot}30`, flexShrink:0 }}>{c.label}</span>
           {summary && <span style={{ fontSize:10, color:"#94a3b8", whiteSpace:"nowrap", flexShrink:0 }}>({summary})</span>}
         </div>
@@ -543,7 +543,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
     const h=e=>{if(ref.current&&!ref.current.contains(e.target))setNodeOpen(false)}
     document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h)
   },[])
-  const filtered=useMemo(()=>{const q=search.toLowerCase().trim();return allNodes.filter(n=>n.name.toLowerCase().includes(q)||n.role.toLowerCase().includes(q)).sort((a,b)=>(ROLE_ORDER[a.role]??9)-(ROLE_ORDER[b.role]??9))},[search,allNodes])
+  const filtered=useMemo(()=>{const q=search.toLowerCase().trim();return allNodes.filter(n=>n.name.toLowerCase().includes(q)||(n.fullName&&n.fullName.toLowerCase().includes(q))||n.role.toLowerCase().includes(q)).sort((a,b)=>(ROLE_ORDER[a.role]??9)-(ROLE_ORDER[b.role]??9))},[search,allNodes])
   const sel=allNodes.find(n=>String(n.id)===String(selectedId))
   const sc=sel?getRC(sel.role, isDark):null
   const hasF=selectedId||(roleFilter&&roleFilter!=="all")
@@ -554,7 +554,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
         <span style={{fontSize:13,fontWeight:600,color:isDark?"#94a3b8":"#475569",whiteSpace:"nowrap"}}>🔍 Select Node:</span>
         <div style={{position:"relative"}} ref={ref}>
           <button className="mn-btn" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,border:`1.8px solid ${sc?sc.border:"#cbd5e1"}`,background:sc?sc.bg:"#f8fafc",fontSize:13,fontWeight:500,minWidth:190,color:sc?sc.text:"#334155"}} onClick={()=>setNodeOpen(p=>!p)}>
-            {sel?<><span style={{width:8,height:8,borderRadius:"50%",background:sc.dot,display:"inline-block",flexShrink:0}}/><span style={{fontWeight:600,flex:1}}>{sel.name}</span><span style={{fontSize:11,opacity:0.6}}>({getRoleLabel(sel.role)})</span></>:<span style={{color:"#94a3b8"}}>— Select a node —</span>}
+            {sel?<><span style={{width:8,height:8,borderRadius:"50%",background:sc.dot,display:"inline-block",flexShrink:0}}/><span style={{fontWeight:600,flex:1}}>{sel.name}{sel.fullName ? ` (${sel.fullName})` : ""}</span><span style={{fontSize:11,opacity:0.6}}>({getRoleLabel(sel.role)})</span></>:<span style={{color:isDark?"#94a3b8":"#94a3b8"}}>— Select a node —</span>}
             <span style={{fontSize:9,marginLeft:"auto",opacity:0.5}}>{nodeOpen?"▲":"▼"}</span>
           </button>
           {nodeOpen&&(
@@ -572,7 +572,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
                     onMouseEnter={e=>{if(!active)e.currentTarget.style.background="#f8fafc"}}
                     onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent"}}>
                     <span style={{width:8,height:8,borderRadius:"50%",background:nc.dot,display:"inline-block",flexShrink:0}}/>
-                    <span style={{fontWeight:600,fontSize:13,flex:1,color:nc.text}}>{n.name}</span>
+                    <span style={{fontWeight:600,fontSize:13,flex:1,color:isDark?"#f1f5f9":nc.text}}>{n.name}{n.fullName ? ` (${n.fullName})` : ""}</span>
                     <span style={{fontSize:11,padding:"2px 8px",borderRadius:999,color:nc.dot,background:`${nc.dot}18`}}>{getRoleLabel(n.role)}</span>
                   </div>
                 )})}
@@ -597,7 +597,7 @@ function FilterBar({ allNodes, selectedId, roleFilter, onSelectNode, onSelectRol
   )
 }
 
-const DT={nodeW:148,nodeH:84,gapX:36,gapY:70,lineClr:"#cbd5e1",lineW:2}
+const DT={nodeW:164,nodeH:96,gapX:36,gapY:70,lineClr:"#cbd5e1",lineW:2}
 function calcLayout(node,depth=0,pos={x:0},collapsed={}){
   const nodeId=String(node.id||node._id||"")
   const kids=collapsed[nodeId]?[]:sortKids(node.children||[])
@@ -682,15 +682,15 @@ function DesktopTree({ roots, onSelect }) {
     <div style={{display:"flex",flexDirection:"column",width:"100%",height:"100%"}}>
       {/* ✅ Zoom controls + Color picker toolbar */}
       {/* Zoom controls toolbar */}
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",background:"var(--mn-tb-bg, #f8fafc)",borderBottom:"1px solid var(--mn-tb-border, #e2e8f0)",flexWrap:"wrap"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",background:isDark?"#0d1110":"var(--mn-tb-bg, #f8fafc)",borderBottom:isDark?"1px solid rgba(255,255,255,0.08)":"1px solid var(--mn-tb-border, #e2e8f0)",flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:4,paddingRight:10,borderRight:"1px solid #e2e8f0"}}>
           <button onClick={zoomOut} disabled={zoomMult<=ZOOM_MIN} title="Zoom Out"
-            style={{width:26,height:26,borderRadius:7,border:"1px solid #e2e8f0",background:"#fff",cursor:zoomMult<=ZOOM_MIN?"not-allowed":"pointer",fontSize:15,fontWeight:700,color:"#475569",display:"flex",alignItems:"center",justifyContent:"center",opacity:zoomMult<=ZOOM_MIN?0.4:1,flexShrink:0}}>−</button>
+            style={{width:26,height:26,borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",cursor:zoomMult<=ZOOM_MIN?"not-allowed":"pointer",fontSize:15,fontWeight:700,color:isDark?"#f1f5f9":"#475569",display:"flex",alignItems:"center",justifyContent:"center",opacity:zoomMult<=ZOOM_MIN?0.4:1,flexShrink:0}}>−</button>
           <span style={{fontSize:11,fontWeight:700,color:"#475569",minWidth:42,textAlign:"center"}}>{Math.round(scale*100)}%</span>
           <button onClick={zoomIn} disabled={zoomMult>=ZOOM_MAX} title="Zoom In"
-            style={{width:26,height:26,borderRadius:7,border:"1px solid #e2e8f0",background:"#fff",cursor:zoomMult>=ZOOM_MAX?"not-allowed":"pointer",fontSize:15,fontWeight:700,color:"#475569",display:"flex",alignItems:"center",justifyContent:"center",opacity:zoomMult>=ZOOM_MAX?0.4:1,flexShrink:0}}>+</button>
+            style={{width:26,height:26,borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",cursor:zoomMult>=ZOOM_MAX?"not-allowed":"pointer",fontSize:15,fontWeight:700,color:isDark?"#f1f5f9":"#475569",display:"flex",alignItems:"center",justifyContent:"center",opacity:zoomMult>=ZOOM_MAX?0.4:1,flexShrink:0}}>+</button>
           <button onClick={zoomFit} title="Fit to screen"
-            style={{marginLeft:4,fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:"1px solid #e2e8f0",background:"#fff",color:"#64748b",cursor:"pointer",whiteSpace:"nowrap"}}>⛶ Fit</button>
+            style={{marginLeft:4,fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",color:isDark?"#94a3b8":"#64748b",cursor:"pointer",whiteSpace:"nowrap"}}>⛶ Fit</button>
           <button onClick={zoomUltra} disabled={zoomMult>=ZOOM_MAX} title="Ultra Zoom"
             style={{fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:"1px solid #c4b5fd",background:"#f5f3ff",color:"#7c3aed",cursor:zoomMult>=ZOOM_MAX?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:zoomMult>=ZOOM_MAX?0.5:1}}>🔎 Ultra</button>
         </div>
@@ -732,10 +732,10 @@ function DesktopTree({ roots, onSelect }) {
           matter how tall the toolbar gets, so nothing ever pushes the
           layout past the parent's box — it just scrolls internally instead. */}
       <div style={{flex:1,width:"100%",minHeight:0,position:"relative"}}>
-      <div ref={containerRef} style={{width:"100%",height:"100%",position:"relative",overflow:"auto",background:"var(--mn-canvas-bg, linear-gradient(135deg,#f8fafc 0%,#f0f4ff 100%))"}}>
+      <div ref={containerRef} style={{width:"100%",height:"100%",position:"relative",overflow:"auto",background:isDark?"#090c0a":"var(--mn-canvas-bg, linear-gradient(135deg,#f8fafc 0%,#f0f4ff 100%))"}}>
       <div style={{position:"relative",width:stageW,height:stageH}}>
       <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",pointerEvents:"none",opacity:0.4}}>
-        <defs><pattern id="dtgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" strokeWidth="0.5"/></pattern></defs>
+        <defs><pattern id="dtgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke={isDark?"rgba(255,255,255,0.06)":"#e2e8f0"} strokeWidth="0.5"/></pattern></defs>
         <rect width="100%" height="100%" fill="url(#dtgrid)"/>
       </svg>
       <div style={{position:"absolute",left:offsetX,top:offsetY,width:rawW,height:rawH,transform:`scale(${scale})`,transformOrigin:"top left",transition:"transform 0.35s cubic-bezier(.4,0,.2,1), left 0.35s, top 0.35s"}}>
@@ -790,18 +790,21 @@ function DesktopTree({ roots, onSelect }) {
                   setFocusTarget({ x: layout.x + DT.nodeW/2, y: layout.y + DT.nodeH/2 })
                 }}
                 style={{width:"100%",height:"100%",
-                  background: highlightId===nodeId ? lineColor+"22" : c.bg,
+                  background: highlightId===nodeId ? (isDark?"rgba(124,58,237,0.25)":lineColor+"22") : (isDark?(c.bg||"rgba(255,255,255,0.04)"):c.bg),
                   border:`2px solid ${highlightId===nodeId ? lineColor : c.border}`,
                   borderRadius:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                  boxShadow: highlightId===nodeId ? `0 0 0 3px ${lineColor}40,0 4px 16px ${lineColor}30` : `0 4px 16px ${c.dot}20,0 1px 4px rgba(0,0,0,0.06)`,
-                  userSelect:"none",padding:"8px 10px",boxSizing:"border-box",gap:2,cursor:"pointer"}}>
-                <div style={{fontSize:24,lineHeight:1,filter:"drop-shadow(0 1px 2px rgba(0,0,0,0.12))"}}>{icon}</div>
-                <div style={{fontSize:12,fontWeight:700,color:c.text,lineHeight:1.3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:DT.nodeW-20,textAlign:"center",marginTop:2}}>{layout.node.name}</div>
-                <div style={{fontSize:10,color:c.dot,fontWeight:600,background:`${c.dot}12`,borderRadius:99,padding:"1px 8px",marginTop:1}}>{c.label}</div>
+                  boxShadow: highlightId===nodeId ? `0 0 0 3px ${lineColor}40,0 4px 16px ${lineColor}30` : (isDark?"0 4px 20px rgba(0,0,0,0.4)":`0 4px 16px ${c.dot}20,0 1px 4px rgba(0,0,0,0.06)`),
+                  userSelect:"none",padding:"8px 8px",boxSizing:"border-box",gap:1,cursor:"pointer"}}>
+                <div style={{fontSize:22,lineHeight:1,filter:"drop-shadow(0 1px 2px rgba(0,0,0,0.12))"}}>{icon}</div>
+                <div style={{fontSize:12,fontWeight:800,color:isDark?"#ffffff":c.text,lineHeight:1.2,fontFamily:"monospace",letterSpacing:"0.04em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:DT.nodeW-16,textAlign:"center",marginTop:2}}>{layout.node.name}</div>
+                {layout.node.fullName && layout.node.fullName.trim() !== "" && layout.node.fullName.toLowerCase() !== layout.node.name.toLowerCase() && (
+                  <div style={{fontSize:11,fontWeight:600,color:isDark?"#94a3b8":"#475569",lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:DT.nodeW-16,textAlign:"center"}}>{layout.node.fullName}</div>
+                )}
+                <div style={{fontSize:9,color:c.dot,fontWeight:700,background:isDark?`${c.dot}25`:`${c.dot}12`,borderRadius:99,padding:"1px 8px",marginTop:1,textTransform:"uppercase",letterSpacing:"0.04em"}}>{c.label}</div>
               </div>
               {hasKids&&(
                 <button onClick={e=>{e.stopPropagation();setCollapsed(p=>({...p,[nodeId]:!p[nodeId]}))}}
-                  style={{position:"absolute",bottom:-13,left:"50%",transform:"translateX(-50%)",width:26,height:26,borderRadius:"50%",background:"#fff",border:`2px solid ${c.border}`,color:c.dot,fontSize:12,fontWeight:900,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 2px 8px ${c.dot}30,0 1px 3px rgba(0,0,0,0.12)`,zIndex:10,padding:0,cursor:"pointer",transition:"all 0.2s ease"}}>
+                  style={{position:"absolute",bottom:-13,left:"50%",transform:"translateX(-50%)",width:26,height:26,borderRadius:"50%",background:isDark?"#121915":"#fff",border:`2px solid ${c.border}`,color:c.dot,fontSize:12,fontWeight:900,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 2px 8px ${c.dot}30,0 1px 3px rgba(0,0,0,0.12)`,zIndex:10,padding:0,cursor:"pointer",transition:"all 0.2s ease"}}>
                   {isColld?"+":" −"}
                 </button>
               )}
@@ -869,8 +872,8 @@ export default function MyNetwork() {
 
   const renderNode=(node,level=0)=>(
     <div key={node.id||node._id} style={{marginLeft:level*16}}>
-      <div className="mn-card" onClick={()=>setSelectedUser(node)} style={{padding:"8px 12px",border:"1px solid #e2e8f0",borderRadius:8,margin:"3px 0",background:"#f8fafc",display:"flex",alignItems:"center",gap:8}}>
-        <span style={{fontWeight:600,fontSize:13,color:"#1e293b",flex:1}}>{node.name||"User"}</span>
+      <div className="mn-card" onClick={()=>setSelectedUser(node)} style={{padding:"8px 12px",borderRadius:8,margin:"3px 0",background:isDark?"#111613":"#f8fafc",border:isDark?"1px solid rgba(255,255,255,0.08)":"1px solid #e2e8f0",display:"flex",alignItems:"center",gap:8}}>
+        <span style={{fontWeight:600,fontSize:13,color:isDark?"#ffffff":"#1e293b",flex:1}}>{node.name}{node.fullName ? ` (${node.fullName})` : ""}</span>
         <span style={{fontSize:11,color:getRC(node.role).dot,fontWeight:600}}>{getRoleLabel(node.role)||"-"}</span>
       </div>
       {node.children&&sortKids(node.children).map(ch=>renderNode(ch,level+1))}
@@ -884,12 +887,12 @@ export default function MyNetwork() {
   const views=[{key:"network",label:"👥 Network",recommended:true},{key:"graph",label:"🌳 Graph",recommended:false},{key:"tree",label:"📋 List",recommended:false}]
 
   if(isMobile) return(
-    <div style={{minHeight:"100vh",background:"#f8fafc",fontFamily:"system-ui,sans-serif",paddingBottom:80}}>
-      <div style={{background:"#fff",padding:"14px 14px 10px",borderBottom:"1px solid #e2e8f0",position:"sticky",top:0,zIndex:50}}>
+    <div style={{minHeight:"100vh",background:isDark?"#080b0a":"#f8fafc",fontFamily:"system-ui,sans-serif",paddingBottom:80}}>
+      <div style={{background:isDark?"#0c100e":"#fff",padding:"14px 14px 10px",borderBottom:isDark?"1px solid rgba(255,255,255,0.08)":"1px solid #e2e8f0",position:"sticky",top:0,zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
           <span style={{fontSize:20}}>🌐</span>
           <div>
-            <h2 style={{margin:0,fontSize:15,fontWeight:800,color:"#1e293b"}}>My Network</h2>
+            <h2 style={{margin:0,fontSize:15,fontWeight:800,color:isDark?"#ffffff":"#1e293b"}}>My Network</h2>
             <p style={{margin:0,fontSize:10,color:"#94a3b8"}}>Role: <strong style={{color:getRC(user?.role).dot}}>{user?.role||"unknown"}</strong>{" · Tap node for analytics"}</p>
           </div>
         </div>
@@ -949,9 +952,9 @@ export default function MyNetwork() {
             <div style={{display:"flex",flexDirection:"column",gap:7}}>
               {mobileFiltered.map(n=>{const c=getRC(n.role);return(
                 <div key={n.id||n._id} className="mn-card" onClick={()=>setSelectedUser(n)}
-                  style={{background:"#fff",borderRadius:12,padding:"10px 12px",boxShadow:"0 1px 4px rgba(0,0,0,0.05)",display:"flex",alignItems:"center",gap:10,borderLeft:`3px solid ${c.border}`}}>
+                  style={{background:isDark?"#111613":"#fff",borderRadius:12,padding:"10px 12px",boxShadow:isDark?"0 2px 10px rgba(0,0,0,0.4)":"0 1px 4px rgba(0,0,0,0.05)",display:"flex",alignItems:"center",gap:10,borderLeft:`3px solid ${c.border}`}}>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.name}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:isDark?"#ffffff":"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.name}{n.fullName ? ` (${n.fullName})` : ""}</div>
                     <div style={{fontSize:11,color:c.dot,fontWeight:600}}>{n.role}{n.level>1?` · L${n.level}`:""}</div>
                   </div>
                   <span style={{fontSize:11,padding:"2px 7px",borderRadius:20,fontWeight:700,background:c.bg,color:c.text,flexShrink:0}}>📊</span>
@@ -1005,7 +1008,7 @@ export default function MyNetwork() {
         {viewMode==="graph"&&!loading&&(
           <>
             {allNodes.length>0&&<FilterBar allNodes={allNodes} selectedId={filteredId} roleFilter={roleFilter} onSelectNode={handleSelNode} onSelectRole={setRoleFilter} onReset={handleReset}/>}
-            <div style={{background:"#f8fafc",borderRadius:12,border:"1px solid #e8eef4",height:"calc(100vh - 180px)",minHeight:400,overflow:"hidden"}}>
+            <div style={{background:isDark?"#090c0b":"#f8fafc",borderRadius:14,border:isDark?"1px solid rgba(255,255,255,0.08)":"1px solid #e8eef4",height:"calc(100vh - 180px)",minHeight:400,overflow:"hidden"}}>
               <DesktopTree roots={displayRoots} onSelect={handleClick}/>
             </div>
           </>
@@ -1019,13 +1022,15 @@ export default function MyNetwork() {
         {tree.length===0&&!loading&&<div style={{textAlign:"center",padding:32,color:"#94a3b8",fontSize:13}}><div style={{fontSize:32,marginBottom:8}}>🕸️</div>Aapke network mein koi user nahi hai abhi</div>}
       </div>
       {selectedUser&&(
-        <div style={{marginTop:16,background:"#fff",borderRadius:16,boxShadow:"0 2px 16px rgba(0,0,0,0.08)",border:"1px solid #e2e8f0"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 18px",borderBottom:"1px solid #f1f5f9",background:"#f8fafc",borderRadius:"16px 16px 0 0"}}>
+        <div style={{marginTop:16,background:isDark?"#0c100e":"#fff",borderRadius:16,boxShadow:isDark?"0 4px 30px rgba(0,0,0,0.7)":"0 2px 16px rgba(0,0,0,0.08)",border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#e2e8f0"}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 18px",borderBottom:`1px solid ${isDark?"rgba(255,255,255,0.08)":"#f1f5f9"}`,background:isDark?"#111613":"#f8fafc",borderRadius:"16px 16px 0 0"}}>
             <div>
-              <div style={{fontWeight:700,fontSize:15,color:"#1e293b"}}>{selectedUser.name}</div>
-              <div style={{fontSize:12,color:getRC(selectedUser.role).dot,fontWeight:600,textTransform:"capitalize"}}>{selectedUser.role}</div>
+              <div style={{fontWeight:700,fontSize:15,color:isDark?"#ffffff":"#1e293b"}}>
+                {selectedUser.name}{selectedUser.fullName ? ` — ${selectedUser.fullName}` : ""}
+              </div>
+              <div style={{fontSize:12,color:getRC(selectedUser.role, isDark).dot,fontWeight:600,textTransform:"capitalize"}}>{selectedUser.role}</div>
             </div>
-            <button className="mn-btn" onClick={()=>setSelectedUser(null)} style={{width:32,height:32,borderRadius:"50%",border:"none",background:"#e2e8f0",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>✕</button>
+            <button className="mn-btn" onClick={()=>setSelectedUser(null)} style={{width:32,height:32,borderRadius:"50%",border:"none",background:isDark?"rgba(255,255,255,0.1)":"#e2e8f0",color:isDark?"#ffffff":"#334155",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>✕</button>
           </div>
           <AnalyticsPanel selectedUser={selectedUser} treeData={tree} onClose={()=>setSelectedUser(null)}/>
         </div>
