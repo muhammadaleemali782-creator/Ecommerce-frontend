@@ -453,14 +453,27 @@ export default function PPCWallet({ setPage }) {
                   )}
                 </div>
 
-                {wallet.withdrawable && (
-                  <button
-                    onClick={() => setPage("withdrawal-request")}
-                    className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black uppercase text-xs tracking-wider rounded-xl transition-all cursor-pointer shadow-lg active:scale-98"
-                  >
-                    Request Withdrawal ➔
-                  </button>
-                )}
+                {wallet.withdrawable && (() => {
+                  const hasPPC = (wallet.ppcCount || 0) > 0
+                  return (
+                    <button
+                      onClick={() => {
+                        if (hasPPC) setPage("withdrawal-request")
+                      }}
+                      disabled={!hasPPC}
+                      title={hasPPC ? "Request Withdrawal" : "Withdrawal ke liye PPC balance hona zaroori hai"}
+                      className={`w-full mt-4 py-3 rounded-xl font-black uppercase text-xs tracking-wider transition-all ${
+                        hasPPC
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black cursor-pointer shadow-lg active:scale-98"
+                          : isDark
+                            ? "bg-white/[0.04] text-stone-500 border border-white/[0.06] cursor-not-allowed opacity-60"
+                            : "bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed opacity-70"
+                      }`}
+                    >
+                      Request Withdrawal ➔
+                    </button>
+                  )
+                })()}
               </div>
             ))}
           </div>
