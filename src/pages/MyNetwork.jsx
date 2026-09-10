@@ -284,6 +284,7 @@ function MiniAnalytics({ userId, onClose }) {
 
 /* ─── SubTreeNode — FIXED: 📊 button outside clickable row ─── */
 function SubTreeNode({ node, depth=0, isLast=false, level=1, hideIfNotUser=false }) {
+  const { isDark } = useTheme() || {}
   const [open, setOpen]         = useState(false)
   const [showMini, setShowMini] = useState(false)
   const kids    = sortKids(node.children || [])
