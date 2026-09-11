@@ -3,130 +3,6 @@ import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 
-// Fallback Curated Formulations (non-exported const fixes Vite HMR Fast Refresh)
-const DEFAULT_AYURVEDIC_PRODUCTS = [
-  {
-    id: "himalayan-shilajit-gold",
-    title: "Pure Shilajit Rasayana Resin",
-    category: "Rasayana & Vitality",
-    price: 1499,
-    mrp: 1999,
-    rating: 4.9,
-    reviews: 328,
-    image: "/moss_oil.jpg",
-    tag: "BESTSELLER",
-    dosha: "Tridosha Balance",
-    description: "Purified Himalayan resin rich in fulvic acid and 84+ minerals for sustained vitality, strength, and stamina.",
-    ingredients: ["Pure Shilajit", "Swarna Bhasma", "Ashwagandha"],
-    benefits: "Enhances stamina, immunity, and natural metabolic energy."
-  },
-  {
-    id: "triphala-deep-cleanser",
-    title: "Triphala Botanical Facial Cleanser",
-    category: "Skin & Hair",
-    price: 649,
-    mrp: 850,
-    rating: 4.8,
-    reviews: 214,
-    image: "/moss_foam.jpg",
-    tag: "AYUSH CERTIFIED",
-    dosha: "Pitta & Kapha",
-    description: "Gentle purifying foam infused with Amalaki, Haritaki, and Bibhitaki to cleanse deep impurities.",
-    ingredients: ["Amalaki", "Haritaki", "Bibhitaki", "Aloe Vera"],
-    benefits: "Purifies toxins, restores skin balance, and soothes redness."
-  },
-  {
-    id: "kumkumadi-radiance-serum",
-    title: "Kumkumadi Miracle Face Elixir",
-    category: "Oils & Serums",
-    price: 1899,
-    mrp: 2499,
-    rating: 5.0,
-    reviews: 452,
-    image: "/moss_serum.jpg",
-    tag: "PREMIUM",
-    dosha: "Vata & Pitta",
-    description: "Traditional 26-herb Ayurvedic serum infused with Kashmiri Saffron and Sandalwood for natural radiance.",
-    ingredients: ["Kashmiri Saffron", "Rakta Chandana", "Manjistha", "Goat Milk"],
-    benefits: "Brightens complexion, reduces blemishes, and evens tone."
-  },
-  {
-    id: "bhringraj-kesh-taila",
-    title: "Bhringraj Herb Enriched Hair Oil",
-    category: "Skin & Hair",
-    price: 799,
-    mrp: 999,
-    rating: 4.9,
-    reviews: 189,
-    image: "/moss_shampoo.jpg",
-    tag: "HAIR CARE",
-    dosha: "Pitta Pacifying",
-    description: "Slow-cooked Mahabhringraj oil in sesame and virgin coconut base to nourish roots and strengthen hair.",
-    ingredients: ["Mahabhringraj", "Amla", "Brahmi", "Sesame Oil"],
-    benefits: "Strengthens roots, controls hair fall, and calms scalp."
-  },
-  {
-    id: "ashwagandha-ksheer-extract",
-    title: "Organic Ashwagandha Root Churna",
-    category: "Rasayana & Vitality",
-    price: 899,
-    mrp: 1199,
-    rating: 4.8,
-    reviews: 276,
-    image: "/natgeo_jadibooti.jpg",
-    tag: "WELLNESS",
-    dosha: "Vata Harmonizer",
-    description: "Pure Withania Somnifera root extract to regulate daily stress and support deep restorative rest.",
-    ingredients: ["Organic Ashwagandha", "Pipali Extract"],
-    benefits: "Relieves stress, boosts endurance, and supports rest."
-  },
-  {
-    id: "neem-chandan-purifying-mask",
-    title: "Neem & Chandan Purifying Lepam",
-    category: "Skin & Hair",
-    price: 749,
-    mrp: 950,
-    rating: 4.7,
-    reviews: 165,
-    image: "/moss_mask.jpg",
-    tag: "DETOX",
-    dosha: "Pitta Cooling",
-    description: "Medicinal clay blended with fresh organic Neem and Sandalwood to cool and clarify skin.",
-    ingredients: ["Fullers Earth", "Neem Leaf", "Chandan", "Haldi"],
-    benefits: "Draws out deep impurities, clears pores, and cools skin."
-  },
-  {
-    id: "herbal-vitality-oil",
-    title: "Maha Narayana Muscle Relief Oil",
-    category: "Oils & Serums",
-    price: 1199,
-    mrp: 1499,
-    rating: 4.9,
-    reviews: 310,
-    image: "/moss_hands.jpg",
-    tag: "JOINT RELIEF",
-    dosha: "Vata Soother",
-    description: "Traditional therapeutic blend of herbs to relieve muscular tension and support flexible joint mobility.",
-    ingredients: ["Dashamoola", "Bala", "Ashwagandha", "Shatavari"],
-    benefits: "Relieves stiffness, eases aches, and restores mobility."
-  },
-  {
-    id: "himalayan-amrit-nectar",
-    title: "Brahm Rasayana Herbal Nectar",
-    category: "Rasayana & Vitality",
-    price: 2199,
-    mrp: 2799,
-    rating: 5.0,
-    reviews: 140,
-    image: "/hero_moss_bottles.jpg",
-    tag: "SIGNATURE",
-    dosha: "Tridoshic",
-    description: "Ayurvedic rejuvenating blend made with fresh wild amla, cardamom, and pure forest honey.",
-    ingredients: ["Wild Amla", "Pipali", "Shankhpushpi", "Forest Honey"],
-    benefits: "Promotes longevity, daily vigor, and natural immunity."
-  }
-]
-
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
   const { products = [], addToCart, cart = [] } = useStore() || {}
@@ -138,12 +14,9 @@ export default function Store({ setPage }) {
   const [flippedCardId, setFlippedCardId] = useState(null)
   const [addedToast, setAddedToast] = useState(null)
 
-  // Merge backend products with fallback list if backend is empty
+  // Real backend products only — zero hardcoded demo products
   const allProducts = useMemo(() => {
-    if (products && products.length > 0) {
-      return products
-    }
-    return DEFAULT_AYURVEDIC_PRODUCTS
+    return Array.isArray(products) ? products : []
   }, [products])
 
   // Extract unique categories safely

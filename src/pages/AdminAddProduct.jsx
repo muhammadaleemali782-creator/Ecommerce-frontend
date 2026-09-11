@@ -1,168 +1,167 @@
 import { useState, useEffect } from "react"
+import { useTheme } from "../context/ThemeContext"
+import EducaLogo from "../components/EducaLogo"
+import { getRoleLabel } from "../utils/roleLabels"
 
 /* ─── Live Card Preview ─── */
-function CardPreview({ productName, price, category, ppcReward, imagePreview, description }) {
+function CardPreview({ productName, price, category, ppcReward, imagePreview, description, isDark }) {
   const [flipped, setFlipped] = useState(false)
   const showPPC = Number(ppcReward) > 0
 
   return (
-    <div>
-      <div style={{
-        fontSize: 11, color: "#7c3aed", fontWeight: 700,
-        marginBottom: 8, textTransform: "uppercase", letterSpacing: 1,
-        display: "flex", alignItems: "center", gap: 6,
-      }}>
-        👁️ Live Preview — Tap to flip
+    <div className="w-full flex flex-col items-center">
+      <div className={`text-[10.5px] font-mono font-bold uppercase tracking-wider mb-2.5 flex items-center gap-1.5 ${
+        isDark ? "text-amber-400" : "text-amber-800"
+      }`}>
+        <span>👁️</span>
+        <span>Live 3D Preview (Tap to flip)</span>
       </div>
 
       <div
-        style={{ perspective: "1000px", height: 300, cursor: "pointer", maxWidth: 180, margin: "0 auto" }}
+        style={{ perspective: "1000px" }}
+        className="h-[310px] w-full max-w-[190px] cursor-pointer mx-auto select-none"
         onClick={() => setFlipped(f => !f)}
       >
-        <div style={{
-          position: "relative", width: "100%", height: "100%",
-          transformStyle: "preserve-3d",
-          transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-        }}>
+        <div
+          style={{
+            transformStyle: "preserve-3d",
+            transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
+            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          }}
+          className="relative w-full h-full"
+        >
           {/* FRONT */}
-          <div style={{
-            position: "absolute", inset: 0,
-            backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
-            borderRadius: 14, overflow: "hidden", background: "#fff",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-            display: "flex", flexDirection: "column",
-          }}>
+          <div
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+            }}
+            className={`absolute inset-0 rounded-2xl overflow-hidden border shadow-xl flex flex-col transition-colors ${
+              isDark
+                ? "bg-[#141b16] border-white/10 text-white shadow-black/60"
+                : "bg-white border-stone-200 text-stone-900 shadow-stone-300/60"
+            }`}
+          >
             {showPPC && (
-              <div style={{
-                position: "absolute", top: 8, right: 8, zIndex: 10,
-                background: "linear-gradient(135deg,#7c3aed,#a855f7)",
-                color: "#fff", fontSize: 10, fontWeight: 800,
-                padding: "3px 8px", borderRadius: 20,
-              }}>💎 {ppcReward} PPC</div>
+              <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 text-[9.5px] font-black font-mono px-2 py-0.5 rounded-full shadow-md">
+                💎 {ppcReward} PPC
+              </div>
             )}
-            <div style={{
-              position: "absolute", top: 8, left: 8, zIndex: 10,
-              background: "rgba(0,0,0,0.35)", color: "#fff",
-              fontSize: 9, fontWeight: 600, padding: "2px 7px", borderRadius: 20,
-            }}>tap for info</div>
+            <div className="absolute top-2 left-2 z-10 bg-black/50 text-white text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded-md backdrop-blur-xs">
+              tap to flip
+            </div>
 
             {imagePreview ? (
-              <div style={{ height: 120, overflow: "hidden", flexShrink: 0 }}>
-                <img src={imagePreview} alt="preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div className="h-[125px] overflow-hidden shrink-0 bg-stone-900/40">
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  className="w-full h-full object-cover"
+                />
               </div>
             ) : (
-              <div style={{
-                height: 120, background: "linear-gradient(135deg,#f8fafc,#f1f5f9)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 36, flexShrink: 0,
-              }}>📦</div>
+              <div className={`h-[125px] flex items-center justify-center text-3xl shrink-0 ${
+                isDark ? "bg-black/30" : "bg-stone-100"
+              }`}>
+                📦
+              </div>
             )}
 
-            <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", flex: 1 }}>
-              <h2 style={{
-                fontWeight: 800, fontSize: 13, color: "#1e293b",
-                lineHeight: 1.3, marginBottom: 2,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              }}>{productName || "Product Name"}</h2>
+            <div className="p-3 flex flex-col flex-1 min-w-0">
+              <h2 className={`font-black text-xs uppercase tracking-tight truncate mb-0.5 ${
+                isDark ? "text-white" : "text-stone-900"
+              }`}>
+                {productName || "Product Name"}
+              </h2>
 
               {category && (
-                <span style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, marginBottom: 3 }}>
+                <span className="text-[9.5px] font-mono font-bold text-amber-500 truncate mb-1">
                   {category}
                 </span>
               )}
 
-              <p style={{ fontWeight: 900, fontSize: 16, color: "#0f172a", marginBottom: 5 }}>
+              <p className={`font-black text-base tracking-tight mb-2 ${
+                isDark ? "text-amber-400" : "text-stone-900"
+              }`}>
                 ₹{price || "0"}
               </p>
 
               {showPPC && (
-                <div style={{
-                  background: "linear-gradient(135deg,#faf5ff,#ede9fe)",
-                  border: "1px solid #ddd6fe", borderRadius: 8, padding: "5px 8px",
-                  display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
-                }}>
-                  <span style={{ fontSize: 13 }}>💎</span>
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 800, color: "#6d28d9" }}>{ppcReward} PPC Reward</div>
-                    <div style={{ fontSize: 9, color: "#8b5cf6" }}>Is sale par {ppcReward} PPC milenge</div>
+                <div className={`rounded-lg p-1.5 flex items-center gap-1.5 mb-2 border ${
+                  isDark
+                    ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                    : "bg-amber-50 border-amber-200 text-amber-900"
+                }`}>
+                  <span className="text-xs">💎</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[9.5px] font-bold truncate">{ppcReward} PPC Reward</div>
+                    <div className="text-[8px] opacity-75 truncate">Per sale incentive</div>
                   </div>
                 </div>
               )}
 
-              <div style={{
-                marginTop: "auto",
-                background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
-                borderRadius: 8, padding: "7px 0",
-                fontWeight: 800, fontSize: 12, textAlign: "center",
-              }}>🛒 Add to Cart</div>
+              <div className="mt-auto bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider py-1.5 rounded-lg text-center shadow-xs">
+                🛒 Add to Cart
+              </div>
             </div>
           </div>
 
           {/* BACK */}
-          <div style={{
-            position: "absolute", inset: 0,
-            backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
-            transform: "rotateY(180deg)", borderRadius: 14, overflow: "hidden",
-            background: "linear-gradient(145deg,#1e1b4b,#312e81,#4c1d95)",
-            display: "flex", flexDirection: "column",
-            padding: "14px 12px", color: "#fff",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+          <div
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)",
+            }}
+            className="absolute inset-0 rounded-2xl overflow-hidden border border-white/15 bg-gradient-to-br from-[#162019] via-[#111713] to-[#0a0e0b] flex flex-col p-3.5 text-white shadow-xl"
+          >
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
               {imagePreview ? (
-                <img src={imagePreview} alt="preview"
-                  style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }} />
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  className="w-8 h-8 rounded-lg object-cover border border-white/20 shrink-0"
+                />
               ) : (
-                <div style={{
-                  width: 32, height: 32, borderRadius: 6, fontSize: 18,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(255,255,255,0.1)",
-                }}>📦</div>
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm shrink-0">
+                  📦
+                </div>
               )}
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 11, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 110 }}>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-xs truncate leading-tight">
                   {productName || "Product Name"}
                 </div>
-                {category && <div style={{ fontSize: 9, color: "#c4b5fd" }}>{category}</div>}
+                {category && <div className="text-[9px] text-amber-400 truncate font-mono">{category}</div>}
               </div>
             </div>
 
-            <div style={{
-              flex: 1, background: "rgba(255,255,255,0.07)",
-              borderRadius: 8, padding: "8px 10px", marginBottom: 8, overflow: "hidden",
-            }}>
-              <div style={{ fontSize: 9, color: "#a78bfa", fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: 1 }}>
+            <div className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl p-2.5 mb-2 overflow-hidden">
+              <div className="text-[9px] font-mono uppercase tracking-widest text-amber-400 font-bold mb-1">
                 Product Details
               </div>
-              <p style={{ fontSize: 10, lineHeight: 1.5, color: "#e2e8f0", overflow: "hidden", maxHeight: 70 }}>
-                {description || "Description yahan dikhegi..."}
+              <p className="text-[10px] leading-relaxed text-stone-300 overflow-hidden line-clamp-3">
+                {description || "Description details will appear here..."}
               </p>
             </div>
 
-            <div style={{
-              background: "rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 10px",
-              display: "flex", justifyContent: "space-between", marginBottom: 8,
-            }}>
+            <div className="bg-white/[0.06] border border-white/[0.08] rounded-xl p-2 flex justify-between items-center mb-2">
               <div>
-                <div style={{ fontSize: 9, color: "#a78bfa" }}>Price</div>
-                <div style={{ fontWeight: 900, fontSize: 16, color: "#fde68a" }}>₹{price || "0"}</div>
+                <div className="text-[8.5px] font-mono text-stone-400 uppercase">Price</div>
+                <div className="font-black text-sm text-amber-300">₹{price || "0"}</div>
               </div>
               {showPPC && (
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 9, color: "#a78bfa" }}>PPC</div>
-                  <div style={{ fontWeight: 900, fontSize: 16, color: "#86efac" }}>💎 {ppcReward}</div>
+                <div className="text-right">
+                  <div className="text-[8.5px] font-mono text-stone-400 uppercase">PPC Reward</div>
+                  <div className="font-black text-sm text-emerald-400">💎 {ppcReward}</div>
                 </div>
               )}
             </div>
 
-            <div style={{
-              background: "linear-gradient(90deg,#fbbf24,#f59e0b)",
-              borderRadius: 8, padding: "7px 0",
-              fontWeight: 800, fontSize: 11, textAlign: "center",
-            }}>🛒 Add to Cart</div>
+            <div className="bg-amber-400 text-stone-950 font-black text-[10.5px] uppercase tracking-wider py-1.5 rounded-lg text-center">
+              🛒 Add to Cart
+            </div>
 
-            <div style={{ textAlign: "center", marginTop: 6, fontSize: 9, color: "rgba(255,255,255,0.4)" }}>
+            <div className="text-center mt-1.5 text-[8.5px] text-stone-400 font-mono">
               tap to flip back
             </div>
           </div>
@@ -174,6 +173,8 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
 
 /* ─── Main AdminAddProduct ─── */
 export default function AdminAddProduct({ setPage }) {
+  const { isDark } = useTheme()
+
   const [productName, setProductName] = useState("")
   const [price, setPrice] = useState("")
   const [category, setCategory] = useState("")
@@ -191,14 +192,6 @@ export default function AdminAddProduct({ setPage }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterRole, setFilterRole] = useState("all")
 
-  // detect mobile
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener("resize", fn)
-    return () => window.removeEventListener("resize", fn)
-  }, [])
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -207,11 +200,11 @@ export default function AdminAddProduct({ setPage }) {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/users/all-for-product`, {
           headers: { Authorization: `Bearer ${token}` }
         })
-        if (!res.ok) throw new Error("Failed")
+        if (!res.ok) throw new Error("Failed to load users")
         const data = await res.json()
-        setAllUsers(data)
+        setAllUsers(Array.isArray(data) ? data : [])
       } catch (err) {
-        console.error(err)
+        console.error("Fetch users error:", err)
       } finally {
         setUsersLoading(false)
       }
@@ -221,9 +214,11 @@ export default function AdminAddProduct({ setPage }) {
 
   const filteredUsers = allUsers.filter(u => {
     const matchRole = filterRole === "all" || u.role === filterRole
+    const q = searchQuery.toLowerCase().trim()
     const matchSearch =
-      u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      !q ||
+      u.name?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q)
     return matchRole && matchSearch
   })
 
@@ -235,7 +230,7 @@ export default function AdminAddProduct({ setPage }) {
 
   const toggleSelectAllVisible = () => {
     const visibleIds = filteredUsers.map(u => u._id)
-    const allSelected = visibleIds.every(id => selectedUserIds.includes(id))
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => selectedUserIds.includes(id))
     if (allSelected) {
       setSelectedUserIds(prev => prev.filter(id => !visibleIds.includes(id)))
     } else {
@@ -259,15 +254,17 @@ export default function AdminAddProduct({ setPage }) {
       setMessage("")
       const token = localStorage.getItem("token")
       if (!token) { setMessage("Please login first"); setLoading(false); return }
+
       if (!assignAllUsers && selectedUserIds.length === 0) {
         setMessage("Please select at least one user OR check 'Assign to ALL Users'")
         setLoading(false); return
       }
+
       const formData = new FormData()
-      formData.append("title", productName)
+      formData.append("title", productName.trim())
       formData.append("price", price)
-      formData.append("category", category)
-      formData.append("description", description)
+      formData.append("category", category.trim())
+      formData.append("description", description.trim())
       formData.append("ppcReward", ppcReward)
       formData.append("assignAllUsers", assignAllUsers)
       if (!assignAllUsers && selectedUserIds.length > 0) {
@@ -280,20 +277,22 @@ export default function AdminAddProduct({ setPage }) {
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       })
+
       if (!res.ok) {
         const errorText = await res.text()
         throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`)
       }
+
       const data = await res.json()
       if (data) {
-        setMessage("Product added successfully!")
+        setMessage("✅ Product added successfully to catalog!")
         setProductName(""); setPrice(""); setCategory(""); setDescription("")
         setPpcReward("1"); setImage(null); setImagePreview(null)
         setAssignAllUsers(false); setSelectedUserIds([]); setSearchQuery("")
         if (typeof setPage === "function") {
-          setTimeout(() => setPage("admin-products"), 1500)
+          setTimeout(() => setPage("admin-products"), 1200)
         } else {
-          setTimeout(() => window.location.reload(), 2000)
+          setTimeout(() => window.location.reload(), 1500)
         }
       }
     } catch (err) {
@@ -303,301 +302,451 @@ export default function AdminAddProduct({ setPage }) {
     }
   }
 
-  const roleBadge = (role) => {
-    const colors = {
-      distributor: "bg-blue-100 text-blue-700",
-      seller: "bg-green-100 text-green-700",
-      user: "bg-purple-100 text-purple-700"
+  const roleBadgeStyle = (role) => {
+    if (role === "distributor") {
+      return isDark
+        ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
+        : "bg-sky-50 text-sky-700 border-sky-200"
     }
-    return colors[role] || "bg-gray-100 text-gray-600"
+    if (role === "seller") {
+      return isDark
+        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+    }
+    return isDark
+      ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+      : "bg-purple-50 text-purple-700 border-purple-200"
   }
 
-  const previewBox = (
-    <div style={{
-      background: "#faf5ff",
-      border: "2px dashed #c4b5fd",
-      borderRadius: 16,
-      padding: 16,
-      width: isMobile ? "100%" : 200,
-      boxSizing: "border-box",
-    }}>
-      <CardPreview
-        productName={productName}
-        price={price}
-        category={category}
-        ppcReward={ppcReward}
-        imagePreview={imagePreview}
-        description={description}
-      />
-    </div>
-  )
-
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1e293b", margin: 0 }}>
-          ➕ Add Product
-        </h2>
+    <div className={`max-w-5xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10 space-y-6 select-none transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
+      
+      {/* ── HEADER CARD ── */}
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+        isDark
+          ? "bg-[#111713] border-white/[0.08]"
+          : "bg-white border-stone-200 shadow-sm"
+      }`}>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 mt-1">
+            <EducaLogo size={36} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-[9.5px] font-black uppercase tracking-widest font-mono">
+                ✦ CATALOG CREATION
+              </span>
+            </div>
+            <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+              isDark ? "text-white" : "text-stone-900"
+            }`}>
+              Add New Product
+            </h1>
+            <p className={`text-xs font-medium mt-0.5 ${
+              isDark ? "text-stone-400" : "text-stone-600"
+            }`}>
+              Upload images, set pricing, configure PPC incentive & assign products to users.
+            </p>
+          </div>
+        </div>
+
         {setPage && (
           <button
             type="button"
             onClick={() => setPage("admin-products")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 10,
-              border: "1px solid #cbd5e1",
-              background: "#fff",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#334155",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
-            }}
+            className={`px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 self-stretch sm:self-auto ${
+              isDark
+                ? "bg-white/[0.06] hover:bg-white/[0.12] text-stone-200 hover:text-white border-white/10"
+                : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300 shadow-xs"
+            }`}
           >
-            ← Back to Products List
+            <span>←</span>
+            <span>Back to Products</span>
           </button>
         )}
       </div>
 
+      {/* ── STATUS MESSAGE ── */}
       {message && (
-        <div style={{
-          marginBottom: 16, padding: "12px 16px", borderRadius: 10,
-          background: message.includes("successfully") ? "#f0fdf4" : "#fef2f2",
-          color: message.includes("successfully") ? "#166534" : "#991b1b",
-          border: `1px solid ${message.includes("successfully") ? "#bbf7d0" : "#fecaca"}`,
-          fontWeight: 600,
-        }}>
-          {message.includes("successfully") ? "✅ " : "❌ "}{message}
+        <div className={`p-4 rounded-2xl text-xs font-bold border flex items-center gap-2.5 transition-all ${
+          message.includes("successfully")
+            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+            : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
+        }`}>
+          <span>{message.includes("successfully") ? "✅" : "⚠️"}</span>
+          <span>{message}</span>
         </div>
       )}
 
-      {/* Desktop: side-by-side | Mobile: stacked (form first, preview below) */}
-      <div style={{
-        display: isMobile ? "flex" : "grid",
-        flexDirection: isMobile ? "column" : undefined,
-        gridTemplateColumns: isMobile ? undefined : "1fr 216px",
-        gap: 24,
-        alignItems: "start",
-      }}>
+      {/* ── FORM & PREVIEW SPLIT ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* ── FORM ── */}
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-          <div>
-            <label style={labelStyle}>Product Name <span style={{ color: "#ef4444" }}>*</span></label>
-            <input
-              type="text" value={productName} onChange={e => setProductName(e.target.value)}
-              required placeholder="Product ka naam likho"
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {/* ── LEFT FORM (8 Columns on desktop) ── */}
+        <div className="lg:col-span-8">
+          <form
+            onSubmit={handleSubmit}
+            className={`p-6 sm:p-7 rounded-3xl border space-y-5 transition-colors ${
+              isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+            }`}
+          >
+            {/* Product Title */}
             <div>
-              <label style={labelStyle}>Price (₹) <span style={{ color: "#ef4444" }}>*</span></label>
-              <input
-                type="number" min="0" step="0.01" value={price}
-                onChange={e => setPrice(e.target.value)} required placeholder="100"
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>PPC Reward <span style={{ color: "#ef4444" }}>*</span></label>
-              <input
-                type="number" min="0" step="1" value={ppcReward}
-                onChange={e => setPpcReward(e.target.value)} required placeholder="1"
-                style={{ ...inputStyle, borderColor: "#a78bfa" }}
-              />
-              <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>1 PPC = ₹40</p>
-            </div>
-          </div>
-
-          <div>
-            <label style={labelStyle}>Category <span style={{ color: "#94a3b8", fontSize: 11 }}>(optional)</span></label>
-            <input
-              type="text" value={category} onChange={e => setCategory(e.target.value)}
-              placeholder="e.g. Electronics, Clothing"
-              style={inputStyle}
-            />
-            <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>Category filter Store/Home pe dikha dega</p>
-          </div>
-
-          <div>
-            <label style={labelStyle}>Description <span style={{ color: "#94a3b8", fontSize: 11 }}>(optional)</span></label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Product ke baare mein details likho — ingredients, benefits, usage, etc."
-              rows={4}
-              style={{ ...inputStyle, resize: "vertical", minHeight: 90, fontFamily: "inherit", lineHeight: 1.6 }}
-            />
-            <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-              Card flip hone pe back side pe dikhegi
-            </p>
-          </div>
-
-          <div>
-            <label style={labelStyle}>Product Image</label>
-            <input type="file" accept="image/*" onChange={handleImageChange}
-              style={{ fontSize: 13, color: "#475569" }} />
-            {imagePreview && (
-              <div style={{ marginTop: 8 }}>
-                <img src={imagePreview} alt="preview"
-                  style={{ height: 80, borderRadius: 8, objectFit: "cover", border: "2px solid #e2e8f0" }} />
-                <button type="button" onClick={() => { setImage(null); setImagePreview(null) }}
-                  style={{ display: "block", marginTop: 4, fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>
-                  ✕ Remove image
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* ── ASSIGN ── */}
-          <div style={{ border: "1px solid #e2e8f0", borderRadius: 12, overflow: "hidden" }}>
-            <div style={{
-              background: "#f8fafc", padding: "12px 16px",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                <input
-                  type="checkbox" checked={assignAllUsers}
-                  onChange={e => { setAssignAllUsers(e.target.checked); if (e.target.checked) setSelectedUserIds([]) }}
-                  style={{ width: 16, height: 16 }}
-                />
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>Assign to ALL Users</span>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
+                Product Name <span className="text-red-500">*</span>
               </label>
-              <span style={{ fontSize: 12, color: "#64748b", background: "#fff", border: "1px solid #e2e8f0", padding: "2px 8px", borderRadius: 6 }}>
-                {allUsers.length} users
-              </span>
+              <input
+                type="text"
+                value={productName}
+                onChange={e => setProductName(e.target.value)}
+                required
+                placeholder="e.g. Pure Shilajit Rasayana Resin"
+                className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                }`}
+              />
             </div>
 
-            {!assignAllUsers && (
-              <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                <p style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>Specific users select karo:</p>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input
-                    type="text" placeholder="Search name/email..."
-                    value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    style={{ ...inputStyle, flex: 1, padding: "8px 12px" }}
-                  />
-                  <select
-                    value={filterRole} onChange={e => setFilterRole(e.target.value)}
-                    style={{ ...inputStyle, padding: "8px 10px" }}
-                  >
-                    <option value="all">All Roles</option>
-                    <option value="distributor">Distributor</option>
-                    <option value="seller">Seller</option>
-                    <option value="user">User</option>
-                  </select>
-                </div>
+            {/* Price & PPC in 2 Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  Selling Price (₹) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  required
+                  placeholder="e.g. 1499"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                      : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                  }`}
+                />
+              </div>
 
-                {filteredUsers.length > 0 && (
-                  <div style={{
-                    display: "flex", justifyContent: "space-between",
-                    background: "#eff6ff", padding: "8px 12px", borderRadius: 8, fontSize: 13,
-                  }}>
-                    <span style={{ color: "#1d4ed8", fontWeight: 600 }}>{selectedUserIds.length} selected</span>
-                    <button type="button" onClick={toggleSelectAllVisible}
-                      style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>
-                      {filteredUsers.every(u => selectedUserIds.includes(u._id)) ? "Deselect All" : "Select All Visible"}
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  PPC Reward (Points) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={ppcReward}
+                  onChange={e => setPpcReward(e.target.value)}
+                  required
+                  placeholder="e.g. 1"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-amber-500/30 text-amber-300 focus:border-[#fbbf24]"
+                      : "bg-amber-50/50 border-amber-300 text-amber-900 focus:border-amber-500 focus:bg-white shadow-xs"
+                  }`}
+                />
+                <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                  💡 1 PPC = ₹40 (Seller reward on each order)
+                </p>
+              </div>
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
+                Category <span className="text-[10px] opacity-70 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+                placeholder="e.g. Rasayana & Vitality, Skin & Hair, Oils & Serums"
+                className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                }`}
+              />
+              <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                Ye category Store page par category filter tabs me dikhegi
+              </p>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
+                Description & Benefits <span className="text-[10px] opacity-70 font-normal">(optional)</span>
+              </label>
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Product ke ingredients, lab testing, benefits aur dosage likhein..."
+                rows={3}
+                className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all resize-y min-h-[85px] leading-relaxed ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                    : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                }`}
+              />
+              <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                Card flip hone par piche details me dikhegi
+              </p>
+            </div>
+
+            {/* Product Image */}
+            <div>
+              <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                isDark ? "text-stone-300" : "text-stone-700"
+              }`}>
+                Product Image
+              </label>
+              <div className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center gap-3 ${
+                isDark ? "bg-black/20 border-white/[0.08]" : "bg-stone-50 border-stone-200"
+              }`}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className={`text-xs font-semibold file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-wider file:cursor-pointer transition-all ${
+                    isDark
+                      ? "text-stone-300 file:bg-amber-400 file:text-stone-950 hover:file:bg-amber-300"
+                      : "text-stone-700 file:bg-stone-900 file:text-white hover:file:bg-stone-800"
+                  }`}
+                />
+                {imagePreview && (
+                  <div className="flex items-center gap-2.5 mt-2 sm:mt-0">
+                    <img
+                      src={imagePreview}
+                      alt="preview"
+                      className="w-12 h-12 rounded-xl object-cover border border-white/20 shadow-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setImage(null); setImagePreview(null) }}
+                      className="text-[11px] font-bold text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                    >
+                      ✕ Remove
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
 
-                {usersLoading ? (
-                  <div style={{ textAlign: "center", padding: 24, color: "#94a3b8", fontSize: 13 }}>Loading users...</div>
-                ) : filteredUsers.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: 24, color: "#94a3b8", fontSize: 13 }}>No users found</div>
-                ) : (
-                  <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: 8 }}>
-                    {filteredUsers.map(user => {
-                      const isSelected = selectedUserIds.includes(user._id)
-                      const isDisabled = user.isBlocked || user.isDeleted
-                      return (
-                        <label key={user._id}
-                          style={{
-                            display: "flex", alignItems: "center", gap: 10,
-                            padding: "10px 12px", cursor: isDisabled ? "not-allowed" : "pointer",
-                            background: isSelected ? "#eff6ff" : "#fff",
-                            borderBottom: "1px solid #f1f5f9",
-                            opacity: isDisabled ? 0.5 : 1,
-                          }}>
-                          <input
-                            type="checkbox" checked={isSelected}
-                            onChange={() => toggleUser(user._id)}
-                            disabled={isDisabled}
-                            style={{ width: 15, height: 15, accentColor: "#2563eb" }}
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                              <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>{user.name}</span>
-                              <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${roleBadge(user.role)}`}>
-                                {user.role}
-                              </span>
-                              {user.isBlocked && <span style={{ fontSize: 10, background: "#fee2e2", color: "#dc2626", padding: "1px 6px", borderRadius: 10 }}>blocked</span>}
-                            </div>
-                            <div style={{ fontSize: 11, color: "#94a3b8" }}>{user.email}</div>
-                          </div>
-                        </label>
-                      )
-                    })}
-                  </div>
-                )}
+            {/* ── USER ASSIGNMENT SECTION ── */}
+            <div className={`rounded-2xl border overflow-hidden transition-colors ${
+              isDark ? "border-white/[0.08] bg-black/20" : "border-stone-200 bg-stone-50/50"
+            }`}>
+              {/* Checkbox Header */}
+              <div className={`p-3.5 sm:p-4 border-b flex items-center justify-between gap-3 ${
+                isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-100/70 border-stone-200"
+              }`}>
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={assignAllUsers}
+                    onChange={e => {
+                      setAssignAllUsers(e.target.checked)
+                      if (e.target.checked) setSelectedUserIds([])
+                    }}
+                    className="w-4 h-4 rounded accent-amber-400 cursor-pointer"
+                  />
+                  <span className={`text-xs font-black uppercase tracking-wider ${
+                    isDark ? "text-white" : "text-stone-900"
+                  }`}>
+                    Assign to ALL Users
+                  </span>
+                </label>
+                <span className={`text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-md border ${
+                  isDark ? "bg-white/[0.06] text-stone-300 border-white/10" : "bg-white text-stone-700 border-stone-300"
+                }`}>
+                  {allUsers.length} total users
+                </span>
+              </div>
 
-                {selectedUserIds.length === 0 && (
-                  <p style={{ fontSize: 12, color: "#b45309", background: "#fffbeb", border: "1px solid #fde68a", padding: "8px 12px", borderRadius: 8 }}>
-                    ⚠️ Kam se kam ek user select karo, ya "Assign to ALL" enable karo
+              {/* Specific User Selector */}
+              {!assignAllUsers && (
+                <div className="p-3.5 sm:p-4 space-y-3">
+                  <p className={`text-[11px] font-bold uppercase tracking-wider font-mono ${
+                    isDark ? "text-stone-400" : "text-stone-600"
+                  }`}>
+                    Ya specific users select karein:
                   </p>
-                )}
-              </div>
-            )}
 
-            {assignAllUsers && (
-              <div style={{ padding: "12px 16px", background: "#f0fdf4", color: "#15803d", fontSize: 13, borderTop: "1px solid #e2e8f0" }}>
-                ✅ Product sabhi users ko assign ho jayega
-              </div>
-            )}
+                  <div className="flex gap-2 flex-col sm:flex-row">
+                    <input
+                      type="text"
+                      placeholder="Search username or email..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className={`flex-1 p-2.5 rounded-xl text-xs font-medium focus:outline-none border transition-all ${
+                        isDark
+                          ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                          : "bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
+                      }`}
+                    />
+                    <select
+                      value={filterRole}
+                      onChange={e => setFilterRole(e.target.value)}
+                      className={`p-2.5 rounded-xl text-xs font-bold focus:outline-none border ${
+                        isDark
+                          ? "bg-[#162019] border-white/10 text-white"
+                          : "bg-white border-stone-300 text-stone-900"
+                      }`}
+                    >
+                      <option value="all">All Roles</option>
+                      <option value="distributor">Distributor</option>
+                      <option value="seller">Seller</option>
+                      <option value="user">User</option>
+                    </select>
+                  </div>
+
+                  {filteredUsers.length > 0 && (
+                    <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono font-bold ${
+                      isDark
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                        : "bg-amber-50 border-amber-200 text-amber-900"
+                    }`}>
+                      <span>{selectedUserIds.length} users selected</span>
+                      <button
+                        type="button"
+                        onClick={toggleSelectAllVisible}
+                        className="text-[11px] font-black uppercase tracking-wider underline cursor-pointer"
+                      >
+                        {filteredUsers.every(u => selectedUserIds.includes(u._id)) ? "Deselect All" : "Select All Visible"}
+                      </button>
+                    </div>
+                  )}
+
+                  {usersLoading ? (
+                    <div className="text-center py-6 text-xs text-stone-400 font-mono">Loading users list...</div>
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-stone-400 font-mono">No users matched search</div>
+                  ) : (
+                    <div className={`max-h-56 overflow-y-auto rounded-xl border divide-y ${
+                      isDark ? "border-white/10 divide-white/[0.06]" : "border-stone-200 divide-stone-100 bg-white"
+                    }`}>
+                      {filteredUsers.map(u => {
+                        const isSelected = selectedUserIds.includes(u._id)
+                        const isDisabled = u.isBlocked || u.isDeleted
+                        return (
+                          <label
+                            key={u._id}
+                            className={`p-2.5 flex items-center gap-3 transition-colors ${
+                              isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                            } ${
+                              isSelected
+                                ? isDark ? "bg-amber-500/10" : "bg-amber-50/70"
+                                : isDark ? "hover:bg-white/[0.03]" : "hover:bg-stone-50"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleUser(u._id)}
+                              disabled={isDisabled}
+                              className="w-4 h-4 rounded accent-amber-400 cursor-pointer shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                                  {u.name}
+                                </span>
+                                {u.fullName && u.fullName !== u.name && (
+                                  <span className="text-[10px] text-stone-400">
+                                    ({u.fullName})
+                                  </span>
+                                )}
+                                <span className={`text-[9.5px] font-mono font-bold px-2 py-0.2 rounded-full border ${roleBadgeStyle(u.role)}`}>
+                                  {getRoleLabel(u.role)}
+                                </span>
+                                {u.isBlocked && (
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 bg-red-500/20 text-red-400 border border-red-500/30 rounded">
+                                    blocked
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10.5px] font-mono text-stone-400 truncate mt-0.5">
+                                {u.email}
+                              </div>
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {selectedUserIds.length === 0 && (
+                    <p className={`p-2.5 rounded-xl border text-[11px] font-bold ${
+                      isDark
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                        : "bg-amber-50 border-amber-200 text-amber-900"
+                    }`}>
+                      ⚠️ Kripya kam se kam ek user select karein ya upar "Assign to ALL Users" tick karein.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {assignAllUsers && (
+                <div className={`p-3.5 text-xs font-bold border-t ${
+                  isDark
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                }`}>
+                  ✅ Ye product registered sabhi users aur sellers ko automatically assign ho jayega.
+                </div>
+              )}
+            </div>
+
+            {/* SUBMIT BUTTON */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-98 disabled:opacity-50"
+              >
+                {loading ? "Adding Product to Catalog..." : "✓ Add Product to Catalog"}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* ── RIGHT LIVE PREVIEW (4 Columns on desktop, sticky) ── */}
+        <div className="lg:col-span-4 lg:sticky lg:top-6">
+          <div className={`p-5 rounded-3xl border transition-colors ${
+            isDark
+              ? "bg-[#111713] border-white/[0.08]"
+              : "bg-white border-stone-200 shadow-sm"
+          }`}>
+            <CardPreview
+              productName={productName}
+              price={price}
+              category={category}
+              ppcReward={ppcReward}
+              imagePreview={imagePreview}
+              description={description}
+              isDark={isDark}
+            />
           </div>
-
-          {/* Submit */}
-          <button
-            type="submit" disabled={loading}
-            style={{
-              padding: "14px", borderRadius: 12, border: "none",
-              background: loading ? "#94a3b8" : "linear-gradient(90deg,#2563eb,#7c3aed)",
-              color: "#fff", fontWeight: 800, fontSize: 15,
-              cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: loading ? "none" : "0 4px 16px rgba(37,99,235,0.3)",
-            }}
-          >
-            {loading ? "Adding Product..." : "✅ Add Product"}
-          </button>
-        </form>
-
-        {/* ── PREVIEW ── 
-            Desktop: right column, sticky
-            Mobile: rendered below form (via JSX order) 
-        */}
-        <div style={isMobile ? {} : { position: "sticky", top: 20 }}>
-          {previewBox}
         </div>
 
       </div>
+
     </div>
   )
-}
-
-const labelStyle = {
-  display: "block",
-  fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 6,
-}
-
-const inputStyle = {
-  width: "100%", padding: "10px 14px",
-  border: "1.5px solid #e2e8f0", borderRadius: 10,
-  fontSize: 14, outline: "none", boxSizing: "border-box",
-  fontFamily: "inherit",
 }
