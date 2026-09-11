@@ -189,15 +189,27 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Bill To / Buyer</div>
           
-          {/* Real Customer Name */}
-          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+          {/* 1. User ID (if registered user) */}
+          {order.userId?.name && (
+            <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
+              {order.userId.name}
+            </div>
+          )}
+
+          {/* 2. User Name */}
+          <div style={{
+            fontWeight: order.userId?.name ? 700 : 800,
+            fontSize: order.userId?.name ? 12 : 14,
+            color: order.userId?.name ? "#475569" : "#1e293b",
+            marginTop: order.userId?.name ? 2 : 0
+          }}>
             {order.customerFullName || order.userId?.fullName || order.customerName || "Customer"}
           </div>
 
-          {/* System ID ONLY if distinct from customer name */}
-          {order.userId?.name && order.userId.name !== (order.customerFullName || order.customerName) && (
-            <div style={{fontSize:11,fontWeight:700,color:"#0284c7",fontFamily:"monospace",marginTop:2}}>
-              🆔 ID: {order.userId.name}
+          {/* 3. Email */}
+          {order.userId?.email && (
+            <div style={{fontSize:10.5,color:"#64748b",marginTop:2,wordBreak:"break-all"}}>
+              {order.userId.email}
             </div>
           )}
 
@@ -241,17 +253,30 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
           
-          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
-            {order.sellerId?.fullName || order.sellerId?.name || "—"}
+          {/* 1. User ID */}
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
+            {order.sellerId?.name || "—"}
           </div>
 
-          {order.sellerId?.name && (
-            <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
-              🆔 ID: {order.sellerId.name}
+          {/* 2. User Name */}
+          {(() => {
+            const sellerFullName = order.sellerId?.fullName || order.sellerFullName || order.sellerName || ""
+            if (sellerFullName && sellerFullName !== order.sellerId?.name) {
+              return (
+                <div style={{fontSize:12,fontWeight:700,color:"#475569",marginTop:2}}>
+                  {sellerFullName}
+                </div>
+              )
+            }
+            return null
+          })()}
+
+          {/* 3. Email */}
+          {order.sellerId?.email && (
+            <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>
+              {order.sellerId.email}
             </div>
           )}
-
-          <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>{order.sellerId?.email||""}</div>
           
           {order.userId && order.userId?.name !== order.sellerId?.name && (
             <div style={{marginTop:6,fontSize:10.5,background:"#eff6ff",borderRadius:6,padding:"3px 7px",color:"#1d4ed8",display:"inline-block"}}>
