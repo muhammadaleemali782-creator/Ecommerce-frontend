@@ -489,7 +489,7 @@ export default function DistributorDashboard({ setPage }) {
                           </div>
                         </div>
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${st.badge}`}>
-                          {u.role}
+                          {u.role === "seller" ? "Direct Seller" : u.role}
                         </span>
                       </div>
                     )
@@ -946,7 +946,7 @@ export default function DistributorDashboard({ setPage }) {
                         <div className="text-[10px] text-stone-400 mt-0.5">Level {u.level || 1}</div>
                       </div>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shrink-0 ${st.badge}`}>
-                        {u.role}
+                        {u.role === "seller" ? "Direct Seller" : u.role}
                       </span>
                     </div>
                   )

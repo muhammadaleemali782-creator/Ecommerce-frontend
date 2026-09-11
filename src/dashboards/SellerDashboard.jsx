@@ -156,7 +156,7 @@ export default function SellerDashboard({ setPage }) {
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{color:isDark?"#93c5fd":"rgba(255,255,255,0.75)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>
-                {isUser?"User":"Seller"} Dashboard
+                {isUser?"User":"Direct Seller"} Dashboard
               </div>
               <div style={{color:"#fff",fontWeight:800,fontSize:17,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                 {user.fullName || user.name}
@@ -451,7 +451,7 @@ export default function SellerDashboard({ setPage }) {
                   </div>
                   <span style={{fontSize:10,padding:"3px 8px",borderRadius:20,fontWeight:700,
                     background:u.role==="seller"?"#eff6ff":"#faf5ff",color:u.role==="seller"?"#2563eb":"#9333ea"}}>
-                    {u.role}
+                    {u.role === "seller" ? "Direct Seller" : u.role}
                   </span>
                 </div>
               ))}
@@ -523,7 +523,7 @@ export default function SellerDashboard({ setPage }) {
           {user.name && user.name !== user.fullName && (
             <div style={{opacity:0.9,fontSize:12,fontFamily:"monospace",marginTop:2}}>🆔 {user.name}</div>
           )}
-          <div style={{opacity:0.75,fontSize:12,marginTop:2,textTransform:"capitalize"}}>{user.role}</div>
+          <div style={{opacity:0.75,fontSize:12,marginTop:2,textTransform:"capitalize"}}>{user.role === "seller" ? "Direct Seller" : user.role}</div>
         </div>
 
         {/* Quick stats */}
@@ -823,7 +823,7 @@ export default function SellerDashboard({ setPage }) {
                   <div style={{fontSize:20}}>{u.role==="seller"?"🛒":"👤"}</div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:600,fontSize:13,color:"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.name}</div>
-                    <div style={{fontSize:10,color:u.role==="seller"?"#2563eb":"#9333ea",fontWeight:600,textTransform:"capitalize"}}>{u.role}</div>
+                    <div style={{fontSize:10,color:u.role==="seller"?"#2563eb":"#9333ea",fontWeight:600,textTransform:"capitalize"}}>{u.role === "seller" ? "Direct Seller" : u.role}</div>
                   </div>
                 </div>
               ))}

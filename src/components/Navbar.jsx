@@ -118,7 +118,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
       ]
     },
     seller: {
-      label: "SELLER",
+      label: "DIRECT SELLER",
       color: isDark ? "text-emerald-400" : "text-emerald-700",
       links: [
         { label: "DASHBOARD", pg: "dashboard" },
@@ -387,7 +387,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
             <>
               <button
                 onClick={() => go("my-profile")}
-                title={`${safeUser?.fullName || safeUser?.name || "User"} (${role})`}
+                title={`${safeUser?.fullName || safeUser?.name || "User"} (${role === "seller" ? "Direct Seller" : role})`}
                 className={`w-full flex items-center rounded-xl transition-all cursor-pointer border gap-2.5 p-2 ${
                   isDark ? "hover:bg-white/[0.07] border-white/[0.06]" : "hover:bg-stone-50 border-stone-200"
                 }`}
@@ -403,7 +403,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                     role === "admin" ? "text-amber-500" :
                     role === "distributor" ? "text-sky-500" :
                     role === "seller" ? "text-emerald-500" : "text-violet-500"
-                  }`}>{role}</div>
+                  }`}>{role === "seller" ? "DIRECT SELLER" : role}</div>
                 </div>
               </button>
 
@@ -523,7 +523,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
                     {safeUser?.fullName || safeUser?.name || "User"}
                   </span>
                   <span className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded border shrink-0 ${roleTagClass}`}>
-                    {role}
+                    {role === "seller" ? "DIRECT SELLER" : role}
                   </span>
                 </div>
                 <div className={`text-[10px] font-mono font-semibold truncate max-w-[130px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>

@@ -11,20 +11,20 @@
 export const ROLE_LABELS = {
   admin:       "Admin",
   distributor: "Distributor",
-  seller:      "Seller",
+  seller:      "Direct Seller",
   user:        "User",
 }
 
-/** Single role ka label → "Distributor", "Seller", "User", "Admin" */
+/** Single role ka label → "Distributor", "Direct Seller", "User", "Admin" */
 export const getRoleLabel = (role) =>
   ROLE_LABELS[role] || role || "Unknown"
 
-/** Plural label → "Distributors", "Sellers", "Users", "Admins" */
+/** Plural label → "Distributors", "Direct Sellers", "Users", "Admins" */
 export const getRoleLabelPlural = (role) => {
   const map = {
     admin:       "Admins",
     distributor: "Distributors",
-    seller:      "Sellers",
+    seller:      "Direct Sellers",
     user:        "Users",
   }
   return map[role] || role || "Unknown"
