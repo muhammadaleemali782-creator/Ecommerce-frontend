@@ -17,8 +17,22 @@ export default function DistributorOrders() {
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener("resize", check); return () => window.removeEventListener("resize", check)
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
   }, [])
+
+  const fmtDate = (d) => {
+    if (!d) return "—"
+    return new Date(d).toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    })
+  }
 
   const load = async () => {
     try {
@@ -27,10 +41,14 @@ export default function DistributorOrders() {
       const url = tab === "pending"
         ? `${import.meta.env.VITE_API_URL}/orders/pending`
         : `${import.meta.env.VITE_API_URL}/orders/distributor`
-      const res  = await fetch(url, { headers:{ Authorization:`Bearer ${token}` } })
+      const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       const data = await res.json()
       setOrders(Array.isArray(data) ? data : [])
-    } catch(e) {} finally { setLoading(false) }
+    } catch(e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [tab])
@@ -47,76 +65,101 @@ export default function DistributorOrders() {
 
       const res  = await fetch(url, {
         method: "PUT",
-        headers: { Authorization:`Bearer ${token}`, "Content-Type":"application/json" },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ note, noteVisible })
       })
       const data = await res.json()
       if (res.ok) {
-        setModal(null); setNote(""); setNoteVisible(false)
+        setModal(null)
+        setNote("")
+        setNoteVisible(false)
         alert(isApprove
-          ? "✅ Approve ho gaya! Ab Admin final approve karega — tabhi PPC aur Sales update hongi."
+          ? "✅ Stage 1 Approve ho gaya! Ab Admin final approve karega — tabhi PPC aur Sales update hongi."
           : "Order reject ho gaya.")
         load()
-      } else { alert("❌ " + (data.msg || data.message)) }
-    } catch(e) { alert("Error: " + e.message) } finally { setBusy(null) }
+      } else {
+        alert("❌ " + (data.msg || data.message))
+      }
+    } catch(e) {
+      alert("Error: " + e.message)
+    } finally {
+      setBusy(null)
+    }
   }
 
   /* ── Status Section ── */
   const StatusSection = ({ order }) => {
     const s = order.status
     return (
-      <div>
+      <div className="space-y-1">
         {s === "pending" && (
-          <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:99, background:"#fff7ed", color:"#c2410c", border:"1px solid #fed7aa" }}>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full border bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             ⏳ Pending — Aapka approval chahiye
           </span>
         )}
         {s === "dist_approved" && (
           <div>
-            <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:99, background:"#eff6ff", color:"#1d4ed8", border:"1px solid #93c5fd" }}>
-              🔵 Aapne Approve Kiya
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full border bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+              🏢 Dist. Approved
             </span>
-            <div style={{ marginTop:4, fontSize:10, color:"#1d4ed8" }}>⏳ Admin ka final approval baaki</div>
-            <div style={{ marginTop:2, fontSize:10, color:"#64748b" }}>⚠️ PPC aur Sales tab milegi jab Admin approve kare</div>
+            <div className="text-[10px] text-sky-600 dark:text-sky-400 font-mono mt-1 font-bold">⏳ Admin final approval baaki</div>
+            {order.distributorApprovedAt && (
+              <div className="text-[9px] text-stone-400 font-mono">🕒 {fmtDate(order.distributorApprovedAt)}</div>
+            )}
           </div>
         )}
         {s === "confirmed" && (
           <div>
-            <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:99, background:"#f0fdf4", color:"#15803d", border:"1px solid #86efac" }}>
-              ✅ Final Confirmed
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full border bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              ✅ Confirmed
             </span>
-            {order.approvedByAdmin && (
-              <div style={{ marginTop:4, fontSize:10, color:"#7c3aed", fontWeight:600 }}>
-                👑 Admin ne apni taraf se approve kiya
+            {order.distributorApproved && (
+              <div className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-bold mt-1">
+                🏢 Dist. Approved {order.distributorApprovedAt && `(${fmtDate(order.distributorApprovedAt)})`}
               </div>
             )}
-            <div style={{ marginTop:2, fontSize:10, color:"#15803d" }}>✅ PPC + Sales distribute ho gayi</div>
+            {order.approvedByAdmin && (
+              <div className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-bold mt-0.5">
+                👑 Admin Final Approved {order.confirmedAt && `(${fmtDate(order.confirmedAt)})`}
+              </div>
+            )}
           </div>
         )}
         {s === "rejected" && (
-          <span style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:99, background:"#fef2f2", color:"#dc2626", border:"1px solid #fca5a5" }}>
-            ❌ Rejected
-          </span>
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full border bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              ❌ Rejected
+            </span>
+            {order.rejectedAt && (
+              <div className="text-[9px] text-stone-400 font-mono mt-1">🕒 {fmtDate(order.rejectedAt)}</div>
+            )}
+          </div>
         )}
 
-        {/* Distributor ka note */}
+        {/* Distributor Note */}
         {order.distributorNote && (
-          <div style={{ marginTop:5, fontSize:10, padding:"3px 8px", borderRadius:5, fontStyle:"italic",
-            background: order.distributorNoteVisible ? "#f0fdf4" : "#f8fafc",
-            color: order.distributorNoteVisible ? "#15803d" : "#64748b",
-            border:`1px solid ${order.distributorNoteVisible ? "#bbf7d0" : "#e2e8f0"}` }}>
-            📝 Aapka note: "{order.distributorNote}"
-            <span style={{ marginLeft:4, fontSize:9, fontWeight:700 }}>
-              {order.distributorNoteVisible ? "— Seller ko dikh raha hai 👁" : "— Private 🔒"}
+          <div className={`mt-1.5 text-[10px] px-2 py-1 rounded-lg border font-mono ${
+            order.distributorNoteVisible
+              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-300"
+              : isDark ? "bg-white/[0.04] border-white/10 text-stone-400" : "bg-stone-100 border-stone-200 text-stone-600"
+          }`}>
+            📝 <b>Aapka note:</b> "{order.distributorNote}"
+            <span className="ml-1 text-[9px] opacity-80">
+              {order.distributorNoteVisible ? "— 👁 Public" : "— 🔒 Private"}
             </span>
           </div>
         )}
 
-        {/* Admin note (agar visible ho) */}
+        {/* Admin Note */}
         {order.adminNote && order.adminNoteVisible && (
-          <div style={{ marginTop:4, fontSize:10, padding:"3px 8px", borderRadius:5, fontStyle:"italic",
-            background:"#faf5ff", color:"#7c3aed", border:"1px solid #e9d5ff" }}>
-            👑 Admin note: "{order.adminNote}"
+          <div className={`mt-1 text-[10px] px-2 py-1 rounded-lg border font-mono ${
+            isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-900"
+          }`}>
+            👑 <b>Admin:</b> "{order.adminNote}"
           </div>
         )}
       </div>
@@ -126,126 +169,111 @@ export default function DistributorOrders() {
   /* ── Collapsible Products ── */
   const ProductsCollapse = ({ items }) => {
     const [open, setOpen] = useState(false)
-    if (!items?.length) return <span style={{ fontSize:11, color:"#cbd5e1" }}>—</span>
+    if (!items?.length) return <span className="text-xs text-stone-400">—</span>
     return (
-      <div>
-        <button onClick={() => setOpen(p => !p)}
-          style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:8,
-            border:"1px solid #e2e8f0", background: open ? "#f1f5f9" : "#f8fafc",
-            cursor:"pointer", fontSize:11, fontWeight:600, color:"#475569" }}>
-          📦 {items.length} item{items.length > 1 ? "s" : ""}
-          <span style={{ fontSize:9 }}>{open ? "▲" : "▼"}</span>
+      <div className="mt-1">
+        <button
+          onClick={() => setOpen(p => !p)}
+          className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold font-mono flex items-center gap-1.5 cursor-pointer transition-colors ${
+            isDark
+              ? "bg-white/[0.04] hover:bg-white/[0.08] text-stone-300 border-white/10"
+              : "bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-300"
+          }`}
+        >
+          <span>📦 {items.length} item{items.length > 1 ? "s" : ""}</span>
+          <span className="text-[9px]">{open ? "▲" : "▼"}</span>
         </button>
+
         {open && (
-          <div style={{ marginTop:6, background:"#f8fafc", borderRadius:8, border:"1px solid #e2e8f0", overflow:"hidden" }}>
+          <div className={`mt-2 rounded-xl border p-2.5 space-y-2 text-xs font-mono shadow-md ${
+            isDark ? "bg-black/60 border-white/10 text-stone-300" : "bg-stone-50 border-stone-200 text-stone-800"
+          }`}>
             {items.map((item, i) => (
-              <div key={i} style={{ padding:"7px 10px", borderBottom: i < items.length-1 ? "1px solid #e2e8f0" : "none" }}>
-                <div style={{ fontWeight:600, fontSize:12, color:"#1e293b" }}>{item.title || item.name || "Product"}</div>
-              {/* ✅ PPC Badge — Distributor ko dikhao */}
-              {(item.ppcReward || 0) > 0 && (
-                <div style={{ marginTop:2 }}>
-                  <span style={{ fontSize:10, background:"#7c3aed", color:"#fff", borderRadius:99, padding:"1px 7px", fontWeight:700 }}>
+              <div key={i} className="pb-1.5 border-b border-white/[0.06] last:border-0 last:pb-0">
+                <div className="flex items-center justify-between font-bold">
+                  <span>{item.title || item.name || "Product"}</span>
+                  <span className="text-emerald-500 font-black">
+                    ₹{item.price} × {item.qty || item.quantity || 1}
+                  </span>
+                </div>
+                {(item.ppcReward || 0) > 0 && (
+                  <span className="inline-block mt-0.5 text-[9px] px-1.5 py-0.2 rounded bg-violet-500/20 text-violet-400 font-bold border border-violet-500/30">
                     💎 {item.ppcReward} PPC
                   </span>
-                </div>
-              )}
-                {item.description && <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>{item.description}</div>}
-                <div style={{ display:"flex", justifyContent:"space-between", marginTop:3 }}>
-                  <span style={{ fontSize:10, color:"#94a3b8" }}>Qty: {item.qty || item.quantity || 1}</span>
-                  <span style={{ fontSize:11, fontWeight:700, color:"#16a34a" }}>
-                    ₹{item.price} × {item.qty || item.quantity || 1} = ₹{(item.price*(item.qty||item.quantity||1)).toLocaleString()}
-                  </span>
-                </div>
+                )}
               </div>
             ))}
-            <div style={{ padding:"6px 10px", background:"#f0fdf4", borderTop:"1px solid #e2e8f0",
-              display:"flex", justifyContent:"space-between" }}>
-              <span style={{ fontSize:11, fontWeight:700 }}>Total</span>
-              <span style={{ fontSize:12, fontWeight:800, color:"#16a34a" }}>
-                ₹{items.reduce((s,i) => s + (i.price*(i.qty||i.quantity||1)), 0).toLocaleString()}
-              </span>
-            </div>
           </div>
         )}
       </div>
     )
   }
 
+  /* ── Mobile Card ── */
   const MobileCard = ({ order }) => {
     const isPending = order.status === "pending"
     return (
-      <div style={{ background:"#fff", borderRadius:14, padding:14, marginBottom:10,
-        boxShadow:"0 1px 8px rgba(0,0,0,0.07)", border:"1px solid #e2e8f0" }}>
-
-        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-          <span style={{ fontFamily:"monospace", fontSize:11, color:"#94a3b8" }}>#{order._id?.slice(-6)}</span>
-          <span style={{ fontSize:10, color:"#94a3b8" }}>{new Date(order.createdAt).toLocaleDateString("en-IN")}</span>
-        </div>
-
-        <div style={{ marginBottom:10, display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
-          <StatusSection order={order}/>
-          <button onClick={() => setInvoice(order)}
-            style={{ padding:"5px 11px", borderRadius:8, border:"1px solid #e2e8f0", background:"#f8fafc",
-              color:"#475569", fontWeight:700, fontSize:11, cursor:"pointer", flexShrink:0, marginLeft:8 }}>
+      <div className={`p-4 rounded-2xl border mb-3 shadow-md transition-all ${
+        isDark ? "bg-[#111713] border-white/[0.08] text-white" : "bg-white border-stone-200 text-stone-900 shadow-sm"
+      }`}>
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06] mb-3">
+          <div>
+            <span className="font-mono font-bold text-xs text-amber-500">#{order._id?.slice(-6)}</span>
+            <div className="text-[10px] text-stone-400 font-mono mt-0.5">{fmtDate(order.createdAt)}</div>
+          </div>
+          <button
+            onClick={() => setInvoice(order)}
+            className={`px-2.5 py-1 rounded-lg border text-[10.5px] font-bold font-mono flex items-center gap-1 cursor-pointer ${
+              isDark ? "bg-white/[0.06] hover:bg-white/10 text-stone-300 border-white/10" : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+            }`}
+          >
             🧾 Invoice
           </button>
         </div>
 
+        <div className="mb-3">
+          <StatusSection order={order} />
+        </div>
+
         {order.onBehalfOfId && (
-          <div style={{ background:"#fff7ed", borderRadius:8, padding:"5px 10px", marginBottom:8, border:"1px solid #fed7aa", fontSize:11 }}>
+          <div className="mb-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-mono">
             🎯 <b>{order.placedByName}</b> → <b>{order.onBehalfOfName}</b>
           </div>
         )}
 
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, fontSize:12, marginBottom:8 }}>
+        <div className="grid grid-cols-2 gap-2 text-xs font-mono mb-3 p-2.5 rounded-xl bg-black/20 dark:bg-white/[0.02] border border-white/[0.05]">
           <div>
-            <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-              <span style={{ fontSize:9, background:"#f0fdf4", color:"#15803d", borderRadius:3, padding:"1px 5px", fontWeight:700 }}>Seller</span>
-              <b>{order.sellerId?.role === "user" ? (order.sellerId?.name ? order.sellerId.name + "'s Seller" : "—") : (order.sellerId?.name || "—")}</b>
-            </div>
+            <span className="text-[10px] text-stone-400 uppercase block">Direct Seller</span>
+            <span className="font-bold text-emerald-500">{order.sellerId?.name || "—"}</span>
             {order.sellerId?.fullName && order.sellerId.fullName !== order.sellerId.name && (
-              <div style={{ fontSize:10, fontWeight:600, color:"#475569", marginLeft:4 }}>
-                👤 {order.sellerId.fullName}
-              </div>
-            )}
-            {order.userId && (
-              <div style={{ marginTop:4 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                  <span style={{ fontSize:9, background:"#eff6ff", color:"#1d4ed8", borderRadius:3, padding:"1px 5px", fontWeight:700 }}>User</span>
-                  <span style={{ fontSize:11, color:"#1d4ed8", fontWeight:600 }}>{order.userId?.name || "—"}</span>
-                </div>
-                {order.userId.fullName && order.userId.fullName !== order.userId.name && (
-                  <div style={{ fontSize:10, fontWeight:600, color:"#475569", marginLeft:4 }}>
-                    👤 {order.userId.fullName}
-                  </div>
-                )}
-              </div>
+              <div className="text-[10px] text-stone-400 truncate">👤 {order.sellerId.fullName}</div>
             )}
           </div>
           <div>
-            <span style={{ color:"#94a3b8" }}>Customer: </span><b>{order.customerName || "—"}</b>
-            {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
-              <div style={{ fontSize:10, fontWeight:600, color:"#475569" }}>
-                👤 {order.customerFullName || order.userId?.fullName}
-              </div>
-            )}
+            <span className="text-[10px] text-stone-400 uppercase block">Customer</span>
+            <span className="font-bold truncate block">{order.customerName || "—"}</span>
+            <div className="text-[10px] text-stone-400">{order.phone || "—"}</div>
           </div>
-          <div><span style={{ color:"#94a3b8" }}>Amount: </span><b style={{ color:"#16a34a" }}>₹{order.total?.toLocaleString()}</b></div>
-          <div><span style={{ color:"#94a3b8" }}>Phone: </span>{order.phone || "—"}</div>
+          <div className="col-span-2 pt-1 border-t border-white/[0.06] flex items-center justify-between">
+            <span className="text-stone-400">Total:</span>
+            <span className="font-black text-sm text-emerald-500">₹{order.total?.toLocaleString("en-IN")}</span>
+          </div>
         </div>
 
-        <div style={{ marginBottom:10 }}><ProductsCollapse items={order.items}/></div>
+        <ProductsCollapse items={order.items} />
 
         {isPending && (
-          <div style={{ display:"flex", gap:8 }}>
+          <div className="flex gap-2 mt-3 pt-3 border-t border-white/[0.06]">
             <button
-              onClick={() => { setModal({ orderId:order._id, action:"approve" }); setNote(""); setNoteVisible(false) }}
-              style={{ flex:2, padding:"10px", borderRadius:10, border:"none", background:"#16a34a", color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer" }}>
+              onClick={() => { setModal({ orderId: order._id, action: "approve" }); setNote(""); setNoteVisible(false) }}
+              className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer font-mono"
+            >
               ✅ Approve (Stage 1)
             </button>
             <button
-              onClick={() => { setModal({ orderId:order._id, action:"reject" }); setNote(""); setNoteVisible(false) }}
-              style={{ flex:1, padding:"10px", borderRadius:10, border:"1px solid #fca5a5", background:"#fef2f2", color:"#dc2626", fontWeight:700, fontSize:13, cursor:"pointer" }}>
+              onClick={() => { setModal({ orderId: order._id, action: "reject" }); setNote(""); setNoteVisible(false) }}
+              className="px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-500 border border-red-500/30 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer font-mono"
+            >
               ❌ Reject
             </button>
           </div>
@@ -255,234 +283,216 @@ export default function DistributorOrders() {
   }
 
   return (
-    <div style={{ fontFamily:"system-ui,sans-serif", padding: isMobile ? "12px" : "0" }}>
+    <div className={`space-y-6 select-none transition-colors duration-200 ${
+      isDark ? "text-white" : "text-stone-900"
+    }`}>
 
-      {/* Header */}
-      <div style={{ background:"linear-gradient(135deg,#065f46,#047857)", borderRadius:14, padding:"20px", marginBottom:12, color:"#fff" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
-          <EducaLogo size={36} />
-          <h1 style={{ margin:0, fontSize: isMobile ? 18 : 22, fontWeight:800 }}>Orders Dashboard</h1>
+      {/* ── HEADER BANNER ── */}
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-all relative overflow-hidden ${
+        isDark
+          ? "bg-gradient-to-br from-[#0c1f17] via-[#102a1f] to-[#0c1612] border-emerald-500/20 shadow-2xl"
+          : "bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white shadow-lg"
+      }`}>
+        <div className="flex items-center gap-3.5 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-1 shrink-0 shadow-md">
+            <EducaLogo size={36} />
+          </div>
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 text-[9.5px] font-mono font-black uppercase tracking-widest mb-1">
+              ✦ STAGE 1: DISTRIBUTOR DISPATCH & REVIEW
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase font-mono">
+              Orders Dashboard
+            </h1>
+            <p className="text-xs text-white/80 mt-0.5 font-medium">
+              Aapka approval Stage 1 hai — Admin Stage 2 pe final approve karke PPC + Sales distribute karega.
+            </p>
+          </div>
         </div>
-        <p style={{ margin:"4px 0 0", fontSize:12, opacity:0.8 }}>
-          Aapka approval Stage 1 hai — Admin Stage 2 pe PPC + Sales trigger karega
-        </p>
       </div>
 
-      {/* Info banner */}
-      <div style={{ background:"#eff6ff", borderRadius:10, padding:"10px 14px", marginBottom:14, border:"1px solid #bfdbfe", fontSize:12, color:"#1d4ed8" }}>
-        💡 <b>2-Stage Process:</b> Aap approve karo (Stage 1) → Admin final approve kare (Stage 2) → Tab PPC + Sales milegi
+      {/* ── 2-STAGE PROCESS NOTICE ── */}
+      <div className={`p-3.5 rounded-2xl border text-xs flex items-center gap-2.5 font-medium ${
+        isDark
+          ? "bg-sky-500/10 border-sky-500/20 text-sky-300"
+          : "bg-sky-50 border-sky-200 text-sky-800 shadow-xs"
+      }`}>
+        <span className="text-base">💡</span>
+        <div>
+          <b>2-Stage Order Flow:</b> Pehle aap review karke Stage 1 approve karein → Phir Admin Stage 2 final approve karega → Tab sabhi wallets me PPC & Sales trigger hongi.
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display:"flex", gap:6, marginBottom:14, background:"#f1f5f9", borderRadius:10, padding:4 }}>
-        {[{ key:"pending", label:"⏳ Pending Approval" }, { key:"all", label:"📋 Sab Orders" }].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            style={{ flex:1, padding:"9px 8px", borderRadius:8, border:"none", cursor:"pointer", fontSize:12, fontWeight:700,
-              background: tab===t.key ? "#fff" : "transparent", color: tab===t.key ? "#1e293b" : "#64748b",
-              boxShadow: tab===t.key ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
+      {/* ── TAB SELECTOR ── */}
+      <div className={`p-1 rounded-2xl border flex gap-1 font-mono text-xs max-w-md ${
+        isDark ? "bg-black/40 border-white/[0.08]" : "bg-stone-100 border-stone-300"
+      }`}>
+        {[
+          { key: "pending", label: "⏳ Pending Approval" },
+          { key: "all",     label: "📋 Sab Orders" },
+        ].map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all cursor-pointer uppercase tracking-wider text-[11px] ${
+              tab === t.key
+                ? isDark
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                  : "bg-white text-emerald-900 border border-emerald-300 shadow-xs"
+                : isDark
+                  ? "text-stone-400 hover:text-white"
+                  : "text-stone-600 hover:text-stone-900"
+            }`}
+          >
             {t.label}
           </button>
         ))}
       </div>
 
-      {loading && <div style={{ textAlign:"center", padding:40 }}><div style={{ fontSize:32 }}>⏳</div></div>}
-      {!loading && orders.length === 0 && (
-        <div style={{ textAlign:"center", padding:40, color:"#94a3b8", background:"#fff", borderRadius:12, border:"1px dashed #e2e8f0" }}>
-          <div style={{ fontSize:40 }}>📭</div><p>{tab === "pending" ? "Koi pending order nahi" : "Koi order nahi"}</p>
+      {/* ── CONTENT ── */}
+      {loading ? (
+        <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
+          Orders load ho rahe hain...
         </div>
-      )}
-
-      {!loading && orders.length > 0 && (
+      ) : orders.length === 0 ? (
+        <div className={`p-12 text-center rounded-3xl border ${
+          isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
+        }`}>
+          <span className="text-3xl block mb-2">📭</span>
+          <h3 className={`text-sm font-bold uppercase font-mono ${isDark ? "text-white" : "text-stone-900"}`}>
+            {tab === "pending" ? "Koi Pending Order Nahi Hai" : "Koi Order Record Nahi Mila"}
+          </h3>
+          <p className="text-xs mt-1 text-stone-400 font-mono">Jaise hi naya order aayega, yahan review ke liye dikhega.</p>
+        </div>
+      ) : (
         <>
-          {isMobile && <div>{orders.map(o => <MobileCard key={o._id} order={o}/>)}</div>}
+          {/* Mobile Card List */}
+          {isMobile && (
+            <div className="space-y-3">
+              {orders.map(o => <MobileCard key={o._id} order={o} />)}
+            </div>
+          )}
 
+          {/* Desktop Table */}
           {!isMobile && (
-            <div style={{ background:"#fff", borderRadius:12, border:"1px solid #e2e8f0", overflow:"auto", boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+            <div className={`overflow-x-auto rounded-2xl border shadow-xl ${
+              isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+            }`}>
+              <table className="w-full text-left border-collapse min-w-[950px]">
                 <thead>
-                  <tr style={{ background:"#f8fafc", borderBottom:"2px solid #e2e8f0" }}>
-                    {["ORDER","USER","SELLER","DISTRIBUTOR","CUSTOMER","TOTAL","NOTES","STATUS","ACTION"].map(h => (
-                      <th key={h} style={{ padding:"12px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:"#64748b", whiteSpace:"nowrap", letterSpacing:"0.05em" }}>{h}</th>
-                    ))}
+                  <tr className={`border-b text-[10px] font-black uppercase tracking-wider font-mono ${
+                    isDark ? "border-white/[0.08] bg-black/40 text-stone-400" : "border-stone-200 bg-stone-50 text-stone-600"
+                  }`}>
+                    <th className="p-3.5">ORDER</th>
+                    <th className="p-3.5">SELLER</th>
+                    <th className="p-3.5">CUSTOMER</th>
+                    <th className="p-3.5">TOTAL</th>
+                    <th className="p-3.5">STATUS & APPROVAL</th>
+                    <th className="p-3.5 text-right">ACTION</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {orders.map((order, i) => {
+                <tbody className={`divide-y text-xs ${
+                  isDark ? "divide-white/[0.04]" : "divide-stone-100"
+                }`}>
+                  {orders.map(order => {
                     const isPending = order.status === "pending"
-                    /* ── Combine all notes ── */
-                    const notes = [
-                      order.distributorNote && { role:"Dist", text:order.distributorNote, visible:order.distributorNoteVisible, color:"#f59e0b" },
-                      order.adminNote        && { role:"Admin", text:order.adminNote,        visible:order.adminNoteVisible,        color:"#7c3aed" },
-                    ].filter(Boolean)
-
-                    /* ── Status badge ── */
-                    const statusBadge =
-                      order.status === "pending"       ? { label:"Pending",   bg:"#fff7ed", color:"#c2410c", border:"#fed7aa" }
-                    : order.status === "dist_approved" ? { label:"Dist. Approved", bg:"#eff6ff", color:"#1d4ed8", border:"#93c5fd" }
-                    : order.status === "confirmed"     ? { label:"Confirmed",  bg:"#f0fdf4", color:"#15803d", border:"#86efac" }
-                    : order.status === "rejected"      ? { label:"Rejected",   bg:"#fef2f2", color:"#dc2626", border:"#fca5a5" }
-                    : { label: order.status, bg:"#f8fafc", color:"#64748b", border:"#e2e8f0" }
-
                     return (
-                      <tr key={order._id} style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"}`, background: isDark ? (i%2===0 ? "#111417" : "#14181c") : (i%2===0 ? "#fff" : "#fafbfc") }}>
-
-                        {/* ORDER ID + Date */}
-                        <td style={{ padding:"12px 14px", whiteSpace:"nowrap" }}>
-                          <div style={{ fontFamily:"monospace", fontSize:12, fontWeight:700, color:"#3b82f6" }}>
-                            #{order._id?.slice(-6)}
-                          </div>
-                          <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>
-                            {new Date(order.createdAt).toLocaleDateString("en-IN", { day:"2-digit", month:"numeric", year:"numeric" })}
-                          </div>
-                          {/* Behalf tag */}
+                      <tr key={order._id} className={`transition-colors ${
+                        isDark ? "hover:bg-white/[0.02]" : "hover:bg-stone-50/70"
+                      }`}>
+                        {/* Order ID & Date */}
+                        <td className="p-3.5 whitespace-nowrap">
+                          <div className="font-mono text-xs font-bold text-amber-500">#{order._id?.slice(-6)}</div>
+                          <div className="text-[10px] text-stone-400 font-mono mt-0.5">{fmtDate(order.createdAt)}</div>
                           {order.onBehalfOfId && (
-                            <div style={{ marginTop:4, fontSize:9, background:"#fff7ed", color:"#c2410c", border:"1px solid #fed7aa", borderRadius:4, padding:"1px 5px", display:"inline-block", fontWeight:600 }}>
-                              🎯 on behalf
+                            <div className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 inline-block">
+                              🎯 {order.placedByName} → {order.onBehalfOfName}
                             </div>
                           )}
-                        </td>
-
-                        {/* USER */}
-                        <td style={{ padding:"12px 14px" }}>
-                          {order.userId && order.userId.role === "user" ? (
-                            <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#1d4ed8", fontFamily:"monospace" }}>
-                                {order.userId?.name || "—"}
-                              </div>
-                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                👤 {order.userId?.fullName || order.userId?.name}
-                              </div>
-                            </div>
-                          ) : (
-                            <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>
-                          )}
-                        </td>
-
-                        {/* SELLER */}
-                        <td style={{ padding:"12px 14px" }}>
-                          {order.sellerId && order.sellerId.role === "seller" ? (
-                            <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#15803d", fontFamily:"monospace" }}>
-                                {order.sellerId?.name || "—"}
-                              </div>
-                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                👤 {order.sellerId?.fullName || order.sellerId?.name}
-                              </div>
-                              {/* Behalf chain — sirf yahan dikhao */}
-                              {order.onBehalfOfId && (
-                                <div style={{ marginTop:4, fontSize:9, background:"#fff7ed", color:"#92400e", border:"1px solid #fde68a", borderRadius:4, padding:"2px 6px", display:"inline-block" }}>
-                                  {order.placedByName} {order.placedByFullName && `(${order.placedByFullName})`} → {order.onBehalfOfName} {order.onBehalfOfFullName && `(${order.onBehalfOfFullName})`}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>
-                          )}
-                        </td>
-
-                        {/* DISTRIBUTOR */}
-                        <td style={{ padding:"12px 14px" }}>
-                          {order.distributorId ? (
-                            <div>
-                              <div style={{ fontWeight:700, fontSize:12, color:"#7c3aed", fontFamily:"monospace" }}>
-                                {order.distributorId?.name || "—"}
-                              </div>
-                              <div style={{ fontWeight:600, fontSize:11, color:"#1e293b", marginTop:1 }}>
-                                👤 {order.distributorId?.fullName || order.distributorId?.name}
-                              </div>
-                            </div>
-                          ) : (
-                            <span style={{ color:"#cbd5e1", fontSize:11 }}>—</span>
-                          )}
-                        </td>
-
-                        {/* CUSTOMER */}
-                        <td style={{ padding:"12px 14px" }}>
-                          <div style={{ fontWeight:700, fontSize:12, color:"#1e293b" }}>{order.customerName || "—"}</div>
-                          {(order.customerFullName || order.userId?.fullName) && (order.customerFullName || order.userId?.fullName) !== order.customerName && (
-                            <div style={{ fontWeight:600, fontSize:11, color:"#475569", marginTop:1 }}>
-                              👤 {order.customerFullName || order.userId?.fullName}
-                            </div>
-                          )}
-                          <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>{order.phone || ""}</div>
-                          {order.address && (
-                            <div style={{ fontSize:9, color:"#cbd5e1", marginTop:1, maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                              {order.address}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* TOTAL */}
-                        <td style={{ padding:"12px 14px", whiteSpace:"nowrap" }}>
-                          <div style={{ fontWeight:800, color:"#16a34a", fontSize:14 }}>
-                            ₹{order.total?.toLocaleString()}
-                          </div>
-                          <div style={{ marginTop:4 }}>
-                            <ProductsCollapse items={order.items} />
-                          </div>
-                        </td>
-
-                        {/* NOTES */}
-                        <td style={{ padding:"12px 14px", minWidth:160 }}>
-                          {notes.length === 0 ? (
-                            <span style={{ color:"#e2e8f0", fontSize:11 }}>—</span>
-                          ) : (
-                            <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                              {notes.map((n, ni) => (
-                                <div key={ni} style={{ fontSize:10, padding:"3px 7px", borderRadius:5, background: n.color+"15", border:`1px solid ${n.color}40`, color:"#374151" }}>
-                                  <span style={{ fontWeight:700, color: n.color }}>🗒 {n.role}:</span> {n.text}
-                                  {!n.visible && <span style={{ marginLeft:4, fontSize:8, color:"#94a3b8" }}>🔒</span>}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* STATUS */}
-                        <td style={{ padding:"12px 14px", whiteSpace:"nowrap" }}>
-                          <span style={{ fontSize:11, fontWeight:700, padding:"4px 10px", borderRadius:99, background:statusBadge.bg, color:statusBadge.color, border:`1px solid ${statusBadge.border}` }}>
-                            {order.status === "confirmed" ? "✅" : order.status === "rejected" ? "❌" : order.status === "dist_approved" ? "🔵" : "⏳"} {statusBadge.label}
-                          </span>
-                          {order.status === "confirmed" && (
-                            <div style={{ fontSize:9, color:"#15803d", marginTop:3 }}>✅ PPC + Sales distribute ho gayi</div>
-                          )}
-                          {order.status === "dist_approved" && (
-                            <div style={{ fontSize:9, color:"#1d4ed8", marginTop:3 }}>⏳ Admin approval baaki</div>
-                          )}
-                        </td>
-
-                        {/* ACTION */}
-                        <td style={{ padding:"12px 14px" }}>
-                          {/* 🧾 Invoice always visible */}
-                          <div style={{ marginBottom:6 }}>
-                            <button onClick={() => setInvoice(order)}
-                              style={{ padding:"4px 10px", borderRadius:7, border:"1px solid #e2e8f0",
-                                background:"#f8fafc", color:"#475569", fontWeight:700, fontSize:10, cursor:"pointer" }}>
+                          <div>
+                            <button
+                              onClick={() => setInvoice(order)}
+                              className={`mt-1.5 px-2 py-1 rounded-md text-[10px] font-bold font-mono flex items-center gap-1 border cursor-pointer ${
+                                isDark ? "bg-white/[0.06] hover:bg-white/10 text-stone-300 border-white/10" : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+                              }`}
+                            >
                               🧾 Invoice
                             </button>
                           </div>
+                        </td>
+
+                        {/* Seller */}
+                        <td className="p-3.5">
+                          {order.sellerId ? (
+                            <div>
+                              <div className="font-bold font-mono text-emerald-500">{order.sellerId.name}</div>
+                              {order.sellerId.fullName && order.sellerId.fullName !== order.sellerId.name && (
+                                <div className="text-[11px] text-stone-400 mt-0.5">👤 {order.sellerId.fullName}</div>
+                              )}
+                              <span className="inline-block text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-bold uppercase mt-1 border border-emerald-500/20 font-mono">
+                                Direct Seller
+                              </span>
+                            </div>
+                          ) : <span className="text-stone-400">—</span>}
+                        </td>
+
+                        {/* Customer */}
+                        <td className="p-3.5">
+                          <div className={`font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{order.customerName || "—"}</div>
+                          <div className="text-[10px] text-stone-400 font-mono mt-0.5">{order.phone || ""}</div>
+                        </td>
+
+                        {/* Total */}
+                        <td className="p-3.5 whitespace-nowrap">
+                          <div className="font-black text-sm text-emerald-500 font-mono">
+                            ₹{order.total?.toLocaleString("en-IN")}
+                          </div>
+                          <ProductsCollapse items={order.items} />
+                        </td>
+
+                        {/* Status & Flow */}
+                        <td className="p-3.5">
+                          <StatusSection order={order} />
+                        </td>
+
+                        {/* Action */}
+                        <td className="p-3.5 whitespace-nowrap text-right">
                           {isPending ? (
-                            <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                            <div className="flex flex-col gap-1.5 items-end">
                               <button
                                 disabled={busy === order._id}
-                                onClick={() => { setModal({ orderId:order._id, action:"approve" }); setNote(""); setNoteVisible(false) }}
-                                style={{ padding:"7px 14px", borderRadius:8, border:"none", background:"#16a34a", color:"#fff", fontWeight:700, fontSize:11, cursor:"pointer" }}>
-                                ✅ Approve
+                                onClick={() => { setModal({ orderId: order._id, action: "approve" }); setNote(""); setNoteVisible(false) }}
+                                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider transition-all cursor-pointer font-mono"
+                              >
+                                ✅ Approve (Stage 1)
                               </button>
                               <button
                                 disabled={busy === order._id}
-                                onClick={() => { setModal({ orderId:order._id, action:"reject" }); setNote(""); setNoteVisible(false) }}
-                                style={{ padding:"7px 14px", borderRadius:8, border:"1px solid #fca5a5", background:"#fef2f2", color:"#dc2626", fontWeight:700, fontSize:11, cursor:"pointer" }}>
+                                onClick={() => { setModal({ orderId: order._id, action: "reject" }); setNote(""); setNoteVisible(false) }}
+                                className="px-3.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-500 border border-red-500/30 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer font-mono"
+                              >
                                 ❌ Reject
                               </button>
                             </div>
                           ) : order.status === "confirmed" ? (
-                            <span style={{ fontSize:11, color:"#15803d", fontWeight:700 }}>✅ Done<br/><span style={{ fontSize:9, color:"#94a3b8" }}>{new Date(order.updatedAt).toLocaleDateString("en-IN")}</span></span>
+                            <span className="text-[11px] font-bold text-emerald-500 font-mono">
+                              ✅ Completed
+                              {order.confirmedAt && (
+                                <div className="text-[9.5px] text-stone-400 font-mono mt-0.5">{fmtDate(order.confirmedAt)}</div>
+                              )}
+                            </span>
                           ) : order.status === "dist_approved" ? (
-                            <span style={{ fontSize:11, color:"#1d4ed8", fontWeight:600 }}>⏳ Waiting<br/><span style={{ fontSize:9, color:"#94a3b8" }}>Admin se</span></span>
-                          ) : order.status === "rejected" ? (
-                            <span style={{ fontSize:11, color:"#dc2626", fontWeight:700 }}>❌ Rejected</span>
-                          ) : null}
+                            <span className="text-[11px] font-bold text-sky-500 font-mono">
+                              ⏳ Awaiting Admin Final
+                              {order.distributorApprovedAt && (
+                                <div className="text-[9.5px] text-stone-400 font-mono mt-0.5">{fmtDate(order.distributorApprovedAt)}</div>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-bold text-red-500 font-mono">
+                              ❌ Rejected
+                            </span>
+                          )}
                         </td>
                       </tr>
                     )
@@ -496,63 +506,79 @@ export default function DistributorOrders() {
 
       {/* ── ACTION MODAL ── */}
       {modal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:999, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
-          <div style={{ background:"#fff", borderRadius:16, padding:24, width:"100%", maxWidth:440, boxShadow:"0 8px 32px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ margin:"0 0 4px", fontSize:17, fontWeight:800 }}>
-              {modal.action === "approve" ? "✅ Order Approve (Stage 1)" : "❌ Order Reject"}
-            </h3>
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono">
+          <div className={`border rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 ${
+            isDark ? "bg-[#121814] border-white/[0.12] text-white" : "bg-white border-stone-200 text-stone-900"
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{modal.action === "approve" ? "✅" : "❌"}</span>
+              <h3 className={`text-base font-black uppercase ${isDark ? "text-white" : "text-stone-900"}`}>
+                {modal.action === "approve" ? "Distributor Approval (Stage 1)" : "Order Rejection"}
+              </h3>
+            </div>
 
             {modal.action === "approve" && (
-              <div style={{ background:"#eff6ff", borderRadius:8, padding:"8px 12px", marginBottom:12, fontSize:12, color:"#1d4ed8", border:"1px solid #bfdbfe" }}>
-                📌 Aapka approve Stage 1 hoga — PPC aur Sales tab milegi jab Admin final approve kare
+              <div className={`p-3 rounded-xl border text-xs ${
+                isDark ? "bg-sky-500/10 border-sky-500/20 text-sky-300" : "bg-sky-50 border-sky-200 text-sky-800"
+              }`}>
+                📌 Aapka approve Stage 1 hoga — PPC aur Sales tab distribute hongi jab Admin Stage 2 final approve karega.
               </div>
             )}
 
-            <label style={{ display:"block", fontSize:12, fontWeight:700, color:"#374151", marginBottom:6 }}>
-              📝 Note {modal.action === "reject" ? "(rejection reason)" : "(optional)"}
-            </label>
-            <textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder={modal.action === "approve" ? "Approval note... (optional)" : "Rejection reason likhein..."}
-              rows={3}
-              style={{ width:"100%", padding:"10px 12px", borderRadius:10, border:"1.5px solid #e2e8f0",
-                fontSize:13, outline:"none", resize:"vertical", boxSizing:"border-box", fontFamily:"system-ui", marginBottom:12 }}
-            />
+            <div>
+              <label className="block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 opacity-80">
+                📝 Note {modal.action === "reject" ? "(Rejection reason)" : "(Optional)"}
+              </label>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder={modal.action === "approve" ? "Add delivery or handling note..." : "Reason for rejection..."}
+                rows={3}
+                className={`w-full p-3 rounded-xl border text-xs focus:outline-none ${
+                  isDark ? "bg-black/40 border-white/10 text-white placeholder:text-stone-600 focus:border-emerald-500" : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-emerald-600"
+                }`}
+              />
+            </div>
 
-            {/* ⭐ NOTE VISIBILITY TOGGLE */}
-            <div onClick={() => setNoteVisible(p => !p)}
-              style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", borderRadius:10,
-                border:`1.5px solid ${noteVisible ? "#86efac" : "#e2e8f0"}`,
-                background: noteVisible ? "#f0fdf4" : "#f8fafc", cursor:"pointer", marginBottom:14 }}>
-              <div style={{ width:40, height:22, borderRadius:11, background: noteVisible ? "#16a34a" : "#e2e8f0",
-                position:"relative", transition:"background 0.2s", flexShrink:0 }}>
-                <div style={{ position:"absolute", top:3, left: noteVisible ? 21 : 3, width:16, height:16,
-                  borderRadius:"50%", background:"#fff", transition:"left 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" }}/>
+            {/* Note Visibility Toggle */}
+            <div
+              onClick={() => setNoteVisible(p => !p)}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors ${
+                noteVisible
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-300"
+                  : isDark ? "bg-black/30 border-white/10 text-stone-400" : "bg-stone-50 border-stone-200 text-stone-600"
+              }`}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] font-black ${
+                noteVisible ? "bg-emerald-600 text-white border-emerald-500" : "border-stone-400"
+              }`}>
+                {noteVisible ? "✓" : ""}
               </div>
-              <div>
-                <div style={{ fontSize:13, fontWeight:700, color: noteVisible ? "#15803d" : "#374151" }}>
-                  {noteVisible ? "👁 Seller / User ko dikhega" : "🔒 Sirf Admin aur Aapko dikhega"}
-                </div>
-                <div style={{ fontSize:10, color:"#64748b" }}>
-                  {noteVisible ? "Note seller ke orders page pe visible hoga" : "Note private rahega"}
-                </div>
+              <div className="text-xs">
+                <span className="font-bold">{noteVisible ? "👁 Seller / User ko dikhega" : "🔒 Sirf Admin aur Aapko dikhega"}</span>
+                <div className="text-[10px] opacity-75">{noteVisible ? "Public on order statement" : "Private review note"}</div>
               </div>
             </div>
 
-            <div style={{ display:"flex", gap:10 }}>
-              <button onClick={() => { setModal(null); setNote(""); setNoteVisible(false) }}
-                style={{ flex:1, padding:"11px", borderRadius:10, border:"1.5px solid #e2e8f0",
-                  background:"#f8fafc", color:"#64748b", fontWeight:600, cursor:"pointer" }}>
+            <div className="flex gap-2.5 pt-2">
+              <button
+                onClick={() => { setModal(null); setNote(""); setNoteVisible(false) }}
+                className={`flex-1 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider cursor-pointer ${
+                  isDark ? "bg-white/[0.04] border-white/10 text-stone-300 hover:bg-white/[0.08]" : "bg-stone-100 border-stone-300 text-stone-700 hover:bg-stone-200"
+                }`}
+              >
                 Cancel
               </button>
               <button
                 disabled={busy === modal.orderId}
                 onClick={handleAction}
-                style={{ flex:2, padding:"11px", borderRadius:10, border:"none",
-                  background: modal.action === "approve" ? "#16a34a" : "#dc2626",
-                  color:"#fff", fontWeight:700, cursor:"pointer" }}>
-                {busy === modal.orderId ? "⏳..." : modal.action === "approve" ? "✅ Confirm Approve" : "❌ Confirm Reject"}
+                className={`flex-2 py-2.5 rounded-xl text-white text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                  modal.action === "approve"
+                    ? "bg-emerald-600 hover:bg-emerald-500"
+                    : "bg-red-600 hover:bg-red-500"
+                }`}
+              >
+                {busy === modal.orderId ? "Processing..." : modal.action === "approve" ? "✅ Confirm Approve" : "❌ Confirm Reject"}
               </button>
             </div>
           </div>
@@ -560,7 +586,9 @@ export default function DistributorOrders() {
       )}
 
       {/* Invoice Modal */}
-      {invoice && <InvoiceModal order={invoice} onClose={() => setInvoice(null)} viewerRole="distributor" />}
+      {invoice && (
+        <InvoiceModal order={invoice} onClose={() => setInvoice(null)} viewerRole="distributor" />
+      )}
     </div>
   )
 }

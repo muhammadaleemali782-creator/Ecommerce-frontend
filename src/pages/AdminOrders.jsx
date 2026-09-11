@@ -135,7 +135,18 @@ export default function AdminOrders() {
   }
 
   const fmt     = (n) => Number(n || 0).toLocaleString("en-IN")
-  const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"
+  const fmtDate = (d) => {
+    if (!d) return "—"
+    return new Date(d).toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    })
+  }
 
   const FILTERS = [
     { key: "all",           label: "All Orders",    color: "bg-white/10 text-white border-white/20" },
