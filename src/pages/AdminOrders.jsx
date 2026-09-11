@@ -335,6 +335,25 @@ export default function AdminOrders() {
                           <div className="text-[11px] font-bold text-stone-700 dark:text-stone-300 mt-0.5">
                             👤 {order.distributorId.fullName || order.distributorId.name}
                           </div>
+
+                          {/* Approval Status Badge */}
+                          {order.distributorApproved && !order.adminBypassedDistributor ? (
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-500/30">
+                              <span>🏢 Dist. Approved</span>
+                            </div>
+                          ) : order.status === "confirmed" ? (
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30">
+                              <span>👑 Admin Approved</span>
+                            </div>
+                          ) : order.status === "pending" ? (
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-stone-500/15 text-stone-500 dark:text-stone-400 border border-stone-500/20">
+                              <span>⏳ Dist. Pending</span>
+                            </div>
+                          ) : order.status === "rejected" ? (
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-red-500/15 text-red-500 border border-red-500/20">
+                              <span>❌ Dist. Rejected</span>
+                            </div>
+                          ) : null}
                         </div>
                       ) : <span className="text-stone-400">—</span>}
                     </td>
@@ -368,9 +387,35 @@ export default function AdminOrders() {
                     {/* Status */}
                     <td className="p-3.5 whitespace-nowrap">
                       <StatusBadge status={order.status} />
-                      {order.approvedByAdmin && order.status === "confirmed" && (
-                        <div className="text-[9px] text-amber-600 dark:text-blue-400 font-bold mt-1">👑 Admin Approved</div>
-                      )}
+
+                      {/* Approval workflow trail */}
+                      <div className="flex flex-col gap-0.5 mt-1.5 font-mono">
+                        {order.distributorApproved && !order.adminBypassedDistributor ? (
+                          <div className="text-[9.5px] font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1">
+                            <span>🏢 Dist. Approved</span>
+                            {order.distributorApprovedAt && (
+                              <span className="text-[8.5px] opacity-75 font-normal">({fmtDate(order.distributorApprovedAt)})</span>
+                            )}
+                          </div>
+                        ) : order.status === "confirmed" ? (
+                          <div className="text-[9.5px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <span>👑 Admin Approved</span>
+                          </div>
+                        ) : order.status === "pending" ? (
+                          <div className="text-[9.5px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <span>⏳ Awaiting Dist.</span>
+                          </div>
+                        ) : null}
+
+                        {order.status === "confirmed" && (order.approvedByAdmin || order.adminApproved) && order.distributorApproved && !order.adminBypassedDistributor && (
+                          <div className="text-[9.5px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <span>👑 Admin Approved</span>
+                            {order.confirmedAt && (
+                              <span className="text-[8.5px] opacity-75 font-normal">({fmtDate(order.confirmedAt)})</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
 
                     {/* Actions */}

@@ -114,7 +114,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             <div style={{marginTop:10,color:"rgba(255,255,255,0.65)",fontSize:11}}>
               <div>Date: {fmtDate(order.createdAt)}</div>
               {order.status==="confirmed"&&order.confirmedAt&&<div>Confirmed: {fmtDate(order.confirmedAt)}</div>}
-              {order.status==="dist_approved"&&order.distributorApprovedAt&&<div>Approved: {fmtDate(order.distributorApprovedAt)}</div>}
+              {order.distributorApproved&&order.distributorApprovedAt&&<div>Dist. Approved: {fmtDate(order.distributorApprovedAt)}</div>}
               {order.status==="rejected"&&order.rejectedAt&&<div>Rejected: {fmtDate(order.rejectedAt)}</div>}
             </div>
           </div>
