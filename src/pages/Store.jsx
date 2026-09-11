@@ -21,8 +21,12 @@ export default function Store({ setPage }) {
 
   // Extract unique categories safely
   const categories = useMemo(() => {
-    const cats = allProducts.map(p => p.category).filter(Boolean)
-    return ["all", ...new Set(cats)]
+    const set = new Set()
+    allProducts.forEach(p => {
+      const c = (p.category || "").trim()
+      if (c) set.add(c)
+    })
+    return ["all", ...Array.from(set)]
   }, [allProducts])
 
   // Filtered and sorted products
@@ -30,11 +34,11 @@ export default function Store({ setPage }) {
     let list = allProducts.filter(p => {
       const q = search.trim().toLowerCase()
       const title = (p.title || p.name || "").toLowerCase()
-      const cat = (p.category || "").toLowerCase()
+      const cat = (p.category || "").trim().toLowerCase()
       const desc = (p.description || p.desc || "").toLowerCase()
       
       const matchesSearch = !q || title.includes(q) || cat.includes(q) || desc.includes(q)
-      const matchesCategory = category === "all" || p.category === category
+      const matchesCategory = category === "all" || cat === category.toLowerCase()
       return matchesSearch && matchesCategory
     })
 
@@ -169,21 +173,23 @@ export default function Store({ setPage }) {
               )}
             </div>
 
-            {/* Sort Select (Most Popular removed, clean sort options) */}
+            {/* Category Select (Replaces old 'Top Rated Formulations' with all categories) */}
             <div className="flex items-center gap-1.5 shrink-0">
               <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
+                value={category}
+                onChange={e => setCategory(e.target.value)}
                 className={`w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
                     : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 shadow-sm"
                 }`}
               >
-                <option value="rating">★ Top Rated Formulations</option>
-                <option value="price-low">💰 Price: Low to High</option>
-                <option value="price-high">💎 Price: High to Low</option>
-                <option value="newest">✨ Newest Arrivals</option>
+                <option value="all">📂 ALL CATEGORIES</option>
+                {categories.filter(c => c !== "all").map(c => (
+                  <option key={c} value={c}>
+                    🏷️ {c.toUpperCase()}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -191,7 +197,7 @@ export default function Store({ setPage }) {
           {/* ── Category Filter Rail ── */}
           <div className="mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
             {categories.map(cat => {
-              const isSelected = category === cat
+              const isSelected = category.toLowerCase() === cat.toLowerCase()
               const label = cat === "all" ? "All Products" : cat
               return (
                 <button
@@ -217,22 +223,48 @@ export default function Store({ setPage }) {
       {/* ── Main Catalog Grid (2 Columns Mobile, 3 Tablet, 4 Desktop) ── */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6">
         
-        {/* Count and Reset */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Count, Sort and Reset */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider ${
             isDark ? "text-stone-400" : "text-stone-500"
           }`}>
             Showing <span className={`font-black ${isDark ? "text-white" : "text-stone-950"}`}>{visibleProducts.length}</span> Products
             {category !== "all" && <span> in <span className="text-amber-600 dark:text-blue-400 font-bold">{category}</span></span>}
           </div>
-          {(category !== "all" || search) && (
-            <button
-              onClick={() => { setCategory("all"); setSearch("") }}
-              className="text-[11px] font-bold text-amber-600 dark:text-blue-400 hover:underline transition-colors cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          )}
+
+          <div className="flex items-center gap-3">
+            {/* Sort Selector */}
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                isDark ? "text-stone-400" : "text-stone-500"
+              }`}>
+                Sort:
+              </span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
+                  isDark
+                    ? "bg-black/40 border-white/10 text-stone-200 focus:border-[#fbbf24]"
+                    : "bg-white border-stone-300 text-stone-700 focus:border-blue-500 shadow-xs"
+                }`}
+              >
+                <option value="rating">★ Top Rated</option>
+                <option value="price-low">💰 Price: Low to High</option>
+                <option value="price-high">💎 Price: High to Low</option>
+                <option value="newest">✨ Newest Arrivals</option>
+              </select>
+            </div>
+
+            {(category !== "all" || search) && (
+              <button
+                onClick={() => { setCategory("all"); setSearch("") }}
+                className="text-[11px] font-bold text-amber-600 dark:text-blue-400 hover:underline transition-colors cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Empty State */}
