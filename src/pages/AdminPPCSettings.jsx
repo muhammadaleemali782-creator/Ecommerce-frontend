@@ -34,6 +34,8 @@ export default function AdminPPCSettings() {
     { level: 4, name: "Diamond Seller", threshold: 2000, reward: "🎁 ₹5000 + trip" },
   ])
   
+  const [salaryPayoutBusy, setSalaryPayoutBusy] = useState(false)
+  
   useEffect(() => {
     fetchSettings()
   }, [])
@@ -58,6 +60,7 @@ export default function AdminPPCSettings() {
           userOrderDirectRate:      data.userOrderDistributionRates?.directSeller ?? 50,
           userOrderDistributorRate: data.userOrderDistributionRates?.distributor  ?? 50,
           minimumWithdrawal:        data.minimumWithdrawal || "",
+          salaryPayoutDay:          data.salaryPayoutDay ?? 1,
         })
 
         // Parse distributor levels
@@ -159,6 +162,29 @@ export default function AdminPPCSettings() {
     setSellerLevels(prev => prev.map(l => l.level === lvlNum ? { ...l, [field]: value } : l))
   }
   
+  const handleRunSalaryPayout = async () => {
+    if (!window.confirm("Kya aap sabhi eligible qualified users ko is mahine ki lifetime salary abhi distribute karna chahte hain?")) return
+    try {
+      setSalaryPayoutBusy(true)
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ppc-settings/run-salary-payout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        alert(`✅ Lifetime Salary Payout Success!\nMonth: ${data.month}\nUsers Credited: ${data.creditedCount}\nTotal Amount: ₹${data.totalAmountCredited?.toLocaleString("en-IN")}`)
+        fetchSettings()
+      } else {
+        alert(`❌ ${data.message || data.error || "Payout run failed"}`)
+      }
+    } catch (e) {
+      alert(`Error: ${e.message}`)
+    } finally {
+      setSalaryPayoutBusy(false)
+    }
+  }
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     
@@ -181,6 +207,7 @@ export default function AdminPPCSettings() {
         },
         body: JSON.stringify({
           basePPCValue: formData.basePPCValue,
+          salaryPayoutDay: Number(formData.salaryPayoutDay) || 1,
           distributionRates: {
             direct:      formData.directRate,
             parent:      formData.parentRate,
@@ -382,6 +409,76 @@ export default function AdminPPCSettings() {
                 />
                 <p className="text-[10px] text-stone-400 mt-1">Minimum wallet balance required to request bank payout</p>
               </div>
+            </div>
+          </div>
+
+          {/* Section: Monthly Lifetime Salary Payout */}
+          <div className={`p-5 rounded-2xl border space-y-4 ${
+            isDark ? "bg-black/40 border-purple-500/20" : "bg-purple-50/50 border-purple-200"
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+                  isDark ? "text-white" : "text-stone-900"
+                }`}>
+                  <span className="text-purple-400">📅</span> Lifetime Monthly Salary Payout
+                </h3>
+                <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+                  Jinhone level complete karke claim kiya hai, unko har mahine is date ko automatic lifetime salary wallet me add hogi.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRunSalaryPayout}
+                disabled={salaryPayoutBusy}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+                  salaryPayoutBusy
+                    ? "bg-purple-700/50 text-purple-300 cursor-not-allowed"
+                    : "bg-purple-600 hover:bg-purple-500 active:scale-95 text-white shadow-md shadow-purple-600/30"
+                }`}
+              >
+                {salaryPayoutBusy ? "Processing..." : "🚀 Run Salary Payout Now"}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-400" : "text-stone-600"
+                }`}>
+                  Monthly Payout Day (1 se 28) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    max="28"
+                    value={formData.salaryPayoutDay}
+                    onChange={(e) => setFormData({ ...formData, salaryPayoutDay: e.target.value })}
+                    required
+                    className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
+                      isDark ? "bg-[#121814] text-white border-white/10 focus:border-purple-400" : "bg-white text-stone-900 border-stone-300 focus:border-purple-500 shadow-sm"
+                    }`}
+                    placeholder="1"
+                  />
+                  <span className={`text-xs font-bold whitespace-nowrap ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                    tareekh ko
+                  </span>
+                </div>
+                <p className="text-[10px] text-stone-400 mt-1">Aap jo bhi tareekh choose karenge, har mahine usi din salary credit hogi</p>
+              </div>
+
+              {settings?.lastSalaryPayoutMonth && (
+                <div className={`p-3 rounded-xl border flex flex-col justify-center ${
+                  isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-white border-stone-200"
+                }`}>
+                  <span className="text-[10px] uppercase font-mono tracking-wider text-stone-400">Last Payout Processed Month</span>
+                  <span className="text-sm font-mono font-bold text-purple-400 mt-1">
+                    ✅ {settings.lastSalaryPayoutMonth}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
