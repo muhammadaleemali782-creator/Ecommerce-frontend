@@ -3,6 +3,17 @@ import { useStore } from "../context/StoreContext";
 import { useAuth } from "../context/AuthContext";
 import EducaLogo from "../components/EducaLogo";
 
+const resolveImg = (img) => {
+  if (!img || typeof img !== "string") return "/natgeo_jadibooti.jpg"
+  const trimmed = img.trim()
+  if (!trimmed) return "/natgeo_jadibooti.jpg"
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) return trimmed
+  if (trimmed.startsWith("/") && !trimmed.startsWith("/uploads/")) return trimmed
+  const base = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")
+  const cleanPath = trimmed.replace(/^\/+/, "").replace(/^uploads\//, "")
+  return `${base}/uploads/${cleanPath}`
+}
+
 // ══════════════════════════════════════════════════════════
 // 4 SOVEREIGN REALMS (DIFFERENTIATED SUBTAG & CATEGORY, ZERO NUMBERS)
 // ══════════════════════════════════════════════════════════
@@ -131,7 +142,7 @@ export function ProductCard({
   const handleAdd = onAddToCart || onAdd;
   const price = item.price || item.finalPrice || 0;
   const name = item.name || item.title || "Ayurvedic Product";
-  const image = item.image || item.img || "/natgeo_jadibooti.jpg";
+  const image = resolveImg(item.image || item.img)
   const category = item.category || "Rasayana";
   const rating = item.rating || 5;
 
@@ -141,6 +152,11 @@ export function ProductCard({
         <img
           src={image}
           alt={name}
+          onError={(e) => {
+            if (!e.currentTarget.src.endsWith("/natgeo_jadibooti.jpg")) {
+              e.currentTarget.src = "/natgeo_jadibooti.jpg"
+            }
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />

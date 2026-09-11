@@ -10,6 +10,17 @@ const SORT_OPTIONS = [
   { id: "price-high", label: "Price: High to Low", icon: "💎" },
 ]
 
+const resolveImg = (img) => {
+  if (!img || typeof img !== "string") return "/natgeo_jadibooti.jpg"
+  const trimmed = img.trim()
+  if (!trimmed) return "/natgeo_jadibooti.jpg"
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) return trimmed
+  if (trimmed.startsWith("/") && !trimmed.startsWith("/uploads/")) return trimmed
+  const base = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")
+  const cleanPath = trimmed.replace(/^\/+/, "").replace(/^uploads\//, "")
+  return `${base}/uploads/${cleanPath}`
+}
+
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
   const { products = [], addToCart, cart = [] } = useStore() || {}
@@ -529,7 +540,7 @@ export default function Store({ setPage }) {
               const price = product.price || product.finalPrice || 0
               const mrp = product.mrp || Math.round(price * 1.25)
               const discountPct = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0
-              const image = product.image || product.img || "/natgeo_jadibooti.jpg"
+              const image = resolveImg(product.image || product.img)
               const tag = product.tag || product.category || "AYUSH"
               const rating = product.rating || 4.9
               const reviews = product.reviews || 85
@@ -564,11 +575,18 @@ export default function Store({ setPage }) {
                       {/* Image Container */}
                       <div
                         onClick={(e) => toggleFlip(productId, e)}
-                        className="relative aspect-square w-full rounded-t-2xl overflow-hidden bg-stone-100 dark:bg-stone-900 cursor-pointer group"
+                        className={`relative aspect-square w-full rounded-t-2xl overflow-hidden cursor-pointer group ${
+                          isDark ? "bg-[#0d120e]" : "bg-stone-100"
+                        }`}
                       >
                         <img
                           src={image}
                           alt={title}
+                          onError={(e) => {
+                            if (!e.currentTarget.src.endsWith("/natgeo_jadibooti.jpg")) {
+                              e.currentTarget.src = "/natgeo_jadibooti.jpg"
+                            }
+                          }}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"
                           decoding="async"
