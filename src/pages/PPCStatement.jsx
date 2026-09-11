@@ -316,15 +316,18 @@ export default function PPCStatement({ setPage }) {
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold font-mono ${
-                        row.isUserOrder
-                          ? "bg-violet-500/15 text-violet-400 border border-violet-500/30"
-                          : row.positionType === "distributor"
-                          ? "bg-sky-500/15 text-sky-400 border border-sky-500/30"
-                          : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      }`}>
-                        {row.isUserOrder ? "🛒 Direct User Order" : row.positionType === "distributor" ? "🏢 Dist. Override" : "👥 Seller Commission"}
-                      </span>
+                      {(() => {
+                        const isUser = row.isUserOrder || row.fromUser?.role === "user"
+                        return (
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold font-mono ${
+                            isUser
+                              ? "bg-violet-500/15 text-violet-400 border border-violet-500/30"
+                              : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                          }`}>
+                            {isUser ? "🛒 Direct User Order" : "🛍️ Direct Seller"}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td className="py-3 px-4 font-mono text-[11px] text-stone-400">
                       {row.order?._id ? `#${row.order._id.slice(-6)}` : "—"}

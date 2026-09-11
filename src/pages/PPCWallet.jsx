@@ -652,10 +652,12 @@ export default function PPCWallet({ setPage }) {
                     const pct   = item.percentageShare || 50
                     const rupee = item.rupeeValue || (item.ppcCount * rate * pct / 100)
                     const walletLabel =
-                      item.walletType === "userWallet"           ? "User Wallet"
-                    : item.walletType === "sellerWalletAsSeller" ? "Direct Seller Wallet"
-                    : item.walletType === "sellerWallet"         ? "Direct Seller Wallet"
-                    : item.walletType || "—"
+                      item.walletLabel
+                      || (item.walletType === "userWallet" ? "User Wallet"
+                          : item.walletType === "sellerWalletAsSeller" ? "Direct Seller Wallet"
+                          : item.walletType === "sellerWallet" ? (walletData?.role === "distributor" ? "Distributor Wallet" : "Direct Seller Wallet")
+                          : item.walletType === "distributorWallet" ? "Distributor Wallet"
+                          : item.walletType || "—")
 
                     return (
                       <tr key={idx} className={isDark ? "hover:bg-white/[0.02]" : "hover:bg-stone-50"}>
@@ -669,11 +671,20 @@ export default function PPCWallet({ setPage }) {
                           {item.ppcCount} <span className="text-[10px] text-stone-400 font-normal">PPC</span>
                         </td>
                         <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                            isDark ? "bg-white/[0.04] border-white/10 text-stone-300" : "bg-stone-100 border-stone-200 text-stone-700"
-                          }`}>
-                            {item.positionType || "direct"}
-                          </span>
+                          {(() => {
+                            const isUser = item.isUserOrder || item.sourceRole === "user" || item.fromUserRole === "user"
+                            const isSeller = item.sourceRole === "seller" || item.fromUserRole === "seller" || (!item.isUserOrder && !item.chainInfo?.isUserOrder)
+                            const label = item.sourceLabel || (isUser ? "Direct User" : isSeller ? "Direct Seller" : (item.positionType === "distributor" ? "Direct Seller" : item.positionType || "Direct Seller"))
+                            return (
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                                isUser
+                                  ? "bg-violet-500/15 text-violet-400 border-violet-500/30"
+                                  : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                              }`}>
+                                {label}
+                              </span>
+                            )
+                          })()}
                         </td>
                         <td className="p-3 font-bold text-emerald-500">
                           ₹{rupee.toFixed(2)}

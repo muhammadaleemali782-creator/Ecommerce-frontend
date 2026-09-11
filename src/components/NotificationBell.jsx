@@ -28,8 +28,7 @@ export default function NotificationBell({ isMobile = false }) {
   const {
     notifications,
     unreadCount,
-    isOpen,
-    setIsOpen,
+    setIsOpen: setContextIsOpen,
     clearAll,
     deleteNotif,
     markAllRead,
@@ -40,6 +39,15 @@ export default function NotificationBell({ isMobile = false }) {
   const bellBtnRef = useRef(null)
   const [coords, setCoords] = useState(null)
   const [confirmNotif, setConfirmNotif] = useState(null)
+  const [isOpen, setIsOpenLocal] = useState(false)
+
+  const setIsOpen = useCallback((val) => {
+    setIsOpenLocal(prev => {
+      const next = typeof val === "function" ? val(prev) : val
+      if (setContextIsOpen) setContextIsOpen(next)
+      return next
+    })
+  }, [setContextIsOpen])
 
   const updateCoords = useCallback(() => {
     if (bellBtnRef.current) {
@@ -473,6 +481,7 @@ export default function NotificationBell({ isMobile = false }) {
               </button>
               <button
                 onClick={() => {
+                  setIsOpen(false)
                   handleNotifClick(confirmNotif)
                   setConfirmNotif(null)
                 }}
