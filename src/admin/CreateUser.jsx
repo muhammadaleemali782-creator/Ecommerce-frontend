@@ -10,6 +10,8 @@ export default function CreateUser() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    phone: "",
+    address: "",
     password: "",
     role: "seller"
   })
@@ -27,7 +29,7 @@ export default function CreateUser() {
   /* ================= HANDLE SUBMIT ================= */
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.password) {
-      return alert("All fields are required")
+      return alert("Name, Email and Password are required")
     }
 
     // 🔒 SAFETY: Role-based creation rules
@@ -54,7 +56,10 @@ export default function CreateUser() {
         },
         body: JSON.stringify({
           parentId: user?.id,   // 🔥 IMPORTANT (Admin / Distributor)
+          fullName: form.name.trim(),
           name: form.name.trim(),
+          phone: form.phone.trim(),
+          address: form.address.trim(),
           email: form.email.trim(),
           password: form.password,
           role: form.role
@@ -75,6 +80,8 @@ export default function CreateUser() {
       setForm({
         name: "",
         email: "",
+        phone: "",
+        address: "",
         password: "",
         role: "seller"
       })
@@ -143,6 +150,43 @@ export default function CreateUser() {
             isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
           }`}
           value={form.email}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* ---------- PHONE ---------- */}
+      <div className="mb-2.5">
+        <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
+          isDark ? "text-stone-300" : "text-stone-700"
+        }`}>
+          Mobile / Phone Number
+        </label>
+        <input
+          name="phone"
+          type="tel"
+          placeholder="e.g. 9876543210"
+          className={`w-full p-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
+          }`}
+          value={form.phone}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* ---------- ADDRESS ---------- */}
+      <div className="mb-2.5">
+        <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1 ${
+          isDark ? "text-stone-300" : "text-stone-700"
+        }`}>
+          Address / Location
+        </label>
+        <input
+          name="address"
+          placeholder="e.g. New Delhi, Delhi - 110001"
+          className={`w-full p-2.5 rounded-xl border text-xs font-medium focus:outline-none ${
+            isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
+          }`}
+          value={form.address}
           onChange={handleChange}
         />
       </div>

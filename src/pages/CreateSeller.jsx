@@ -10,6 +10,8 @@ export default function CreateSeller() {
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [address, setAddress] = useState("")
   const [password, setPassword] = useState("")
   const [role, setRole] = useState("seller")
 
@@ -38,7 +40,7 @@ export default function CreateSeller() {
     e.preventDefault()
 
     if (!name.trim() || !email.trim() || !password.trim()) {
-      alert("Please fill all fields")
+      alert("Please fill all required fields (Name, Email, Password)")
       return
     }
 
@@ -62,6 +64,9 @@ export default function CreateSeller() {
         },
         body: JSON.stringify({
           name: name.trim(),
+          fullName: name.trim(),
+          phone: phone.trim(),
+          address: address.trim(),
           email: email.trim(),
           password,
           role,
@@ -76,11 +81,13 @@ export default function CreateSeller() {
         return
       }
 
-      alert("Seller created successfully!")
+      alert("User created successfully!")
 
       /* ================= RESET ================= */
       setName("")
       setEmail("")
+      setPhone("")
+      setAddress("")
       setPassword("")
       setAssignedProducts([])
 
@@ -100,23 +107,37 @@ export default function CreateSeller() {
       <form onSubmit={handleSubmit}>
 
         <input
-          className="border p-2 w-full mb-3"
-          placeholder="Full Name"
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Full Name *"
           value={name}
           onChange={e => setName(e.target.value)}
         />
 
         <input
-          className="border p-2 w-full mb-3"
-          placeholder="Email"
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Email *"
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
 
         <input
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Phone Number (optional)"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+        />
+
+        <input
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Address / Location (optional)"
+          value={address}
+          onChange={e => setAddress(e.target.value)}
+        />
+
+        <input
           type="password"
-          className="border p-2 w-full mb-3"
-          placeholder="Password"
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Password *"
           value={password}
           onChange={e => setPassword(e.target.value)}
         />

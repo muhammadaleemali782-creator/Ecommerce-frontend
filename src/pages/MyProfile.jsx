@@ -36,8 +36,9 @@ export default function MyProfile() {
       if (data) {
         setProfile(data)
         if (typeof updateUser === "function") updateUser(data)
+        const isNameSystemId = data.fullName === data.name
         setForm({
-          fullName: data.fullName || "",
+          fullName: (!isNameSystemId && data.fullName) ? data.fullName : "",
           phone:    data.phone    || "",
           address:  data.address  || "",
         })
@@ -132,7 +133,10 @@ export default function MyProfile() {
     </div>
   )
 
-  const initials = (profile.fullName || profile.name || "U")[0].toUpperCase()
+  const hasRealName = Boolean(profile.fullName && profile.fullName.trim() && profile.fullName.trim() !== profile.name)
+  const displayName = hasRealName ? profile.fullName.trim() : profile.name
+  const isProfileIncomplete = !hasRealName || !profile.phone || !profile.address
+  const initials = (hasRealName ? profile.fullName.trim() : profile.name || "U")[0].toUpperCase()
 
   return (
     <div className="max-w-2xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10 space-y-6 select-none">
@@ -188,7 +192,7 @@ export default function MyProfile() {
               <h1 className={`text-xl sm:text-2xl font-black tracking-tight truncate ${
                 isDark ? "text-white" : "text-stone-900"
               }`}>
-                {profile.fullName || profile.name}
+                {displayName}
               </h1>
 
               <p className={`text-xs font-mono mt-0.5 truncate ${
@@ -253,11 +257,27 @@ export default function MyProfile() {
           {!editing ? (
             /* ── VIEW MODE ── */
             <div className="space-y-3">
+              {isProfileIncomplete && (
+                <div className={`p-3.5 sm:p-4 rounded-2xl border flex items-start gap-3 text-xs mb-3 ${
+                  isDark
+                    ? "bg-amber-500/10 border-amber-500/25 text-amber-300"
+                    : "bg-amber-50 border-amber-200 text-amber-900"
+                }`}>
+                  <span className="text-base leading-none">ℹ️</span>
+                  <div className="flex-1">
+                    <p className="font-bold">Profile Details Incomplete</p>
+                    <p className="opacity-85 mt-0.5">
+                      Aapka Full Name, Mobile Number ya Address abhi darj nahi hai. Niche <b>"Edit Profile Details"</b> button dabakar apni jankari update karein.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <ProfileRow
                 isDark={isDark}
                 icon="👤"
                 label="Full Name"
-                value={profile.fullName || profile.name || "—"}
+                value={hasRealName ? profile.fullName : "— (Click Edit Profile Details to set)"}
               />
               <ProfileRow
                 isDark={isDark}
@@ -270,13 +290,13 @@ export default function MyProfile() {
                 isDark={isDark}
                 icon="📞"
                 label="Phone Number"
-                value={profile.phone || "—"}
+                value={profile.phone || "— (Click Edit Profile Details to set)"}
               />
               <ProfileRow
                 isDark={isDark}
                 icon="📍"
                 label="Address / Location"
-                value={profile.address || "—"}
+                value={profile.address || "— (Click Edit Profile Details to set)"}
               />
               <ProfileRow
                 isDark={isDark}
