@@ -424,13 +424,29 @@ export default function AdminRequestHistory() {
                     <div className="flex items-center justify-between">
                       <span className={isDark ? "text-stone-400" : "text-stone-500"}>Submitted:</span>
                       <span className={`font-mono font-semibold ${isDark ? "text-white" : "text-stone-800"}`}>
-                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                        {r.createdAt ? (
+                          <>
+                            {new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            {" "}
+                            <span className={`text-[10px] ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                              {new Date(r.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                            </span>
+                          </>
+                        ) : "—"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className={isDark ? "text-stone-400" : "text-stone-500"}>Decided:</span>
                       <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">
-                        {decidedAt ? new Date(decidedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                        {decidedAt ? (
+                          <>
+                            {new Date(decidedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            {" "}
+                            <span className={`text-[10px] font-normal ${isDark ? "text-purple-300" : "text-purple-500"}`}>
+                              {new Date(decidedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                            </span>
+                          </>
+                        ) : "—"}
                       </span>
                     </div>
                   </div>
