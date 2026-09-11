@@ -1,7 +1,14 @@
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
+
+const SORT_OPTIONS = [
+  { id: "rating", label: "Top Rated", icon: "★" },
+  { id: "newest", label: "Newest Arrivals", icon: "✨" },
+  { id: "price-low", label: "Price: Low to High", icon: "💰" },
+  { id: "price-high", label: "Price: High to Low", icon: "💎" },
+]
 
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
@@ -13,6 +20,13 @@ export default function Store({ setPage }) {
   const [sortBy, setSortBy] = useState("rating")
   const [flippedCardId, setFlippedCardId] = useState(null)
   const [addedToast, setAddedToast] = useState(null)
+
+  // Custom polished dropdowns state
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
+  const categoryDropdownRef = useRef(null)
+
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+  const sortDropdownRef = useRef(null)
 
   // Real backend products only — zero hardcoded demo products
   const allProducts = useMemo(() => {
@@ -28,6 +42,44 @@ export default function Store({ setPage }) {
     })
     return ["all", ...Array.from(set)]
   }, [allProducts])
+
+  // Compute product count per category for UX badge indicators
+  const categoryCounts = useMemo(() => {
+    const map = { all: allProducts.length }
+    allProducts.forEach(p => {
+      const c = (p.category || "").trim()
+      if (c) {
+        map[c] = (map[c] || 0) + 1
+      }
+    })
+    return map
+  }, [allProducts])
+
+  // Close dropdowns on outside click or Escape key
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target)) {
+        setCategoryDropdownOpen(false)
+      }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target)) {
+        setSortDropdownOpen(false)
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setCategoryDropdownOpen(false)
+        setSortDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("touchstart", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("touchstart", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
 
   // Filtered and sorted products
   const visibleProducts = useMemo(() => {
@@ -173,24 +225,151 @@ export default function Store({ setPage }) {
               )}
             </div>
 
-            {/* Category Select (Replaces old 'Top Rated Formulations' with all categories) */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <select
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                className={`w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white focus:border-[#fbbf24]"
-                    : "bg-stone-50 border-stone-300 text-stone-900 focus:border-blue-500 shadow-sm"
+            {/* ── Custom Luxury Category Dropdown ── */}
+            <div className="relative shrink-0" ref={categoryDropdownRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoryDropdownOpen(prev => !prev)
+                  setSortDropdownOpen(false)
+                }}
+                className={`w-full sm:w-auto min-w-[210px] px-4 py-2.5 rounded-xl border text-xs font-black uppercase tracking-wider flex items-center justify-between gap-3 transition-all duration-200 cursor-pointer select-none ${
+                  categoryDropdownOpen
+                    ? isDark
+                      ? "bg-[#18221a] border-amber-400 text-white shadow-lg shadow-black/60 ring-2 ring-amber-400/20"
+                      : "bg-white border-blue-600 text-stone-900 shadow-md ring-2 ring-blue-500/20"
+                    : isDark
+                      ? "bg-[#111713] hover:bg-[#161f18] border-white/12 hover:border-white/25 text-stone-200 shadow-xs"
+                      : "bg-white hover:bg-stone-50 border-stone-300 hover:border-stone-400 text-stone-800 shadow-xs"
                 }`}
               >
-                <option value="all">📂 ALL CATEGORIES</option>
-                {categories.filter(c => c !== "all").map(c => (
-                  <option key={c} value={c}>
-                    🏷️ {c.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center gap-2.5 truncate">
+                  <span className="text-sm shrink-0">
+                    {category === "all" ? "📂" : "🏷️"}
+                  </span>
+                  <span className="truncate">
+                    {category === "all" ? "All Categories" : category}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                    isDark ? "bg-white/10 text-stone-300" : "bg-stone-100 text-stone-600"
+                  }`}>
+                    {categoryCounts[category] || 0}
+                  </span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      categoryDropdownOpen ? "rotate-180 text-amber-400" : "text-stone-400"
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+
+              {/* Custom Category Dropdown Popover */}
+              {categoryDropdownOpen && (
+                <div
+                  className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-2xl border shadow-2xl p-2 z-50 backdrop-blur-xl transition-all duration-150 ${
+                    isDark
+                      ? "bg-[#111713]/95 border-white/15 shadow-black/90 text-white ring-1 ring-white/5"
+                      : "bg-white/98 border-stone-200 shadow-stone-900/20 text-stone-900 ring-1 ring-black/5"
+                  }`}
+                >
+                  <div className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest flex items-center justify-between border-b mb-1.5 ${
+                    isDark ? "text-stone-400 border-white/10" : "text-stone-500 border-stone-200"
+                  }`}>
+                    <span>Filter By Category</span>
+                    <span className="font-semibold">{categories.length - 1} Categories</span>
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto space-y-1 pr-1">
+                    {/* All Categories Option */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategory("all")
+                        setCategoryDropdownOpen(false)
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                        category === "all"
+                          ? isDark
+                            ? "bg-amber-400/15 border border-amber-400/40 text-amber-300 font-black"
+                            : "bg-blue-600 text-white font-black shadow-sm"
+                          : isDark
+                            ? "text-stone-300 hover:bg-white/10 hover:text-white"
+                            : "text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-sm">📂</span>
+                        <span>All Categories</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          category === "all"
+                            ? isDark
+                              ? "bg-amber-400/20 text-amber-300"
+                              : "bg-white/20 text-white"
+                            : isDark
+                              ? "bg-white/5 text-stone-400"
+                              : "bg-stone-100 text-stone-500"
+                        }`}>
+                          {allProducts.length}
+                        </span>
+                        {category === "all" && <span className="text-xs font-black">✓</span>}
+                      </div>
+                    </button>
+
+                    {/* Dynamic Categories */}
+                    {categories.filter(c => c !== "all").map(c => {
+                      const isSelected = category.toLowerCase() === c.toLowerCase()
+                      const count = categoryCounts[c] || 0
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => {
+                            setCategory(c)
+                            setCategoryDropdownOpen(false)
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                            isSelected
+                              ? isDark
+                                ? "bg-amber-400/15 border border-amber-400/40 text-amber-300 font-black"
+                                : "bg-blue-600 text-white font-black shadow-sm"
+                              : isDark
+                                ? "text-stone-300 hover:bg-white/10 hover:text-white"
+                                : "text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 truncate">
+                            <span className="text-sm">🏷️</span>
+                            <span className="truncate">{c}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              isSelected
+                                ? isDark
+                                  ? "bg-amber-400/20 text-amber-300"
+                                  : "bg-white/20 text-white"
+                                : isDark
+                                  ? "bg-white/5 text-stone-400"
+                                  : "bg-stone-100 text-stone-500"
+                            }`}>
+                              {count}
+                            </span>
+                            {isSelected && <span className="text-xs font-black">✓</span>}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -233,27 +412,83 @@ export default function Store({ setPage }) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Sort Selector */}
-            <div className="flex items-center gap-1.5">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                isDark ? "text-stone-400" : "text-stone-500"
-              }`}>
-                Sort:
-              </span>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-wider focus:outline-none cursor-pointer ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-stone-200 focus:border-[#fbbf24]"
-                    : "bg-white border-stone-300 text-stone-700 focus:border-blue-500 shadow-xs"
+            {/* Custom Sort Dropdown */}
+            <div className="relative" ref={sortDropdownRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortDropdownOpen(prev => !prev)
+                  setCategoryDropdownOpen(false)
+                }}
+                className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer select-none ${
+                  sortDropdownOpen
+                    ? isDark
+                      ? "bg-[#18221a] border-amber-400 text-white ring-2 ring-amber-400/20"
+                      : "bg-white border-blue-600 text-stone-900 ring-2 ring-blue-500/20"
+                    : isDark
+                      ? "bg-[#111713] hover:bg-[#161f18] border-white/10 text-stone-300"
+                      : "bg-white hover:bg-stone-50 border-stone-300 text-stone-700 shadow-xs"
                 }`}
               >
-                <option value="rating">★ Top Rated</option>
-                <option value="price-low">💰 Price: Low to High</option>
-                <option value="price-high">💎 Price: High to Low</option>
-                <option value="newest">✨ Newest Arrivals</option>
-              </select>
+                <span className={`text-[10px] ${isDark ? "text-stone-400" : "text-stone-400"}`}>
+                  Sort:
+                </span>
+                <span>
+                  {SORT_OPTIONS.find(o => o.id === sortBy)?.icon}{" "}
+                  {SORT_OPTIONS.find(o => o.id === sortBy)?.label}
+                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform duration-200 ${
+                    sortDropdownOpen ? "rotate-180 text-amber-400" : "text-stone-400"
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {sortDropdownOpen && (
+                <div
+                  className={`absolute right-0 top-full mt-1.5 w-56 rounded-2xl border shadow-2xl p-1.5 z-50 backdrop-blur-xl transition-all duration-150 ${
+                    isDark
+                      ? "bg-[#111713]/95 border-white/15 shadow-black/90 text-white ring-1 ring-white/5"
+                      : "bg-white/98 border-stone-200 shadow-stone-900/20 text-stone-900 ring-1 ring-black/5"
+                  }`}
+                >
+                  <div className="space-y-1">
+                    {SORT_OPTIONS.map(opt => {
+                      const isSelected = sortBy === opt.id
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(opt.id)
+                            setSortDropdownOpen(false)
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                            isSelected
+                              ? isDark
+                                ? "bg-amber-400/15 border border-amber-400/40 text-amber-300 font-black"
+                                : "bg-blue-600 text-white font-black"
+                              : isDark
+                                ? "text-stone-300 hover:bg-white/10 hover:text-white"
+                                : "text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{opt.icon}</span>
+                            <span>{opt.label}</span>
+                          </div>
+                          {isSelected && <span className="text-xs font-black">✓</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {(category !== "all" || search) && (
