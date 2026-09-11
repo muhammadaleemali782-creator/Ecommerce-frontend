@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
 
-export default function AdminProductList() {
+export default function AdminProductList({ setPage }) {
   const { isDark } = useTheme()
   const [products, setProducts]   = useState([])
   const [users, setUsers]         = useState([])
@@ -230,18 +230,32 @@ export default function AdminProductList() {
           </div>
         </div>
 
-        {/* Search Input */}
-        <div className="w-full sm:w-72">
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search products..."
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
-              isDark
-                ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
-                : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
-            }`}
-          />
+        {/* Search Input & Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="w-full sm:w-64">
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search products..."
+              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
+                isDark
+                  ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                  : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-blue-500"
+              }`}
+            />
+          </div>
+          {setPage && (
+            <button
+              onClick={() => setPage("admin-add-product")}
+              className={`px-4 py-2.5 rounded-xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap shadow-sm ${
+                isDark
+                  ? "bg-amber-400 hover:bg-amber-300 text-stone-950 border-amber-400"
+                  : "bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-md"
+              }`}
+            >
+              <span>➕ Add Product</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -262,8 +276,22 @@ export default function AdminProductList() {
             No Products Found
           </h3>
           <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
-            Try another search keyword or create products first.
+            Try another search keyword or add new products to the catalog.
           </p>
+          {setPage && (
+            <div className="mt-4">
+              <button
+                onClick={() => setPage("admin-add-product")}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+                  isDark
+                    ? "bg-amber-400 hover:bg-amber-300 text-stone-950"
+                    : "bg-amber-500 hover:bg-amber-600 text-white shadow-md"
+                }`}
+              >
+                <span>➕ Add First Product</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

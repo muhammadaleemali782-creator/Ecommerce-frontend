@@ -86,6 +86,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
         { label: "📜 PPC STATEMENT", pg: "ppc-statement" },
         { label: "📡 TEAM RADAR", pg: "team-activity" },
         { label: "PRODUCTS", pg: "admin-products" },
+        { label: "➕ ADD PRODUCT", pg: "admin-add-product" },
         { label: "ALL USERS", pg: "admin-users" },
         { label: "ALL ORDERS", pg: "admin-orders" },
         { label: "REQUESTS", pg: "admin-requests" },

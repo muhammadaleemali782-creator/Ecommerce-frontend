@@ -173,7 +173,7 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
 }
 
 /* ─── Main AdminAddProduct ─── */
-export default function AdminAddProduct() {
+export default function AdminAddProduct({ setPage }) {
   const [productName, setProductName] = useState("")
   const [price, setPrice] = useState("")
   const [category, setCategory] = useState("")
@@ -290,7 +290,11 @@ export default function AdminAddProduct() {
         setProductName(""); setPrice(""); setCategory(""); setDescription("")
         setPpcReward("1"); setImage(null); setImagePreview(null)
         setAssignAllUsers(false); setSelectedUserIds([]); setSearchQuery("")
-        setTimeout(() => window.location.reload(), 2000)
+        if (typeof setPage === "function") {
+          setTimeout(() => setPage("admin-products"), 1500)
+        } else {
+          setTimeout(() => window.location.reload(), 2000)
+        }
       }
     } catch (err) {
       setMessage(`Failed: ${err.message}`)
@@ -330,9 +334,33 @@ export default function AdminAddProduct() {
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1e293b", marginBottom: 20 }}>
-        ➕ Add Product
-      </h2>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1e293b", margin: 0 }}>
+          ➕ Add Product
+        </h2>
+        {setPage && (
+          <button
+            type="button"
+            onClick={() => setPage("admin-products")}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 10,
+              border: "1px solid #cbd5e1",
+              background: "#fff",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#334155",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+            }}
+          >
+            ← Back to Products List
+          </button>
+        )}
+      </div>
 
       {message && (
         <div style={{

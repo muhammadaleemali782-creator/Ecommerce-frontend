@@ -266,7 +266,7 @@ function AppContent() {
         case "admin-add-product":
           if (!loggedIn) return <Login setPage={setPage} />
           if (role !== "admin") return <Unauth />
-          return <AdminAddProduct />
+          return <AdminAddProduct setPage={setPage} />
 
         case "admin-network":
           if (!loggedIn) return <Login setPage={setPage} />
@@ -276,7 +276,7 @@ function AppContent() {
         case "admin-products":
           if (!loggedIn) return <Login setPage={setPage} />
           if (role !== "admin") return <Unauth />
-          return <AdminProductList />
+          return <AdminProductList setPage={setPage} />
 
         case "admin-users":
           if (!loggedIn) return <Login setPage={setPage} />

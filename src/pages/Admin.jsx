@@ -65,6 +65,14 @@ export default function Admin({ setPage }) {
       category: "Commerce & Catalog",
       items: [
         {
+          id: "admin-add-product",
+          title: "Add New Product",
+          desc: "Create new product, upload photos, set PPC reward & user permissions",
+          icon: "➕",
+          tag: "CREATION",
+          accent: isDark ? "from-amber-500/20 to-transparent text-amber-300 border-amber-500/30" : "from-amber-500/15 to-amber-500/5 text-amber-900 border-amber-300",
+        },
+        {
           id: "admin-products",
           title: "Products Management",
           desc: "Add, update price, edit AYUSH certifications & inventory",
@@ -263,7 +271,17 @@ export default function Admin({ setPage }) {
             </div>
 
             {/* Top Quick Actions */}
-            <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0 flex-wrap">
+              <button
+                onClick={() => setPage?.("admin-add-product")}
+                className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-sm ${
+                  isDark
+                    ? "bg-amber-400 hover:bg-amber-300 text-stone-950 border-amber-400"
+                    : "bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-md"
+                }`}
+              >
+                <span>➕ Add Product</span>
+              </button>
               <button
                 onClick={() => setPage?.("store")}
                 className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
