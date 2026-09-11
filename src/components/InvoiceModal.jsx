@@ -189,22 +189,17 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Bill To / Buyer</div>
           
-          {/* 1. User ID (if registered user) */}
-          {order.userId?.name && (
-            <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
-              {order.userId.name}
-            </div>
-          )}
-
-          {/* 2. User Name */}
-          <div style={{
-            fontWeight: order.userId?.name ? 700 : 800,
-            fontSize: order.userId?.name ? 12 : 14,
-            color: order.userId?.name ? "#475569" : "#1e293b",
-            marginTop: order.userId?.name ? 2 : 0
-          }}>
+          {/* 1. Name */}
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
             {order.customerFullName || order.userId?.fullName || order.customerName || "Customer"}
           </div>
+
+          {/* 2. ID */}
+          {order.userId?.name && order.userId.name !== (order.customerFullName || order.customerName) && (
+            <div style={{fontSize:11,fontWeight:700,color:"#0284c7",fontFamily:"monospace",marginTop:2}}>
+              🆔 ID: {order.userId.name}
+            </div>
+          )}
 
           {/* 3. Email */}
           {order.userId?.email && (
@@ -253,23 +248,27 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
           <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
           
-          {/* 1. User ID */}
-          <div style={{fontWeight:800,fontSize:14,color:"#1e293b",fontFamily:"monospace"}}>
-            {order.sellerId?.name || "—"}
+          {/* 1. Name */}
+          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+            {(() => {
+              const nameCandidate = order.sellerId?.fullName || order.sellerFullName || order.sellerName
+              if (nameCandidate && nameCandidate !== order.sellerId?.name) {
+                return nameCandidate
+              }
+              if (order.sellerId?.email) {
+                const uname = order.sellerId.email.split("@")[0].replace(/[._0-9]+/g, " ").trim()
+                if (uname) return uname.charAt(0).toUpperCase() + uname.slice(1)
+              }
+              return order.sellerId?.name || "—"
+            })()}
           </div>
 
-          {/* 2. User Name */}
-          {(() => {
-            const sellerFullName = order.sellerId?.fullName || order.sellerFullName || order.sellerName || ""
-            if (sellerFullName && sellerFullName !== order.sellerId?.name) {
-              return (
-                <div style={{fontSize:12,fontWeight:700,color:"#475569",marginTop:2}}>
-                  {sellerFullName}
-                </div>
-              )
-            }
-            return null
-          })()}
+          {/* 2. ID */}
+          {order.sellerId?.name && (
+            <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
+              🆔 ID: {order.sellerId.name}
+            </div>
+          )}
 
           {/* 3. Email */}
           {order.sellerId?.email && (
