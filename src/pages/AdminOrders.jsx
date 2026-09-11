@@ -248,6 +248,9 @@ export default function AdminOrders() {
       (o._id || "").toLowerCase().includes(q) ||
       (o.customerName || "").toLowerCase().includes(q) ||
       (o.phone || "").toLowerCase().includes(q) ||
+      (o.userId?.name || "").toLowerCase().includes(q) ||
+      (o.userId?.fullName || "").toLowerCase().includes(q) ||
+      (o.userId?.email || "").toLowerCase().includes(q) ||
       (o.sellerId?.name || "").toLowerCase().includes(q) ||
       (o.sellerId?.fullName || "").toLowerCase().includes(q) ||
       (o.distributorId?.name || "").toLowerCase().includes(q) ||
@@ -397,6 +400,12 @@ export default function AdminOrders() {
               const hasDirectSeller = Boolean(order.sellerId?.name)
               const hasDistributor = Boolean(order.distributorId?.name)
 
+              // Names & IDs
+              const distName = order.distributorId?.fullName || order.distributorId?.name
+              const distId   = order.distributorId?.name
+              const sellerName = order.sellerId?.fullName || order.sellerId?.name
+              const sellerId   = order.sellerId?.name
+
               return (
                 <div
                   key={order._id}
@@ -441,9 +450,17 @@ export default function AdminOrders() {
                           📞 {order.phone}
                         </a>
                       )}
-                      {order.userId?.name && order.userId.name !== order.customerName && (
-                        <div className="text-[9.5px] font-mono text-sky-400 mt-0.5 truncate">
-                          User: <b>{order.userId.name}</b>
+                      {order.userId && (
+                        <div className="text-[9.5px] font-mono text-sky-400 mt-1">
+                          👤 User: <b>{order.userId.fullName || order.userId.name}</b>
+                          {order.userId.name && order.userId.fullName && order.userId.name !== order.userId.fullName && (
+                            <span className="text-stone-400 ml-1">({order.userId.name})</span>
+                          )}
+                          {order.userId.email && (
+                            <div className="text-[9px] text-stone-400 truncate">
+                              ✉️ {order.userId.email}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -459,23 +476,54 @@ export default function AdminOrders() {
                     </div>
                   </div>
 
-                  {/* Sales Channel (Distributor & Seller) */}
+                  {/* Sales Channel (Distributor & Seller) with User Name + ID */}
                   <div className="grid grid-cols-2 gap-2 text-[10.5px] font-mono">
-                    <div className={`p-2 rounded-xl border ${
+                    {/* Distributor Card */}
+                    <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
                       isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-200"
                     }`}>
-                      <div className="text-[9px] text-violet-400 font-bold uppercase">Distributor</div>
-                      <div className="font-bold text-white truncate mt-0.5">
-                        {hasDistributor ? order.distributorId.name : "—"}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-violet-400 font-bold uppercase tracking-wider">🏢 Distributor</span>
+                          {hasDistributor && distId && (
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-violet-500/20 text-violet-300 font-bold border border-violet-500/30">
+                              {distId}
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-bold text-white text-xs mt-1 truncate">
+                          {hasDistributor ? distName : "— Direct"}
+                        </div>
                       </div>
+                      {hasDistributor && distId && distName !== distId && (
+                        <div className="text-[9.5px] text-stone-400 mt-1">
+                          ID: <span className="text-violet-300 font-semibold">{distId}</span>
+                        </div>
+                      )}
                     </div>
-                    <div className={`p-2 rounded-xl border ${
+
+                    {/* Seller Card */}
+                    <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
                       isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-200"
                     }`}>
-                      <div className="text-[9px] text-emerald-400 font-bold uppercase">Seller</div>
-                      <div className="font-bold text-white truncate mt-0.5">
-                        {hasDirectSeller ? order.sellerId.name : "Direct Seller"}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">🏷️ Seller</span>
+                          {hasDirectSeller && sellerId && (
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                              {sellerId}
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-bold text-white text-xs mt-1 truncate">
+                          {hasDirectSeller ? sellerName : "Direct Seller"}
+                        </div>
                       </div>
+                      {hasDirectSeller && sellerId && sellerName !== sellerId && (
+                        <div className="text-[9.5px] text-stone-400 mt-1">
+                          ID: <span className="text-emerald-300 font-semibold">{sellerId}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -557,8 +605,8 @@ export default function AdminOrders() {
                     isDark ? "border-white/[0.08] bg-black/50 text-stone-400" : "border-stone-200 bg-stone-50 text-stone-600"
                   }`}>
                     <th className="py-3.5 px-4 w-[140px]">ORDER & TIME</th>
-                    <th className="py-3.5 px-4 w-[160px]">CUSTOMER</th>
-                    <th className="py-3.5 px-4 w-[180px]">DISTRIBUTOR & SELLER</th>
+                    <th className="py-3.5 px-4 w-[170px]">CUSTOMER & USER</th>
+                    <th className="py-3.5 px-4 w-[190px]">DISTRIBUTOR & SELLER</th>
                     <th className="py-3.5 px-4 w-[90px]">TOTAL</th>
                     <th className="py-3.5 px-4 w-[130px]">NOTES</th>
                     <th className="py-3.5 px-4 w-[240px]">APPROVAL FLOW</th>
@@ -573,6 +621,11 @@ export default function AdminOrders() {
                     const isConfirmed = order.status === "confirmed"
                     const hasDirectSeller = Boolean(order.sellerId?.name)
                     const hasDistributor = Boolean(order.distributorId?.name)
+
+                    const distName = order.distributorId?.fullName || order.distributorId?.name
+                    const distId   = order.distributorId?.name
+                    const sellerName = order.sellerId?.fullName || order.sellerId?.name
+                    const sellerId   = order.sellerId?.name
 
                     return (
                       <tr
@@ -617,7 +670,7 @@ export default function AdminOrders() {
                           </button>
                         </td>
 
-                        {/* 2. CUSTOMER & PLACED FOR */}
+                        {/* 2. CUSTOMER & USER */}
                         <td className="py-4 px-4 align-top">
                           <div className="font-black text-xs text-white">
                             {order.customerName || "—"}
@@ -629,9 +682,17 @@ export default function AdminOrders() {
                             </div>
                           )}
 
-                          {order.userId?.name && order.userId.name !== order.customerName && (
+                          {order.userId && (
                             <div className="text-[10px] font-mono text-sky-400 mt-1">
-                              👤 User: <b>{order.userId.name}</b>
+                              👤 User: <b>{order.userId.fullName || order.userId.name}</b>
+                              {order.userId.name && order.userId.fullName && order.userId.name !== order.userId.fullName && (
+                                <span className="text-stone-400 ml-1">({order.userId.name})</span>
+                              )}
+                              {order.userId.email && (
+                                <div className="text-[9px] text-stone-400 font-normal">
+                                  ✉️ {order.userId.email}
+                                </div>
+                              )}
                             </div>
                           )}
 
@@ -644,39 +705,47 @@ export default function AdminOrders() {
 
                         {/* 3. SALES CHANNEL (DISTRIBUTOR & DIRECT SELLER) */}
                         <td className="py-4 px-4 align-top">
-                          <div className="space-y-1.5 font-mono">
+                          <div className="space-y-2 font-mono">
                             {/* Distributor */}
                             {hasDistributor ? (
-                              <div className="flex items-center gap-1.5 text-xs">
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">
-                                  Dist
-                                </span>
-                                <span className="font-bold text-violet-300">{order.distributorId.name}</span>
-                                {order.distributorId.fullName && order.distributorId.fullName !== order.distributorId.name && (
-                                  <span className="text-[10px] text-stone-400 truncate max-w-[80px]">
-                                    ({order.distributorId.fullName})
+                              <div className="text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">
+                                    Dist
                                   </span>
+                                  <span className="font-bold text-white">
+                                    {distName}
+                                  </span>
+                                </div>
+                                {distId && (
+                                  <div className="text-[10px] text-violet-300/90 pl-1 mt-0.5">
+                                    ID: {distId}
+                                  </div>
                                 )}
                               </div>
                             ) : (
-                              <div className="text-[10px] text-stone-500">Distributor: —</div>
+                              <div className="text-[10px] text-stone-500">Distributor: — Direct</div>
                             )}
 
                             {/* Direct Seller */}
                             {hasDirectSeller ? (
-                              <div className="flex items-center gap-1.5 text-xs">
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                  Seller
-                                </span>
-                                <span className="font-bold text-emerald-300">{order.sellerId.name}</span>
-                                {order.sellerId.fullName && order.sellerId.fullName !== order.sellerId.name && (
-                                  <span className="text-[10px] text-stone-400 truncate max-w-[80px]">
-                                    ({order.sellerId.fullName})
+                              <div className="text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Seller
                                   </span>
+                                  <span className="font-bold text-white">
+                                    {sellerName}
+                                  </span>
+                                </div>
+                                {sellerId && (
+                                  <div className="text-[10px] text-emerald-300/90 pl-1 mt-0.5">
+                                    ID: {sellerId}
+                                  </div>
                                 )}
                               </div>
                             ) : (
-                              <div className="text-[10px] text-stone-500">Seller: —</div>
+                              <div className="text-[10px] text-stone-500">Seller: Direct Seller</div>
                             )}
                           </div>
                         </td>
