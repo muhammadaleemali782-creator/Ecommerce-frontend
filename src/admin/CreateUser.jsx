@@ -1,22 +1,55 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 export default function CreateUser() {
   const { user } = useAuth()
   const { isDark } = useTheme()
 
-  /* ================= FORM STATE ================= */
-  const [form, setForm] = useState({
+  const DRAFT_KEY = "admin_create_user"
+  const defaultValues = {
     name: "",
     email: "",
     phone: "",
     address: "",
     password: "",
     role: "seller"
-  })
+  }
 
+  /* ================= FORM STATE ================= */
+  const [form, setForm] = useState(() => getFormDraft(DRAFT_KEY, defaultValues))
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
   const [loading, setLoading] = useState(false)
+
+  // Auto-save draft
+  useEffect(() => {
+    if (form.name || form.email || form.phone || form.address) {
+      saveFormDraft(DRAFT_KEY, form)
+    }
+  }, [form])
+
+  // Flush on phone call / tab suspend
+  useEffect(() => {
+    const flush = () => {
+      if (form.name || form.email || form.phone || form.address) {
+        saveFormDraft(DRAFT_KEY, form)
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [form])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setForm(defaultValues)
+    setHasRestoredDraft(false)
+  }
 
   /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
@@ -75,6 +108,8 @@ export default function CreateUser() {
       }
 
       alert(`${form.role.toUpperCase()} created successfully ✅`)
+      clearFormDraft(DRAFT_KEY)
+      setHasRestoredDraft(false)
 
       // 🔄 Reset form
       setForm({
@@ -116,6 +151,13 @@ export default function CreateUser() {
       <p className={`text-xs font-medium mb-4 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
         Logged in as: <b className={isDark ? "text-white" : "text-stone-900"}>{user?.name}</b> ({user?.role})
       </p>
+
+      {hasRestoredDraft && (
+        <DraftBanner
+          onClear={handleClearDraft}
+          message="Restored user details from your previous session."
+        />
+      )}
 
       {/* ---------- NAME ---------- */}
       <div className="mb-2.5">

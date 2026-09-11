@@ -77,7 +77,45 @@ const Unauth = () => (
 )
 
 function AppContent() {
-  const [page, setPage] = useState("home")
+  const [page, setPage] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get("ref")) return "join"
+      const saved = sessionStorage.getItem("active_page") || localStorage.getItem("last_active_page")
+      if (saved && !["login", "home"].includes(saved)) {
+        return saved
+      }
+    } catch {}
+    return "home"
+  })
+
+  // Persist active page for mobile app suspension / tab close / phone call recovery
+  useEffect(() => {
+    try {
+      if (page) {
+        sessionStorage.setItem("active_page", page)
+        localStorage.setItem("last_active_page", page)
+      }
+    } catch {}
+  }, [page])
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      try {
+        if (page) {
+          sessionStorage.setItem("active_page", page)
+          localStorage.setItem("last_active_page", page)
+        }
+      } catch {}
+    }
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("beforeunload", handlePageHide)
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("beforeunload", handlePageHide)
+    }
+  }, [page])
+
   const [booting, setBooting] = useState(true)
   const [bootMsg, setBootMsg] = useState("")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {

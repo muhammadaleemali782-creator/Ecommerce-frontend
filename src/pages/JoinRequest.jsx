@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel } from "../utils/roleLabels"
 import EducaLogo from "../components/EducaLogo"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 export default function JoinRequest({ setPage }) {
   const { isDark } = useTheme()
@@ -14,18 +16,53 @@ export default function JoinRequest({ setPage }) {
   const [refError, setRefError] = useState("")
   const [lockedRole, setLockedRole] = useState(rawRole.toLowerCase())
 
-  // Form states
-  const [name, setName] = useState("")
-  const [emailName, setEmailName] = useState("")
+  // Form states with draft support
+  const DRAFT_KEY = "join_request"
+  const draft = getFormDraft(DRAFT_KEY, {})
+  const [name, setName] = useState(draft.name || "")
+  const [emailName, setEmailName] = useState(draft.emailName || "")
   const [emailDomain, setEmailDomain] = useState("@educa.com")
-  const [phone, setPhone] = useState("")
-  const [address, setAddress] = useState("")
-  const [idType, setIdType] = useState("aadhar")
-  const [idNumber, setIdNumber] = useState("")
+  const [phone, setPhone] = useState(draft.phone || "")
+  const [address, setAddress] = useState(draft.address || "")
+  const [idType, setIdType] = useState(draft.idType || "aadhar")
+  const [idNumber, setIdNumber] = useState(draft.idNumber || "")
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [emailExists, setEmailExists] = useState(false)
   const [emailChecking, setEmailChecking] = useState(false)
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  // Auto-save draft on changes
+  useEffect(() => {
+    if (name || emailName || phone || address || idNumber) {
+      saveFormDraft(DRAFT_KEY, { name, emailName, phone, address, idType, idNumber })
+    }
+  }, [name, emailName, phone, address, idType, idNumber])
+
+  // Immediate flush on phone call / tab background
+  useEffect(() => {
+    const flush = () => {
+      if (name || emailName || phone || address || idNumber) {
+        saveFormDraft(DRAFT_KEY, { name, emailName, phone, address, idType, idNumber })
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [name, emailName, phone, address, idType, idNumber])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setName("")
+    setEmailName("")
+    setPhone("")
+    setAddress("")
+    setIdNumber("")
+    setHasRestoredDraft(false)
+  }
 
   const fullEmail = emailName.trim() ? `${emailName.trim()}${emailDomain || "@educa.com"}` : ""
   const isValidEmail = (val) => Boolean(val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim()))
@@ -134,6 +171,8 @@ export default function JoinRequest({ setPage }) {
         return
       }
 
+      clearFormDraft(DRAFT_KEY)
+      setHasRestoredDraft(false)
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch (err) {
@@ -301,6 +340,13 @@ export default function JoinRequest({ setPage }) {
               Admin approval ke baad aapka account create hoga
             </p>
           </div>
+
+          {hasRestoredDraft && (
+            <DraftBanner
+              onClear={handleClearDraft}
+              message="Restored your application details from previous session."
+            />
+          )}
 
           {/* Full Name */}
           <div>

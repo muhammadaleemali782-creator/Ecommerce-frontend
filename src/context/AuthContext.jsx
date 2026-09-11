@@ -192,6 +192,10 @@ export function AuthProvider({ children }) {
     setLoggedIn(false)
     localStorage.removeItem("user")
     localStorage.removeItem("token")
+    try {
+      sessionStorage.removeItem("active_page")
+      localStorage.removeItem("last_active_page")
+    } catch {}
 
     /* 🔥 IMPORTANT */
     localStorage.setItem("auth-change", Date.now())

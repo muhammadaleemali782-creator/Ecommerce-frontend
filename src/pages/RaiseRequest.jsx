@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel } from "../utils/roleLabels"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 /* ── Role config ── */
 const RC = {
@@ -113,23 +115,65 @@ export default function RaiseUserRequest() {
   const { user } = useAuth()
   const { isDark } = useTheme()
 
-  const [type, setType]               = useState("seller")
-  const [emailName, setEmailName]     = useState("")
+  const DRAFT_KEY = "raise_request"
+  const draft = getFormDraft(DRAFT_KEY, {})
+  const [type, setType]               = useState(draft.type || "seller")
+  const [emailName, setEmailName]     = useState(draft.emailName || "")
   const [emailDomain, setEmailDomain] = useState("@educa.com")
   const [domainLoading, setDomainLoading] = useState(false)
-  const [freeEmail, setFreeEmail]     = useState("")
+  const [freeEmail, setFreeEmail]     = useState(draft.freeEmail || "")
   const [loading, setLoading]         = useState(false)
   const [emailExists, setEmailExists] = useState(false)
   const [emailChecking, setEmailChecking] = useState(false)
   const [generatedId, setGeneratedId] = useState("")
-  const [name, setName]               = useState("")
-  const [phone, setPhone]             = useState("")
-  const [address, setAddress]         = useState("")
-  const [idType, setIdType]           = useState("aadhar")
-  const [idNumber, setIdNumber]       = useState("")
+  const [name, setName]               = useState(draft.name || "")
+  const [phone, setPhone]             = useState(draft.phone || "")
+  const [address, setAddress]         = useState(draft.address || "")
+  const [idType, setIdType]           = useState(draft.idType || "aadhar")
+  const [idNumber, setIdNumber]       = useState(draft.idNumber || "")
   const [products, setProducts]       = useState([])
-  const [productIds, setProductIds]   = useState([])
-  const [assignAllProducts, setAssignAllProducts] = useState(false)
+  const [productIds, setProductIds]   = useState(draft.productIds || [])
+  const [assignAllProducts, setAssignAllProducts] = useState(draft.assignAllProducts || false)
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  // Auto-save draft on changes
+  useEffect(() => {
+    if (name || emailName || freeEmail || phone || address || idNumber) {
+      saveFormDraft(DRAFT_KEY, {
+        type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts
+      })
+    }
+  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts])
+
+  // Flush immediately on phone call / tab background
+  useEffect(() => {
+    const flush = () => {
+      if (name || emailName || freeEmail || phone || address || idNumber) {
+        saveFormDraft(DRAFT_KEY, {
+          type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts
+        })
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setName("")
+    setEmailName("")
+    setFreeEmail("")
+    setPhone("")
+    setAddress("")
+    setIdNumber("")
+    setProductIds([])
+    setAssignAllProducts(false)
+    setHasRestoredDraft(false)
+  }
 
   // Network picker
   const canUsePicker = user?.role === "distributor" || user?.role === "seller"
@@ -284,6 +328,8 @@ export default function RaiseUserRequest() {
       })
       const data = await res.json()
       if (!res.ok) { alert(data.message || "Error"); return }
+      clearFormDraft(DRAFT_KEY)
+      setHasRestoredDraft(false)
       alert("Request sent to Admin ✅")
       setEmailName(""); setFreeEmail(""); setEmailExists(false)
       setName(""); setPhone(""); setAddress("")
@@ -424,6 +470,13 @@ export default function RaiseUserRequest() {
             <h2 style={{ fontSize:16, fontWeight:800, color:card.text, margin:0, letterSpacing:"-0.01em" }}>Request Form</h2>
             <p style={{ fontSize:12, color:card.sub, margin:"3px 0 0" }}>Admin approve karega tab account create hoga</p>
           </div>
+
+          {hasRestoredDraft && (
+            <DraftBanner
+              onClear={handleClearDraft}
+              message="Restored your request form details from previous session."
+            />
+          )}
 
           {/* ── NETWORK PICKER ── */}
           {canUsePicker && (

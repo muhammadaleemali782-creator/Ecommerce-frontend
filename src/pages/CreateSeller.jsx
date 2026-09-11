@@ -2,18 +2,56 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useStore } from "../context/StoreContext"
 import ProductAssignSection from "../components/ProductAssignSection"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 export default function CreateSeller() {
 
   const { user } = useAuth()
   const { fetchProducts } = useStore()   // 🔥 important
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [address, setAddress] = useState("")
-  const [password, setPassword] = useState("")
-  const [role, setRole] = useState("seller")
+  const DRAFT_KEY = "create_seller"
+  const draft = getFormDraft(DRAFT_KEY, {})
+  const [name, setName] = useState(draft.name || "")
+  const [email, setEmail] = useState(draft.email || "")
+  const [phone, setPhone] = useState(draft.phone || "")
+  const [address, setAddress] = useState(draft.address || "")
+  const [password, setPassword] = useState(draft.password || "")
+  const [role, setRole] = useState(draft.role || "seller")
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  // Auto-save draft
+  useEffect(() => {
+    if (name || email || phone || address) {
+      saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role })
+    }
+  }, [name, email, phone, address, password, role])
+
+  // Flush on phone call / tab suspend
+  useEffect(() => {
+    const flush = () => {
+      if (name || email || phone || address) {
+        saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role })
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [name, email, phone, address, password, role])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setName("")
+    setEmail("")
+    setPhone("")
+    setAddress("")
+    setPassword("")
+    setRole("seller")
+    setHasRestoredDraft(false)
+  }
 
   /* ================= ASSIGNED PRODUCTS ================= */
   const [assignedProducts, setAssignedProducts] = useState([])
@@ -82,6 +120,8 @@ export default function CreateSeller() {
       }
 
       alert("User created successfully!")
+      clearFormDraft(DRAFT_KEY)
+      setHasRestoredDraft(false)
 
       /* ================= RESET ================= */
       setName("")
@@ -103,6 +143,13 @@ export default function CreateSeller() {
       <h2 className="text-xl font-bold mb-4">
         {user?.role === "distributor" ? "Create Distributor / Seller" : "Create Seller / User"}
       </h2>
+
+      {hasRestoredDraft && (
+        <DraftBanner
+          onClear={handleClearDraft}
+          message="Restored details from your previous session."
+        />
+      )}
 
       <form onSubmit={handleSubmit}>
 

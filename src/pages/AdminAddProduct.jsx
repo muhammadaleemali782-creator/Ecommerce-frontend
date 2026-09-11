@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
 import { getRoleLabel } from "../utils/roleLabels"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 /* ─── Live Card Preview ─── */
 function CardPreview({ productName, price, category, ppcReward, imagePreview, description, isDark }) {
@@ -175,22 +177,79 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
 export default function AdminAddProduct({ setPage }) {
   const { isDark } = useTheme()
 
-  const [productName, setProductName] = useState("")
-  const [price, setPrice] = useState("")
-  const [category, setCategory] = useState("")
-  const [description, setDescription] = useState("")
+  const DRAFT_KEY = "admin_add_product"
+  const draft = getFormDraft(DRAFT_KEY, {})
+  const [productName, setProductName] = useState(draft.productName || "")
+  const [price, setPrice] = useState(draft.price || "")
+  const [category, setCategory] = useState(draft.category || "")
+  const [description, setDescription] = useState(draft.description || "")
   const [image, setImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
-  const [ppcReward, setPpcReward] = useState("1")
-  const [assignAllUsers, setAssignAllUsers] = useState(false)
+  const [imagePreview, setImagePreview] = useState(draft.imagePreview || null)
+  const [ppcReward, setPpcReward] = useState(draft.ppcReward || "1")
+  const [assignAllUsers, setAssignAllUsers] = useState(draft.assignAllUsers || false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
 
   const [allUsers, setAllUsers] = useState([])
-  const [selectedUserIds, setSelectedUserIds] = useState([])
+  const [selectedUserIds, setSelectedUserIds] = useState(draft.selectedUserIds || [])
   const [usersLoading, setUsersLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterRole, setFilterRole] = useState("all")
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  // Auto-save draft on changes
+  useEffect(() => {
+    if (productName || price || category || description || imagePreview || selectedUserIds.length > 0) {
+      saveFormDraft(DRAFT_KEY, {
+        productName,
+        price,
+        category,
+        description,
+        ppcReward,
+        assignAllUsers,
+        selectedUserIds,
+        imagePreview
+      })
+    }
+  }, [productName, price, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
+
+  // Flush immediately on phone call / tab close / mobile background
+  useEffect(() => {
+    const flush = () => {
+      if (productName || price || category || description || imagePreview) {
+        saveFormDraft(DRAFT_KEY, {
+          productName,
+          price,
+          category,
+          description,
+          ppcReward,
+          assignAllUsers,
+          selectedUserIds,
+          imagePreview
+        })
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [productName, price, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setProductName("")
+    setPrice("")
+    setCategory("")
+    setDescription("")
+    setImage(null)
+    setImagePreview(null)
+    setPpcReward("1")
+    setAssignAllUsers(false)
+    setSelectedUserIds([])
+    setHasRestoredDraft(false)
+  }
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -285,6 +344,8 @@ export default function AdminAddProduct({ setPage }) {
 
       const data = await res.json()
       if (data) {
+        clearFormDraft(DRAFT_KEY)
+        setHasRestoredDraft(false)
         setMessage("✅ Product added successfully to catalog!")
         setProductName(""); setPrice(""); setCategory(""); setDescription("")
         setPpcReward("1"); setImage(null); setImagePreview(null)
@@ -391,6 +452,13 @@ export default function AdminAddProduct({ setPage }) {
               isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
             }`}
           >
+            {hasRestoredDraft && (
+              <DraftBanner
+                onClear={handleClearDraft}
+                message="Restored your unsaved product details from previous session."
+              />
+            )}
+
             {/* Product Title */}
             <div>
               <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${

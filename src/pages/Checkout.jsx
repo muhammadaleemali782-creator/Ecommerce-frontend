@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 /* ── Role config ── */
 const RC = {
@@ -145,10 +147,41 @@ export default function Checkout({ setPage }) {
   const { cart, clearCart } = useStore()
   const { user } = useAuth() || {}
 
-  const [name,    setName]    = useState("")
-  const [phone,   setPhone]   = useState("")
-  const [address, setAddress] = useState("")
+  const DRAFT_KEY = "checkout"
+  const draft = getFormDraft(DRAFT_KEY, {})
+  const [name,    setName]    = useState(draft.name || "")
+  const [phone,   setPhone]   = useState(draft.phone || "")
+  const [address, setAddress] = useState(draft.address || "")
   const [loading, setLoading] = useState(false)
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  useEffect(() => {
+    if (name || phone || address) {
+      saveFormDraft(DRAFT_KEY, { name, phone, address })
+    }
+  }, [name, phone, address])
+
+  useEffect(() => {
+    const flush = () => {
+      if (name || phone || address) {
+        saveFormDraft(DRAFT_KEY, { name, phone, address })
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [name, phone, address])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setName("")
+    setPhone("")
+    setAddress("")
+    setHasRestoredDraft(false)
+  }
 
   // ✅ Distributor AND seller both can place on behalf
   // Distributor: MUST select someone (seller/user only), cannot order for self or other distributors
@@ -216,6 +249,8 @@ export default function Checkout({ setPage }) {
       const data = await res.json()
       if (!res.ok) { alert(data.message || "Order failed"); return }
 
+      clearFormDraft(DRAFT_KEY)
+      setHasRestoredDraft(false)
       clearCart()
       // ✅ Role-based redirect to correct orders page
       const role = user?.role
@@ -300,6 +335,12 @@ export default function Checkout({ setPage }) {
 
           {/* Customer Details */}
           <div style={{ marginBottom:20 }}>
+            {hasRestoredDraft && (
+              <DraftBanner
+                onClear={handleClearDraft}
+                message="Restored your customer & shipping details from previous session."
+              />
+            )}
             <div style={{ fontSize:13, fontWeight:700, color:"#1e293b", marginBottom:10 }}>📋 Customer Details</div>
             {[
               { val:name,    set:setName,    ph:"Full Name *",        type:"text" },

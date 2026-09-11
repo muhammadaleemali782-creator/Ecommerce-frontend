@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
+import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
+import DraftBanner from "../components/DraftBanner"
 
 /* ── Collapsible Source Card ── */
 function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {
@@ -128,12 +130,43 @@ export default function WithdrawalRequest() {
   const [historyFilter, setHistoryFilter] = useState("all")
   const [showHistory, setShowHistory] = useState(false)
 
-  const [formData, setFormData] = useState({
+  const DRAFT_KEY = "withdrawal_request"
+  const defaultForm = {
     walletType: "",
     amount: "",
     paymentMethod: "",
     paymentDetails: ""
-  })
+  }
+  const [formData, setFormData] = useState(() => getFormDraft(DRAFT_KEY, defaultForm))
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
+
+  // Auto-save draft
+  useEffect(() => {
+    if (formData.amount || formData.paymentMethod || formData.paymentDetails || formData.walletType) {
+      saveFormDraft(DRAFT_KEY, formData)
+    }
+  }, [formData])
+
+  // Immediate flush on phone call / background
+  useEffect(() => {
+    const flush = () => {
+      if (formData.amount || formData.paymentMethod || formData.paymentDetails || formData.walletType) {
+        saveFormDraft(DRAFT_KEY, formData)
+      }
+    }
+    window.addEventListener("pagehide", flush)
+    window.addEventListener("beforeunload", flush)
+    return () => {
+      window.removeEventListener("pagehide", flush)
+      window.removeEventListener("beforeunload", flush)
+    }
+  }, [formData])
+
+  const handleClearDraft = () => {
+    clearFormDraft(DRAFT_KEY)
+    setFormData(defaultForm)
+    setHasRestoredDraft(false)
+  }
 
   const [message, setMessage] = useState({ type: "", text: "" })
 
@@ -236,6 +269,8 @@ export default function WithdrawalRequest() {
       })
       const data = await res.json()
       if (res.ok) {
+        clearFormDraft(DRAFT_KEY)
+        setHasRestoredDraft(false)
         setMessage({ type: "success", text: "Withdrawal request submitted successfully!" })
         setFormData({ walletType: "", amount: "", paymentMethod: "", paymentDetails: "" })
         fetchData()
@@ -472,6 +507,12 @@ export default function WithdrawalRequest() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {hasRestoredDraft && (
+              <DraftBanner
+                onClear={handleClearDraft}
+                message="Restored withdrawal form details from your previous session."
+              />
+            )}
             <div>
               <label className="block text-xs font-bold mb-1 text-stone-400">Select Wallet *</label>
               <select
