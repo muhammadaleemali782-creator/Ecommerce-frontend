@@ -7,11 +7,30 @@ Disallow: /distributor/*
 Disallow: /seller/*
 Disallow: /api/*
 
-# Specific crawler rules
+# Search Engines
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# AI Crawlers & LLM Engines (ChatGPT, Claude, Perplexity, Gemini)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
 Allow: /
 
 # Host and Sitemap

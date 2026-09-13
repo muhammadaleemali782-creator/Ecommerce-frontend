@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useStore } from "../context/StoreContext";
 import { useAuth } from "../context/AuthContext";
 import EducaLogo from "../components/EducaLogo";
+import Top10AyurvedicEnergy from "../components/Top10AyurvedicEnergy";
 
 const resolveImg = (img) => {
   if (!img || typeof img !== "string") return "/natgeo_jadibooti.jpg"
@@ -504,6 +505,11 @@ export default function Home({ setPage }) {
           </div>
         </div>
 
+        {/* ── 📱 MOBILE TOP 10 AYURVEDIC ENERGY MEDICINES DIRECTORY ── */}
+        <div className="relative z-20">
+          <Top10AyurvedicEnergy setPage={safeSetPage} />
+        </div>
+
         {/* ── 📱 SUBTLE FOOTER: SHARE, DOWNLOAD, TERMS & POLICIES ── */}
         <div className="relative z-20 px-4 pb-4 pt-2 flex flex-col gap-2 bg-gradient-to-t from-black via-black/95 to-transparent">
           
@@ -940,6 +946,9 @@ export default function Home({ setPage }) {
             </div>
           </div>
         </section>
+
+        {/* ── 🖥️ DESKTOP TOP 10 AYURVEDIC ENERGY MEDICINES DIRECTORY ── */}
+        <Top10AyurvedicEnergy setPage={safeSetPage} />
 
         {/* Desktop Global Footer Section */}
         <footer className="bg-[#080808] px-8 py-10 text-slate-400 border-t border-white/[0.06]">
