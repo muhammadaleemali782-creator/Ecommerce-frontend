@@ -615,9 +615,9 @@ export default function Store({ setPage }) {
               const tag = product.tag || product.category || "AYUSH"
               const rating = product.rating || 4.9
               const reviews = product.reviews || 85
-              const desc = product.description || product.desc || "Pure botanical formulation for vitality."
-              const dosha = product.dosha || "Tridosha Balance"
-              const ingredients = product.ingredients || (product.category ? [product.category] : ["Ayurvedic Herbs"])
+              const desc = (product.description || product.desc || "").trim()
+              const dosha = (product.dosha || "").trim()
+              const ingredients = Array.isArray(product.ingredients) && product.ingredients.length > 0 ? product.ingredients : null
 
               const cartItem = (cart || []).find(c => (c.id || c._id || c.productId) === productId)
               const cartQty = cartItem ? cartItem.qty : 0
@@ -758,7 +758,7 @@ export default function Store({ setPage }) {
                         {/* Back Header with Prominent Return Button */}
                         <div className="flex items-center justify-between gap-2 border-b border-stone-800 pb-2 mb-2">
                           <span className="text-[9px] font-mono font-black uppercase tracking-widest text-blue-400">
-                            🌿 FORMULATION DOSSIER
+                            PRODUCT DETAILS
                           </span>
                           <button
                             onClick={(e) => toggleFlip(productId, e)}
@@ -774,27 +774,38 @@ export default function Store({ setPage }) {
                           {title}
                         </h4>
 
-                        {/* Dosha Tag */}
-                        <div className="mt-1.5 px-2 py-1 rounded-md bg-stone-800 text-[9px] sm:text-[10px] font-bold text-amber-300">
-                          Dosha: {dosha}
-                        </div>
+                        {/* Category Tag (if present) */}
+                        {product.category && (
+                          <div className="mt-1.5 inline-block px-2 py-0.5 rounded-md bg-stone-800 text-[9px] font-semibold text-stone-300">
+                            {product.category}
+                          </div>
+                        )}
 
-                        {/* Description */}
-                        <p className="mt-2 text-[10.5px] sm:text-xs text-stone-300 line-clamp-3 leading-relaxed">
-                          {desc}
-                        </p>
+                        {/* Dosha Tag - only if provided */}
+                        {dosha && (
+                          <div className="mt-1.5 px-2 py-1 rounded-md bg-stone-800 text-[9px] sm:text-[10px] font-bold text-amber-300">
+                            Dosha: {dosha}
+                          </div>
+                        )}
 
-                        {/* Botanicals List */}
+                        {/* Description - only if provided */}
+                        {desc && (
+                          <p className="mt-2 text-[10.5px] sm:text-xs text-stone-300 line-clamp-4 leading-relaxed">
+                            {desc}
+                          </p>
+                        )}
+
+                        {/* Ingredients List - only if real ingredients exist */}
                         {ingredients && ingredients.length > 0 && (
                           <div className="mt-2">
-                            <div className="text-[9px] font-bold text-stone-400 uppercase">Botanicals:</div>
+                            <div className="text-[9px] font-bold text-stone-400 uppercase">Ingredients:</div>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {ingredients.slice(0, 3).map((ing, i) => (
+                              {ingredients.slice(0, 4).map((ing, i) => (
                                 <span
                                   key={i}
                                   className="px-1.5 py-0.5 rounded bg-stone-800 text-[8.5px] text-stone-200"
                                 >
-                                  🌿 {ing}
+                                  {ing}
                                 </span>
                               ))}
                             </div>
