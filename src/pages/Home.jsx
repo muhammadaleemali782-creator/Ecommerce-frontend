@@ -556,6 +556,10 @@ export default function Home({ setPage }) {
             <span className="text-[10px] font-black uppercase tracking-[0.16em] text-white">EDUCA-VEDA</span>
           </div>
 
+          <p className="text-[10px] text-center text-slate-400 font-sans tracking-tight max-w-[290px] mx-auto leading-relaxed">
+            📍 Vihar Gali No. 3, Utthan Road, Jhalwa, Prayagraj - 211012
+          </p>
+
           <p className="text-[9.5px] text-center text-slate-500 font-sans tracking-wide">
             © 2026 EDUCA-VEDA · We Give Results Not Promises
           </p>
@@ -949,6 +953,7 @@ export default function Home({ setPage }) {
               <div>
                 <span className="text-sm font-black uppercase tracking-[0.2em] text-white">EDUCA-VEDA</span>
                 <p className="text-[10px] text-slate-500 font-mono mt-0.5">We Give Results Not Promises · Ayurvedic Sovereignty</p>
+                <p className="text-[11px] text-slate-400 font-sans mt-1">📍 Vihar Gali No. 3, Utthan Road, Jhalwa, Prayagraj, UP - 211012</p>
               </div>
             </div>
 
