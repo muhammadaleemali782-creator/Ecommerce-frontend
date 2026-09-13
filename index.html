@@ -1,19 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#121813" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- ── Primary SEO Meta Tags ── -->
+    <title>EDUCA VEDA — Pure Himalayan Ayurvedic Healing & Wellness Hub</title>
+    <meta name="title" content="EDUCA VEDA — Pure Himalayan Ayurvedic Healing & Wellness Hub" />
+    <meta
+      name="description"
+      content="Discover pure Himalayan Ayurvedic healing with EDUCA VEDA. 100% natural, AYUSH-certified herbal rasayanas, non-invasive pulse diagnosis (Rogsetu Nadi Parikshan), clinical Gurukul training, and authentic Ayurvedic wellness formulations with zero side-effects."
+    />
+    <meta
+      name="keywords"
+      content="Ayurvedic medicine, Educa Veda, herbal health products, Rogsetu Nadi Parikshan, pulse diagnosis, Ayurvedic wellness consultant, Gurukul Ayurveda course, natural healing, AYUSH certified, herbal remedies India, Himalayan jadibooti, rasayana, dosha healing, Ayurvedic store India"
+    />
+    <meta name="author" content="EDUCA VEDA" />
+    <meta name="publisher" content="EDUCA VEDA" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="https://educa-store.vercel.app/" />
+
+    <!-- ── Geographic & Language Meta Tags ── -->
+    <meta name="geo.region" content="IN" />
+    <meta name="geo.placename" content="India" />
+    <meta name="language" content="English, Hindi" />
+    <meta name="rating" content="general" />
+
+    <!-- ── Open Graph / Facebook / WhatsApp ── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://educa-store.vercel.app/" />
+    <meta property="og:site_name" content="EDUCA VEDA" />
+    <meta property="og:title" content="EDUCA VEDA — Pure Himalayan Ayurvedic Healing & Wellness Hub" />
+    <meta
+      property="og:description"
+      content="100% natural Ayurvedic formulations with zero side-effects. Explore Rogsetu non-invasive pulse diagnosis and clinical Gurukul training."
+    />
+    <meta property="og:image" content="https://educa-store.vercel.app/educa_logo.png" />
+    <meta property="og:image:secure_url" content="https://educa-store.vercel.app/educa_logo.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="EDUCA VEDA — Results Not Promises" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- ── Twitter Card Meta Tags ── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://educa-store.vercel.app/" />
+    <meta name="twitter:title" content="EDUCA VEDA — Pure Himalayan Ayurvedic Healing & Wellness Hub" />
+    <meta
+      name="twitter:description"
+      content="100% natural Ayurvedic formulations with zero side-effects. Explore Rogsetu non-invasive pulse diagnosis and clinical Gurukul training."
+    />
+    <meta name="twitter:image" content="https://educa-store.vercel.app/educa_logo.png" />
+    <meta name="twitter:image:alt" content="EDUCA VEDA Brand Logo" />
+
+    <!-- ── Favicons & Webmanifest ── -->
     <link rel="icon" type="image/png" href="/educa_logo.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/educa_logo.png" />
-    <title>EDUCA VEDA — Ayurvedic Wellness</title>
-    <!-- Google Fonts: preconnect first (eliminates render-blocking) -->
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- ── Google Fonts: Preconnect for fast Core Web Vitals ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap"
       rel="stylesheet"
     />
+
+    <!-- ── Schema.org Structured Data (JSON-LD) ── -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://educa-store.vercel.app/#organization",
+            "name": "EDUCA VEDA",
+            "alternateName": "Educa Veda Ayurvedic Store",
+            "url": "https://educa-store.vercel.app",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://educa-store.vercel.app/educa_logo.png",
+              "caption": "EDUCA VEDA Logo"
+            },
+            "description": "Authentic Ayurvedic wellness, natural medicines, non-invasive pulse diagnosis, and clinical training.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "areaServed": "IN",
+              "availableLanguage": ["en", "hi"]
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://educa-store.vercel.app/#website",
+            "url": "https://educa-store.vercel.app",
+            "name": "EDUCA VEDA",
+            "publisher": {
+              "@id": "https://educa-store.vercel.app/#organization"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://educa-store.vercel.app/?search={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Store",
+            "@id": "https://educa-store.vercel.app/#store",
+            "name": "EDUCA VEDA Wellness Store",
+            "image": "https://educa-store.vercel.app/educa_logo.png",
+            "url": "https://educa-store.vercel.app",
+            "priceRange": "₹₹",
+            "currenciesAccepted": "INR",
+            "paymentAccepted": "Cash, UPI, Credit Card, Debit Card, Net Banking",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "IN"
+            }
+          },
+          {
+            "@type": "MedicalBusiness",
+            "@id": "https://educa-store.vercel.app/#medical",
+            "name": "EDUCA ROGSETU Pulse Diagnosis",
+            "description": "Non-invasive Ayurvedic pulse diagnosis (Nadi Parikshan), Tridosha analysis, and certified Vaidya wellness consultation with zero radiation and zero surgery.",
+            "url": "https://educa-store.vercel.app"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

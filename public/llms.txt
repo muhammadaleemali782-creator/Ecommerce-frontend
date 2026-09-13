@@ -1,0 +1,34 @@
+# EDUCA VEDA — Ayurvedic Healing, Rogsetu & Gurukul
+> Results Not Promises. Pure Himalayan Ayurvedic Healing, Nadi Parikshan, and Certified Clinical Wellness.
+
+## Overview
+EDUCA VEDA is an authentic Indian Ayurvedic wellness and healthcare enterprise headquartered in India. It specializes in 100% natural, AYUSH-certified herbal formulations with zero side-effects, non-invasive pulse diagnosis (Rogsetu Nadi Parikshan), and professional clinical training through Educa Gurukul.
+
+## Core Realms & Offerings
+1. **EDUCA HEALTH (Store)**:
+   - Himalayan Shuddh Jadi Booti & Rasayanas
+   - Cellular healing, natural immunity, and zero-dependency herbal medicines
+   - Range includes: Pure Rasayanas, herbal oils, digestion supplements, vitality blends, and skin/hair care formulations.
+   - URL: https://educa-store.vercel.app/?page=store
+
+2. **EDUCA ROGSETU & WELLNESS CONSULTATION**:
+   - Classical Nadi Parikshan (Ayurvedic Pulse Diagnosis)
+   - Zero surgery, zero toxic radiation/laser diagnostics
+   - Tridosha (Vata, Pitta, Kapha) balance analysis by certified Vaidyas
+   - URL: https://educa-store.vercel.app/?page=services
+
+3. **EDUCA GURUKUL**:
+   - Clinical Diploma training in Ayurvedic herbology (Dravyaguna), Panchakarma, and disease management
+   - Prepares students to become certified Wellness Consultants
+   - Affordable course fees with community healthcare empowerment
+   - URL: https://educa-store.vercel.app/?page=services
+
+4. **DISTRIBUTOR & DIRECT SELLER NETWORK**:
+   - Multi-tier decentralized distribution network
+   - Direct Seller commission, PPC liquidity rewards, and lifetime royalty pools
+   - URL: https://educa-store.vercel.app/?page=join
+
+## Verification & Trust
+- **Certification**: AYUSH Certified, GMP Compliant manufacturing practices
+- **Headquarters**: India
+- **Platform**: https://educa-store.vercel.app

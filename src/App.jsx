@@ -68,6 +68,7 @@ import { StoreProvider, useStore } from "./context/StoreContext"
 import { AuthProvider, useAuth }   from "./context/AuthContext"
 import { NotificationProvider, useNotifications } from "./context/NotificationContext"
 import { ThemeProvider } from "./context/ThemeContext"
+import { useSEO } from "./utils/useSEO"
 
 /* ─── Unauthorized helper ─── */
 const Unauth = () => (
@@ -88,6 +89,9 @@ function AppContent() {
     } catch {}
     return "home"
   })
+
+  // Dynamic SEO meta and title management
+  useSEO(page)
 
   // Persist active page for mobile app suspension / tab close / phone call recovery
   useEffect(() => {

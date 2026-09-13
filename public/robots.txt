@@ -1,0 +1,19 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /distributor/*
+Disallow: /seller/*
+Disallow: /api/*
+
+# Specific crawler rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Host and Sitemap
+Host: https://educa-store.vercel.app
+Sitemap: https://educa-store.vercel.app/sitemap.xml

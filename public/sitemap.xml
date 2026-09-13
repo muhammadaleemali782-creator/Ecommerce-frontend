@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Home Page -->
+  <url>
+    <loc>https://educa-store.vercel.app/</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Store (All Ayurvedic Products) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Services & Rogsetu Pulse Diagnosis -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=services</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Gurukul Ayurveda Course -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=services#gurukul</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Join Request / Direct Seller & Distributor -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=join</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Login & Portal -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=login</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Cart -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=cart</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>
