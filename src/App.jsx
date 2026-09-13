@@ -82,6 +82,8 @@ function AppContent() {
     try {
       const params = new URLSearchParams(window.location.search)
       if (params.get("ref")) return "join"
+      if (params.get("page")) return params.get("page")
+      if (params.get("search") || params.get("category")) return "store"
       const saved = sessionStorage.getItem("active_page") || localStorage.getItem("last_active_page")
       if (saved && !["login", "home"].includes(saved)) {
         return saved

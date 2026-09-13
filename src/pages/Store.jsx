@@ -21,13 +21,58 @@ const resolveImg = (img) => {
   return `${base}/uploads/${cleanPath}`
 }
 
+const KEYWORD_ALIASES = {
+  energy: ["shilajit", "ashwagandha", "musli", "gokshura", "stamina", "vitality", "power", "vigor", "energy"],
+  shilajit: ["shilajit", "energy", "stamina", "vitality", "resin"],
+  tulsi: ["tulsi", "pancha tulsi", "vedic", "immunity", "cough", "cold", "flu", "respiratory"],
+  "tulsi vedic": ["tulsi", "pancha tulsi", "vedic", "immunity"],
+  liver: ["liv", "liver", "detox", "kutki", "amrit", "bhumi amla", "fatty", "jaundice", "sgot", "sgpt"],
+  sugar: ["sugar", "diabetes", "madhumeha", "gudmar", "jamun", "karela", "vijaysar"],
+  diabetes: ["sugar", "diabetes", "madhumeha", "gudmar", "jamun", "karela", "vijaysar"],
+  bp: ["bp", "blood pressure", "raktachap", "sarpagandha", "arjuna", "hypertension"],
+  "high bp": ["bp", "blood pressure", "raktachap", "sarpagandha", "arjuna", "hypertension"],
+  daat: ["daat", "dant", "teeth", "tooth", "dental", "pyorrhea", "laung", "clove"],
+  dant: ["daat", "dant", "teeth", "tooth", "dental", "pyorrhea", "laung", "clove"],
+  dental: ["daat", "dant", "teeth", "tooth", "dental", "pyorrhea", "laung", "clove"],
+  teeth: ["daat", "dant", "teeth", "tooth", "dental", "pyorrhea", "laung", "clove"],
+  period: ["period", "cramp", "shecurevedic", "menstrual", "pcod", "pcos", "ladki", "gynaec", "cramps"],
+  shecurevedic: ["shecurevedic", "period", "cramp", "menstrual", "ashoka", "lodhra", "gynaec"],
+  joint: ["joint", "sandhivata", "ghutna", "pain", "dard", "shallaki", "nirgundi", "arthritis"],
+  hair: ["hair", "kesh", "baal", "bhringraj", "dandruff", "fall"],
+  gas: ["gas", "kabz", "constipation", "triphala", "pachak", "acidity", "pait"]
+}
+
+const QUICK_CHIPS = [
+  { label: "⚡ Energy & Shilajit", query: "energy" },
+  { label: "🍃 Tulsi Vedic", query: "tulsi" },
+  { label: "🫀 Liver Detox", query: "liver" },
+  { label: "🩸 Sugar / Diabetes", query: "sugar" },
+  { label: "💓 High BP", query: "bp" },
+  { label: "🌸 Shecurevedic (Period)", query: "shecurevedic" },
+  { label: "🦷 Daat ki Dawa", query: "daat" },
+  { label: "🦵 Joint Pain", query: "joint" },
+  { label: "🌿 Hair Care", query: "hair" }
+]
+
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
   const { products = [], addToCart, cart = [] } = useStore() || {}
   const { user } = useAuth() || {}
 
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("all")
+  const [search, setSearch] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("search") || ""
+    } catch {
+      return ""
+    }
+  })
+  const [category, setCategory] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("category") || "all"
+    } catch {
+      return "all"
+    }
+  })
   const [sortBy, setSortBy] = useState("rating")
   const [flippedCardId, setFlippedCardId] = useState(null)
   const [addedToast, setAddedToast] = useState(null)
@@ -100,7 +145,21 @@ export default function Store({ setPage }) {
       const cat = (p.category || "").trim().toLowerCase()
       const desc = (p.description || p.desc || "").toLowerCase()
       
-      const matchesSearch = !q || title.includes(q) || cat.includes(q) || desc.includes(q)
+      let matchesSearch = !q || title.includes(q) || cat.includes(q) || desc.includes(q)
+      
+      // Keyword alias expansion for health searches (energy, tulsi, liver, sugar, bp, dental, etc.)
+      if (!matchesSearch && q) {
+        const words = q.split(/\s+/)
+        for (const [key, aliases] of Object.entries(KEYWORD_ALIASES)) {
+          if (words.some(w => key.includes(w) || w.includes(key))) {
+            if (aliases.some(alias => title.includes(alias) || desc.includes(alias) || cat.includes(alias))) {
+              matchesSearch = true
+              break
+            }
+          }
+        }
+      }
+
       const matchesCategory = category === "all" || cat === category.toLowerCase()
       return matchesSearch && matchesCategory
     })
@@ -219,7 +278,7 @@ export default function Store({ setPage }) {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search herbal products, ingredients, doshas..."
+                placeholder="Search Energy, Tulsi Vedic, Liver, Sugar, BP, Shecurevedic, Daat ki dawa..."
                 className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none border transition-all ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
@@ -402,6 +461,34 @@ export default function Store({ setPage }) {
                   }`}
                 >
                   {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* ── Quick Diagnostic & Product Filter Chips ── */}
+          <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-500/90 shrink-0 mr-1 flex items-center gap-1">
+              <span>⚡</span> POPULAR:
+            </span>
+            {QUICK_CHIPS.map(chip => {
+              const active = search.toLowerCase() === chip.query.toLowerCase()
+              return (
+                <button
+                  key={chip.query}
+                  onClick={() => {
+                    setCategory("all")
+                    setSearch(prev => (prev.toLowerCase() === chip.query.toLowerCase() ? "" : chip.query))
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                    active
+                      ? "bg-amber-400 text-stone-950 border-amber-400 font-black shadow-xs scale-105"
+                      : isDark
+                        ? "bg-white/[0.04] border-white/10 text-stone-300 hover:bg-white/10 hover:text-white"
+                        : "bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100 hover:text-stone-900 shadow-xs"
+                  }`}
+                >
+                  {chip.label}
                 </button>
               )
             })}

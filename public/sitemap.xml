@@ -17,7 +17,79 @@
     <loc>https://educa-store.vercel.app/?page=store</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Deep Product Search: Energy & Stamina (Shilajit / Ashwagandha) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=energy</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Tulsi Vedic (Pancha Tulsi Drops) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=tulsi</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Liver Detox & Fatty Liver (Liv-Amrit) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=liver</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Sugar & Diabetes Care (Madhumeha) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=sugar</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: High Blood Pressure (Raktachap) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=bp</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Women's Period Care (Shecurevedic) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=shecurevedic</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Toothache & Pyorrhea (Dant Suraksha) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=dental</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Deep Product Search: Joint Pain & Arthritis (Sandhivata) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=joint</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Deep Product Search: Hair Fall & Dandruff (Kesh Sanjeevani) -->
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=hair</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <!-- Services & Rogsetu Pulse Diagnosis -->
