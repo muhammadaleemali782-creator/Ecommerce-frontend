@@ -24,6 +24,10 @@ export default function AdminProductList({ setPage }) {
   const [editingProduct, setEditingProduct] = useState(null)
   const [editTitle, setEditTitle] = useState("")
   const [editPrice, setEditPrice] = useState("")
+  const [editMrp, setEditMrp] = useState("")
+  const [editRating, setEditRating] = useState("4.9")
+  const [editReviews, setEditReviews] = useState("85")
+  const [editDiscountBadge, setEditDiscountBadge] = useState("")
   const [editCategory, setEditCategory] = useState("")
   const [editDescription, setEditDescription] = useState("")
   const [editPpcReward, setEditPpcReward] = useState("1")
@@ -37,6 +41,10 @@ export default function AdminProductList({ setPage }) {
     setEditingProduct(p)
     setEditTitle(p.title || p.name || "")
     setEditPrice(p.price !== undefined ? p.price : "")
+    setEditMrp(p.mrp !== undefined && p.mrp !== null ? p.mrp : "")
+    setEditRating(p.rating !== undefined && p.rating !== null ? p.rating : "4.9")
+    setEditReviews(p.reviews !== undefined && p.reviews !== null ? p.reviews : "85")
+    setEditDiscountBadge(p.discountBadge || "")
     setEditCategory(p.category || "")
     setEditDescription(p.description || "")
     setEditPpcReward(p.ppcReward !== undefined ? p.ppcReward : "1")
@@ -86,6 +94,10 @@ export default function AdminProductList({ setPage }) {
       const formData = new FormData()
       formData.append("title", editTitle.trim())
       formData.append("price", editPrice)
+      formData.append("mrp", editMrp)
+      formData.append("rating", editRating)
+      formData.append("reviews", editReviews)
+      formData.append("discountBadge", editDiscountBadge.trim())
       formData.append("category", editCategory.trim())
       formData.append("description", editDescription.trim())
       formData.append("ppcReward", editPpcReward)
@@ -114,6 +126,10 @@ export default function AdminProductList({ setPage }) {
         ...editingProduct,
         title: editTitle.trim(),
         price: Number(editPrice),
+        mrp: Number(editMrp) || 0,
+        rating: Number(editRating) || 4.9,
+        reviews: Number(editReviews) || 85,
+        discountBadge: editDiscountBadge.trim(),
         category: editCategory.trim(),
         description: editDescription.trim(),
         ppcReward: Number(editPpcReward),
@@ -760,6 +776,95 @@ export default function AdminProductList({ setPage }) {
                           isDark
                             ? "bg-black/40 border-white/10 text-emerald-400 focus:border-emerald-400"
                             : "bg-stone-50 border-stone-200 text-emerald-600 focus:border-emerald-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* MRP & Discount Tag in 2 cols */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-300" : "text-stone-700"
+                      }`}>
+                        MRP / Strike Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={editMrp}
+                        onChange={(e) => setEditMrp(e.target.value)}
+                        placeholder="e.g. 1200"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-colors focus:outline-none ${
+                          isDark
+                            ? "bg-black/40 border-white/10 text-white focus:border-amber-400"
+                            : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-300" : "text-stone-700"
+                      }`}>
+                        Discount Tag / Badge
+                      </label>
+                      <input
+                        type="text"
+                        value={editDiscountBadge}
+                        onChange={(e) => setEditDiscountBadge(e.target.value)}
+                        placeholder="e.g. 20% OFF, BESTSELLER"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-colors focus:outline-none ${
+                          isDark
+                            ? "bg-black/40 border-white/10 text-white focus:border-amber-400"
+                            : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Rating & Reviews in 2 cols */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-300" : "text-stone-700"
+                      }`}>
+                        Rating (⭐ 1.0 - 5.0)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        step="0.1"
+                        value={editRating}
+                        onChange={(e) => setEditRating(e.target.value)}
+                        placeholder="4.9"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-colors focus:outline-none ${
+                          isDark
+                            ? "bg-black/40 border-white/10 text-white focus:border-amber-400"
+                            : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1 ${
+                        isDark ? "text-stone-300" : "text-stone-700"
+                      }`}>
+                        Reviews Count
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={editReviews}
+                        onChange={(e) => setEditReviews(e.target.value)}
+                        placeholder="85"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-colors focus:outline-none ${
+                          isDark
+                            ? "bg-black/40 border-white/10 text-white focus:border-amber-400"
+                            : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500"
                         }`}
                       />
                     </div>

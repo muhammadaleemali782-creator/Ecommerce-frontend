@@ -608,13 +608,14 @@ export default function Store({ setPage }) {
               const productId = product.id || product._id || product.title
               const isFlipped = flippedCardId === productId
               const title = product.title || product.name || "Ayurvedic Product"
-              const price = product.price || product.finalPrice || 0
-              const mrp = product.mrp || Math.round(price * 1.25)
+              const price = Number(product.price || product.finalPrice || 0)
+              const mrp = Number(product.mrp) > price ? Number(product.mrp) : 0
               const discountPct = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0
+              const discountBadge = product.discountBadge || (discountPct > 0 ? `${discountPct}% OFF` : null)
               const image = resolveImg(product.image || product.img)
               const tag = product.tag || product.category || "AYUSH"
-              const rating = product.rating || 4.9
-              const reviews = product.reviews || 85
+              const rating = product.rating !== undefined && product.rating !== null && product.rating !== "" ? product.rating : 4.9
+              const reviews = product.reviews !== undefined && product.reviews !== null && product.reviews !== "" ? product.reviews : 85
               const desc = (product.description || product.desc || "").trim()
               const dosha = (product.dosha || "").trim()
               const ingredients = Array.isArray(product.ingredients) && product.ingredients.length > 0 ? product.ingredients : null
@@ -668,9 +669,9 @@ export default function Store({ setPage }) {
                           <span className="px-2 py-0.5 rounded-md bg-stone-950/90 text-[8.5px] sm:text-[9.5px] font-black text-white uppercase tracking-wider shadow-sm">
                             {tag}
                           </span>
-                          {discountPct > 0 && (
+                          {discountBadge && (
                             <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-[8px] sm:text-[8.5px] font-black text-white uppercase">
-                              {discountPct}% OFF
+                              {discountBadge}
                             </span>
                           )}
                         </div>
@@ -774,10 +775,11 @@ export default function Store({ setPage }) {
                           {title}
                         </h4>
 
-                        {/* Category Tag (if present) */}
+                        {/* Category - with explicit label */}
                         {product.category && (
-                          <div className="mt-1.5 inline-block px-2 py-0.5 rounded-md bg-stone-800 text-[9px] font-semibold text-stone-300">
-                            {product.category}
+                          <div className="mt-2 text-[10px] sm:text-[11px] text-stone-300">
+                            <span className="font-bold text-amber-400 font-mono">Category: </span>
+                            <span className="text-stone-200">{product.category}</span>
                           </div>
                         )}
 
@@ -788,11 +790,12 @@ export default function Store({ setPage }) {
                           </div>
                         )}
 
-                        {/* Description - only if provided */}
+                        {/* Description - with explicit label */}
                         {desc && (
-                          <p className="mt-2 text-[10.5px] sm:text-xs text-stone-300 line-clamp-4 leading-relaxed">
-                            {desc}
-                          </p>
+                          <div className="mt-2 text-[10px] sm:text-[11px] text-stone-300 leading-relaxed">
+                            <span className="font-bold text-amber-400 font-mono">Description: </span>
+                            <span className="text-stone-300 line-clamp-4">{desc}</span>
+                          </div>
                         )}
 
                         {/* Ingredients List - only if real ingredients exist */}

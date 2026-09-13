@@ -6,9 +6,13 @@ import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../ut
 import DraftBanner from "../components/DraftBanner"
 
 /* ─── Live Card Preview ─── */
-function CardPreview({ productName, price, category, ppcReward, imagePreview, description, isDark }) {
+function CardPreview({ productName, price, mrp, rating, reviews, discountBadge, category, ppcReward, imagePreview, description, isDark }) {
   const [flipped, setFlipped] = useState(false)
   const showPPC = Number(ppcReward) > 0
+  const numPrice = Number(price) || 0
+  const numMrp = Number(mrp) > numPrice ? Number(mrp) : 0
+  const discountPct = numMrp > numPrice ? Math.round(((numMrp - numPrice) / numMrp) * 100) : 0
+  const badge = discountBadge || (discountPct > 0 ? `${discountPct}% OFF` : null)
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -49,9 +53,15 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
                 💎 {ppcReward} PPC
               </div>
             )}
-            <div className="absolute top-2 left-2 z-10 bg-black/50 text-white text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded-md backdrop-blur-xs">
-              tap to flip
-            </div>
+            {badge ? (
+              <div className="absolute top-2 left-2 z-10 bg-emerald-600 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md shadow-md">
+                {badge}
+              </div>
+            ) : (
+              <div className="absolute top-2 left-2 z-10 bg-black/50 text-white text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded-md backdrop-blur-xs">
+                tap to flip
+              </div>
+            )}
 
             {imagePreview ? (
               <div className="h-[125px] overflow-hidden shrink-0 bg-stone-900/40">
@@ -77,16 +87,30 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
               </h2>
 
               {category && (
-                <span className="text-[9.5px] font-mono font-bold text-amber-500 truncate mb-1">
+                <span className="text-[9.5px] font-mono font-bold text-amber-500 truncate mb-0.5">
                   {category}
                 </span>
               )}
 
-              <p className={`font-black text-base tracking-tight mb-2 ${
-                isDark ? "text-amber-400" : "text-stone-900"
-              }`}>
-                ₹{price || "0"}
-              </p>
+              {/* Rating & Reviews */}
+              <div className="flex items-center gap-1 text-[9.5px] font-bold text-amber-500 mb-1">
+                <span>★ {rating || "4.9"}</span>
+                <span className="text-stone-400 font-normal text-[8.5px]">({reviews || "85"})</span>
+              </div>
+
+              {/* Price & MRP */}
+              <div className="flex items-baseline gap-1.5 mb-2">
+                <span className={`font-black text-base tracking-tight ${
+                  isDark ? "text-amber-400" : "text-stone-900"
+                }`}>
+                  ₹{price || "0"}
+                </span>
+                {numMrp > numPrice && (
+                  <span className="text-[10px] text-stone-400 line-through">
+                    ₹{numMrp}
+                  </span>
+                )}
+              </div>
 
               {showPPC && (
                 <div className={`rounded-lg p-1.5 flex items-center gap-1.5 mb-2 border ${
@@ -141,9 +165,16 @@ function CardPreview({ productName, price, category, ppcReward, imagePreview, de
               <div className="text-[9px] font-mono uppercase tracking-widest text-amber-400 font-bold mb-1">
                 Product Details
               </div>
-              <p className="text-[10px] leading-relaxed text-stone-300 overflow-hidden line-clamp-3">
-                {description || "Description details will appear here..."}
-              </p>
+              {category && (
+                <div className="text-[9.5px] text-stone-300 mb-1">
+                  <span className="font-bold text-amber-400 font-mono">Category: </span>
+                  <span>{category}</span>
+                </div>
+              )}
+              <div className="text-[9.5px] text-stone-300 leading-relaxed">
+                <span className="font-bold text-amber-400 font-mono">Description: </span>
+                <span className="line-clamp-3">{description || "No description provided"}</span>
+              </div>
             </div>
 
             <div className="bg-white/[0.06] border border-white/[0.08] rounded-xl p-2 flex justify-between items-center mb-2">
@@ -181,6 +212,10 @@ export default function AdminAddProduct({ setPage }) {
   const draft = getFormDraft(DRAFT_KEY, {})
   const [productName, setProductName] = useState(draft.productName || "")
   const [price, setPrice] = useState(draft.price || "")
+  const [mrp, setMrp] = useState(draft.mrp || "")
+  const [rating, setRating] = useState(draft.rating || "4.9")
+  const [reviews, setReviews] = useState(draft.reviews || "85")
+  const [discountBadge, setDiscountBadge] = useState(draft.discountBadge || "")
   const [category, setCategory] = useState(draft.category || "")
   const [description, setDescription] = useState(draft.description || "")
   const [image, setImage] = useState(null)
@@ -199,10 +234,14 @@ export default function AdminAddProduct({ setPage }) {
 
   // Auto-save draft on changes
   useEffect(() => {
-    if (productName || price || category || description || imagePreview || selectedUserIds.length > 0) {
+    if (productName || price || mrp || rating || reviews || discountBadge || category || description || imagePreview || selectedUserIds.length > 0) {
       saveFormDraft(DRAFT_KEY, {
         productName,
         price,
+        mrp,
+        rating,
+        reviews,
+        discountBadge,
         category,
         description,
         ppcReward,
@@ -211,15 +250,19 @@ export default function AdminAddProduct({ setPage }) {
         imagePreview
       })
     }
-  }, [productName, price, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
+  }, [productName, price, mrp, rating, reviews, discountBadge, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
 
   // Flush immediately on phone call / tab close / mobile background
   useEffect(() => {
     const flush = () => {
-      if (productName || price || category || description || imagePreview) {
+      if (productName || price || mrp || rating || reviews || discountBadge || category || description || imagePreview) {
         saveFormDraft(DRAFT_KEY, {
           productName,
           price,
+          mrp,
+          rating,
+          reviews,
+          discountBadge,
           category,
           description,
           ppcReward,
@@ -235,12 +278,16 @@ export default function AdminAddProduct({ setPage }) {
       window.removeEventListener("pagehide", flush)
       window.removeEventListener("beforeunload", flush)
     }
-  }, [productName, price, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
+  }, [productName, price, mrp, rating, reviews, discountBadge, category, description, ppcReward, assignAllUsers, selectedUserIds, imagePreview])
 
   const handleClearDraft = () => {
     clearFormDraft(DRAFT_KEY)
     setProductName("")
     setPrice("")
+    setMrp("")
+    setRating("4.9")
+    setReviews("85")
+    setDiscountBadge("")
     setCategory("")
     setDescription("")
     setImage(null)
@@ -322,6 +369,10 @@ export default function AdminAddProduct({ setPage }) {
       const formData = new FormData()
       formData.append("title", productName.trim())
       formData.append("price", price)
+      formData.append("mrp", mrp)
+      formData.append("rating", rating)
+      formData.append("reviews", reviews)
+      formData.append("discountBadge", discountBadge.trim())
       formData.append("category", category.trim())
       formData.append("description", description.trim())
       formData.append("ppcReward", ppcReward)
@@ -347,7 +398,8 @@ export default function AdminAddProduct({ setPage }) {
         clearFormDraft(DRAFT_KEY)
         setHasRestoredDraft(false)
         setMessage("✅ Product added successfully to catalog!")
-        setProductName(""); setPrice(""); setCategory(""); setDescription("")
+        setProductName(""); setPrice(""); setMrp(""); setRating("4.9"); setReviews("85"); setDiscountBadge("")
+        setCategory(""); setDescription("")
         setPpcReward("1"); setImage(null); setImagePreview(null)
         setAssignAllUsers(false); setSelectedUserIds([]); setSearchQuery("")
         if (typeof setPage === "function") {
@@ -527,6 +579,101 @@ export default function AdminAddProduct({ setPage }) {
                 <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
                   💡 1 PPC = ₹40 (Seller reward on each order)
                 </p>
+              </div>
+            </div>
+
+            {/* MRP & Discount Badge (Controlled Price & Offer) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  MRP / Strike Price (₹) <span className="text-[10px] opacity-70 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={mrp}
+                  onChange={e => setMrp(e.target.value)}
+                  placeholder="e.g. 1200 (Cut price shown next to price)"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                      : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                  }`}
+                />
+                <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                  Selling price se zyada daalne par strike price (₹1200) aur discount % dikhega
+                </p>
+              </div>
+
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  Discount Tag / Badge <span className="text-[10px] opacity-70 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={discountBadge}
+                  onChange={e => setDiscountBadge(e.target.value)}
+                  placeholder="e.g. 20% OFF, BESTSELLER (Khaali chhodne par auto % calculate hoga)"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                      : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                  }`}
+                />
+                <p className={`text-[10px] font-mono mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                  Card ke top-left me green badge dikhega (jaise 20% OFF)
+                </p>
+              </div>
+            </div>
+
+            {/* Rating & Reviews (Controlled Ratings) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  Rating (⭐ 1.0 - 5.0) <span className="text-[10px] opacity-70 font-normal">(default: 4.9)</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={rating}
+                  onChange={e => setRating(e.target.value)}
+                  placeholder="4.9"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                      : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
+                  isDark ? "text-stone-300" : "text-stone-700"
+                }`}>
+                  Reviews Count <span className="text-[10px] opacity-70 font-normal">(default: 85)</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={reviews}
+                  onChange={e => setReviews(e.target.value)}
+                  placeholder="85"
+                  className={`w-full p-3 rounded-xl text-xs font-semibold focus:outline-none border transition-all ${
+                    isDark
+                      ? "bg-black/40 border-white/10 text-white placeholder:text-stone-500 focus:border-[#fbbf24]"
+                      : "bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:bg-white shadow-xs"
+                  }`}
+                />
               </div>
             </div>
 
@@ -804,6 +951,10 @@ export default function AdminAddProduct({ setPage }) {
             <CardPreview
               productName={productName}
               price={price}
+              mrp={mrp}
+              rating={rating}
+              reviews={reviews}
+              discountBadge={discountBadge}
               category={category}
               ppcReward={ppcReward}
               imagePreview={imagePreview}
