@@ -2,37 +2,37 @@ import { useEffect } from "react"
 
 const PAGE_META = {
   home: {
-    title: "EDUCA VEDA — Pure Himalayan Ayurvedic Healing & Wellness Hub",
-    desc: "Discover pure Himalayan Ayurvedic healing with EDUCA VEDA. 100% natural, AYUSH-certified herbal formulations with zero side-effects.",
+    title: "EDUCA VEDA (Educa) — Pure Ayurvedic Healing, Diabetes, BP & Shecurevedic | Prayagraj",
+    desc: "EDUCA VEDA (Educa) provides root-cause Ayurvedic healing for Sugar (Diabetes), High BP, Shecurevedic period pain, and Daat ki bimari without hospital expenses. Jhalwa, Prayagraj.",
     path: ""
   },
   store: {
-    title: "Ayurvedic Medicine & Herb Store — EDUCA VEDA",
-    desc: "Shop authentic Ayurvedic medicines, Rasayanas, herbal oils, and wellness formulations directly with doorstep delivery.",
+    title: "Ayurvedic Medicine & Herb Store — EDUCA VEDA (Educa)",
+    desc: "Shop authentic Ayurvedic medicines for Diabetes, High BP, Shecurevedic period care, toothache, and pure Shilajit energy. Fast delivery across India.",
     path: "?page=store"
   },
   services: {
-    title: "Rogsetu Pulse Diagnosis & Gurukul Wellness — EDUCA VEDA",
-    desc: "Experience non-invasive Nadi Parikshan pulse diagnosis and join certified Ayurvedic Gurukul clinical diploma courses.",
+    title: "Rogsetu Pulse Diagnosis & Gurukul Training — EDUCA VEDA | Prayagraj",
+    desc: "Experience non-invasive Nadi Parikshan pulse diagnosis and join certified Ayurvedic Gurukul clinical diploma courses. Jhalwa, Prayagraj.",
     path: "?page=services"
   },
   cart: {
-    title: "Your Ayurvedic Wellness Cart — EDUCA VEDA",
+    title: "Your Ayurvedic Wellness Cart — EDUCA VEDA (Educa)",
     desc: "Review your selected natural Ayurvedic herbs and medicines. Secure checkout and fast delivery across India.",
     path: "?page=cart"
   },
   checkout: {
-    title: "Secure Checkout — EDUCA VEDA",
+    title: "Secure Checkout — EDUCA VEDA (Educa)",
     desc: "Complete your order for genuine Ayurvedic formulations with secure payment and doorstep fulfillment.",
     path: "?page=checkout"
   },
   join: {
-    title: "Join EDUCA VEDA — Direct Seller & Distributor Partnership",
+    title: "Join EDUCA VEDA (Educa) — Direct Seller & Distributor Partnership | Prayagraj",
     desc: "Become a certified partner, distributor, or direct seller with EDUCA VEDA. Earn high commissions and promote holistic health.",
     path: "?page=join"
   },
   login: {
-    title: "Member & Partner Login — EDUCA VEDA",
+    title: "Member & Partner Login — EDUCA VEDA (Educa)",
     desc: "Access your EDUCA VEDA account, order history, distributor dashboard, and royalty wallet.",
     path: "?page=login"
   }
