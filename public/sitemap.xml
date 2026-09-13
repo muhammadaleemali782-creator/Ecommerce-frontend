@@ -20,31 +20,13 @@
     <priority>0.95</priority>
   </url>
 
-  <!-- Deep Product Search: Energy & Stamina (Shilajit / Ashwagandha) -->
+  <!-- Disease Page: Sugar / Diabetes Jad Se Khatam -->
   <url>
-    <loc>https://educa-store.vercel.app/?page=store&amp;search=energy</loc>
+    <loc>https://educa-store.vercel.app/#diabetes-sugar</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-
-  <!-- Deep Product Search: Tulsi Vedic (Pancha Tulsi Drops) -->
-  <url>
-    <loc>https://educa-store.vercel.app/?page=store&amp;search=tulsi</loc>
-    <lastmod>2026-09-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Deep Product Search: Liver Detox & Fatty Liver (Liv-Amrit) -->
-  <url>
-    <loc>https://educa-store.vercel.app/?page=store&amp;search=liver</loc>
-    <lastmod>2026-09-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Deep Product Search: Sugar & Diabetes Care (Madhumeha) -->
   <url>
     <loc>https://educa-store.vercel.app/?page=store&amp;search=sugar</loc>
     <lastmod>2026-09-13</lastmod>
@@ -52,7 +34,33 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Deep Product Search: High Blood Pressure (Raktachap) -->
+  <!-- Disease Page: Ladkiyo Ko Period Dard & Cramps (Shecurevedic) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#period-pain</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=shecurevedic</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=period</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Disease Page: High BP (Hypertension) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#high-bp</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
   <url>
     <loc>https://educa-store.vercel.app/?page=store&amp;search=bp</loc>
     <lastmod>2026-09-13</lastmod>
@@ -60,23 +68,75 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Deep Product Search: Women's Period Care (Shecurevedic) -->
+  <!-- Disease Page: Daat Me Dard & Pyorrhea (Dant Suraksha) -->
   <url>
-    <loc>https://educa-store.vercel.app/?page=store&amp;search=shecurevedic</loc>
+    <loc>https://educa-store.vercel.app/#daat-ki-dawa</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=daat</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=pyorrhea</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Disease Page: Fatty Liver & Liver Detox (Liv-Amrit) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#fatty-liver</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=liver</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Deep Product Search: Toothache & Pyorrhea (Dant Suraksha) -->
+  <!-- Disease Page: Sharirik Kamzori & Low Energy (Shilajit & Ashwagandha) -->
   <url>
-    <loc>https://educa-store.vercel.app/?page=store&amp;search=dental</loc>
+    <loc>https://educa-store.vercel.app/#kamzori-energy</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=energy</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Deep Product Search: Joint Pain & Arthritis (Sandhivata) -->
+  <!-- Disease Page: Khansi, Zukam & Weak Immunity (Tulsi Vedic) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#cough-cold-tulsi</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://educa-store.vercel.app/?page=store&amp;search=tulsi</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Disease Page: Ghutno Ka Dard & Gathiya (Sandhivata) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#joint-pain</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
   <url>
     <loc>https://educa-store.vercel.app/?page=store&amp;search=joint</loc>
     <lastmod>2026-09-13</lastmod>
@@ -84,7 +144,13 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Deep Product Search: Hair Fall & Dandruff (Kesh Sanjeevani) -->
+  <!-- Disease Page: Baal Jhadna & Dandruff (Kesh Sanjeevani) -->
+  <url>
+    <loc>https://educa-store.vercel.app/#hair-fall</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
   <url>
     <loc>https://educa-store.vercel.app/?page=store&amp;search=hair</loc>
     <lastmod>2026-09-13</lastmod>
