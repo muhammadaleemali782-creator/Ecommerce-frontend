@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import Navbar from "./components/Navbar"
 import HeroBanner from "./components/HeroBanner"
 import GrowthLoader from "./components/GrowthLoader"
+import ErrorBoundary from "./components/ErrorBoundary"
 
 // ── Pages ──
 import Home              from "./pages/Home"
@@ -215,7 +216,7 @@ function AppContent() {
         case "store":    return <Store setPage={setPage} />
         case "cart":     return <Cart setPage={setPage} />
         case "checkout": return <Checkout setPage={setPage} />
-        case "orders":   return loggedIn ? <Orders /> : <Login setPage={setPage} />
+        case "orders":   return loggedIn ? <SellerOrders setPage={setPage} /> : <Login setPage={setPage} />
         case "password-help": return <PasswordHelp setPage={setPage} />
         case "login":    return <Login setPage={setPage} />
         case "join":     return <JoinRequest setPage={setPage} />
@@ -247,17 +248,17 @@ function AppContent() {
 
         case "ppc-statement":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (!["distributor","seller","admin"].includes(role)) return <Home />
+          if (!["distributor","seller","admin"].includes(role)) return <Home setPage={setPage} />
           return <PPCStatement setPage={setPage} />
 
         case "team-activity":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (!["distributor","seller","admin"].includes(role)) return <Home />
+          if (!["distributor","seller","admin"].includes(role)) return <Home setPage={setPage} />
           return <TeamActivityRadar setPage={setPage} />
 
         case "distributor-royalty":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (role !== "distributor") return <Home />
+          if (role !== "distributor") return <Home setPage={setPage} />
           return <DistributorRoyalty setPage={setPage} />
 
         case "admin-royalty":
@@ -285,12 +286,12 @@ function AppContent() {
         // ── ORDER PAGES ──
         case "seller-orders":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (!["seller","user"].includes(role)) return <Home />
-          return <SellerOrders />
+          if (!["seller","user"].includes(role)) return <Home setPage={setPage} />
+          return <SellerOrders setPage={setPage} />
 
         case "distributor-orders":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (role !== "distributor") return <Home />
+          if (role !== "distributor") return <Home setPage={setPage} />
           return <DistributorOrders />
 
         // ── DASHBOARD ──
@@ -299,7 +300,7 @@ function AppContent() {
           if (role === "seller" || role === "user") return <SellerDashboard setPage={setPage} />
           if (role === "distributor") return <DistributorDashboard setPage={setPage} />
           if (role === "admin") return <Admin setPage={setPage} />
-          return <Home />
+          return <Home setPage={setPage} />
 
         // ── ADMIN PAGES ──
         case "admin":
@@ -329,7 +330,7 @@ function AppContent() {
 
         case "admin-password-reset":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (role !== "admin") return <Home />
+          if (role !== "admin") return <Home setPage={setPage} />
           return <AdminPasswordReset />
 
         case "admin-requests":
@@ -359,7 +360,7 @@ function AppContent() {
 
         case "admin-orders":
           if (!loggedIn) return <Login setPage={setPage} />
-          if (role !== "admin") return <Home />
+          if (role !== "admin") return <Home setPage={setPage} />
           return <AdminOrders />
 
         // ── ☢️ DATA PURGE (ADMIN ONLY) ──
@@ -385,7 +386,7 @@ function AppContent() {
 
         default:
           console.log("⚠️ Unknown page:", page)
-          return <Home />
+          return <Home setPage={setPage} />
       }
     } catch (err) {
       console.error("❌ Page render crash:", err)
@@ -416,7 +417,9 @@ function AppContent() {
       />
       {page === "home" && <HeroBanner setPage={setPage} />}
       <main className={page === "home" || page === "store" ? "w-full p-0 m-0 overflow-hidden" : "p-2 sm:p-6 pb-28 sm:pb-12 max-w-[1400px] mx-auto"}>
-        {renderPage()}
+        <ErrorBoundary>
+          {renderPage()}
+        </ErrorBoundary>
       </main>
     </div>
   )
@@ -428,7 +431,9 @@ export default function App() {
       <AuthProvider>
         <StoreProvider>
           <NotificationProvider>
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
           </NotificationProvider>
         </StoreProvider>
       </AuthProvider>

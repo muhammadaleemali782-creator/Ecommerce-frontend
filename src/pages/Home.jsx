@@ -208,7 +208,7 @@ export function ProductCard({
 // ══════════════════════════════════════════════════════════
 // MAIN HOME COMPONENT
 // ══════════════════════════════════════════════════════════
-export default function Home({ setPage }) {
+export default function Home({ setPage = () => {} }) {
   const { loggedIn } = useAuth ? useAuth() : { loggedIn: false };
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);

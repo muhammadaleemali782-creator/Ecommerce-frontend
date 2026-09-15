@@ -73,6 +73,7 @@ function OrderStageBar({ status, isUser }) {
 
 export default function SellerOrders() {
   const { user } = useAuth()
+  const { isDark } = useTheme() || {}
   const isUser = user?.role === "user"
 
   const [orders,  setOrders]  = useState([])
@@ -98,16 +99,18 @@ export default function SellerOrders() {
 
   const fmt = (n) => Number(n || 0).toLocaleString("en-IN")
 
+  const safeOrders = Array.isArray(orders) ? orders : []
+
   // User ke liye simplified counts
   const counts = isUser ? {
-    pending:   orders.filter(o => ["pending","distributor_approved"].includes(o.status)).length,
-    confirmed: orders.filter(o => o.status === "confirmed").length,
-    rejected:  orders.filter(o => o.status === "rejected").length,
+    pending:   safeOrders.filter(o => ["pending","distributor_approved"].includes(o.status)).length,
+    confirmed: safeOrders.filter(o => o.status === "confirmed").length,
+    rejected:  safeOrders.filter(o => o.status === "rejected").length,
   } : {
-    pending:              orders.filter(o => o.status === "pending").length,
-    distributor_approved: orders.filter(o => o.status === "distributor_approved").length,
-    confirmed:            orders.filter(o => o.status === "confirmed").length,
-    rejected:             orders.filter(o => o.status === "rejected").length,
+    pending:              safeOrders.filter(o => o.status === "pending").length,
+    distributor_approved: safeOrders.filter(o => o.status === "distributor_approved").length,
+    confirmed:            safeOrders.filter(o => o.status === "confirmed").length,
+    rejected:             safeOrders.filter(o => o.status === "rejected").length,
   }
 
   if (loading) return <InlineLoader label="Orders load ho rahe hain 📦" minHeight={180} />
@@ -139,11 +142,11 @@ export default function SellerOrders() {
       </div>
 
       {/* Orders */}
-      {orders.length === 0 ? (
+      {safeOrders.length === 0 ? (
         <div className="bg-white rounded-xl p-8 text-center text-gray-400">Koi order nahi mila</div>
       ) : (
         <div className="space-y-4">
-          {orders.map(order => (
+          {safeOrders.map(order => (
             <div key={order._id} className={`rounded-2xl p-5 space-y-4 border transition-all ${
               isDark
                 ? "bg-[#111417] border-white/[0.08] shadow-lg shadow-black/40"
