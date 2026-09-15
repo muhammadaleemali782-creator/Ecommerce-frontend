@@ -124,6 +124,63 @@ export default function AdminOrders() {
   const [rejectModal, setRejectModal] = useState(null)
   const [rejectNote,  setRejectNote]  = useState("")
   const [copiedId,    setCopiedId]    = useState(null)
+  const [changeSellerModal, setChangeSellerModal] = useState(null)
+  const [sellerList, setSellerList]               = useState([])
+  const [sellerSearch, setSellerSearch]           = useState("")
+  const [selectedNewSellerId, setSelectedNewSellerId] = useState("")
+  const [changeSellerBusy, setChangeSellerBusy]   = useState(false)
+  const [changeSellerMsg, setChangeSellerMsg]     = useState("")
+
+  const openChangeSellerModal = async (order) => {
+    setChangeSellerModal(order)
+    setSelectedNewSellerId(order.sellerId?._id || "")
+    setSellerSearch(order.sellerId?.name || "")
+    setChangeSellerMsg("")
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/all-for-product`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setSellerList(data.filter(u => !u.isDeleted && u.role === "seller"))
+      }
+    } catch (e) {
+      console.error("Load sellers error:", e)
+    }
+  }
+
+  const handleSaveChangeSeller = async () => {
+    if (!changeSellerModal || !selectedNewSellerId) return
+    try {
+      setChangeSellerBusy(true)
+      setChangeSellerMsg("")
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/change-seller/${changeSellerModal._id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ newSellerId: selectedNewSellerId })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setChangeSellerMsg(data.msg || "Seller change karne mein error aaya")
+        return
+      }
+
+      if (data.order) {
+        setOrders(prev => prev.map(o => o._id === data.order._id ? data.order : o))
+      }
+      setChangeSellerModal(null)
+      alert(data.message || "✅ Seller successfully change ho gaya aur PPC shift ho gayi!")
+    } catch (err) {
+      setChangeSellerMsg(err.message || "Failed to change seller")
+    } finally {
+      setChangeSellerBusy(false)
+    }
+  }
 
   const fmt = (n) => Number(n || 0).toLocaleString("en-IN")
 
@@ -507,19 +564,20 @@ export default function AdminOrders() {
                       isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-200"
                     }`}>
                       <div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-1">
                           <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">🏷️ Seller</span>
-                          {hasDirectSeller && sellerId && (
-                            <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                              {sellerId}
-                            </span>
-                          )}
+                          <button
+                            onClick={() => openChangeSellerModal(order)}
+                            className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 cursor-pointer"
+                          >
+                            ✏️ Change
+                          </button>
                         </div>
                         <div className="font-bold text-white text-xs mt-1 truncate">
                           {hasDirectSeller ? sellerName : "Direct Seller"}
                         </div>
                       </div>
-                      {hasDirectSeller && sellerId && sellerName !== sellerId && (
+                      {hasDirectSeller && sellerId && (
                         <div className="text-[9.5px] text-stone-400 mt-1">
                           ID: <span className="text-emerald-300 font-semibold">{sellerId}</span>
                         </div>
@@ -728,25 +786,30 @@ export default function AdminOrders() {
                             )}
 
                             {/* Direct Seller */}
-                            {hasDirectSeller ? (
-                              <div className="text-xs">
-                                <div className="flex items-center gap-1.5">
+                            <div className="text-xs">
+                              <div className="flex items-center justify-between gap-1.5">
+                                <div className="flex items-center gap-1.5 min-w-0">
                                   <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                                     Seller
                                   </span>
-                                  <span className="font-bold text-white">
-                                    {sellerName}
+                                  <span className="font-bold text-white truncate">
+                                    {hasDirectSeller ? sellerName : "Direct Seller"}
                                   </span>
                                 </div>
-                                {sellerId && (
-                                  <div className="text-[10px] text-emerald-300/90 pl-1 mt-0.5">
-                                    ID: {sellerId}
-                                  </div>
-                                )}
+                                <button
+                                  onClick={() => openChangeSellerModal(order)}
+                                  className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
+                                  title="Change Seller ID & Transfer PPC/Sales"
+                                >
+                                  ✏️ Change
+                                </button>
                               </div>
-                            ) : (
-                              <div className="text-[10px] text-stone-500">Seller: Direct Seller</div>
-                            )}
+                              {sellerId && (
+                                <div className="text-[10px] text-emerald-300/90 pl-1 mt-0.5">
+                                  ID: {sellerId}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
 
@@ -924,6 +987,158 @@ export default function AdminOrders() {
                 className="flex-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg disabled:opacity-50"
               >
                 {busy === rejectModal.orderId ? "Rejecting..." : "❌ Confirm Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CHANGE SELLER MODAL ── */}
+      {changeSellerModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono">
+          <div className={`border rounded-3xl p-5 sm:p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto ${
+            isDark ? "bg-[#121814] border-white/[0.12] text-white" : "bg-white border-stone-200 text-stone-900"
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🔄</span>
+                <div>
+                  <h3 className="text-base font-black uppercase tracking-tight text-amber-400">Change Order Seller</h3>
+                  <p className="text-[10.5px] text-stone-400">Order #{changeSellerModal._id?.slice(-6)} · ₹{fmt(changeSellerModal.total)}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setChangeSellerModal(null)}
+                className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Status Alert */}
+            {changeSellerModal.status === "confirmed" ? (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs leading-relaxed space-y-1">
+                <div className="font-bold flex items-center gap-1.5">
+                  <span>⚡</span>
+                  <span>Order Already Confirmed (Approved)</span>
+                </div>
+                <p className="text-[11px] text-stone-300">
+                  Seller change karte hi purane seller ka <b>PPC</b> aur <b>Sales</b> automatically deduct hokar naye seller aur uski chain me transfer ho jayega.
+                </p>
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/25 text-sky-300 text-xs">
+                ℹ️ Order abhi <b>{changeSellerModal.status}</b> hai. Seller change hone ke baad approval par naye seller ko hi PPC milega.
+              </div>
+            )}
+
+            {/* Current Seller Info */}
+            <div className={`p-3 rounded-xl border text-xs space-y-1 ${
+              isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <span className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Current Assigned Seller:</span>
+              <div className="font-bold text-white text-sm">
+                {changeSellerModal.sellerId?.fullName || changeSellerModal.sellerId?.name || "Direct Seller"}
+                {changeSellerModal.sellerId?.name && (
+                  <span className="text-emerald-400 font-mono ml-2">({changeSellerModal.sellerId.name})</span>
+                )}
+              </div>
+            </div>
+
+            {/* Search or Type New Seller ID */}
+            <div>
+              <label className="block text-[10.5px] font-bold uppercase tracking-wider mb-1 text-stone-300">
+                🔍 Naya Seller Chunein Ya ID Dalein:
+              </label>
+              <input
+                type="text"
+                value={sellerSearch}
+                onChange={e => {
+                  setSellerSearch(e.target.value)
+                  setSelectedNewSellerId(e.target.value)
+                }}
+                placeholder="Seller Name, ID (e.g. DB001/DS005), ya Email..."
+                className={`w-full p-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
+                  isDark
+                    ? "bg-black/50 border-white/15 text-white placeholder:text-stone-600 focus:border-amber-400"
+                    : "bg-stone-50 border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-emerald-600"
+                }`}
+              />
+            </div>
+
+            {/* Quick Select from Filtered Seller List */}
+            <div>
+              <span className="block text-[10px] text-stone-400 uppercase font-bold tracking-wider mb-1.5">
+                Ya Niche List Se Select Karein ({sellerList.length} Sellers):
+              </span>
+              <div className={`max-h-48 overflow-y-auto rounded-xl border p-1 space-y-1 ${
+                isDark ? "bg-black/30 border-white/10" : "bg-stone-50 border-stone-200"
+              }`}>
+                {sellerList
+                  .filter(u => {
+                    if (!sellerSearch.trim()) return true
+                    const q = sellerSearch.toLowerCase().trim()
+                    return (
+                      (u.name && u.name.toLowerCase().includes(q)) ||
+                      (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+                      (u.email && u.email.toLowerCase().includes(q))
+                    )
+                  })
+                  .slice(0, 30)
+                  .map(s => {
+                    const isSelected = selectedNewSellerId === s._id || selectedNewSellerId === s.name
+                    return (
+                      <div
+                        key={s._id}
+                        onClick={() => {
+                          setSelectedNewSellerId(s._id)
+                          setSellerSearch(s.name || s.fullName)
+                        }}
+                        className={`p-2 rounded-lg cursor-pointer flex items-center justify-between text-xs transition-all ${
+                          isSelected
+                            ? "bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold"
+                            : isDark ? "hover:bg-white/[0.05] text-stone-300" : "hover:bg-stone-200 text-stone-800"
+                        }`}
+                      >
+                        <div>
+                          <div className="font-bold">{s.fullName || s.name}</div>
+                          <div className="text-[10px] text-stone-400 font-mono">🆔 {s.name} · {s.email}</div>
+                        </div>
+                        {isSelected && <span className="text-amber-400 font-bold">✓ Selected</span>}
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+
+            {/* Selected Summary */}
+            {selectedNewSellerId && (
+              <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+                🎯 <b>Target Seller ID:</b> <span className="font-mono font-bold">{selectedNewSellerId}</span>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {changeSellerMsg && (
+              <div className="p-2.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs">
+                ❌ {changeSellerMsg}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center gap-2.5 pt-2">
+              <button
+                onClick={() => setChangeSellerModal(null)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-stone-300 font-bold text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={changeSellerBusy || !selectedNewSellerId}
+                onClick={handleSaveChangeSeller}
+                className="flex-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg disabled:opacity-50"
+              >
+                {changeSellerBusy ? "Transferring..." : "🔄 Confirm & Transfer Seller"}
               </button>
             </div>
           </div>
