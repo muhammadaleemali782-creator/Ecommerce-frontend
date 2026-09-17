@@ -453,7 +453,7 @@ export default function TeamActivityRadar({ setPage }) {
     }
   }
 
-  // Automated Single-Tab Runner (runs sequentially in ONE single tab with auto-send support)
+  // Automated Single-Tab Runner (dispatches full queue to Extension v2.0 for 100% in-tab auto sequencing)
   const runSingleTabAutoSequence = async (targetList) => {
     const unsentMembers = targetList.filter(m => selectedMemberIds.has(m._id) && m.phone && !sentBroadcastIds.has(m._id))
     if (unsentMembers.length === 0) {
@@ -461,77 +461,64 @@ export default function TeamActivityRadar({ setPage }) {
       return
     }
 
-    stopAutoSendRef.current = false
-    setIsBulkSending(true)
-    let processed = 0
-
-    for (const member of unsentMembers) {
-      if (stopAutoSendRef.current) {
-        setBulkProgress(prev => ({
-          ...prev,
-          statusText: `⏸️ Broadcast rok diya gaya (${processed}/${unsentMembers.length})`,
-          done: true
-        }))
-        break
-      }
-
-      processed++
-      setBulkProgress({
-        current: processed,
-        total: unsentMembers.length,
-        statusText: `🚀 Bhej raha hai (${processed}/${unsentMembers.length}): ${member.fullName || member.name}...`,
-        done: false
-      })
-
-      const cleanPhone = member.phone.replace(/[^0-9]/g, "")
+    const queue = unsentMembers.map(m => {
+      const cleanPhone = m.phone.replace(/[^0-9]/g, "")
       const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
-      const msg = getPersonalizedWaMessage(member, broadcastTemplate, broadcastCustomText)
-      // Direct WhatsApp Web URL (avoids wa.me redirect delay)
-      const url = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msg)}`
+      return {
+        id: m._id,
+        name: m.fullName || m.name,
+        phone: formattedPhone,
+        message: getPersonalizedWaMessage(m, broadcastTemplate, broadcastCustomText)
+      }
+    })
 
-      // Opens in the SAME single window named "educa_wa_broadcast" (never opens 28 tabs)
-      window.open(url, "educa_wa_broadcast")
+    setIsBulkSending(true)
+    setBulkProgress({
+      current: 1,
+      total: queue.length,
+      statusText: `🚀 Extension v2.0 active! WhatsApp Web par ${queue.length} members ka auto-broadcast shuru ho gaya...`,
+      done: false
+    })
 
-      setSentBroadcastIds(prev => new Set([...prev, member._id]))
+    // Post queue to Extension Bridge (store-bridge.js)
+    window.postMessage({
+      type: "EDUCA_START_BROADCAST",
+      queue: queue,
+      delay: autoSendDelay || 5
+    }, "*")
 
+    // Open WhatsApp Web for the first contact in named tab
+    const first = queue[0]
+    const firstUrl = `https://web.whatsapp.com/send?phone=${first.phone}&text=${encodeURIComponent(first.message)}`
+    window.open(firstUrl, "educa_wa_broadcast")
+
+    // Record follow-up notes in backend
+    for (const m of unsentMembers) {
+      setSentBroadcastIds(prev => new Set([...prev, m._id]))
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+        fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            memberId: member._id,
+            memberId: m._id,
             note: `Auto Broadcast WhatsApp sent [${broadcastTemplate}]`,
             contactMethod: "whatsapp",
             status: "follow_up_taken"
           })
         })
       } catch {}
-
-      // Wait delay seconds before next so WhatsApp Web can load and auto-send
-      if (processed < unsentMembers.length && !stopAutoSendRef.current) {
-        for (let s = autoSendDelay; s > 0; s--) {
-          if (stopAutoSendRef.current) break
-          setBulkProgress({
-            current: processed,
-            total: unsentMembers.length,
-            statusText: `✅ ${member.fullName || member.name} ko bheja! Agla member ${s}s me khulega...`,
-            done: false
-          })
-          await new Promise(r => setTimeout(r, 1000))
-        }
-      }
     }
 
-    if (!stopAutoSendRef.current) {
+    setTimeout(() => {
       setBulkProgress({
-        current: unsentMembers.length,
-        total: unsentMembers.length,
-        statusText: `✅ Sabhi ${unsentMembers.length} selected members ka message ek hi tab me successfully process ho gaya!`,
+        current: queue.length,
+        total: queue.length,
+        statusText: `✅ Sabhi ${queue.length} members WhatsApp Web auto-sender me queued ho gaye! WhatsApp tab me live progress dekhein.`,
         done: true
       })
-    }
-    setIsBulkSending(false)
-    loadRadar()
+      setIsBulkSending(false)
+      loadRadar()
+    }, 2000)
   }
 
   if (loading) {
