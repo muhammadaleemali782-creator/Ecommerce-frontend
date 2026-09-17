@@ -250,17 +250,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
           
           {/* 1. Name */}
           <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
-            {(() => {
-              const nameCandidate = order.sellerId?.fullName || order.sellerFullName || order.sellerName
-              if (nameCandidate && nameCandidate !== order.sellerId?.name) {
-                return nameCandidate
-              }
-              if (order.sellerId?.email) {
-                const uname = order.sellerId.email.split("@")[0].replace(/[._0-9]+/g, " ").trim()
-                if (uname) return uname.charAt(0).toUpperCase() + uname.slice(1)
-              }
-              return order.sellerId?.name || "—"
-            })()}
+            {order.sellerId?.fullName || order.sellerFullName || order.sellerName || order.sellerId?.name || "—"}
           </div>
 
           {/* 2. ID */}
@@ -295,7 +285,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
               "Distributor",
               order.distributorId?.fullName
                 ? `${order.distributorId.fullName} (${order.distributorId.name})`
-                : order.distributorId?.name || "Distributor"
+                : order.distributorId?.name || order.distributorFullName || order.distributorName || (typeof order.distributorId === "object" ? "—" : "—")
             ],
           ].filter(Boolean).map(([k,v])=>(
             <div key={k} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:11,marginBottom:5}}>
@@ -569,7 +559,8 @@ function ThemePicker({ selectedId, onSelect }) {
 /* ══════════════════════════════════════
    MAIN MODAL
 ══════════════════════════════════════ */
-export default function InvoiceModal({ order, onClose, viewerRole }) {
+export default function InvoiceModal({ order: initialOrder, onClose, viewerRole }) {
+  const [order, setOrder] = useState(initialOrder)
   const [settings,setSettings]=useState(null)
   const [loading,setLoading]=useState(true)
   const [printMode,setPrintMode]=useState("normal")
@@ -578,6 +569,20 @@ export default function InvoiceModal({ order, onClose, viewerRole }) {
   const [downloading,setDownloading]=useState(false)
   const printRef=useRef()
   const modalBoxRef=useRef()
+
+  useEffect(() => {
+    if (initialOrder?._id && (!initialOrder.distributorId?.name || !initialOrder.sellerId?.fullName)) {
+      const token = localStorage.getItem("token")
+      fetch(`${import.meta.env.VITE_API_URL}/api/invoice/${initialOrder._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(r => r.json())
+        .then(d => { if (d && d._id) setOrder(d) })
+        .catch(() => {})
+    } else {
+      setOrder(initialOrder)
+    }
+  }, [initialOrder])
 
   useEffect(()=>{
     const load=async()=>{
