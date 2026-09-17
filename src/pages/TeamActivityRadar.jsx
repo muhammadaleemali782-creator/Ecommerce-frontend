@@ -17,26 +17,48 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
   'use strict';
   console.log('[EDUCA Auto-Send] Active on WhatsApp Web');
 
-  // Check every 600ms for the send button and auto-click
-  setInterval(() => {
-    // Check all known WhatsApp Web send button selectors
+  function clickElement(el) {
+    if (!el) return;
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+    el.click();
+  }
+
+  function trySend() {
     const sendBtn = document.querySelector('button[aria-label="Send"]')
       || document.querySelector('span[data-icon="send"]')?.closest('button')
       || document.querySelector('span[data-icon="wds-ic-send-solid"]')?.closest('button')
       || document.querySelector('[data-testid="send"]')?.closest('button')
-      || document.querySelector('footer button');
+      || document.querySelector('[data-testid="compose-btn-send"]')?.closest('button')
+      || Array.from(document.querySelectorAll('footer button')).find(b => 
+           b.querySelector('span[data-icon*="send"]') || 
+           b.getAttribute('aria-label')?.toLowerCase().includes('send')
+         );
 
     if (sendBtn && !sendBtn.disabled) {
-      const isSend = sendBtn.querySelector('[data-icon="send"]')
-        || sendBtn.querySelector('[data-icon="wds-ic-send-solid"]')
-        || sendBtn.querySelector('[data-testid="send"]')
-        || sendBtn.getAttribute('aria-label') === 'Send';
-      if (isSend) {
-        console.log('[EDUCA Auto-Send] Auto-clicking Send button...');
-        sendBtn.click();
-      }
+      console.log('[EDUCA Auto-Send] Found Send Button, clicking...');
+      clickElement(sendBtn);
+      return;
     }
-  }, 600);
+
+    const input = document.querySelector('footer div[contenteditable="true"]')
+      || document.querySelector('div[contenteditable="true"][data-tab="10"]');
+
+    if (input && input.innerText && input.innerText.trim().length > 0) {
+      input.focus();
+      const enterDown = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true
+      });
+      input.dispatchEvent(enterDown);
+    }
+  }
+
+  setInterval(trySend, 400);
 })();`
 
 export default function TeamActivityRadar({ setPage }) {
