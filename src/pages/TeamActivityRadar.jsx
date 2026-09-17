@@ -1,7 +1,43 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import InlineLoader from "../components/InlineLoader"
+
+const TAMPERMONKEY_SCRIPT = `// ==UserScript==
+// @name         EDUCA WhatsApp 100% Hands-Free Auto-Send
+// @namespace    https://educa-store.vercel.app/
+// @version      1.0
+// @description  Automatically clicks Send on WhatsApp Web without needing to press Enter or click Send button
+// @match        https://web.whatsapp.com/*
+// @grant        none
+// @run-at       document-idle
+// ==/UserScript==
+
+(function() {
+  'use strict';
+  console.log('[EDUCA Auto-Send] Active on WhatsApp Web');
+
+  // Check every 600ms for the send button and auto-click
+  setInterval(() => {
+    // Check all known WhatsApp Web send button selectors
+    const sendBtn = document.querySelector('button[aria-label="Send"]')
+      || document.querySelector('span[data-icon="send"]')?.closest('button')
+      || document.querySelector('span[data-icon="wds-ic-send-solid"]')?.closest('button')
+      || document.querySelector('[data-testid="send"]')?.closest('button')
+      || document.querySelector('footer button');
+
+    if (sendBtn && !sendBtn.disabled) {
+      const isSend = sendBtn.querySelector('[data-icon="send"]')
+        || sendBtn.querySelector('[data-icon="wds-ic-send-solid"]')
+        || sendBtn.querySelector('[data-testid="send"]')
+        || sendBtn.getAttribute('aria-label') === 'Send';
+      if (isSend) {
+        console.log('[EDUCA Auto-Send] Auto-clicking Send button...');
+        sendBtn.click();
+      }
+    }
+  }, 600);
+})();`
 
 export default function TeamActivityRadar({ setPage }) {
   const { user: authUser } = useAuth()
@@ -42,7 +78,7 @@ export default function TeamActivityRadar({ setPage }) {
   const [showBroadcastModal, setShowBroadcastModal] = useState(false)
   const [broadcastTemplate, setBroadcastTemplate] = useState("followup") // "followup" | "category" | "offer" | "custom"
   const [broadcastCustomText, setBroadcastCustomText] = useState(
-    "Namaste {name} ji! 👋 Humne notice kiya aapne pichle {daysInactive} dino se EDUCA VEDA me order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\n\n🛍️ Store Link: {storeLink}"
+    "Namaste {name} ji! 👋 Humne notice kiya aapne pichle {daysInactive} dino se EDUCA VEDA me order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\\n\\n🛍️ Store Link: {storeLink}"
   )
   const [sentBroadcastIds, setSentBroadcastIds] = useState(new Set())
   const [broadcastIndex, setBroadcastIndex] = useState(0)
@@ -50,6 +86,9 @@ export default function TeamActivityRadar({ setPage }) {
   const [isBulkSending, setIsBulkSending] = useState(false)
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, statusText: "", done: false })
   const [apiNotice, setApiNotice] = useState("")
+  const [showAutoSendGuide, setShowAutoSendGuide] = useState(false)
+  const [autoSendDelay, setAutoSendDelay] = useState(4)
+  const stopAutoSendRef = useRef(false)
 
   const token = localStorage.getItem("token")
 
@@ -346,7 +385,7 @@ export default function TeamActivityRadar({ setPage }) {
     }
   }
 
-  // Automated Single-Tab Runner (runs sequentially in ONE single tab instead of 28 tabs)
+  // Automated Single-Tab Runner (runs sequentially in ONE single tab with auto-send support)
   const runSingleTabAutoSequence = async (targetList) => {
     const unsentMembers = targetList.filter(m => selectedMemberIds.has(m._id) && m.phone && !sentBroadcastIds.has(m._id))
     if (unsentMembers.length === 0) {
@@ -354,24 +393,35 @@ export default function TeamActivityRadar({ setPage }) {
       return
     }
 
+    stopAutoSendRef.current = false
     setIsBulkSending(true)
     let processed = 0
 
     for (const member of unsentMembers) {
+      if (stopAutoSendRef.current) {
+        setBulkProgress(prev => ({
+          ...prev,
+          statusText: `⏸️ Broadcast rok diya gaya (${processed}/${unsentMembers.length})`,
+          done: true
+        }))
+        break
+      }
+
       processed++
       setBulkProgress({
         current: processed,
         total: unsentMembers.length,
-        statusText: `Bhej raha hai (${processed}/${unsentMembers.length}): ${member.fullName || member.name}...`,
+        statusText: `🚀 Bhej raha hai (${processed}/${unsentMembers.length}): ${member.fullName || member.name}...`,
         done: false
       })
 
       const cleanPhone = member.phone.replace(/[^0-9]/g, "")
       const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
       const msg = getPersonalizedWaMessage(member, broadcastTemplate, broadcastCustomText)
-      const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
+      // Direct WhatsApp Web URL (avoids wa.me redirect delay)
+      const url = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msg)}`
 
-      // Opens in the SAME single window named "educa_wa_broadcast" (NEVER opens 28 tabs!)
+      // Opens in the SAME single window named "educa_wa_broadcast" (never opens 28 tabs)
       window.open(url, "educa_wa_broadcast")
 
       setSentBroadcastIds(prev => new Set([...prev, member._id]))
@@ -389,18 +439,29 @@ export default function TeamActivityRadar({ setPage }) {
         })
       } catch {}
 
-      // Wait 3 seconds before next so WhatsApp Web can load
-      if (processed < unsentMembers.length) {
-        await new Promise(r => setTimeout(r, 3000))
+      // Wait delay seconds before next so WhatsApp Web can load and auto-send
+      if (processed < unsentMembers.length && !stopAutoSendRef.current) {
+        for (let s = autoSendDelay; s > 0; s--) {
+          if (stopAutoSendRef.current) break
+          setBulkProgress({
+            current: processed,
+            total: unsentMembers.length,
+            statusText: `✅ ${member.fullName || member.name} ko bheja! Agla member ${s}s me khulega...`,
+            done: false
+          })
+          await new Promise(r => setTimeout(r, 1000))
+        }
       }
     }
 
-    setBulkProgress({
-      current: unsentMembers.length,
-      total: unsentMembers.length,
-      statusText: `✅ Sabhi ${unsentMembers.length} selected members ka message ek hi tab me process ho gaya!`,
-      done: true
-    })
+    if (!stopAutoSendRef.current) {
+      setBulkProgress({
+        current: unsentMembers.length,
+        total: unsentMembers.length,
+        statusText: `✅ Sabhi ${unsentMembers.length} selected members ka message ek hi tab me successfully process ho gaya!`,
+        done: true
+      })
+    }
     setIsBulkSending(false)
     loadRadar()
   }
@@ -1099,6 +1160,78 @@ export default function TeamActivityRadar({ setPage }) {
               </div>
             )}
 
+            {/* 100% Hands-Free Auto-Send Banner / Guide */}
+            <div className={`p-3.5 rounded-2xl border ${
+              showAutoSendGuide 
+                ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-300" 
+                : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+            } text-xs space-y-2.5 transition-all`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-black text-emerald-400">
+                  <span className="text-base">🤖</span>
+                  <span>100% Hands-Free Auto-Send (Bina Enter/Click Dikhaye Sabhi Ko Bhejein)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAutoSendGuide(!showAutoSendGuide)}
+                  className="text-[11px] underline font-bold text-emerald-300 hover:text-emerald-200 shrink-0"
+                >
+                  {showAutoSendGuide ? "▲ Hide Guide" : "▼ Kaise Karein? (1-Min Setup)"}
+                </button>
+              </div>
+
+              <p className="text-[11px] leading-relaxed opacity-90">
+                Aapko Enter ya Send button par click <b>bhi na karna pade</b>, iske liye 1-baar Tampermonkey script install kar lein. Iske baad aap bas <b>"⚡ 1-Tab Auto Send"</b> dabayenge aur WhatsApp Web khud khulega, message khud send karega aur agle member par chala jayega!
+              </p>
+
+              {showAutoSendGuide && (
+                <div className="space-y-3 pt-2 border-t border-emerald-500/20">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-emerald-500/20 space-y-1">
+                      <div className="font-bold text-emerald-400">1️⃣ Step 1: Install Extension</div>
+                      <p className="text-stone-300 text-[10.5px]">
+                        Chrome me free <a href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank" rel="noreferrer" className="underline font-bold text-emerald-400">Tampermonkey Extension</a> add karein.
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-emerald-500/20 space-y-1">
+                      <div className="font-bold text-emerald-400">2️⃣ Step 2: Paste Script</div>
+                      <p className="text-stone-300 text-[10.5px]">
+                        Niche <b>"Copy Script"</b> dabayein, Tampermonkey me <b>"+"</b> (New Script) dabakar paste karein aur Ctrl+S save karein.
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-emerald-500/20 space-y-1">
+                      <div className="font-bold text-emerald-400">3️⃣ Step 3: 1-Click Send!</div>
+                      <p className="text-stone-300 text-[10.5px]">
+                        Ab yahan <b>"⚡ 1-Tab Auto Send"</b> dabayein — WhatsApp Web khud khulega, khud send hoga bina Enter dabaye!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(TAMPERMONKEY_SCRIPT)
+                        alert("✅ Auto-Send Script Copy Ho Gaya!\n\nTampermonkey extension khol kar '+' dabayein -> sara text hatakar paste karein -> Ctrl+S save karein.")
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs shadow flex items-center gap-1.5 transition-all"
+                    >
+                      <span>📋</span> Copy 100% Auto-Send Script
+                    </button>
+
+                    <a
+                      href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-2 rounded-xl bg-black/40 hover:bg-black/60 text-emerald-300 border border-emerald-500/30 text-xs font-bold"
+                    >
+                      🔗 Tampermonkey Extension (Chrome Store)
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* API Notice / Guidance */}
             {apiNotice && (
               <div className="p-3.5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs space-y-2">
@@ -1206,7 +1339,23 @@ export default function TeamActivityRadar({ setPage }) {
                 {sentBroadcastIds.size === filteredMembers.length ? (
                   <span className="text-emerald-500 font-bold">🎉 Sabhi members ko WhatsApp message bhej diya gaya hai!</span>
                 ) : (
-                  <span>Selected: <strong>{selectedMemberIds.size}</strong> members</span>
+                  <div className="flex items-center gap-3">
+                    <span>Selected: <strong>{selectedMemberIds.size}</strong> members</span>
+                    <label className="flex items-center gap-1 text-[11px] text-stone-400">
+                      <span>Speed:</span>
+                      <select
+                        value={autoSendDelay}
+                        onChange={(e) => setAutoSendDelay(Number(e.target.value))}
+                        disabled={isBulkSending}
+                        className="bg-black/30 border border-white/[0.1] rounded-lg px-2 py-0.5 text-xs text-white"
+                      >
+                        <option value={3}>3 sec / msg</option>
+                        <option value={4}>4 sec / msg (Best)</option>
+                        <option value={5}>5 sec / msg (Slow Net)</option>
+                        <option value={6}>6 sec / msg</option>
+                      </select>
+                    </label>
+                  </div>
                 )}
               </div>
 
@@ -1222,29 +1371,39 @@ export default function TeamActivityRadar({ setPage }) {
                   Close
                 </button>
 
-                {/* Single-Tab Sequential Auto Runner */}
-                <button
-                  type="button"
-                  onClick={() => runSingleTabAutoSequence(filteredMembers)}
-                  disabled={isBulkSending || selectedMemberIds.size === 0}
-                  className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/[0.12] flex items-center gap-1.5 disabled:opacity-40"
-                  title="Ek hi WhatsApp window me auto sequence chalao (28 tabs nahi khulenge)"
-                >
-                  <span>⚡ 1-Tab Auto Send</span>
-                </button>
+                {/* Stop Auto Send Button (When active) */}
+                {isBulkSending ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      stopAutoSendRef.current = true
+                    }}
+                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs shadow-lg flex items-center gap-1.5 animate-pulse"
+                  >
+                    <span>🛑 Stop Auto Send</span>
+                  </button>
+                ) : (
+                  /* Single-Tab Sequential Auto Runner */
+                  <button
+                    type="button"
+                    onClick={() => runSingleTabAutoSequence(filteredMembers)}
+                    disabled={selectedMemberIds.size === 0}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow flex items-center gap-1.5 disabled:opacity-40"
+                    title="WhatsApp Web me auto send chalao (1 hi window me bina 28 tabs khole)"
+                  >
+                    <span>⚡ 1-Tab Auto Send</span>
+                  </button>
+                )}
 
                 {/* 1-Click Direct Send Button (Calls Backend API) */}
                 <button
                   type="button"
                   onClick={() => handleBulkSendDirect(filteredMembers)}
                   disabled={isBulkSending || selectedMemberIds.size === 0}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-md hover:from-emerald-400 hover:to-green-500 flex items-center justify-center gap-1.5 disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/[0.12] flex items-center justify-center gap-1.5 disabled:opacity-40"
+                  title="Direct server API se bina koi tab khole bhejo (Requires Meta/UltraMsg key)"
                 >
-                  {isBulkSending ? (
-                    <span>⏳ Bhej raha hai...</span>
-                  ) : (
-                    <span>🚀 1-Click Me Sabhi Ko Bhejo ({selectedMemberIds.size})</span>
-                  )}
+                  <span>🚀 Direct Server API</span>
                 </button>
               </div>
             </div>
