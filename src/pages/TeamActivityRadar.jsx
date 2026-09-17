@@ -6,8 +6,8 @@ import InlineLoader from "../components/InlineLoader"
 const TAMPERMONKEY_SCRIPT = `// ==UserScript==
 // @name         EDUCA WhatsApp 100% Hands-Free Auto-Send
 // @namespace    https://educa-store.vercel.app/
-// @version      1.0
-// @description  Automatically clicks Send on WhatsApp Web without needing to press Enter or click Send button
+// @version      1.2
+// @description  Automatically clicks Send once on WhatsApp Web without needing to press Enter or click Send button
 // @match        https://web.whatsapp.com/*
 // @grant        none
 // @run-at       document-idle
@@ -15,50 +15,96 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
 
 (function() {
   'use strict';
-  console.log('[EDUCA Auto-Send] Active on WhatsApp Web');
+  console.log('[EDUCA Auto-Send] Safe Engine Initialized');
+
+  let lastSentUrl = "";
+  let isSendingLock = false;
+
+  function updateBadge(text, color = "#25D366") {
+    let badge = document.getElementById('educa-wa-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'educa-wa-badge';
+      badge.style.cssText = 'position:fixed;top:12px;right:80px;z-index:999999;padding:6px 14px;border-radius:20px;font-family:sans-serif;font-size:12px;font-weight:700;color:white;background:#111b21;border:2px solid ' + color + ';box-shadow:0 4px 15px rgba(0,0,0,0.5);pointer-events:none;';
+      document.body.appendChild(badge);
+    }
+    badge.style.borderColor = color;
+    badge.innerHTML = text;
+  }
 
   function clickElement(el) {
     if (!el) return;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-    el.click();
+    try {
+      const opts = { bubbles: true, cancelable: true, view: window };
+      el.dispatchEvent(new MouseEvent('mousedown', opts));
+      el.dispatchEvent(new MouseEvent('mouseup', opts));
+      el.click();
+    } catch (e) {}
   }
 
-  function trySend() {
-    const sendBtn = document.querySelector('button[aria-label="Send"]')
-      || document.querySelector('span[data-icon="send"]')?.closest('button')
-      || document.querySelector('span[data-icon="wds-ic-send-solid"]')?.closest('button')
-      || document.querySelector('[data-testid="send"]')?.closest('button')
-      || document.querySelector('[data-testid="compose-btn-send"]')?.closest('button')
-      || Array.from(document.querySelectorAll('footer button')).find(b => 
-           b.querySelector('span[data-icon*="send"]') || 
-           b.getAttribute('aria-label')?.toLowerCase().includes('send')
-         );
+  function runAutoSend() {
+    const currentUrl = window.location.href;
 
-    if (sendBtn && !sendBtn.disabled) {
-      console.log('[EDUCA Auto-Send] Found Send Button, clicking...');
-      clickElement(sendBtn);
+    if (lastSentUrl && lastSentUrl !== currentUrl) {
+      lastSentUrl = "";
+      isSendingLock = false;
+    }
+
+    if (lastSentUrl === currentUrl || isSendingLock) {
+      updateBadge('🔒 Sent & Locked. Waiting for next contact...', '#00a884');
       return;
     }
 
     const input = document.querySelector('footer div[contenteditable="true"]')
       || document.querySelector('div[contenteditable="true"][data-tab="10"]');
 
-    if (input && input.innerText && input.innerText.trim().length > 0) {
+    const hasText = input && input.innerText && input.innerText.trim().length > 0;
+    if (!hasText) {
+      updateBadge('⏳ EDUCA: Waiting for message text...', '#eab308');
+      return;
+    }
+
+    let targetPhone = "";
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      targetPhone = urlParams.get('phone') || "";
+    } catch (e) {}
+
+    updateBadge('⚡ Sending to ' + (targetPhone || 'Contact') + '...', '#3b82f6');
+
+    const sendBtn = document.querySelector('button[aria-label="Send"]')
+      || document.querySelector('span[data-icon="send"]')?.closest('button')
+      || document.querySelector('span[data-icon="wds-ic-send-solid"]')?.closest('button')
+      || document.querySelector('[data-testid="send"]')?.closest('button')
+      || document.querySelector('[data-testid="compose-btn-send"]')?.closest('button');
+
+    if (sendBtn && !sendBtn.disabled) {
+      const isVoice = sendBtn.querySelector('[data-icon*="ptt"]')
+        || sendBtn.querySelector('[data-icon*="mic"]')
+        || sendBtn.getAttribute('aria-label')?.toLowerCase().includes('voice')
+        || sendBtn.getAttribute('aria-label')?.toLowerCase().includes('record');
+
+      if (!isVoice) {
+        isSendingLock = true;
+        lastSentUrl = currentUrl;
+        clickElement(sendBtn);
+        updateBadge('✅ Sent to ' + (targetPhone || 'Contact') + '! Agla bnda aane de...', '#22c55e');
+        return;
+      }
+    }
+
+    if (hasText && !isSendingLock) {
+      isSendingLock = true;
+      lastSentUrl = currentUrl;
       input.focus();
-      const enterDown = new KeyboardEvent('keydown', {
-        key: 'Enter',
-        code: 'Enter',
-        keyCode: 13,
-        which: 13,
-        bubbles: true,
-        cancelable: true
-      });
-      input.dispatchEvent(enterDown);
+      const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
+      input.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
+      input.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
+      updateBadge('✅ Sent via Enter to ' + (targetPhone || 'Contact') + '!', '#22c55e');
     }
   }
 
-  setInterval(trySend, 400);
+  setInterval(runAutoSend, 600);
 })();`
 
 export default function TeamActivityRadar({ setPage }) {
@@ -109,7 +155,7 @@ export default function TeamActivityRadar({ setPage }) {
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, statusText: "", done: false })
   const [apiNotice, setApiNotice] = useState("")
   const [showAutoSendGuide, setShowAutoSendGuide] = useState(false)
-  const [autoSendDelay, setAutoSendDelay] = useState(4)
+  const [autoSendDelay, setAutoSendDelay] = useState(6)
   const stopAutoSendRef = useRef(false)
 
   const token = localStorage.getItem("token")
