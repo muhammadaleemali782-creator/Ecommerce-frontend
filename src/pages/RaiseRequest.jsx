@@ -131,6 +131,7 @@ export default function RaiseUserRequest() {
   const [address, setAddress]         = useState(draft.address || "")
   const [idType, setIdType]           = useState(draft.idType || "aadhar")
   const [idNumber, setIdNumber]       = useState(draft.idNumber || "")
+  const [category, setCategory]       = useState(draft.category || "")
   const [products, setProducts]       = useState([])
   const [productIds, setProductIds]   = useState(draft.productIds || [])
   const [assignAllProducts, setAssignAllProducts] = useState(draft.assignAllProducts || false)
@@ -138,19 +139,19 @@ export default function RaiseUserRequest() {
 
   // Auto-save draft on changes
   useEffect(() => {
-    if (name || emailName || freeEmail || phone || address || idNumber) {
+    if (name || emailName || freeEmail || phone || address || idNumber || category) {
       saveFormDraft(DRAFT_KEY, {
-        type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts
+        type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts, category
       })
     }
-  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts])
+  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts, category])
 
   // Flush immediately on phone call / tab background
   useEffect(() => {
     const flush = () => {
-      if (name || emailName || freeEmail || phone || address || idNumber) {
+      if (name || emailName || freeEmail || phone || address || idNumber || category) {
         saveFormDraft(DRAFT_KEY, {
-          type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts
+          type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts, category
         })
       }
     }
@@ -160,7 +161,7 @@ export default function RaiseUserRequest() {
       window.removeEventListener("pagehide", flush)
       window.removeEventListener("beforeunload", flush)
     }
-  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts])
+  }, [type, name, emailName, freeEmail, phone, address, idType, idNumber, productIds, assignAllProducts, category])
 
   const handleClearDraft = () => {
     clearFormDraft(DRAFT_KEY)
@@ -170,6 +171,7 @@ export default function RaiseUserRequest() {
     setPhone("")
     setAddress("")
     setIdNumber("")
+    setCategory("")
     setProductIds([])
     setAssignAllProducts(false)
     setHasRestoredDraft(false)
@@ -321,6 +323,7 @@ export default function RaiseUserRequest() {
         body: JSON.stringify({
           type, name, email: fullEmail, phone, address, generatedId,
           idType, idNumber: idNumber.trim().toUpperCase(),
+          category: category.trim(),
           requestedForId: onBehalfOf?._id || null,
           productIds: user?.role === "admin" ? productIds : [],
           assignAllProducts: user?.role === "admin" ? assignAllProducts : false
@@ -333,7 +336,7 @@ export default function RaiseUserRequest() {
       alert("Request sent to Admin ✅")
       setEmailName(""); setFreeEmail(""); setEmailExists(false)
       setName(""); setPhone(""); setAddress("")
-      setIdType("aadhar"); setIdNumber("")
+      setIdType("aadhar"); setIdNumber(""); setCategory("")
       setProductIds([]); setAssignAllProducts(false)
       setOnBehalfOf(null); setShowPicker(false)
     } catch { alert("Server error") }
@@ -599,6 +602,36 @@ export default function RaiseUserRequest() {
             <label style={LabelStyle}>Address</label>
             <textarea style={{...InputStyle, resize:"vertical", lineHeight:1.6}} placeholder="Poora address likho"
               rows={3} value={address} onChange={e=>setAddress(e.target.value)} />
+          </div>
+
+          {/* ── CATEGORY / TAG ── */}
+          <div>
+            <label style={LabelStyle}>Category / Tag (Optional)</label>
+            <select
+              style={{ ...InputStyle, marginBottom: 6 }}
+              value={["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(category) ? category : "custom"}
+              onChange={e => {
+                if (e.target.value !== "custom") setCategory(e.target.value)
+                else setCategory("custom")
+              }}
+            >
+              <option value="">-- Koi Category Select Karein (Optional) --</option>
+              <option value="Diabetic / Sugar">🩸 Diabetic / Sugar</option>
+              <option value="BP / Hypertension">💓 BP / Hypertension</option>
+              <option value="Loan">💳 Loan</option>
+              <option value="Investment">📈 Investment</option>
+              <option value="Health / Rogsetu">🌿 Health / Rogsetu</option>
+              <option value="General">🏷️ General</option>
+              <option value="custom">✏️ Custom Category Likhein...</option>
+            </select>
+            {(!["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(category) || category === "custom") && (
+              <input
+                style={InputStyle}
+                placeholder="Custom category type karein..."
+                value={category === "custom" ? "" : category}
+                onChange={e => setCategory(e.target.value)}
+              />
+            )}
           </div>
 
           {/* ── AADHAR / PAN ── */}

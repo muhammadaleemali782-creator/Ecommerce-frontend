@@ -13,6 +13,8 @@ export default function TeamActivityRadar({ setPage }) {
 
   // Filter & Search
   const [activeTab, setActiveTab] = useState("all") // "all" | "follow_up_needed" | "dormant" | "new_onboarding" | "active"
+  const [roleFilter, setRoleFilter] = useState("all") // "all" | "user" | "seller" | "distributor"
+  const [categoryFilter, setCategoryFilter] = useState("all") // "all" | specific category | "none"
   const [search, setSearch] = useState("")
 
   // Notes Modal state
@@ -30,6 +32,20 @@ export default function TeamActivityRadar({ setPage }) {
   const [waType, setWaType] = useState("personal") // "personal" | "business"
   const [customWaNumber, setCustomWaNumber] = useState("")
   const [waTemplate, setWaTemplate] = useState("followup")
+
+  // Quick Category Editor state
+  const [categoryModalMember, setCategoryModalMember] = useState(null)
+  const [editCategoryVal, setEditCategoryVal] = useState("")
+  const [savingCategory, setSavingCategory] = useState(false)
+
+  // WhatsApp Broadcast Modal state
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false)
+  const [broadcastTemplate, setBroadcastTemplate] = useState("followup") // "followup" | "category" | "offer" | "custom"
+  const [broadcastCustomText, setBroadcastCustomText] = useState(
+    "Namaste {name} ji! 👋 Humne notice kiya aapne pichle {daysInactive} dino se EDUCA VEDA me order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\n\n🛍️ Store Link: {storeLink}"
+  )
+  const [sentBroadcastIds, setSentBroadcastIds] = useState(new Set())
+  const [broadcastIndex, setBroadcastIndex] = useState(0)
 
   const token = localStorage.getItem("token")
 
@@ -150,6 +166,96 @@ export default function TeamActivityRadar({ setPage }) {
     setWaModalMember(null)
   }
 
+  const getCategoryIcon = (cat) => {
+    if (!cat) return "🏷️"
+    const c = cat.toLowerCase()
+    if (c.includes("diabet") || c.includes("sugar")) return "🩸"
+    if (c.includes("bp") || c.includes("hyper") || c.includes("pressure")) return "💓"
+    if (c.includes("loan")) return "💳"
+    if (c.includes("invest")) return "📈"
+    if (c.includes("health") || c.includes("rog") || c.includes("ayur")) return "🌿"
+    return "🏷️"
+  }
+
+  const handleUpdateCategory = async (memberId, newCat) => {
+    try {
+      setSavingCategory(true)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/team/member-category/${memberId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ category: newCat })
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setData(prev => ({
+          ...prev,
+          members: (prev?.members || []).map(m => m._id === memberId ? { ...m, category: json.category } : m)
+        }))
+        setCategoryModalMember(null)
+      } else {
+        alert(json.message || "Failed to update category")
+      }
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  const getPersonalizedWaMessage = (member, template, customText) => {
+    const name = member.fullName || member.name || "Ji"
+    const cat = member.category || "General Health"
+    const role = member.role === "distributor" ? "Distributor" : member.role === "seller" ? "Direct Seller" : "Customer"
+    const days = member.daysInactive !== null && member.daysInactive !== undefined ? `${member.daysInactive}` : "kuch"
+
+    if (template === "custom") {
+      return (customText || "")
+        .replace(/{name}/g, name)
+        .replace(/{category}/g, cat)
+        .replace(/{role}/g, role)
+        .replace(/{daysInactive}/g, days)
+        .replace(/{storeLink}/g, "https://educa-store.vercel.app/")
+    } else if (template === "category") {
+      return `Namaste ${name} ji! 👋\n\nHum EDUCA VEDA se connect kar rahe hain. Aapke *${cat}* related health requirements ke liye hamare paas pure Ayurvedic formulations & herbal products available hain.\n\nKoi consultation ya order help chahiye toh batayein!\n🛍️ Store Link: https://educa-store.vercel.app/`
+    } else if (template === "offer") {
+      return `🎉 Namaste ${name} ji! EDUCA VEDA par naye Ayurvedic products aur special health offers live ho gaye hain.\n\nApne manpasand products dekhne aur order karne ke liye visit karein:\n🛍️ Store Link: https://educa-store.vercel.app/`
+    } else {
+      // followup
+      return `Namaste ${name} ji! 👋\n\nHumne notice kiya aapne pichle *${days}* dino se EDUCA VEDA me koi naya order nahi lagaya hai. Koi product guidance ya order placement me help chahiye toh batayein!\n\n🛍️ Store Link: https://educa-store.vercel.app/`
+    }
+  }
+
+  const sendBroadcastToMember = async (member) => {
+    if (!member.phone) {
+      alert(`Member ${member.fullName || member.name} ka phone number nahi mila.`)
+      return
+    }
+    const cleanPhone = member.phone.replace(/[^0-9]/g, "")
+    const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
+    const msg = getPersonalizedWaMessage(member, broadcastTemplate, broadcastCustomText)
+    const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
+    window.open(url, "_blank")
+
+    setSentBroadcastIds(prev => new Set([...prev, member._id]))
+
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          memberId: member._id,
+          note: `Broadcast WhatsApp sent [${broadcastTemplate}]`,
+          contactMethod: "whatsapp",
+          status: "follow_up_taken"
+        })
+      })
+      loadRadar()
+    } catch {}
+  }
+
   if (loading) {
     return <InlineLoader label="Loading Team Pulse & Follow-Up Radar..." minHeight={300} />
   }
@@ -157,13 +263,26 @@ export default function TeamActivityRadar({ setPage }) {
   const members = data?.members || []
   const counts = data?.counts || {}
 
+  const presetCategories = ["Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"]
+  const existingCategories = Array.from(new Set(members.map(m => m.category).filter(Boolean)))
+  const allCategories = Array.from(new Set([...presetCategories, ...existingCategories]))
+
   const filteredMembers = members.filter(m => {
     if (activeTab !== "all" && m.activityStatus !== activeTab) return false
+    if (roleFilter !== "all" && m.role !== roleFilter) return false
+    if (categoryFilter !== "all") {
+      if (categoryFilter === "none") {
+        if (m.category) return false
+      } else if ((m.category || "").toLowerCase() !== categoryFilter.toLowerCase()) {
+        return false
+      }
+    }
     if (!search) return true
     const q = search.toLowerCase()
     return (m.fullName || "").toLowerCase().includes(q) ||
            (m.name || "").toLowerCase().includes(q) ||
-           (m.phone || "").includes(q)
+           (m.phone || "").includes(q) ||
+           (m.category || "").toLowerCase().includes(q)
   })
 
   return (
@@ -224,6 +343,77 @@ export default function TeamActivityRadar({ setPage }) {
         ))}
       </div>
 
+      {/* ── ROLE, CATEGORY & BROADCAST TOOLBAR ── */}
+      <div className={`p-4 rounded-3xl border shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 ${
+        isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+      }`}>
+        {/* Left: Role & Category Filters */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Role Filter Chips */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl border bg-black/5 dark:bg-black/30 border-white/[0.06] overflow-x-auto">
+            {[
+              { id: "all", label: "Sabhi Roles" },
+              { id: "user", label: "👤 Customers" },
+              { id: "seller", label: "🛒 Direct Sellers" },
+              { id: "distributor", label: "🏢 Distributors" },
+            ].map(r => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setRoleFilter(r.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                  roleFilter === r.id
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-stone-900"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Category Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-stone-400 whitespace-nowrap">🏷️ Category:</span>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className={`text-xs px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold ${
+                isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+              }`}
+            >
+              <option value="all">Sabhi Categories ({members.length})</option>
+              <option value="none">⚠️ Bina Category Wale ({members.filter(m => !m.category).length})</option>
+              {allCategories.map(cat => {
+                const count = members.filter(m => (m.category || "").toLowerCase() === cat.toLowerCase()).length
+                return (
+                  <option key={cat} value={cat}>
+                    {getCategoryIcon(cat)} {cat} ({count})
+                  </option>
+                )
+              })}
+            </select>
+          </div>
+        </div>
+
+        {/* Right: Broadcast WhatsApp Action */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setSentBroadcastIds(new Set())
+              setBroadcastIndex(0)
+              setShowBroadcastModal(true)
+            }}
+            disabled={filteredMembers.length === 0}
+            className="w-full lg:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-md hover:from-emerald-400 hover:to-green-500 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+          >
+            <span className="text-base">📢</span>
+            <span>Broadcast WhatsApp ({filteredMembers.length} Members)</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── TEAM CARDS LIST ── */}
       {filteredMembers.length === 0 ? (
         <div className={`p-16 text-center rounded-3xl border ${
@@ -274,6 +464,35 @@ export default function TeamActivityRadar({ setPage }) {
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border ${statusBadge.cls}`}>
                       {statusBadge.label}
                     </span>
+                  </div>
+
+                  {/* Role & Category Badge */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap text-[11px] pt-1">
+                    <span className={`px-2 py-0.5 rounded-lg font-bold font-mono text-[10px] uppercase border ${
+                      member.role === "distributor" ? "bg-sky-500/15 text-sky-400 border-sky-500/30" :
+                      member.role === "seller" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" :
+                      "bg-violet-500/15 text-violet-400 border-violet-500/30"
+                    }`}>
+                      {member.role === "distributor" ? "🏢 Distributor" : member.role === "seller" ? "🛒 Direct Seller" : "👤 User"}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryModalMember(member)
+                        setEditCategoryVal(member.category || "")
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border transition-all hover:scale-105 ${
+                        member.category
+                          ? "bg-amber-500/15 text-amber-500 border-amber-500/30 hover:bg-amber-500/25"
+                          : "bg-stone-500/15 text-stone-400 border-dashed border-stone-500/30 hover:bg-stone-500/25"
+                      }`}
+                      title="Category badalne ke liye click karein"
+                    >
+                      <span>{getCategoryIcon(member.category)}</span>
+                      <span>{member.category || "+ Add Category"}</span>
+                      <span className="text-[9px] opacity-70">✏️</span>
+                    </button>
                   </div>
 
                   {/* Contact Info & Stats */}
@@ -508,6 +727,306 @@ export default function TeamActivityRadar({ setPage }) {
                 <span>💬 Open WhatsApp & Save Remark</span>
                 <span>➔</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── QUICK CATEGORY EDIT MODAL ── */}
+      {categoryModalMember && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
+            isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 border-white/[0.08]">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2">
+                  🏷️ Member Category Badlein
+                </h3>
+                <p className="text-xs font-mono text-sky-500 mt-0.5">
+                  {categoryModalMember.fullName || categoryModalMember.name} (🆔 {categoryModalMember.name})
+                </p>
+              </div>
+              <button
+                onClick={() => setCategoryModalMember(null)}
+                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-stone-400 block">
+                Category / Tag Select Karein:
+              </label>
+              <select
+                value={["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(editCategoryVal) ? editCategoryVal : "custom"}
+                onChange={(e) => {
+                  if (e.target.value !== "custom") setEditCategoryVal(e.target.value)
+                  else setEditCategoryVal("custom")
+                }}
+                className={`w-full px-3 py-2.5 rounded-xl border text-xs font-bold ${
+                  isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                }`}
+              >
+                <option value="">-- Bina Category / None --</option>
+                <option value="Diabetic / Sugar">🩸 Diabetic / Sugar</option>
+                <option value="BP / Hypertension">💓 BP / Hypertension</option>
+                <option value="Loan">💳 Loan</option>
+                <option value="Investment">📈 Investment</option>
+                <option value="Health / Rogsetu">🌿 Health / Rogsetu</option>
+                <option value="General">🏷️ General</option>
+                <option value="custom">✏️ Custom Tag Likhein...</option>
+              </select>
+
+              {(!["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(editCategoryVal) || editCategoryVal === "custom") && (
+                <input
+                  type="text"
+                  placeholder="Apni pasand ki category likhein..."
+                  value={editCategoryVal === "custom" ? "" : editCategoryVal}
+                  onChange={(e) => setEditCategoryVal(e.target.value)}
+                  className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
+                  }`}
+                />
+              )}
+
+              <p className="text-[11px] text-stone-400">
+                💡 Category set karne se Team Radar me Diabetic, BP, Loan, Investment wagera ke hisab se members ko aasani se filter kiya ja sakta hai.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
+              <button
+                type="button"
+                onClick={() => setCategoryModalMember(null)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border ${
+                  isDark ? "border-white/[0.1] text-stone-300 hover:bg-stone-800" : "border-stone-300 text-stone-700 hover:bg-stone-100"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={savingCategory}
+                onClick={() => handleUpdateCategory(categoryModalMember._id, editCategoryVal === "custom" ? "" : editCategoryVal)}
+                className="px-5 py-2 rounded-xl bg-blue-600 text-white font-black text-xs shadow hover:bg-blue-500 disabled:opacity-50"
+              >
+                {savingCategory ? "Saving..." : "Save Category"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── WHATSAPP BROADCAST MODAL ── */}
+      {showBroadcastModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className={`w-full max-w-2xl p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 max-h-[92vh] flex flex-col ${
+            isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
+          }`}>
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b pb-3 border-white/[0.08]">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2">
+                  📢 WhatsApp Personalized Broadcast
+                </h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Filtered Target: <strong className="text-emerald-500">{filteredMembers.length} Members</strong> (
+                  Role: <span className="font-mono text-blue-400">{roleFilter.toUpperCase()}</span>,
+                  Category: <span className="font-mono text-amber-400">{categoryFilter}</span>)
+                </p>
+              </div>
+              <button
+                onClick={() => setShowBroadcastModal(false)}
+                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Template Selector & Live Preview */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-bold text-stone-400 block mb-1">
+                    Template Select Karein:
+                  </label>
+                  <select
+                    value={broadcastTemplate}
+                    onChange={(e) => setBroadcastTemplate(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${
+                      isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                    }`}
+                  >
+                    <option value="followup">🔥 Re-engagement & Follow-Up (Inactivity)</option>
+                    <option value="category">🩺 Health & Category Consultation (Personalized)</option>
+                    <option value="offer">🎉 New Products & Special Store Offers</option>
+                    <option value="custom">✏️ Custom Message (Placeholders Support)</option>
+                  </select>
+                </div>
+
+                <div className="flex items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const phones = filteredMembers.map(m => m.phone).filter(Boolean).join(", ")
+                      navigator.clipboard.writeText(phones)
+                      alert("Sabhi phone numbers copy ho gaye! (" + phones.split(",").length + " numbers)")
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 ${
+                      isDark ? "border-white/[0.1] bg-stone-800 text-stone-300 hover:bg-stone-700" : "border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100"
+                    }`}
+                  >
+                    <span>📋</span> Copy All Numbers
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (filteredMembers[0]) {
+                        const sampleMsg = getPersonalizedWaMessage(filteredMembers[0], broadcastTemplate, broadcastCustomText)
+                        navigator.clipboard.writeText(sampleMsg)
+                        alert("Message text copy ho gaya!")
+                      }
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 ${
+                      isDark ? "border-white/[0.1] bg-stone-800 text-stone-300 hover:bg-stone-700" : "border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100"
+                    }`}
+                  >
+                    <span>📑</span> Copy Message
+                  </button>
+                </div>
+              </div>
+
+              {broadcastTemplate === "custom" && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px] text-stone-400">
+                    <span>Message Text (Placeholders: <code>{"{name}"}</code>, <code>{"{category}"}</code>, <code>{"{daysInactive}"}</code>, <code>{"{role}"}</code>):</span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={broadcastCustomText}
+                    onChange={(e) => setBroadcastCustomText(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                      isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
+                    }`}
+                  />
+                </div>
+              )}
+
+              {/* Live Preview Box */}
+              {filteredMembers.length > 0 && (
+                <div className={`p-3 rounded-2xl border text-xs space-y-1 ${
+                  isDark ? "bg-black/30 border-white/[0.06]" : "bg-emerald-50/50 border-emerald-200 text-stone-800"
+                }`}>
+                  <div className="flex items-center justify-between text-[10px] font-mono font-bold text-emerald-500 uppercase">
+                    <span>💬 Live Preview (For: {filteredMembers[0]?.fullName || filteredMembers[0]?.name})</span>
+                    <span>Category: {filteredMembers[0]?.category || "None"}</span>
+                  </div>
+                  <p className="whitespace-pre-wrap text-stone-300 dark:text-stone-300 text-stone-800 text-[11px] font-medium leading-relaxed">
+                    {getPersonalizedWaMessage(filteredMembers[0], broadcastTemplate, broadcastCustomText)}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Sequence Runner & Member Checklist */}
+            <div className="flex-1 overflow-y-auto space-y-2 border-t border-b border-white/[0.08] py-2 max-h-[300px] pr-1">
+              <div className="flex items-center justify-between text-xs font-mono text-stone-400 px-1">
+                <span>RECIPIENTS ({filteredMembers.length} MEMBERS):</span>
+                <span className="text-emerald-500 font-bold">
+                  Sent: {sentBroadcastIds.size} / {filteredMembers.length}
+                </span>
+              </div>
+
+              {filteredMembers.map((member, idx) => {
+                const isSent = sentBroadcastIds.has(member._id)
+                return (
+                  <div
+                    key={member._id}
+                    className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all ${
+                      isSent
+                        ? isDark ? "bg-emerald-950/20 border-emerald-500/30" : "bg-emerald-50/70 border-emerald-300"
+                        : isDark ? "bg-black/20 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="font-mono text-[11px] text-stone-500 w-5">#{idx + 1}</span>
+                      <div className="min-w-0">
+                        <div className="font-bold truncate flex items-center gap-1.5">
+                          <span>{member.fullName || member.name}</span>
+                          {member.category && (
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-500 font-normal">
+                              {getCategoryIcon(member.category)} {member.category}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-stone-400 font-mono truncate">
+                          🆔 {member.name} · 📞 {member.phone || "No phone"} · Inactive: {member.daysInactive !== null ? `${member.daysInactive}d` : "0d"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isSent ? (
+                        <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-500 font-bold text-[11px] border border-emerald-500/30">
+                          Sent ✅
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => sendBroadcastToMember(member)}
+                          disabled={!member.phone}
+                          className="px-3 py-1.5 rounded-xl bg-green-500 text-white font-bold text-xs shadow hover:bg-green-600 disabled:opacity-40 flex items-center gap-1"
+                        >
+                          <span>💬 Send</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Modal Bottom Controls */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+              <div className="text-xs text-stone-400 font-mono">
+                {sentBroadcastIds.size === filteredMembers.length ? (
+                  <span className="text-emerald-500 font-bold">🎉 Sabhi members ko WhatsApp message bhej diya gaya hai!</span>
+                ) : (
+                  <span>Kisi bhi member ke 'Send' button par click karke personalized chat open karein</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowBroadcastModal(false)}
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold border ${
+                    isDark ? "border-white/[0.1] text-stone-300 hover:bg-stone-800" : "border-stone-300 text-stone-700 hover:bg-stone-100"
+                  }`}
+                >
+                  Close
+                </button>
+
+                {/* 1-Click Send Next Button */}
+                {sentBroadcastIds.size < filteredMembers.length && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextUnsent = filteredMembers.find(m => !sentBroadcastIds.has(m._id) && m.phone)
+                      if (nextUnsent) {
+                        sendBroadcastToMember(nextUnsent)
+                      } else {
+                        alert("Koi unsent member with valid phone number bacha nahi hai.")
+                      }
+                    }}
+                    className="flex-1 sm:flex-none px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-md hover:from-emerald-400 hover:to-green-500 flex items-center justify-center gap-1.5"
+                  >
+                    <span>▶️ Open Next ({sentBroadcastIds.size + 1}/{filteredMembers.length})</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

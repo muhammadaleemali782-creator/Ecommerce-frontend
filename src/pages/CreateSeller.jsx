@@ -18,20 +18,21 @@ export default function CreateSeller() {
   const [address, setAddress] = useState(draft.address || "")
   const [password, setPassword] = useState(draft.password || "")
   const [role, setRole] = useState(draft.role || "seller")
+  const [category, setCategory] = useState(draft.category || "")
   const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
 
   // Auto-save draft
   useEffect(() => {
-    if (name || email || phone || address) {
-      saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role })
+    if (name || email || phone || address || category) {
+      saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role, category })
     }
-  }, [name, email, phone, address, password, role])
+  }, [name, email, phone, address, password, role, category])
 
   // Flush on phone call / tab suspend
   useEffect(() => {
     const flush = () => {
-      if (name || email || phone || address) {
-        saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role })
+      if (name || email || phone || address || category) {
+        saveFormDraft(DRAFT_KEY, { name, email, phone, address, password, role, category })
       }
     }
     window.addEventListener("pagehide", flush)
@@ -40,7 +41,7 @@ export default function CreateSeller() {
       window.removeEventListener("pagehide", flush)
       window.removeEventListener("beforeunload", flush)
     }
-  }, [name, email, phone, address, password, role])
+  }, [name, email, phone, address, password, role, category])
 
   const handleClearDraft = () => {
     clearFormDraft(DRAFT_KEY)
@@ -50,6 +51,7 @@ export default function CreateSeller() {
     setAddress("")
     setPassword("")
     setRole("seller")
+    setCategory("")
     setHasRestoredDraft(false)
   }
 
@@ -108,6 +110,7 @@ export default function CreateSeller() {
           email: email.trim(),
           password,
           role,
+          category: category.trim(),
           assignedProducts: cleanProducts   // 🔥 important fix
         })
       })
@@ -129,6 +132,7 @@ export default function CreateSeller() {
       setPhone("")
       setAddress("")
       setPassword("")
+      setCategory("")
       setAssignedProducts([])
 
     } catch (err) {
@@ -217,6 +221,37 @@ export default function CreateSeller() {
             </>
           )}
         </select>
+
+        <div className="mb-3">
+          <label className="block text-xs font-semibold text-gray-600 mb-1">
+            Category / Tag (Optional)
+          </label>
+          <select
+            className="border p-2 w-full rounded text-sm mb-1.5"
+            value={["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(category) ? category : "custom"}
+            onChange={e => {
+              if (e.target.value !== "custom") setCategory(e.target.value)
+              else setCategory("custom")
+            }}
+          >
+            <option value="">-- Koi Category Select Karein (Optional) --</option>
+            <option value="Diabetic / Sugar">🩸 Diabetic / Sugar</option>
+            <option value="BP / Hypertension">💓 BP / Hypertension</option>
+            <option value="Loan">💳 Loan</option>
+            <option value="Investment">📈 Investment</option>
+            <option value="Health / Rogsetu">🌿 Health / Rogsetu</option>
+            <option value="General">🏷️ General</option>
+            <option value="custom">✏️ Custom Category Likhein...</option>
+          </select>
+          {(!["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(category) || category === "custom") && (
+            <input
+              className="border p-2 w-full rounded text-sm"
+              placeholder="Custom category type karein..."
+              value={category === "custom" ? "" : category}
+              onChange={e => setCategory(e.target.value)}
+            />
+          )}
+        </div>
 
         {/* 🔥 PRODUCT ASSIGN SECTION — only for seller/distributor */}
         {(role === "seller" || role === "distributor") && (
