@@ -309,6 +309,13 @@ export default function RaiseUserRequest() {
       alert(idType === "aadhar" ? "Aadhar number 12 digit ka hona chahiye" : "PAN number sahi format mein nahi hai (e.g. ABCDE1234F)")
       return
     }
+    if (phone && phone.trim()) {
+      const cleanP = phone.replace(/\D/g, "")
+      if (cleanP.length !== 10) {
+        alert("Mobile number exactly 10 digit ka hona chahiye (bina 0 ya +91 ke).")
+        return
+      }
+    }
     try {
       const chkRes = await fetch(`${import.meta.env.VITE_API_URL}/check-email?email=${encodeURIComponent(fullEmail)}`)
       const chkData = await chkRes.json()

@@ -461,22 +461,42 @@ export default function TeamActivityRadar({ setPage }) {
       return
     }
 
-    const queue = unsentMembers.map(m => {
-      const cleanPhone = m.phone.replace(/[^0-9]/g, "")
-      const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
-      return {
-        id: m._id,
-        name: m.fullName || m.name,
-        phone: formattedPhone,
-        message: getPersonalizedWaMessage(m, broadcastTemplate, broadcastCustomText)
+    const queue = []
+    let invalidCount = 0
+
+    for (const m of unsentMembers) {
+      const cleanDigits = (m.phone || "").replace(/\D/g, "")
+      let validPhone = ""
+      if (cleanDigits.length === 10) {
+        validPhone = `91${cleanDigits}`
+      } else if (cleanDigits.length === 12 && cleanDigits.startsWith("91")) {
+        validPhone = cleanDigits
       }
-    })
+
+      if (validPhone) {
+        queue.push({
+          id: m._id,
+          name: m.fullName || m.name,
+          phone: validPhone,
+          message: getPersonalizedWaMessage(m, broadcastTemplate, broadcastCustomText)
+        })
+      } else {
+        invalidCount++
+      }
+    }
+
+    if (queue.length === 0) {
+      alert("Selected members me se kisi ke paas bhi valid 10-digit mobile number nahi hai.")
+      return
+    }
 
     setIsBulkSending(true)
     setBulkProgress({
       current: 1,
       total: queue.length,
-      statusText: `🚀 Extension v2.0 active! WhatsApp Web par ${queue.length} members ka auto-broadcast shuru ho gaya...`,
+      statusText: invalidCount > 0
+        ? `🚀 Extension v2.2 active! ${queue.length} valid members ko bhej raha hai (${invalidCount} galat/9-digit numbers auto-skip kiye)...`
+        : `🚀 Extension v2.2 active! WhatsApp Web par ${queue.length} members ka auto-broadcast shuru ho gaya...`,
       done: false
     })
 
@@ -1361,7 +1381,13 @@ export default function TeamActivityRadar({ setPage }) {
                           )}
                         </div>
                         <div className="text-[10px] text-stone-400 font-mono truncate">
-                          🆔 {member.name} · 📞 {member.phone || "No phone"} · Inactive: {member.daysInactive !== null ? `${member.daysInactive}d` : "0d"}
+                          🆔 {member.name} · 📞 {member.phone || "No phone"} {(() => {
+                            const d = (member.phone || "").replace(/\D/g, "")
+                            if (d && d.length !== 10 && !(d.length === 12 && d.startsWith("91"))) {
+                              return <span className="text-red-400 font-bold ml-1">⚠️ Wrong ({d.length} digits)</span>
+                            }
+                            return null
+                          })()} · Inactive: {member.daysInactive !== null ? `${member.daysInactive}d` : "0d"}
                         </div>
                       </div>
                     </div>

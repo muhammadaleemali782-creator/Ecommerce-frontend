@@ -84,6 +84,14 @@ export default function CreateSeller() {
       return
     }
 
+    if (phone && phone.trim()) {
+      const cleanP = phone.replace(/\D/g, "")
+      if (cleanP.length !== 10) {
+        alert("Mobile number exactly 10 digit ka hona chahiye (na kam, na zyada).")
+        return
+      }
+    }
+
     try {
       setLoading(true)
 
@@ -173,9 +181,10 @@ export default function CreateSeller() {
 
         <input
           className="border p-2 w-full mb-3 rounded"
-          placeholder="Phone Number (optional)"
+          placeholder="Mobile Number (10 digits)"
           value={phone}
-          onChange={e => setPhone(e.target.value)}
+          maxLength={10}
+          onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
         />
 
         <input
