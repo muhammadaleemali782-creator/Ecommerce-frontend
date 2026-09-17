@@ -107,6 +107,14 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
   setInterval(runAutoSend, 600);
 })();`
 
+const PRESET_TEMPLATES = {
+  followup: "Namaste {name} ji! 👋\n\nHumne notice kiya aapne pichle *{daysInactive}* dino se EDUCA VEDA me koi naya order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\n\n🛍️ Store Link: {storeLink}",
+  category: "Namaste {name} ji! 👋\n\nAapke *{category}* related health requirements ke liye hamare paas pure Ayurvedic formulations aur expert solutions available hain.\n\nKoi bhi consultation ya order help chahiye toh batayein!\n🛍️ Store Link: {storeLink}",
+  offer: "🎉 Namaste {name} ji!\n\nEDUCA VEDA par naye Ayurvedic formulations aur special health store offers live ho gaye hain! Apne manpasand products dekhne aur order karne ke liye visit karein:\n🛍️ Store Link: {storeLink}",
+  group: "Namaste {name} ji ({role})! 🏢\n\nEDUCA VEDA me aapki team activity aur business growth ke liye hamari special schemes live hain. Apne direct sellers aur network ko active karein!\n\n🛍️ Store: {storeLink}",
+  custom: "Namaste {name} ji! 👋\n\n"
+}
+
 export default function TeamActivityRadar({ setPage }) {
   const { user: authUser } = useAuth()
   const { isDark } = useTheme()
@@ -144,10 +152,8 @@ export default function TeamActivityRadar({ setPage }) {
 
   // WhatsApp Broadcast Modal state
   const [showBroadcastModal, setShowBroadcastModal] = useState(false)
-  const [broadcastTemplate, setBroadcastTemplate] = useState("followup") // "followup" | "category" | "offer" | "custom"
-  const [broadcastCustomText, setBroadcastCustomText] = useState(
-    "Namaste {name} ji! 👋 Humne notice kiya aapne pichle {daysInactive} dino se EDUCA VEDA me order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\\n\\n🛍️ Store Link: {storeLink}"
-  )
+  const [broadcastTemplate, setBroadcastTemplate] = useState("followup") // "followup" | "category" | "offer" | "group" | "custom"
+  const [broadcastCustomText, setBroadcastCustomText] = useState(PRESET_TEMPLATES.followup)
   const [sentBroadcastIds, setSentBroadcastIds] = useState(new Set())
   const [broadcastIndex, setBroadcastIndex] = useState(0)
   const [selectedMemberIds, setSelectedMemberIds] = useState(new Set())
@@ -320,23 +326,17 @@ export default function TeamActivityRadar({ setPage }) {
     const name = member.fullName || member.name || "Ji"
     const cat = member.category || "General Health"
     const role = member.role === "distributor" ? "Distributor" : member.role === "seller" ? "Direct Seller" : "Customer"
-    const days = member.daysInactive !== null && member.daysInactive !== undefined ? `${member.daysInactive}` : "kuch"
+    const days = member.daysInactive !== null && member.daysInactive !== undefined ? `${member.daysInactive}` : "0"
 
-    if (template === "custom") {
-      return (customText || "")
-        .replace(/{name}/g, name)
-        .replace(/{category}/g, cat)
-        .replace(/{role}/g, role)
-        .replace(/{daysInactive}/g, days)
-        .replace(/{storeLink}/g, "https://educa-store.vercel.app/")
-    } else if (template === "category") {
-      return `Namaste ${name} ji! 👋\n\nHum EDUCA VEDA se connect kar rahe hain. Aapke *${cat}* related health requirements ke liye hamare paas pure Ayurvedic formulations & herbal products available hain.\n\nKoi consultation ya order help chahiye toh batayein!\n🛍️ Store Link: https://educa-store.vercel.app/`
-    } else if (template === "offer") {
-      return `🎉 Namaste ${name} ji! EDUCA VEDA par naye Ayurvedic products aur special health offers live ho gaye hain.\n\nApne manpasand products dekhne aur order karne ke liye visit karein:\n🛍️ Store Link: https://educa-store.vercel.app/`
-    } else {
-      // followup
-      return `Namaste ${name} ji! 👋\n\nHumne notice kiya aapne pichle *${days}* dino se EDUCA VEDA me koi naya order nahi lagaya hai. Koi product guidance ya order placement me help chahiye toh batayein!\n\n🛍️ Store Link: https://educa-store.vercel.app/`
-    }
+    const baseText = (customText && customText.trim()) ? customText : (PRESET_TEMPLATES[template] || PRESET_TEMPLATES.followup)
+
+    return baseText
+      .replace(/{name}/g, name)
+      .replace(/{category}/g, cat)
+      .replace(/{role}/g, role)
+      .replace(/{daysInactive}/g, days)
+      .replace(/{storeLink}/g, "https://educa-store.vercel.app/")
+      .replace(/{phone}/g, member.phone || "")
   }
 
   const sendBroadcastToMember = async (member) => {
@@ -1023,17 +1023,17 @@ export default function TeamActivityRadar({ setPage }) {
 
       {/* ── QUICK CATEGORY EDIT MODAL ── */}
       {categoryModalMember && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
             isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
           }`}>
             <div className="flex items-center justify-between border-b pb-3 border-white/[0.08]">
               <div>
                 <h3 className="text-base font-black flex items-center gap-2">
-                  🏷️ Member Category Badlein
+                  🏷️ Category / Custom Tag Badlein
                 </h3>
                 <p className="text-xs font-mono text-sky-500 mt-0.5">
-                  {categoryModalMember.fullName || categoryModalMember.name} (🆔 {categoryModalMember.name})
+                  {categoryModalMember.fullName || categoryModalMember.name} (Role: <span className="uppercase text-amber-400 font-bold">{categoryModalMember.role}</span>)
                 </p>
               </div>
               <button
@@ -1045,43 +1045,59 @@ export default function TeamActivityRadar({ setPage }) {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-bold text-stone-400 block">
-                Category / Tag Select Karein:
-              </label>
-              <select
-                value={["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(editCategoryVal) ? editCategoryVal : "custom"}
-                onChange={(e) => {
-                  if (e.target.value !== "custom") setEditCategoryVal(e.target.value)
-                  else setEditCategoryVal("custom")
-                }}
-                className={`w-full px-3 py-2.5 rounded-xl border text-xs font-bold ${
-                  isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
-                }`}
-              >
-                <option value="">-- Bina Category / None --</option>
-                <option value="Diabetic / Sugar">🩸 Diabetic / Sugar</option>
-                <option value="BP / Hypertension">💓 BP / Hypertension</option>
-                <option value="Loan">💳 Loan</option>
-                <option value="Investment">📈 Investment</option>
-                <option value="Health / Rogsetu">🌿 Health / Rogsetu</option>
-                <option value="General">🏷️ General</option>
-                <option value="custom">✏️ Custom Tag Likhein...</option>
-              </select>
-
-              {(!["", "Diabetic / Sugar", "BP / Hypertension", "Loan", "Investment", "Health / Rogsetu", "General"].includes(editCategoryVal) || editCategoryVal === "custom") && (
+              <div>
+                <label className="text-xs font-bold text-stone-300 block mb-1.5">
+                  Category Name / Tag (Kuch bhi likhein ya neeche click karein):
+                </label>
                 <input
                   type="text"
-                  placeholder="Apni pasand ki category likhein..."
-                  value={editCategoryVal === "custom" ? "" : editCategoryVal}
+                  placeholder="Kuch bhi likhein, e.g. Diabetic, Loan, VIP, BP, Wholesale..."
+                  value={editCategoryVal}
                   onChange={(e) => setEditCategoryVal(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark ? "bg-black/60 border-white/[0.15] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
                   }`}
+                  autoFocus
                 />
-              )}
+              </div>
 
-              <p className="text-[11px] text-stone-400">
-                💡 Category set karne se Team Radar me Diabetic, BP, Loan, Investment wagera ke hisab se members ko aasani se filter kiya ja sakta hai.
+              <div>
+                <span className="text-[11px] font-bold text-stone-400 block mb-1.5">
+                  ⚡ 1-Click Popular Tags:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: "🩸 Diabetic / Sugar", val: "Diabetic / Sugar" },
+                    { label: "💓 BP / Hypertension", val: "BP / Hypertension" },
+                    { label: "💳 Loan", val: "Loan" },
+                    { label: "📈 Investment", val: "Investment" },
+                    { label: "🌿 Health / Rogsetu", val: "Health / Rogsetu" },
+                    { label: "⭐ VIP Member", val: "VIP Member" },
+                    { label: "🔥 Active Seller", val: "Active Seller" },
+                    { label: "🏢 Distributor Hub", val: "Distributor Hub" },
+                    { label: "🛒 Wholesale Buyer", val: "Wholesale Buyer" },
+                    { label: "❌ Clear / Khali", val: "" }
+                  ].map((pill) => (
+                    <button
+                      key={pill.label}
+                      type="button"
+                      onClick={() => setEditCategoryVal(pill.val)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
+                        editCategoryVal === pill.val
+                          ? "bg-blue-600 text-white border-blue-500 shadow-sm"
+                          : isDark
+                          ? "bg-stone-800/80 border-white/[0.08] text-stone-300 hover:bg-stone-700"
+                          : "bg-stone-100 border-stone-300 text-stone-700 hover:bg-stone-200"
+                      }`}
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-[11px] text-stone-400 leading-relaxed bg-black/20 p-2.5 rounded-xl border border-white/[0.05]">
+                💡 <b>Benefit:</b> Category set karne ke baad aap Team Radar me Diabetic, Loan, BP, VIP wagera filter karke unhe alag-alag targeted WhatsApp messages bhej sakte hain.
               </p>
             </div>
 
@@ -1098,7 +1114,7 @@ export default function TeamActivityRadar({ setPage }) {
               <button
                 type="button"
                 disabled={savingCategory}
-                onClick={() => handleUpdateCategory(categoryModalMember._id, editCategoryVal === "custom" ? "" : editCategoryVal)}
+                onClick={() => handleUpdateCategory(categoryModalMember._id, editCategoryVal.trim())}
                 className="px-5 py-2 rounded-xl bg-blue-600 text-white font-black text-xs shadow hover:bg-blue-500 disabled:opacity-50"
               >
                 {savingCategory ? "Saving..." : "Save Category"}
@@ -1111,11 +1127,11 @@ export default function TeamActivityRadar({ setPage }) {
       {/* ── WHATSAPP BROADCAST MODAL ── */}
       {showBroadcastModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className={`w-full max-w-2xl p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-4 max-h-[92vh] flex flex-col ${
+          <div className={`w-full max-w-2xl p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-3.5 max-h-[94vh] flex flex-col ${
             isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
           }`}>
             {/* Modal Header */}
-            <div className="flex items-start justify-between border-b pb-3 border-white/[0.08]">
+            <div className="flex items-start justify-between border-b pb-2.5 border-white/[0.08]">
               <div>
                 <h3 className="text-base font-black flex items-center gap-2">
                   📢 WhatsApp Personalized Broadcast
@@ -1134,28 +1150,135 @@ export default function TeamActivityRadar({ setPage }) {
               </button>
             </div>
 
-            {/* Template Selector & Live Preview */}
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs font-bold text-stone-400 block mb-1">
-                    Template Select Karein:
+            {/* In-Modal Group & Category Filter Bar */}
+            <div className="p-2.5 rounded-2xl border bg-black/20 dark:bg-black/40 border-white/[0.08] space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] font-black uppercase text-stone-400 tracking-wider">🎯 Filter Recipients By Group:</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleSelectAll(filteredMembers)}
+                    className="text-[11px] px-2.5 py-0.5 rounded-lg font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all"
+                  >
+                    ✓ Select All ({filteredMembers.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMemberIds(new Set())}
+                    className="text-[11px] px-2.5 py-0.5 rounded-lg font-bold bg-stone-500/20 text-stone-400 border border-stone-500/30 hover:bg-stone-500/30 transition-all"
+                  >
+                    ✕ Deselect All
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Role Chips */}
+                <div className="flex items-center gap-1 p-0.5 rounded-xl border bg-black/20 border-white/[0.06] overflow-x-auto">
+                  {[
+                    { id: "all", label: "Sabhi Roles" },
+                    { id: "user", label: "👤 Customers" },
+                    { id: "seller", label: "🛒 Direct Sellers" },
+                    { id: "distributor", label: "🏢 Distributors" },
+                  ].map(r => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => {
+                        setRoleFilter(r.id)
+                        setTimeout(() => {
+                          const matched = members.filter(m => {
+                            if (activeTab !== "all" && m.activityStatus !== activeTab) return false
+                            if (r.id !== "all" && m.role !== r.id) return false
+                            if (categoryFilter !== "all") {
+                              if (categoryFilter === "none") { if (m.category) return false }
+                              else if ((m.category || "").toLowerCase() !== categoryFilter.toLowerCase()) return false
+                            }
+                            return true
+                          })
+                          setSelectedMemberIds(new Set(matched.filter(m => m.phone).map(m => m._id)))
+                        }, 50)
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                        roleFilter === r.id
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-stone-900"
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Category Dropdown */}
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <span className="text-[11px] font-bold text-stone-400">Category:</span>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setCategoryFilter(val)
+                      setTimeout(() => {
+                        const matched = members.filter(m => {
+                          if (activeTab !== "all" && m.activityStatus !== activeTab) return false
+                          if (roleFilter !== "all" && m.role !== roleFilter) return false
+                          if (val !== "all") {
+                            if (val === "none") { if (m.category) return false }
+                            else if ((m.category || "").toLowerCase() !== val.toLowerCase()) return false
+                          }
+                          return true
+                        })
+                        setSelectedMemberIds(new Set(matched.filter(m => m.phone).map(m => m._id)))
+                      }, 50)
+                    }}
+                    className={`text-xs px-2.5 py-1 rounded-xl border focus:outline-none font-bold ${
+                      isDark ? "bg-stone-800 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                    }`}
+                  >
+                    <option value="all">Sabhi Categories ({members.length})</option>
+                    <option value="none">⚠️ Bina Category ({members.filter(m => !m.category).length})</option>
+                    {allCategories.map(cat => {
+                      const count = members.filter(m => (m.category || "").toLowerCase() === cat.toLowerCase()).length
+                      return (
+                        <option key={cat} value={cat}>
+                          {getCategoryIcon(cat)} {cat} ({count})
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Template Selector & Always-Visible Custom Message Editor */}
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-bold text-stone-400 shrink-0">
+                    Template:
                   </label>
                   <select
                     value={broadcastTemplate}
-                    onChange={(e) => setBroadcastTemplate(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${
+                    onChange={(e) => {
+                      const t = e.target.value
+                      setBroadcastTemplate(t)
+                      if (PRESET_TEMPLATES[t]) {
+                        setBroadcastCustomText(PRESET_TEMPLATES[t])
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-bold ${
                       isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
                     }`}
                   >
-                    <option value="followup">🔥 Re-engagement & Follow-Up (Inactivity)</option>
-                    <option value="category">🩺 Health & Category Consultation (Personalized)</option>
-                    <option value="offer">🎉 New Products & Special Store Offers</option>
-                    <option value="custom">✏️ Custom Message (Placeholders Support)</option>
+                    <option value="followup">🔥 Re-engagement & Follow-Up</option>
+                    <option value="category">🩺 Health & Category Consultation</option>
+                    <option value="offer">🎉 New Products & Store Offers</option>
+                    <option value="group">🏢 Team & Distributor Growth Scheme</option>
+                    <option value="custom">✏️ Custom Blank Message</option>
                   </select>
                 </div>
 
-                <div className="flex items-end gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -1163,11 +1286,11 @@ export default function TeamActivityRadar({ setPage }) {
                       navigator.clipboard.writeText(phones)
                       alert("Sabhi phone numbers copy ho gaye! (" + phones.split(",").length + " numbers)")
                     }}
-                    className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 ${
+                    className={`py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 ${
                       isDark ? "border-white/[0.1] bg-stone-800 text-stone-300 hover:bg-stone-700" : "border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100"
                     }`}
                   >
-                    <span>📋</span> Copy All Numbers
+                    <span>📋</span> Copy Numbers
                   </button>
                   <button
                     type="button"
@@ -1178,7 +1301,7 @@ export default function TeamActivityRadar({ setPage }) {
                         alert("Message text copy ho gaya!")
                       }
                     }}
-                    className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 ${
+                    className={`py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 ${
                       isDark ? "border-white/[0.1] bg-stone-800 text-stone-300 hover:bg-stone-700" : "border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100"
                     }`}
                   >
@@ -1187,32 +1310,60 @@ export default function TeamActivityRadar({ setPage }) {
                 </div>
               </div>
 
-              {broadcastTemplate === "custom" && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px] text-stone-400">
-                    <span>Message Text (Placeholders: <code>{"{name}"}</code>, <code>{"{category}"}</code>, <code>{"{daysInactive}"}</code>, <code>{"{role}"}</code>):</span>
+              {/* Message Textarea with Placeholder Insertion Chips */}
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-stone-400">
+                  <span className="font-bold">Apna Sandesh Likhein (Type / Edit Message):</span>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span className="text-[10px] text-stone-500">Insert:</span>
+                    {[
+                      { label: "{name}", tag: "{name}" },
+                      { label: "{category}", tag: "{category}" },
+                      { label: "{role}", tag: "{role}" },
+                      { label: "{daysInactive}", tag: "{daysInactive}" },
+                      { label: "{storeLink}", tag: "{storeLink}" },
+                      { label: "{phone}", tag: "{phone}" },
+                    ].map((item) => (
+                      <button
+                        key={item.tag}
+                        type="button"
+                        onClick={() => setBroadcastCustomText(prev => prev + " " + item.tag)}
+                        className="px-1.5 py-0.5 rounded bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 font-mono text-[10px] border border-blue-500/20 transition-all"
+                        title={`Click to insert ${item.tag}`}
+                      >
+                        +{item.label}
+                      </button>
+                    ))}
                   </div>
-                  <textarea
-                    rows={3}
-                    value={broadcastCustomText}
-                    onChange={(e) => setBroadcastCustomText(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                      isDark ? "bg-black/50 border-white/[0.12]" : "bg-stone-50 border-stone-300"
-                    }`}
-                  />
                 </div>
-              )}
+                <textarea
+                  rows={3}
+                  value={broadcastCustomText}
+                  onChange={(e) => setBroadcastCustomText(e.target.value)}
+                  placeholder="Yahan apna custom message likhein... (Placeholders: {name}, {category}, {role}, {daysInactive}, {storeLink})"
+                  className={`w-full px-3 py-2 rounded-xl border text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans ${
+                    isDark ? "bg-black/60 border-white/[0.15] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                  }`}
+                />
+              </div>
 
-              {/* Live Preview Box */}
+              {/* High-Contrast Live Preview Box */}
               {filteredMembers.length > 0 && (
-                <div className={`p-3 rounded-2xl border text-xs space-y-1 ${
-                  isDark ? "bg-black/30 border-white/[0.06]" : "bg-emerald-50/50 border-emerald-200 text-stone-800"
+                <div className={`p-3 rounded-2xl border text-xs space-y-1.5 ${
+                  isDark ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-100" : "bg-emerald-50/70 border-emerald-300 text-emerald-950"
                 }`}>
-                  <div className="flex items-center justify-between text-[10px] font-mono font-bold text-emerald-500 uppercase">
-                    <span>💬 Live Preview (For: {filteredMembers[0]?.fullName || filteredMembers[0]?.name})</span>
-                    <span>Category: {filteredMembers[0]?.category || "None"}</span>
+                  <div className="flex items-center justify-between text-[11px] font-mono font-bold text-emerald-400">
+                    <span className="flex items-center gap-1.5">
+                      <span>💬 Live Preview</span>
+                      <span className="text-white/80 font-sans">
+                        (Target: <b>{filteredMembers[0]?.fullName || filteredMembers[0]?.name}</b> · Role: <span className="uppercase text-amber-400">{filteredMembers[0]?.role}</span> · Category: {filteredMembers[0]?.category || "Bina Category"})
+                      </span>
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider bg-emerald-500/20 px-2 py-0.5 rounded-full text-emerald-300 border border-emerald-500/30">
+                      Personalized
+                    </span>
                   </div>
-                  <p className="whitespace-pre-wrap text-stone-300 dark:text-stone-300 text-stone-800 text-[11px] font-medium leading-relaxed">
+                  <p className="whitespace-pre-wrap font-sans text-xs font-medium leading-relaxed bg-black/30 p-2.5 rounded-xl border border-white/[0.06] text-stone-100">
                     {getPersonalizedWaMessage(filteredMembers[0], broadcastTemplate, broadcastCustomText)}
                   </p>
                 </div>
@@ -1372,13 +1523,24 @@ export default function TeamActivityRadar({ setPage }) {
                       />
                       <span className="font-mono text-[11px] text-stone-500 w-5">#{idx + 1}</span>
                       <div className="min-w-0">
-                        <div className="font-bold truncate flex items-center gap-1.5">
+                        <div className="font-bold truncate flex items-center gap-1.5 flex-wrap">
                           <span>{member.fullName || member.name}</span>
-                          {member.category && (
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-500 font-normal">
-                              {getCategoryIcon(member.category)} {member.category}
-                            </span>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCategoryModalMember(member)
+                              setEditCategoryVal(member.category || "")
+                            }}
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-all hover:scale-105 ${
+                              member.category
+                                ? "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30"
+                                : "bg-stone-800 text-stone-400 border-dashed border-stone-600 hover:text-white"
+                            }`}
+                            title="Category tag badalna / set karna"
+                          >
+                            <span>{getCategoryIcon(member.category)} {member.category || "+ Add Tag"}</span>
+                            <span className="text-[9px] opacity-70 ml-1">✏️</span>
+                          </button>
                         </div>
                         <div className="text-[10px] text-stone-400 font-mono truncate">
                           🆔 {member.name} · 📞 {member.phone || "No phone"} {(() => {
