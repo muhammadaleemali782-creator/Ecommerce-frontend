@@ -164,7 +164,33 @@ export default function TeamActivityRadar({ setPage }) {
   const [autoSendDelay, setAutoSendDelay] = useState(6)
   const stopAutoSendRef = useRef(false)
 
+  // Custom Groups state
+  const [customGroups, setCustomGroups] = useState([])
+  const [activeCustomGroup, setActiveCustomGroup] = useState("")
+  const [showSaveGroupModal, setShowSaveGroupModal] = useState(false)
+  const [groupNameInput, setGroupNameInput] = useState("")
+  const [savingGroup, setSavingGroup] = useState(false)
+
   const token = localStorage.getItem("token")
+
+  const loadCustomGroups = useCallback(async () => {
+    try {
+      const local = localStorage.getItem(`educa_groups_${authUser?._id}`)
+      if (local) setCustomGroups(JSON.parse(local))
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/team/custom-groups`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json.groups) {
+          setCustomGroups(json.groups)
+          localStorage.setItem(`educa_groups_${authUser?._id}`, JSON.stringify(json.groups))
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load custom groups:", err)
+    }
+  }, [token, authUser])
 
   const loadRadar = useCallback(async () => {
     try {
@@ -186,7 +212,8 @@ export default function TeamActivityRadar({ setPage }) {
 
   useEffect(() => {
     loadRadar()
-  }, [loadRadar])
+    loadCustomGroups()
+  }, [loadRadar, loadCustomGroups])
 
   const openNotesModal = async (member) => {
     setSelectedMember(member)
@@ -320,6 +347,71 @@ export default function TeamActivityRadar({ setPage }) {
     } finally {
       setSavingCategory(false)
     }
+  }
+
+  const handleSaveCustomGroup = async (name, memberIds, existingId = null) => {
+    if (!name || !name.trim()) return
+    setSavingGroup(true)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/team/custom-groups`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ id: existingId, name: name.trim(), memberIds })
+      })
+      const json = await res.json()
+      if (json.success && json.group) {
+        setCustomGroups(prev => {
+          const filtered = prev.filter(g => g._id !== json.group._id)
+          const next = [json.group, ...filtered]
+          localStorage.setItem(`educa_groups_${authUser?._id}`, JSON.stringify(next))
+          return next
+        })
+        setActiveCustomGroup(json.group._id)
+        setShowSaveGroupModal(false)
+        setGroupNameInput("")
+        alert(`✅ Group "${json.group.name}" (${memberIds.length} members) save ho gaya!`)
+      } else {
+        const localGroup = { _id: existingId || `local_${Date.now()}`, name: name.trim(), memberIds }
+        setCustomGroups(prev => {
+          const next = [localGroup, ...prev.filter(g => g._id !== localGroup._id)]
+          localStorage.setItem(`educa_groups_${authUser?._id}`, JSON.stringify(next))
+          return next
+        })
+        setActiveCustomGroup(localGroup._id)
+        setShowSaveGroupModal(false)
+        setGroupNameInput("")
+        alert(`✅ Group "${localGroup.name}" (${memberIds.length} members) save ho gaya!`)
+      }
+    } catch (err) {
+      const localGroup = { _id: existingId || `local_${Date.now()}`, name: name.trim(), memberIds }
+      setCustomGroups(prev => {
+        const next = [localGroup, ...prev.filter(g => g._id !== localGroup._id)]
+        localStorage.setItem(`educa_groups_${authUser?._id}`, JSON.stringify(next))
+        return next
+      })
+      setActiveCustomGroup(localGroup._id)
+      setShowSaveGroupModal(false)
+      setGroupNameInput("")
+      alert(`✅ Group "${localGroup.name}" (${memberIds.length} members) save ho gaya!`)
+    } finally {
+      setSavingGroup(false)
+    }
+  }
+
+  const handleDeleteCustomGroup = async (groupId) => {
+    if (!window.confirm("Kya aap is group ko delete karna chahte hain?")) return
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/team/custom-groups/${groupId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    } catch {}
+    setCustomGroups(prev => {
+      const next = prev.filter(g => g._id !== groupId)
+      localStorage.setItem(`educa_groups_${authUser?._id}`, JSON.stringify(next))
+      return next
+    })
+    if (activeCustomGroup === groupId) setActiveCustomGroup("")
   }
 
   const getPersonalizedWaMessage = (member, template, customText) => {
@@ -552,7 +644,11 @@ export default function TeamActivityRadar({ setPage }) {
   const existingCategories = Array.from(new Set(members.map(m => m.category).filter(Boolean)))
   const allCategories = Array.from(new Set([...presetCategories, ...existingCategories]))
 
+  const activeGroupObj = customGroups.find(g => g._id === activeCustomGroup)
+  const activeGroupMemberSet = activeGroupObj ? new Set(activeGroupObj.memberIds?.map(String) || []) : null
+
   const filteredMembers = members.filter(m => {
+    if (activeGroupMemberSet && !activeGroupMemberSet.has(String(m._id))) return false
     if (activeTab !== "all" && m.activityStatus !== activeTab) return false
     if (roleFilter !== "all" && m.role !== roleFilter) return false
     if (categoryFilter !== "all") {
@@ -677,6 +773,36 @@ export default function TeamActivityRadar({ setPage }) {
                   </option>
                 )
               })}
+            </select>
+          </div>
+
+          {/* Custom Group Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-stone-400 whitespace-nowrap">📁 Group:</span>
+            <select
+              value={activeCustomGroup}
+              onChange={(e) => {
+                const gid = e.target.value
+                setActiveCustomGroup(gid)
+                if (gid) {
+                  const grp = customGroups.find(g => g._id === gid)
+                  if (grp) {
+                    setSelectedMemberIds(new Set(grp.memberIds.map(String)))
+                  }
+                }
+              }}
+              className={`text-xs px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500 font-bold ${
+                activeCustomGroup
+                  ? "bg-purple-600 text-white border-purple-500 shadow-sm"
+                  : isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+              }`}
+            >
+              <option value="">Sabhi Groups ({customGroups.length} saved)</option>
+              {customGroups.map(g => (
+                <option key={g._id} value={g._id}>
+                  📁 {g.name} ({g.memberIds?.length || 0} members)
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -1124,6 +1250,107 @@ export default function TeamActivityRadar({ setPage }) {
         </div>
       )}
 
+      {/* ── SAVE CUSTOM GROUP MODAL ── */}
+      {showSaveGroupModal && (
+        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 ${
+            isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 border-white/[0.08]">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2">
+                  📁 Naya Custom Group Banayein
+                </h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Selected: <strong className="text-emerald-400">{selectedMemberIds.size} Members</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setShowSaveGroupModal(false)}
+                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-stone-300 block mb-1.5">
+                  Group Ka Naam Likhein:
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. VIP Delhi Team, Sugar Patients, Loan Leads, Top Sellers..."
+                  value={groupNameInput}
+                  onChange={(e) => setGroupNameInput(e.target.value)}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                    isDark ? "bg-black/60 border-white/[0.15] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                  }`}
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <span className="text-[11px] font-bold text-stone-400 block mb-1.5">
+                  ⚡ 1-Click Name Suggestions:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    "⭐ VIP Members",
+                    "🩸 Diabetic Care Group",
+                    "💓 BP Care Team",
+                    "💳 Loan Leads",
+                    "📈 Investment Group",
+                    "🏢 Top Distributors",
+                    "🛒 Direct Sellers Hub",
+                    "🔥 High Active Network"
+                  ].map((sugg) => (
+                    <button
+                      key={sugg}
+                      type="button"
+                      onClick={() => setGroupNameInput(sugg)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
+                        groupNameInput === sugg
+                          ? "bg-purple-600 text-white border-purple-500"
+                          : isDark
+                          ? "bg-stone-800 border-white/[0.08] text-stone-300 hover:bg-stone-700"
+                          : "bg-stone-100 border-stone-300 text-stone-700 hover:bg-stone-200"
+                      }`}
+                    >
+                      {sugg}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-purple-950/20 border border-purple-500/20 text-[11px] text-purple-300 leading-relaxed">
+                💡 Is group ko save karne ke baad aap 1-click me in sabhi <b>{selectedMemberIds.size} members</b> ko filter karke personalized message bhej sakte hain.
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
+              <button
+                type="button"
+                onClick={() => setShowSaveGroupModal(false)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border ${
+                  isDark ? "border-white/[0.1] text-stone-300 hover:bg-stone-800" : "border-stone-300 text-stone-700 hover:bg-stone-100"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={savingGroup || !groupNameInput.trim()}
+                onClick={() => handleSaveCustomGroup(groupNameInput, Array.from(selectedMemberIds))}
+                className="px-5 py-2 rounded-xl bg-purple-600 text-white font-black text-xs shadow hover:bg-purple-500 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {savingGroup ? "Saving..." : "💾 Save Group"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── WHATSAPP BROADCAST MODAL ── */}
       {showBroadcastModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
@@ -1139,7 +1366,10 @@ export default function TeamActivityRadar({ setPage }) {
                 <p className="text-xs text-stone-400 mt-0.5">
                   Filtered Target: <strong className="text-emerald-500">{filteredMembers.length} Members</strong> (
                   Role: <span className="font-mono text-blue-400">{roleFilter.toUpperCase()}</span>,
-                  Category: <span className="font-mono text-amber-400">{categoryFilter}</span>)
+                  Category: <span className="font-mono text-amber-400">{categoryFilter}</span>
+                  {activeCustomGroup && (
+                    <>, Group: <span className="font-mono text-purple-400 font-bold">"{customGroups.find(g => g._id === activeCustomGroup)?.name || 'Custom'}"</span></>
+                  )})
                 </p>
               </div>
               <button
@@ -1247,6 +1477,96 @@ export default function TeamActivityRadar({ setPage }) {
                     })}
                   </select>
                 </div>
+              </div>
+
+              {/* Custom Groups Filter & Creator Bar */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-white/[0.08]">
+                <span className="text-[11px] font-black text-amber-400 flex items-center gap-1 shrink-0">
+                  <span>📁 Mere Groups:</span>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCustomGroup("")
+                    setTimeout(() => {
+                      setSelectedMemberIds(new Set(members.filter(m => m.phone).map(m => m._id)))
+                    }, 50)
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
+                    !activeCustomGroup
+                      ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm"
+                      : isDark ? "bg-stone-800/80 text-stone-400 border-white/[0.08] hover:text-white" : "bg-stone-100 text-stone-600 border-stone-300"
+                  }`}
+                >
+                  Sabhi Members
+                </button>
+
+                {customGroups.map(grp => (
+                  <div key={grp._id} className="inline-flex items-center shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveCustomGroup(grp._id)
+                        setTimeout(() => {
+                          const matched = members.filter(m => grp.memberIds?.map(String).includes(String(m._id)))
+                          setSelectedMemberIds(new Set(matched.filter(m => m.phone).map(m => m._id)))
+                        }, 50)
+                      }}
+                      className={`px-2.5 py-1 rounded-l-lg text-xs font-bold border transition-all flex items-center gap-1 ${
+                        activeCustomGroup === grp._id
+                          ? "bg-purple-600 text-white border-purple-500"
+                          : isDark
+                          ? "bg-purple-950/40 text-purple-300 border-purple-500/30 hover:bg-purple-900/50"
+                          : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+                      }`}
+                    >
+                      <span>📁 {grp.name}</span>
+                      <span className="text-[10px] opacity-80 font-mono">({grp.memberIds?.length || 0})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCustomGroup(grp._id)}
+                      className={`px-1.5 py-1 rounded-r-lg text-xs font-bold border-t border-b border-r transition-all ${
+                        activeCustomGroup === grp._id
+                          ? "bg-purple-700 text-purple-200 border-purple-500 hover:bg-red-600 hover:text-white"
+                          : isDark
+                          ? "bg-purple-950/60 text-purple-400 border-purple-500/30 hover:bg-red-600 hover:text-white"
+                          : "bg-purple-100 text-purple-700 border-purple-200 hover:bg-red-600 hover:text-white"
+                      }`}
+                      title="Group delete karein"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                {/* Save Selected / Update Group */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedMemberIds.size === 0) {
+                      alert("Pehle neeche checklist se members ko tick karein jinhe group me rakhna hai.")
+                      return
+                    }
+                    if (activeCustomGroup) {
+                      const curr = customGroups.find(g => g._id === activeCustomGroup)
+                      if (curr && window.confirm(`Group "${curr.name}" ko in selected (${selectedMemberIds.size}) members ke sath update karein?`)) {
+                        handleSaveCustomGroup(curr.name, Array.from(selectedMemberIds), curr._id)
+                        return
+                      }
+                    }
+                    setShowSaveGroupModal(true)
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all flex items-center gap-1 ml-auto"
+                >
+                  <span>➕</span>
+                  <span>
+                    {activeCustomGroup
+                      ? `Update Group (${selectedMemberIds.size} Members)`
+                      : `Selected (${selectedMemberIds.size}) Ka Naya Group Banayein`}
+                  </span>
+                </button>
               </div>
             </div>
 
