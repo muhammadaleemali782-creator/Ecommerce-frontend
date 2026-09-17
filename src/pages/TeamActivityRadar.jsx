@@ -46,6 +46,10 @@ export default function TeamActivityRadar({ setPage }) {
   )
   const [sentBroadcastIds, setSentBroadcastIds] = useState(new Set())
   const [broadcastIndex, setBroadcastIndex] = useState(0)
+  const [selectedMemberIds, setSelectedMemberIds] = useState(new Set())
+  const [isBulkSending, setIsBulkSending] = useState(false)
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, statusText: "", done: false })
+  const [apiNotice, setApiNotice] = useState("")
 
   const token = localStorage.getItem("token")
 
@@ -237,7 +241,8 @@ export default function TeamActivityRadar({ setPage }) {
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
     const msg = getPersonalizedWaMessage(member, broadcastTemplate, broadcastCustomText)
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
-    window.open(url, "_blank")
+    // Re-use single window tab so it does not open 28 separate tabs
+    window.open(url, "educa_wa_broadcast")
 
     setSentBroadcastIds(prev => new Set([...prev, member._id]))
 
@@ -254,6 +259,150 @@ export default function TeamActivityRadar({ setPage }) {
       })
       loadRadar()
     } catch {}
+  }
+
+  // Toggle selection of specific member for broadcast
+  const toggleSelectMember = (id) => {
+    setSelectedMemberIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  // Toggle select all filtered members
+  const toggleSelectAll = (targetList) => {
+    const validWithPhone = targetList.filter(m => m.phone)
+    if (selectedMemberIds.size >= validWithPhone.length && validWithPhone.length > 0) {
+      setSelectedMemberIds(new Set())
+    } else {
+      setSelectedMemberIds(new Set(validWithPhone.map(m => m._id)))
+    }
+  }
+
+  // 1-Click Direct API bulk send (no WhatsApp tab ever opens!)
+  const handleBulkSendDirect = async (targetList) => {
+    const targetMembers = targetList.filter(m => selectedMemberIds.has(m._id) && m.phone)
+    if (targetMembers.length === 0) {
+      alert("Kripya kam se kam ek member ko select karein jinka phone number ho.")
+      return
+    }
+
+    try {
+      setIsBulkSending(true)
+      setApiNotice("")
+      setBulkProgress({
+        current: 0,
+        total: targetMembers.length,
+        statusText: "WhatsApp Gateway se connect kiya ja raha hai...",
+        done: false
+      })
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/team/broadcast-whatsapp-api`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipients: targetMembers.map(m => ({
+            id: m._id,
+            name: m.fullName || m.name,
+            phone: m.phone,
+            category: m.category || "",
+            daysInactive: m.daysInactive || 0
+          })),
+          messageTemplate: broadcastTemplate,
+          customText: broadcastCustomText
+        })
+      })
+
+      const json = await res.json()
+
+      if (json.isConfigured && json.success) {
+        setBulkProgress({
+          current: json.sentCount,
+          total: targetMembers.length,
+          statusText: `🎉 Success! Sabhi ${json.sentCount} members ko WhatsApp par message chala gaya bina koi tab khule!`,
+          done: true
+        })
+        setSentBroadcastIds(new Set(targetMembers.map(m => m._id)))
+        loadRadar()
+      } else {
+        // Gateway not configured
+        setApiNotice(json.message || "WhatsApp Gateway API backend me configure nahi hai.")
+        setBulkProgress({
+          current: 0,
+          total: targetMembers.length,
+          statusText: "",
+          done: false
+        })
+      }
+    } catch (err) {
+      setApiNotice("Error: " + err.message)
+    } finally {
+      setIsBulkSending(false)
+    }
+  }
+
+  // Automated Single-Tab Runner (runs sequentially in ONE single tab instead of 28 tabs)
+  const runSingleTabAutoSequence = async (targetList) => {
+    const unsentMembers = targetList.filter(m => selectedMemberIds.has(m._id) && m.phone && !sentBroadcastIds.has(m._id))
+    if (unsentMembers.length === 0) {
+      alert("Sabhi selected members ko message bheja ja chuka hai.")
+      return
+    }
+
+    setIsBulkSending(true)
+    let processed = 0
+
+    for (const member of unsentMembers) {
+      processed++
+      setBulkProgress({
+        current: processed,
+        total: unsentMembers.length,
+        statusText: `Bhej raha hai (${processed}/${unsentMembers.length}): ${member.fullName || member.name}...`,
+        done: false
+      })
+
+      const cleanPhone = member.phone.replace(/[^0-9]/g, "")
+      const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
+      const msg = getPersonalizedWaMessage(member, broadcastTemplate, broadcastCustomText)
+      const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
+
+      // Opens in the SAME single window named "educa_wa_broadcast" (NEVER opens 28 tabs!)
+      window.open(url, "educa_wa_broadcast")
+
+      setSentBroadcastIds(prev => new Set([...prev, member._id]))
+
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            memberId: member._id,
+            note: `Auto Broadcast WhatsApp sent [${broadcastTemplate}]`,
+            contactMethod: "whatsapp",
+            status: "follow_up_taken"
+          })
+        })
+      } catch {}
+
+      // Wait 3 seconds before next so WhatsApp Web can load
+      if (processed < unsentMembers.length) {
+        await new Promise(r => setTimeout(r, 3000))
+      }
+    }
+
+    setBulkProgress({
+      current: unsentMembers.length,
+      total: unsentMembers.length,
+      statusText: `✅ Sabhi ${unsentMembers.length} selected members ka message ek hi tab me process ho gaya!`,
+      done: true
+    })
+    setIsBulkSending(false)
+    loadRadar()
   }
 
   if (loading) {
@@ -401,8 +550,12 @@ export default function TeamActivityRadar({ setPage }) {
           <button
             type="button"
             onClick={() => {
+              const ids = new Set(filteredMembers.filter(m => m.phone).map(m => m._id))
+              setSelectedMemberIds(ids)
               setSentBroadcastIds(new Set())
               setBroadcastIndex(0)
+              setBulkProgress({ current: 0, total: 0, statusText: "", done: false })
+              setApiNotice("")
               setShowBroadcastModal(true)
             }}
             disabled={filteredMembers.length === 0}
@@ -930,10 +1083,58 @@ export default function TeamActivityRadar({ setPage }) {
               )}
             </div>
 
+            {/* Progress Bar & Status */}
+            {bulkProgress.statusText && (
+              <div className={`p-3 rounded-2xl border text-xs ${bulkProgress.done ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-blue-500/15 border-blue-500/30 text-blue-400"}`}>
+                <div className="flex items-center justify-between font-bold mb-1">
+                  <span>{bulkProgress.statusText}</span>
+                  <span>{bulkProgress.current} / {bulkProgress.total}</span>
+                </div>
+                <div className="w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-emerald-500 to-green-400 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${bulkProgress.total ? Math.min(100, (bulkProgress.current / bulkProgress.total) * 100) : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* API Notice / Guidance */}
+            {apiNotice && (
+              <div className="p-3.5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-amber-400">
+                  <span>ℹ️</span>
+                  <span>Bina WhatsApp Tab Khole Background Bhejne Ki Jaankari:</span>
+                </div>
+                <p className="text-[11px] leading-relaxed opacity-90">
+                  WhatsApp browser ko bina user click ya API ke secretly message bhejna allow nahi karta.
+                  Backend me bina koi tab khole direct bhejne ke liye <b>Meta WhatsApp Cloud API (Free 1000 msgs)</b> ya <b>UltraMsg</b> API keys lagti hain.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => runSingleTabAutoSequence(filteredMembers)}
+                    disabled={isBulkSending}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 text-black font-black text-xs shadow hover:bg-amber-400"
+                  >
+                    ⚡ 1-Tab Auto Send Chalu Karein (Single Tab Mode)
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Sequence Runner & Member Checklist */}
             <div className="flex-1 overflow-y-auto space-y-2 border-t border-b border-white/[0.08] py-2 max-h-[300px] pr-1">
               <div className="flex items-center justify-between text-xs font-mono text-stone-400 px-1">
-                <span>RECIPIENTS ({filteredMembers.length} MEMBERS):</span>
+                <label className="flex items-center gap-2 cursor-pointer font-bold select-none text-stone-200">
+                  <input
+                    type="checkbox"
+                    checked={selectedMemberIds.size > 0 && selectedMemberIds.size === filteredMembers.filter(m => m.phone).length}
+                    onChange={() => toggleSelectAll(filteredMembers)}
+                    className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-400 cursor-pointer accent-emerald-500"
+                  />
+                  <span>Sabhi Select / Deselect ({selectedMemberIds.size} / {filteredMembers.length})</span>
+                </label>
                 <span className="text-emerald-500 font-bold">
                   Sent: {sentBroadcastIds.size} / {filteredMembers.length}
                 </span>
@@ -941,16 +1142,26 @@ export default function TeamActivityRadar({ setPage }) {
 
               {filteredMembers.map((member, idx) => {
                 const isSent = sentBroadcastIds.has(member._id)
+                const isChecked = selectedMemberIds.has(member._id)
                 return (
                   <div
                     key={member._id}
                     className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all ${
                       isSent
                         ? isDark ? "bg-emerald-950/20 border-emerald-500/30" : "bg-emerald-50/70 border-emerald-300"
-                        : isDark ? "bg-black/20 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+                        : isChecked
+                        ? isDark ? "bg-blue-950/20 border-blue-500/30" : "bg-blue-50/50 border-blue-200"
+                        : isDark ? "bg-black/20 border-white/[0.06] opacity-60" : "bg-stone-50 border-stone-200 opacity-60"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleSelectMember(member._id)}
+                        disabled={!member.phone || isBulkSending}
+                        className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-400 cursor-pointer accent-emerald-500 shrink-0"
+                      />
                       <span className="font-mono text-[11px] text-stone-500 w-5">#{idx + 1}</span>
                       <div className="min-w-0">
                         <div className="font-bold truncate flex items-center gap-1.5">
@@ -976,8 +1187,9 @@ export default function TeamActivityRadar({ setPage }) {
                         <button
                           type="button"
                           onClick={() => sendBroadcastToMember(member)}
-                          disabled={!member.phone}
+                          disabled={!member.phone || isBulkSending}
                           className="px-3 py-1.5 rounded-xl bg-green-500 text-white font-bold text-xs shadow hover:bg-green-600 disabled:opacity-40 flex items-center gap-1"
+                          title="Is member ka chat kholo (same window me)"
                         >
                           <span>💬 Send</span>
                         </button>
@@ -994,38 +1206,46 @@ export default function TeamActivityRadar({ setPage }) {
                 {sentBroadcastIds.size === filteredMembers.length ? (
                   <span className="text-emerald-500 font-bold">🎉 Sabhi members ko WhatsApp message bhej diya gaya hai!</span>
                 ) : (
-                  <span>Kisi bhi member ke 'Send' button par click karke personalized chat open karein</span>
+                  <span>Selected: <strong>{selectedMemberIds.size}</strong> members</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   type="button"
                   onClick={() => setShowBroadcastModal(false)}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold border ${
+                  disabled={isBulkSending}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border ${
                     isDark ? "border-white/[0.1] text-stone-300 hover:bg-stone-800" : "border-stone-300 text-stone-700 hover:bg-stone-100"
                   }`}
                 >
                   Close
                 </button>
 
-                {/* 1-Click Send Next Button */}
-                {sentBroadcastIds.size < filteredMembers.length && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextUnsent = filteredMembers.find(m => !sentBroadcastIds.has(m._id) && m.phone)
-                      if (nextUnsent) {
-                        sendBroadcastToMember(nextUnsent)
-                      } else {
-                        alert("Koi unsent member with valid phone number bacha nahi hai.")
-                      }
-                    }}
-                    className="flex-1 sm:flex-none px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-md hover:from-emerald-400 hover:to-green-500 flex items-center justify-center gap-1.5"
-                  >
-                    <span>▶️ Open Next ({sentBroadcastIds.size + 1}/{filteredMembers.length})</span>
-                  </button>
-                )}
+                {/* Single-Tab Sequential Auto Runner */}
+                <button
+                  type="button"
+                  onClick={() => runSingleTabAutoSequence(filteredMembers)}
+                  disabled={isBulkSending || selectedMemberIds.size === 0}
+                  className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/[0.12] flex items-center gap-1.5 disabled:opacity-40"
+                  title="Ek hi WhatsApp window me auto sequence chalao (28 tabs nahi khulenge)"
+                >
+                  <span>⚡ 1-Tab Auto Send</span>
+                </button>
+
+                {/* 1-Click Direct Send Button (Calls Backend API) */}
+                <button
+                  type="button"
+                  onClick={() => handleBulkSendDirect(filteredMembers)}
+                  disabled={isBulkSending || selectedMemberIds.size === 0}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs shadow-md hover:from-emerald-400 hover:to-green-500 flex items-center justify-center gap-1.5 disabled:opacity-40"
+                >
+                  {isBulkSending ? (
+                    <span>⏳ Bhej raha hai...</span>
+                  ) : (
+                    <span>🚀 1-Click Me Sabhi Ko Bhejo ({selectedMemberIds.size})</span>
+                  )}
+                </button>
               </div>
             </div>
           </div>
