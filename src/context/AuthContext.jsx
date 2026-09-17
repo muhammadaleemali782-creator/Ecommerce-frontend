@@ -276,6 +276,16 @@ export function AuthProvider({ children }) {
     }
   }, [loggedIn])
 
+  /* ================= SET AUTH SESSION (DIRECT TOKEN + USER) ================= */
+  const setAuthSession = (userData, token) => {
+    if (!userData || !token) return
+    setUser(userData)
+    setLoggedIn(true)
+    localStorage.setItem("user", JSON.stringify(userData))
+    localStorage.setItem("token", token)
+    localStorage.setItem("auth-change", Date.now())
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -285,7 +295,8 @@ export function AuthProvider({ children }) {
         login,
         logout,
         updateUser,
-        fetchFreshProfile
+        fetchFreshProfile,
+        setAuthSession
       }}
     >
       {children}

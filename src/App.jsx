@@ -82,6 +82,11 @@ function AppContent() {
   const [page, setPage] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search)
+      const storeRef = params.get("storeRef") || (params.get("page") === "store" ? params.get("ref") : null)
+      if (storeRef) {
+        localStorage.setItem("educa_store_consultant", storeRef)
+        return "store"
+      }
       if (params.get("ref")) return "join"
       if (params.get("page")) return params.get("page")
       if (params.get("search") || params.get("category")) return "store"

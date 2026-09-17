@@ -69,7 +69,50 @@ const KEYWORD_ALIASES = {
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
   const { products = [], addToCart, cart = [] } = useStore() || {}
-  const { user } = useAuth() || {}
+  const { user, login, setAuthSession } = useAuth() || {}
+
+  const [consultant, setConsultant] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState("login") // "login" | "register"
+  const [pendingProduct, setPendingProduct] = useState(null)
+
+  // Login form state
+  const [loginIdentifier, setLoginIdentifier] = useState("")
+  const [loginPassword, setLoginPassword] = useState("")
+  const [loginError, setLoginError] = useState("")
+  const [loginLoading, setLoginLoading] = useState(false)
+
+  // Registration form state (instant customer under consultant)
+  const [regFullName, setRegFullName] = useState("")
+  const [regPhone, setRegPhone] = useState("")
+  const [regAddress, setRegAddress] = useState("")
+  const [regAadhar, setRegAadhar] = useState("")
+  const [regPassword, setRegPassword] = useState("")
+  const [regError, setRegError] = useState("")
+  const [regLoading, setRegLoading] = useState(false)
+  const [registeredSuccessUser, setRegisteredSuccessUser] = useState(null)
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const refCode = params.get("storeRef") || (params.get("page") === "store" ? params.get("ref") : null) || localStorage.getItem("educa_store_consultant")
+      if (refCode) {
+        localStorage.setItem("educa_store_consultant", refCode)
+        fetch(`${import.meta.env.VITE_API_URL}/requests/referral-info?ref=${encodeURIComponent(refCode)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data?.valid && data?.referrer) {
+              setConsultant(data.referrer)
+            } else {
+              setConsultant({ name: refCode, fullName: refCode })
+            }
+          })
+          .catch(() => {
+            setConsultant({ name: refCode, fullName: refCode })
+          })
+      }
+    } catch {}
+  }, [])
 
   const [search, setSearch] = useState(() => {
     try {
@@ -189,15 +232,97 @@ export default function Store({ setPage }) {
     return list
   }, [allProducts, search, category, sortBy])
 
-  // Handle Add To Cart with instant micro-toast
+  // Handle Add To Cart with login/register interceptor
   const handleAddToCart = useCallback((product, e) => {
     if (e) e.stopPropagation()
+    if (!user) {
+      setPendingProduct(product)
+      setAuthModalTab("login")
+      setShowAuthModal(true)
+      return
+    }
     if (addToCart) addToCart(product)
     setAddedToast(product.title || product.name || "Product")
     setTimeout(() => {
       setAddedToast(null)
     }, 2200)
-  }, [addToCart])
+  }, [user, addToCart])
+
+  const handleModalLogin = async (e) => {
+    if (e) e.preventDefault()
+    if (!loginIdentifier.trim() || !loginPassword.trim()) {
+      setLoginError("ID/Email aur Password dono zaroori hain")
+      return
+    }
+    setLoginLoading(true)
+    setLoginError("")
+    try {
+      const res = await login(loginIdentifier.trim(), loginPassword.trim())
+      if (res?.success) {
+        setShowAuthModal(false)
+        if (pendingProduct && addToCart) {
+          addToCart(pendingProduct)
+          setAddedToast(pendingProduct.title || pendingProduct.name || "Product")
+        }
+        setPendingProduct(null)
+      } else {
+        setLoginError(res?.message || "Invalid credentials. Kripya sahi ID/password dalein.")
+      }
+    } catch (err) {
+      setLoginError(err.message || "Login failed")
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  const handleInstantRegister = async (e) => {
+    if (e) e.preventDefault()
+    if (!regFullName.trim()) { setRegError("Kripya apna pura naam likhein"); return }
+    const cleanDigits = regPhone.replace(/\D/g, "")
+    if (cleanDigits.length !== 10) { setRegError("Kripya sahi 10-digit mobile number likhein"); return }
+    if (!regAddress.trim()) { setRegError("Kripya delivery address likhein"); return }
+    const cleanAadharDigits = regAadhar.replace(/\D/g, "")
+    if (cleanAadharDigits.length !== 12) { setRegError("Kripya 12-digit Aadhar card number likhein"); return }
+    if (!regPassword.trim() || regPassword.trim().length < 4) { setRegError("Password kam se kam 4 aksharo ka hona chahiye"); return }
+
+    setRegLoading(true)
+    setRegError("")
+    try {
+      const sponsorCode = consultant?.name || localStorage.getItem("educa_store_consultant") || ""
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/store/instant-register-customer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ref: sponsorCode,
+          fullName: regFullName.trim(),
+          phone: cleanDigits,
+          address: regAddress.trim(),
+          idNumber: cleanAadharDigits,
+          password: regPassword.trim()
+        })
+      })
+      const data = await res.json()
+      if (res.ok && data?.success && data?.user && data?.token) {
+        if (setAuthSession) setAuthSession(data.user, data.token)
+        setRegisteredSuccessUser(data.user)
+        if (pendingProduct && addToCart) {
+          addToCart(pendingProduct)
+          setAddedToast(pendingProduct.title || pendingProduct.name || "Product")
+        }
+        setTimeout(() => {
+          setShowAuthModal(false)
+          setRegisteredSuccessUser(null)
+          setPendingProduct(null)
+        }, 2500)
+      } else {
+        setRegError(data?.message || "Registration failed")
+      }
+    } catch (err) {
+      setRegError(err.message || "Network error. Kripya dobara try karein.")
+    } finally {
+      setRegLoading(false)
+    }
+  }
 
   // Toggle card flip state smoothly
   const toggleFlip = useCallback((productId, e) => {
@@ -265,6 +390,27 @@ export default function Store({ setPage }) {
               }`}>
                 Natural herbal products crafted for vitality, immunity, and daily wellness.
               </p>
+
+              {/* Consultant Trust Banner */}
+              {consultant && (
+                <div className={`mt-3 inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-2xl border text-xs font-semibold ${
+                  isDark
+                    ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-300"
+                    : "bg-emerald-50 border-emerald-300 text-emerald-900 shadow-sm"
+                }`}>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>
+                    🛍️ Aap Shopping Kar Rahe Hain Apne Consultant Ke Sath:{" "}
+                    <strong className="underline underline-offset-2 font-black">
+                      {consultant.fullName || consultant.name}
+                    </strong>{" "}
+                    <span className="text-[11px] opacity-80">(ID: {consultant.name})</span>
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                    ✓ Verified
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Floating Quick Cart Access */}
@@ -842,6 +988,315 @@ export default function Store({ setPage }) {
         )}
 
       </main>
+
+      {/* ── CUSTOMER AUTH & INSTANT REGISTRATION MODAL ── */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto animate-fadeIn">
+          <div className={`relative w-full max-w-lg my-auto rounded-3xl p-5 sm:p-7 shadow-2xl border transition-all ${
+            isDark
+              ? "bg-[#141b16] border-white/15 text-white"
+              : "bg-white border-stone-200 text-stone-900"
+          }`}>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowAuthModal(false)
+                setPendingProduct(null)
+                setLoginError("")
+                setRegError("")
+                setRegisteredSuccessUser(null)
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-500/15 hover:bg-stone-500/25 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
+            >
+              ✕
+            </button>
+
+            {/* Modal Header */}
+            <div className="text-center pb-3 border-b border-stone-500/15">
+              <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-black uppercase tracking-widest mb-1.5">
+                🌿 EDUCA VEDA APOTHECARY
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+                {registeredSuccessUser ? "🎉 Swagat Hai!" : "Product Cart Me Jodne Ke Liye ID Zaroori Hai"}
+              </h2>
+              <p className="text-xs text-stone-400 mt-1">
+                {registeredSuccessUser
+                  ? "Aapka customer account successfully create ho gaya hai."
+                  : "Apni ID se login karein ya 1 minute me nayi Customer ID banayein."}
+              </p>
+            </div>
+
+            {/* Pending Product Preview */}
+            {pendingProduct && !registeredSuccessUser && (
+              <div className={`mt-3.5 p-3 rounded-2xl border flex items-center gap-3 ${
+                isDark ? "bg-black/30 border-white/10" : "bg-stone-50 border-stone-200"
+              }`}>
+                {pendingProduct.image && (
+                  <img
+                    src={pendingProduct.image}
+                    alt={pendingProduct.title}
+                    className="w-12 h-12 rounded-xl object-cover bg-stone-800 shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-bold text-amber-500 uppercase">Aap Yeh Product Le Rahe Hain</span>
+                  <h4 className="text-xs font-black truncate">{pendingProduct.title || pendingProduct.name}</h4>
+                  <span className="text-xs font-black text-emerald-500">₹{Number(pendingProduct.price || 0).toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Consultant Trust Indicator */}
+            {consultant && !registeredSuccessUser && (
+              <div className={`mt-2.5 px-3 py-2 rounded-xl border text-[11px] flex items-center gap-2 ${
+                isDark ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800"
+              }`}>
+                <span className="text-sm">🛍️</span>
+                <span className="truncate">
+                  Consultant: <strong>{consultant.fullName || consultant.name}</strong> ({consultant.name})
+                </span>
+                <span className="ml-auto px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[9px] uppercase">
+                  Verified
+                </span>
+              </div>
+            )}
+
+            {/* Success View */}
+            {registeredSuccessUser ? (
+              <div className="mt-4 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+                <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black">
+                  ✓
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-emerald-400">Customer ID Created!</h3>
+                  <p className="text-xs text-stone-300 mt-0.5">Welcome, {registeredSuccessUser.fullName}!</p>
+                </div>
+                <div className="p-3 rounded-xl bg-black/40 border border-white/10 text-left font-mono text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">User ID:</span>
+                    <strong className="text-amber-400">{registeredSuccessUser.name}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Educa Mail:</span>
+                    <strong className="text-sky-300 truncate max-w-[200px]">{registeredSuccessUser.email}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Account Type:</span>
+                    <strong className="text-emerald-400 uppercase">Customer (User)</strong>
+                  </div>
+                </div>
+                <p className="text-[11px] text-stone-400">
+                  ✅ Product aapke cart me add ho gaya hai. Cart khul raha hai...
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Tab Switcher */}
+                <div className="mt-4 grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-stone-500/15 border border-stone-500/10">
+                  <button
+                    type="button"
+                    onClick={() => { setAuthModalTab("login"); setLoginError(""); setRegError("") }}
+                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      authModalTab === "login"
+                        ? "bg-blue-600 text-stone-950 shadow-md"
+                        : "text-stone-400 hover:text-white"
+                    }`}
+                  >
+                    🔑 ID Se Login Karein
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthModalTab("register"); setLoginError(""); setRegError("") }}
+                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      authModalTab === "register"
+                        ? "bg-blue-600 text-stone-950 shadow-md"
+                        : "text-stone-400 hover:text-white"
+                    }`}
+                  >
+                    ✨ Nayi ID Banayein (Free)
+                  </button>
+                </div>
+
+                {/* TAB 1: LOGIN */}
+                {authModalTab === "login" && (
+                  <form onSubmit={handleModalLogin} className="mt-4 space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">
+                        User ID, Mobile Number Ya Email
+                      </label>
+                      <input
+                        type="text"
+                        value={loginIdentifier}
+                        onChange={e => setLoginIdentifier(e.target.value)}
+                        placeholder="e.g. US001 ya 9876543210 ya user@educaveda.com"
+                        className={`w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border focus:outline-none focus:border-amber-400 ${
+                          isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                        }`}
+                        autoFocus
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
+                        placeholder="Apna password dalein"
+                        className={`w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border focus:outline-none focus:border-amber-400 ${
+                          isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                        }`}
+                      />
+                    </div>
+
+                    {loginError && (
+                      <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium">
+                        ⚠️ {loginError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loginLoading}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider shadow-lg active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {loginLoading ? "Login Ho Raha Hai..." : "Login Karein Aur Cart Me Jodein ➔"}
+                    </button>
+
+                    <p className="text-center text-[11px] text-stone-400 pt-1">
+                      Naye customer hain?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setAuthModalTab("register")}
+                        className="text-amber-400 font-bold underline cursor-pointer"
+                      >
+                        Yahan 1 Minute Me ID Banayein
+                      </button>
+                    </p>
+                  </form>
+                )}
+
+                {/* TAB 2: INSTANT REGISTRATION */}
+                {authModalTab === "register" && (
+                  <form onSubmit={handleInstantRegister} className="mt-4 space-y-3">
+                    <div className="p-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-[10.5px] text-sky-300">
+                      ℹ️ Yeh Customer ID banegi aur EDUCA Mailbox bhi turant active ho jayega.
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+                        Pura Naam (Full Name) *
+                      </label>
+                      <input
+                        type="text"
+                        value={regFullName}
+                        onChange={e => setRegFullName(e.target.value)}
+                        placeholder="Apna pura naam likhein"
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:border-amber-400 ${
+                          isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                        }`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+                          10-Digit Mobile Number *
+                        </label>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          value={regPhone}
+                          onChange={e => setRegPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                          placeholder="e.g. 9876543210"
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:border-amber-400 ${
+                            isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+                          12-Digit Aadhar Card *
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={12}
+                          value={regAadhar}
+                          onChange={e => setRegAadhar(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                          placeholder="e.g. 123456789012"
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:border-amber-400 ${
+                            isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+                        Delivery Address (Pura Pata) *
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={regAddress}
+                        onChange={e => setRegAddress(e.target.value)}
+                        placeholder="House no, Gali/Mohalla, City, Pin Code"
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:border-amber-400 resize-none ${
+                          isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+                        Apna Password Banayein *
+                      </label>
+                      <input
+                        type="password"
+                        value={regPassword}
+                        onChange={e => setRegPassword(e.target.value)}
+                        placeholder="Apna naya password dalein"
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border focus:outline-none focus:border-amber-400 ${
+                          isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+                        }`}
+                      />
+                    </div>
+
+                    {regError && (
+                      <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium">
+                        ⚠️ {regError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={regLoading}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-xs uppercase tracking-wider shadow-lg active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {regLoading ? "ID Ban Rahi Hai..." : "Customer ID Banayein Aur Cart Me Jodein ➔"}
+                    </button>
+
+                    <p className="text-center text-[11px] text-stone-400 pt-1">
+                      Pehle se account hai?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setAuthModalTab("login")}
+                        className="text-amber-400 font-bold underline cursor-pointer"
+                      >
+                        Yahan Login Karein
+                      </button>
+                    </p>
+                  </form>
+                )}
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
 
     </div>
   )

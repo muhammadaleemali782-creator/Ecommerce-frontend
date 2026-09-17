@@ -170,6 +170,7 @@ export default function TeamActivityRadar({ setPage }) {
   const [showSaveGroupModal, setShowSaveGroupModal] = useState(false)
   const [groupNameInput, setGroupNameInput] = useState("")
   const [savingGroup, setSavingGroup] = useState(false)
+  const [copiedStoreLink, setCopiedStoreLink] = useState(false)
 
   const token = localStorage.getItem("token")
 
@@ -279,14 +280,15 @@ export default function TeamActivityRadar({ setPage }) {
     const targetNumber = waType === "personal" ? (waModalMember.phone || "") : (customWaNumber || waModalMember.phone || "")
     const cleanPhone = targetNumber.replace(/[^0-9]/g, "")
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone
+    const myStoreLink = `${window.location.origin}/?storeRef=${encodeURIComponent(authUser?.name || "")}&page=store`
 
     let msg = `Namaste ${waModalMember.fullName || waModalMember.name} ji! 👋\n\n`
     if (waTemplate === "followup") {
-      msg += `Humne notice kiya aapne pichle ${waModalMember.daysInactive || "kuch"} dino se EDUCA VEDA me order nahi lagaya hai. Koi product guidance ya support chahiye toh batayein!\n\n🛍️ Store Link: https://educa-store.vercel.app/`
+      msg += `Humne notice kiya aapne pichle ${waModalMember.daysInactive || "kuch"} dino se EDUCA VEDA me order nahi lagaya hai. Koi product guidance ya support chahiye toh batayein!\n\n🛍️ Store Link: ${myStoreLink}`
     } else if (waTemplate === "offer") {
-      msg += `🎉 EDUCA VEDA par naye offers aur special products live ho gaye hain! Apne clients ke orders lagane ke liye store visit karein:\n\n🛍️ Store Link: https://educa-store.vercel.app/`
+      msg += `🎉 EDUCA VEDA par naye offers aur special products live ho gaye hain! Apne clients ke orders lagane ke liye store visit karein:\n\n🛍️ Store Link: ${myStoreLink}`
     } else {
-      msg += `Kaise chal raha hai aapka business? Kisi bhi training, customer query ya order placement me help chahiye toh turant connect karein!`
+      msg += `Kaise chal raha hai aapka business? Kisi bhi training, customer query ya order placement me help chahiye toh turant connect karein!\n\n🛍️ Store Link: ${myStoreLink}`
     }
 
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`
@@ -420,6 +422,7 @@ export default function TeamActivityRadar({ setPage }) {
     const role = member.role === "distributor" ? "Distributor" : member.role === "seller" ? "Direct Seller" : "Customer"
     const days = member.daysInactive !== null && member.daysInactive !== undefined ? `${member.daysInactive}` : "0"
 
+    const myStoreLink = `${window.location.origin}/?storeRef=${encodeURIComponent(authUser?.name || "")}&page=store`
     const baseText = (customText && customText.trim()) ? customText : (PRESET_TEMPLATES[template] || PRESET_TEMPLATES.followup)
 
     return baseText
@@ -427,7 +430,7 @@ export default function TeamActivityRadar({ setPage }) {
       .replace(/{category}/g, cat)
       .replace(/{role}/g, role)
       .replace(/{daysInactive}/g, days)
-      .replace(/{storeLink}/g, "https://educa-store.vercel.app/")
+      .replace(/{storeLink}/g, myStoreLink)
       .replace(/{phone}/g, member.phone || "")
   }
 
@@ -686,17 +689,33 @@ export default function TeamActivityRadar({ setPage }) {
           </div>
         </div>
 
-        <div className="relative min-w-[240px]">
-          <input
-            type="text"
-            placeholder="Search member name, ID, phone..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
-            }`}
-          />
-          <span className="absolute left-2.5 top-2.5 text-xs text-stone-400">🔍</span>
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <button
+            type="button"
+            onClick={() => {
+              const storeUrl = `${window.location.origin}/?storeRef=${encodeURIComponent(authUser?.name || "")}&page=store`
+              navigator.clipboard?.writeText(storeUrl)
+              setCopiedStoreLink(true)
+              setTimeout(() => setCopiedStoreLink(false), 2200)
+            }}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black text-xs shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+            title="Apna personal referral store link copy karein"
+          >
+            <span>{copiedStoreLink ? "✓ Link Copied!" : "🔗 Apna Store Link"}</span>
+          </button>
+
+          <div className="relative min-w-[220px]">
+            <input
+              type="text"
+              placeholder="Search member name, ID, phone..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`w-full text-xs px-3 py-2 pl-8 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
+              }`}
+            />
+            <span className="absolute left-2.5 top-2.5 text-xs text-stone-400">🔍</span>
+          </div>
         </div>
       </div>
 
