@@ -265,7 +265,7 @@ export default function Admin({ setPage }) {
                 <p className={`text-xs font-medium truncate max-w-xs sm:max-w-md ${
                   isDark ? "text-stone-400" : "text-stone-600"
                 }`}>
-                  {user?.email || "admin@educaveda.com"}
+                  {user?.email || "admin@educa.com"}
                 </p>
               </div>
             </div>

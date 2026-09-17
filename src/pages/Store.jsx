@@ -1129,7 +1129,7 @@ export default function Store({ setPage }) {
                         type="text"
                         value={loginIdentifier}
                         onChange={e => setLoginIdentifier(e.target.value)}
-                        placeholder="e.g. US001 ya 9876543210 ya user@educaveda.com"
+                        placeholder="e.g. US001 ya 9876543210 ya user@educa.com"
                         className={`w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border focus:outline-none focus:border-amber-400 ${
                           isDark ? "bg-black/40 border-white/15 text-white" : "bg-stone-50 border-stone-300 text-stone-900"
                         }`}

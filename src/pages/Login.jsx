@@ -109,7 +109,7 @@ export default function Login({ setPage }) {
       {
         id: "ed-01",
         name: "Acharya Vaidya",
-        email: "admin@educaveda.com",
+        email: "admin@educa.com",
         role: "ADMIN",
         fallbackEmail: "admin@gmail.com",
         lastActive: "Active Session",
@@ -118,7 +118,7 @@ export default function Login({ setPage }) {
       {
         id: "ed-02",
         name: "Himalaya Herbal Network",
-        email: "distributor@educaveda.com",
+        email: "distributor@educa.com",
         role: "DISTRIBUTOR",
         fallbackEmail: "distributor@gmail.com",
         lastActive: "Verified 2h ago",
@@ -127,7 +127,7 @@ export default function Login({ setPage }) {
       {
         id: "ed-03",
         name: "Rasayana Seller Hub",
-        email: "seller@educaveda.com",
+        email: "seller@educa.com",
         role: "SELLER",
         fallbackEmail: "seller@gmail.com",
         lastActive: "Verified Yesterday",
@@ -685,7 +685,7 @@ export default function Login({ setPage }) {
                   name="educaMailInput"
                   type="text"
                   required
-                  placeholder="e.g. DS001 ya name@educaveda.com"
+                  placeholder="e.g. DS001 ya name@educa.com"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

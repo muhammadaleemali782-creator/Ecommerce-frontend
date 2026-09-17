@@ -173,7 +173,7 @@ export default function PasswordHelp({ setPage }) {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. user@educaveda.com ya DS001"
+                  placeholder="e.g. user@educa.com ya DS001"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
