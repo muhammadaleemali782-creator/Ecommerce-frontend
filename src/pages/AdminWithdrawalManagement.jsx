@@ -14,8 +14,9 @@ export default function AdminWithdrawalManagement() {
   const [loading, setLoading] = useState(true)
   const [requests, setRequests] = useState([])
   const [filter, setFilter] = useState("pending")
-  const [message, setMessage] = useState({ type: "", text: "" })
+  const [message, setMessage] = useState({ type: "", text: "", reqForWhatsApp: null })
   const [ppcRate, setPpcRate] = useState(0)
+  const [cardUtr, setCardUtr] = useState({})
 
   const [rewardRequests, setRewardRequests] = useState([])
   
@@ -177,16 +178,46 @@ export default function AdminWithdrawalManagement() {
     }
   }
   
+  const cleanPhoneForWhatsApp = (raw) => {
+    if (!raw) return ""
+    let digits = String(raw).replace(/\D/g, "")
+    if (digits.startsWith("0")) digits = digits.slice(1)
+    if (digits.length === 10) digits = "91" + digits
+    else if (digits.length === 9) digits = "91" + digits
+    else if (!digits.startsWith("91") && digits.length > 5) digits = "91" + digits
+    return digits
+  }
+
+  const sendWhatsAppApproval = (req, utrOverride) => {
+    const rawPhone = req?.userId?.phone
+    const phone = cleanPhoneForWhatsApp(rawPhone)
+    if (!phone) {
+      alert("Is user ka phone number nahi mila!")
+      return
+    }
+    const name = req?.userId?.fullName || req?.userId?.name || "Partner"
+    const amountPPC = req?.amount || 0
+    const rupeeVal = req?.ppcRateAtRequest > 0 
+      ? (req?.rupeeValueAtRequest?.toFixed(2) || (req?.amount * req?.ppcRateAtRequest * (req?.percentageAtRequest / 100)).toFixed(2))
+      : (ppcRate > 0 ? (req?.amount * ppcRate * 0.25).toFixed(2) : (req?.amount * 10).toFixed(2))
+    const utr = utrOverride || req?.utrNumber || req?.transactionId || cardUtr[req?._id] || "N/A"
+
+    const message = `Namaste ${name} ji! 🙏\n\nAapka EDUCA-VEDA Withdrawal Request APPROVED ho gaya hai aur payment transfer kar diya gaya hai.\n\n💰 Amount: ₹${rupeeVal}\n🪙 PPC Withdrawn: ${amountPPC} PPC\n🏦 Payment Mode: ${req?.paymentMethod || "UPI / Bank"}\n📋 Account Details: ${req?.paymentDetails || "N/A"}\n🔢 Payment UTR / Ref No: ${utr}\n\nPayment aapke account me verify kar lein. Thank you for working with EDUCA-VEDA!`
+
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`
+    window.open(url, "_blank")
+  }
+
   const openModal = (action, request, context = "withdrawal") => {
     setModalData({
       show: true,
       action,
       context,
       request,
-      transactionId: "",
+      transactionId: cardUtr[request?._id] || "",
       note: ""
     })
-    setMessage({ type: "", text: "" })
+    setMessage({ type: "", text: "", reqForWhatsApp: null })
   }
   
   const closeModal = () => {
@@ -198,6 +229,53 @@ export default function AdminWithdrawalManagement() {
       transactionId: "",
       note: ""
     })
+  }
+
+  const handleDirectCardApprove = async (req) => {
+    const utr = (cardUtr[req._id] || "").trim()
+    if (!utr) {
+      // If UTR is empty on card, open modal so admin can enter it
+      openModal("approve", req)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const token = localStorage.getItem("token")
+      if (!token) return
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/approve/${req._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          transactionId: utr,
+          utrNumber: utr,
+          note: "Approved via quick UTR"
+        })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        const approvedReq = { ...req, utrNumber: utr }
+        setMessage({ 
+          type: "success", 
+          text: `Withdrawal approved successfully! UTR: ${utr}`,
+          reqForWhatsApp: approvedReq
+        })
+        fetchRequests()
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to approve" })
+      }
+    } catch (err) {
+      console.error("Direct approve error:", err)
+      setMessage({ type: "error", text: "Failed to approve withdrawal" })
+    } finally {
+      setLoading(false)
+    }
   }
   
   const handleApprove = async () => {
@@ -228,7 +306,12 @@ export default function AdminWithdrawalManagement() {
       const data = await res.json()
       
       if (res.ok) {
-        setMessage({ type: "success", text: "Withdrawal approved successfully!" })
+        const approvedReq = { ...modalData.request, utrNumber: modalData.transactionId?.trim() }
+        setMessage({ 
+          type: "success", 
+          text: `Withdrawal approved successfully! UTR: ${modalData.transactionId?.trim()}`,
+          reqForWhatsApp: approvedReq
+        })
         closeModal()
         fetchRequests()
       } else {
@@ -344,13 +427,23 @@ export default function AdminWithdrawalManagement() {
 
       {/* ── STATUS MESSAGE ── */}
       {message.text && (
-        <div className={`p-4 rounded-2xl text-xs font-bold border flex items-center gap-2 ${
+        <div className={`p-4 rounded-2xl text-xs font-bold border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
           message.type === "success"
             ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
             : "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30"
         }`}>
-          <span>{message.type === "success" ? "✅" : "❌"}</span>
-          {message.text}
+          <div className="flex items-center gap-2">
+            <span>{message.type === "success" ? "✅" : "❌"}</span>
+            <span>{message.text}</span>
+          </div>
+          {message.reqForWhatsApp && (
+            <button
+              onClick={() => sendWhatsAppApproval(message.reqForWhatsApp)}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm w-fit"
+            >
+              📲 Send on WhatsApp
+            </button>
+          )}
         </div>
       )}
 
@@ -620,10 +713,20 @@ export default function AdminWithdrawalManagement() {
                   )}
 
                   {(req.utrNumber || req.transactionId) && (
-                    <div className={`p-3 rounded-xl border text-xs font-mono ${
+                    <div className={`p-3 rounded-xl border text-xs font-mono flex items-center justify-between flex-wrap gap-2 ${
                       isDark ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800"
                     }`}>
-                      <strong>Payment UTR / Ref:</strong> {req.utrNumber || req.transactionId}
+                      <div>
+                        <strong>Payment UTR / Ref:</strong> {req.utrNumber || req.transactionId}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => sendWhatsAppApproval(req)}
+                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                        title="Send WhatsApp confirmation without saving number"
+                      >
+                        📲 WhatsApp Slip
+                      </button>
                     </div>
                   )}
 
@@ -635,21 +738,43 @@ export default function AdminWithdrawalManagement() {
 
                   {/* Actions */}
                   {req.status === "pending" && (
-                    <div className={`flex gap-2 pt-2 border-t ${
+                    <div className={`space-y-2 pt-2 border-t ${
                       isDark ? "border-white/[0.06]" : "border-stone-100"
                     }`}>
-                      <button
-                        onClick={() => openModal("approve", req)}
-                        className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
-                      >
-                        ✅ Approve & Record Transfer
-                      </button>
-                      <button
-                        onClick={() => openModal("reject", req)}
-                        className="py-2.5 px-5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                      >
-                        ❌ Reject
-                      </button>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="Enter Payment UTR / Ref No. (e.g. 423456789012)"
+                          value={cardUtr[req._id] || ""}
+                          onChange={(e) => setCardUtr({ ...cardUtr, [req._id]: e.target.value })}
+                          className={`flex-1 px-3.5 py-2 rounded-xl text-xs font-mono border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                            isDark ? "bg-black/60 border-white/10 text-white placeholder-stone-500" : "bg-white border-stone-300 text-stone-900 placeholder-stone-400"
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => sendWhatsAppApproval(req, cardUtr[req._id])}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold whitespace-nowrap flex items-center justify-center gap-1 cursor-pointer"
+                          title="Preview or Send WhatsApp message"
+                        >
+                          📲 WhatsApp
+                        </button>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDirectCardApprove(req)}
+                          className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+                        >
+                          ✅ Approve & Record Transfer
+                        </button>
+                        <button
+                          onClick={() => openModal("reject", req)}
+                          className="py-2.5 px-5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -696,11 +821,20 @@ export default function AdminWithdrawalManagement() {
 
             {modalData.context === "withdrawal" && modalData.action === "approve" && (
               <div>
-                <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
-                  isDark ? "text-stone-300" : "text-stone-700"
-                }`}>
-                  Bank Reference / UTR Number <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
+                    isDark ? "text-stone-300" : "text-stone-700"
+                  }`}>
+                    Bank Reference / UTR Number <span className="text-red-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => sendWhatsAppApproval(modalData.request, modalData.transactionId)}
+                    className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    📲 WhatsApp Preview
+                  </button>
+                </div>
                 <input
                   type="text"
                   required
