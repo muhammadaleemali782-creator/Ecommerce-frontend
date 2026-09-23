@@ -57,7 +57,7 @@ export default function DistributorRoyalty({ setPage }) {
               Company-Wide Lifetime Royalty Club
             </h1>
             <p className="text-xs font-semibold text-black/80 max-w-xl">
-              Aapko poori company ke total monthly PPC turnover ka <strong>(Company Total PPC × {data.poolMultiplier || 10} ÷ Total Distributors)</strong> lifetime har mahine milta hai!
+              Aapko poori company ke total monthly PPC turnover ka <strong>(Company Total PPC × ₹{data.poolMultiplier || 10} ÷ Total Distributors)</strong> lifetime har mahine barabar distribute hota hai!
             </p>
           </div>
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl font-black text-white shrink-0 border border-white/30">
@@ -92,7 +92,7 @@ export default function DistributorRoyalty({ setPage }) {
         }`}>
           <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Total Company Pool Fund</p>
           <p className="text-xl font-black mt-1 text-blue-500">₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
-          <p className="text-xs font-mono text-stone-400 mt-1">{Math.round(current.accumulatedPoolPPC || 0)} PPC (Company PPC × {data.poolMultiplier || 10})</p>
+          <p className="text-xs font-mono text-stone-400 mt-1">Company PPC ({current.totalCompanyPPC || 0}) × ₹{data.poolMultiplier || 10}</p>
         </div>
 
         <div className={`p-5 rounded-3xl border ${
@@ -100,7 +100,7 @@ export default function DistributorRoyalty({ setPage }) {
         }`}>
           <p className="text-[10px] font-mono uppercase text-emerald-500 font-bold">Your Projected Monthly Royalty</p>
           <p className="text-2xl font-black mt-1 text-emerald-500">₹{(current.projectedSharePerDistributorRupees || 0).toLocaleString("en-IN")}</p>
-          <p className="text-xs font-mono text-stone-400 mt-1">({current.projectedSharePerDistributorPPC || 0} PPC this cycle)</p>
+          <p className="text-xs font-mono text-stone-400 mt-1">Equally distributed ({current.projectedSharePerDistributorPPC || 0} PPC)</p>
         </div>
       </div>
 
