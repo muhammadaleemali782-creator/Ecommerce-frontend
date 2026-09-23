@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import InlineLoader from "../components/InlineLoader"
 import { useTheme } from "../context/ThemeContext"
+import { CardSkeleton } from "../components/Skeleton"
 
 /* =====================================================
    ADMIN WITHDRAWAL MANAGEMENT (MOBILE RESPONSIVE)
@@ -478,9 +479,7 @@ export default function AdminWithdrawalManagement() {
       {view === "rewards" && (
 
         loading ? (
-          <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
-            Loading reward claims...
-          </div>
+          <CardSkeleton count={3} />
         ) : rewardRequests.length === 0 ? (
           <div className={`p-12 text-center rounded-3xl border ${
             isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"
@@ -586,9 +585,7 @@ export default function AdminWithdrawalManagement() {
       {/* ── WITHDRAWAL REQUESTS VIEW ── */}
       {view === "withdrawal" && (
         loading ? (
-          <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
-            Loading withdrawal queue...
-          </div>
+          <CardSkeleton count={4} />
         ) : requests.length === 0 ? (
           <div className={`p-12 text-center rounded-3xl border ${
             isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"

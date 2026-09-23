@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
 import EducaLogo from "../components/EducaLogo"
+import { CardSkeleton } from "../components/Skeleton"
 
 export default function DistributorOrders() {
   const [tab,         setTab]         = useState("pending")
@@ -351,9 +352,7 @@ export default function DistributorOrders() {
 
       {/* ── CONTENT ── */}
       {loading ? (
-        <div className="text-center py-16 text-stone-400 text-xs font-mono animate-pulse">
-          Orders load ho rahe hain...
-        </div>
+        <CardSkeleton count={4} />
       ) : orders.length === 0 ? (
         <div className={`p-12 text-center rounded-3xl border ${
           isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200 shadow-sm"

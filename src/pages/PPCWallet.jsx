@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
+import { PageSkeleton } from "../components/Skeleton"
 
 export default function PPCWallet({ setPage }) {
   const { isDark } = useTheme()
@@ -136,11 +137,7 @@ export default function PPCWallet({ setPage }) {
   useEffect(() => { fetchWallet() }, [fetchWallet])
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[300px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (error) {

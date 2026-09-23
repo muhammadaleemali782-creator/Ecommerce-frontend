@@ -5,6 +5,7 @@ import { useStore } from "../context/StoreContext"
 import Store from "../pages/Store"
 import EducaLogo from "../components/EducaLogo"
 import InlineLoader from "../components/InlineLoader"
+import { PageSkeleton } from "../components/Skeleton"
 import CollapsibleTeamTree from "../components/CollapsibleTeamTree"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from "recharts"
 
@@ -48,6 +49,10 @@ export default function SellerDashboard({ setPage }) {
     }
     load()
   }, [])
+
+  if (loading) {
+    return <PageSkeleton />
+  }
 
   const confirmed  = orders.filter(o => o.status === "confirmed")
   const totalSales = confirmed.reduce((s,o) => s + (o.total||0), 0)

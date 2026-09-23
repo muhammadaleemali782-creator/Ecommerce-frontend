@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import { useStore } from "../context/StoreContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
+import { ProductCardSkeleton } from "../components/Skeleton"
 
 const SORT_OPTIONS = [
   { id: "rating", label: "Top Rated", icon: "★" },
@@ -68,7 +69,7 @@ const KEYWORD_ALIASES = {
 
 export default function Store({ setPage }) {
   const { isDark } = useTheme()
-  const { products = [], addToCart, cart = [] } = useStore() || {}
+  const { products = [], productsLoading, addToCart, cart = [] } = useStore() || {}
   const { user, login, setAuthSession } = useAuth() || {}
 
   const [consultant, setConsultant] = useState(null)
@@ -730,8 +731,10 @@ export default function Store({ setPage }) {
           </div>
         </div>
 
-        {/* Empty State */}
-        {visibleProducts.length === 0 ? (
+        {/* Loading Skeleton, Empty State, or Product Grid */}
+        {productsLoading ? (
+          <ProductCardSkeleton count={8} />
+        ) : visibleProducts.length === 0 ? (
           <div className={`text-center py-20 px-4 rounded-3xl border max-w-md mx-auto shadow-sm ${
             isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
           }`}>

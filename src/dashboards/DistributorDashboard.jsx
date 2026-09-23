@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import InlineLoader from "../components/InlineLoader"
 import EducaLogo from "../components/EducaLogo"
+import { PageSkeleton } from "../components/Skeleton"
 import CollapsibleTeamTree from "../components/CollapsibleTeamTree"
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid
@@ -64,6 +65,10 @@ export default function DistributorDashboard({ setPage }) {
         </button>
       </div>
     )
+  }
+
+  if (loading) {
+    return <PageSkeleton />
   }
 
   const confirmed  = allOrders.filter(o => o.status === "confirmed")

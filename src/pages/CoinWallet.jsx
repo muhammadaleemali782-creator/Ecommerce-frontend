@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { PageSkeleton } from "../components/Skeleton"
 
 export default function CoinWallet() {
   const { user } = useAuth() || {}
@@ -116,9 +117,7 @@ export default function CoinWallet() {
   }
 
   /* ── Loading / Error ── */
-  if (loading) return (
-    <div className="p-6 text-gray-500 animate-pulse">Loading wallet...</div>
-  )
+  if (loading) return <PageSkeleton />
   if (error) return (
     <div className="p-6 text-red-600 space-y-2">
       <p>Error: {error}</p>

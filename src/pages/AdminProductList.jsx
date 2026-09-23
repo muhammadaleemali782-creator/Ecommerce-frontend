@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
+import { ProductCardSkeleton } from "../components/Skeleton"
 
 const resolveImg = (img) => {
   if (!img) return ""
@@ -407,9 +408,7 @@ export default function AdminProductList({ setPage }) {
 
       {/* ── LOADING ── */}
       {loading && (
-        <div className="text-center py-12 text-stone-400 text-xs font-mono animate-pulse">
-          Loading product inventory...
-        </div>
+        <ProductCardSkeleton count={6} />
       )}
 
       {/* ── EMPTY STATE ── */}

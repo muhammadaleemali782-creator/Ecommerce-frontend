@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext"
 import { getRoleLabel, getRoleLabelPlural } from "../utils/roleLabels"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import InlineLoader from "../components/InlineLoader"
+import { NetworkTreeSkeleton } from "../components/Skeleton"
 
 const STYLE = `
   :root {
@@ -962,7 +963,7 @@ export default function MyNetwork() {
         </div>
       </div>
       <div style={{padding:"12px"}}>
-        {loading&&<InlineLoader label="Tumhara network load ho raha hai 🌳" minHeight={200} />}
+        {loading && <NetworkTreeSkeleton />}
         {error&&<div style={{padding:"12px 14px",background:isDark?"rgba(220,38,38,0.15)":"#fef2f2",borderRadius:10,color:"#dc2626",fontSize:13,border:`1px solid ${isDark?"rgba(220,38,38,0.3)":"#fecaca"}`}}>❌ {error}</div>}
         {viewMode==="graph"&&!loading&&(
           <div style={{background:isDark?"#111417":"#fff",borderRadius:14,boxShadow:isDark?"0 1px 12px rgba(0,0,0,0.4)":"0 1px 8px rgba(0,0,0,0.06)",border:`1px solid ${isDark?"rgba(255,255,255,0.08)":"transparent"}`,overflow:"hidden"}}>

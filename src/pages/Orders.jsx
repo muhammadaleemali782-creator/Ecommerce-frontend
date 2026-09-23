@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useStore } from "../context/StoreContext"
 import InlineLoader from "../components/InlineLoader"
 import EducaLogo from "../components/EducaLogo"
+import { CardSkeleton } from "../components/Skeleton"
 
 export default function Orders() {
   const { deleteOrder, printInvoice } = useStore()
@@ -90,8 +91,12 @@ export default function Orders() {
   /* ================= LOADING ================= */
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded shadow text-center">
-        <InlineLoader label="Tumhare orders load ho rahe hain 📦" minHeight={180} />
+      <div className="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+          <div className="h-6 w-36 bg-stone-200 animate-pulse rounded-lg" />
+          <div className="h-4 w-24 bg-stone-200 animate-pulse rounded-md" />
+        </div>
+        <CardSkeleton count={4} />
       </div>
     )
   }

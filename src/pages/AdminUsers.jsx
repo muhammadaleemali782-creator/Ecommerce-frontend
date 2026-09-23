@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react"
 import { getRoleLabel } from "../utils/roleLabels"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
+import { CardSkeleton } from "../components/Skeleton"
 
 function CopyBtn({ text, label = "" }) {
   const [copied, setCopied] = useState(false)
@@ -453,8 +454,11 @@ export default function AdminUsers() {
         </div>
       )}
 
-      {/* ── USER CARDS GRID ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
+      {/* ── USER CARDS GRID / SKELETON ── */}
+      {loading ? (
+        <CardSkeleton count={6} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
         {filteredUsers.map(user => {
           const isDeleted = user.isDeleted
           const roleLabel = getRoleLabel(user.role)
@@ -611,6 +615,7 @@ export default function AdminUsers() {
           )
         })}
       </div>
+      )}
 
       {/* ── USER DETAIL MODAL ── */}
       {selectedUser && (

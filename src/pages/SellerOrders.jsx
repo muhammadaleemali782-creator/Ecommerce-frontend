@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext"
 import InvoiceModal from "../components/InvoiceModal"
 import EducaLogo from "../components/EducaLogo"
 import InlineLoader from "../components/InlineLoader"
+import { CardSkeleton, StatCardSkeleton } from "../components/Skeleton"
 
 const STAGES = [
   { key: "pending",              label: "Order Placed",         icon: "🛒", desc: "Processing"            },
@@ -113,7 +114,15 @@ export default function SellerOrders() {
     rejected:             safeOrders.filter(o => o.status === "rejected").length,
   }
 
-  if (loading) return <InlineLoader label="Orders load ho rahe hain 📦" minHeight={180} />
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="h-8 w-44 bg-stone-200 dark:bg-white/10 animate-pulse rounded-xl" />
+        <StatCardSkeleton count={4} />
+        <CardSkeleton count={4} />
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">

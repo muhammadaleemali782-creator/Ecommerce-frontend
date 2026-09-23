@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import InvoiceModal from "../components/InvoiceModal"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
+import { TableSkeleton, CardSkeleton } from "../components/Skeleton"
 
 /* ── Primary Status Badge ── */
 const StatusBadge = ({ status }) => {
@@ -434,8 +435,13 @@ export default function AdminOrders() {
 
       {/* ── CONTENT (LOADING / EMPTY / ORDERS) ── */}
       {loading ? (
-        <div className="text-center py-20 text-stone-400 text-xs font-mono animate-pulse">
-          ⚡ Loading Orders Database...
+        <div className="space-y-4">
+          <div className="block lg:hidden">
+            <CardSkeleton count={4} />
+          </div>
+          <div className="hidden lg:block">
+            <TableSkeleton rows={6} cols={6} />
+          </div>
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className={`p-10 text-center rounded-3xl border ${

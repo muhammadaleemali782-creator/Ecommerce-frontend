@@ -1,68 +1,69 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, lazy, Suspense } from "react"
 import Navbar from "./components/Navbar"
 import HeroBanner from "./components/HeroBanner"
 import GrowthLoader from "./components/GrowthLoader"
 import ErrorBoundary from "./components/ErrorBoundary"
+import { PageSkeleton } from "./components/Skeleton"
 
-// ── Pages ──
-import Home              from "./pages/Home"
-import Store             from "./pages/Store"
-import Services          from "./pages/Services"
-import Cart              from "./pages/Cart"
-import Checkout          from "./pages/Checkout"
-import Orders            from "./pages/Orders"
-import Login             from "./pages/Login"
-import Admin             from "./pages/Admin"
-import AdminProductList  from "./pages/AdminProductList"
-import AdminUsers        from "./pages/AdminUsers"
-import PasswordHelp      from "./pages/PasswordHelp"
-import AdminPasswordReset from "./pages/AdminPasswordReset"
-import AdminAddProduct   from "./pages/AdminAddProduct"
-import AdminRequests     from "./pages/AdminRequests"
-import AdminEmailSettings from "./pages/AdminEmailSettings"
-import RaiseRequest      from "./pages/RaiseRequest"
-import JoinRequest       from "./pages/JoinRequest"
-import AdminRequestsHistory from "./pages/AdminRequestsHistory"
-import MyCreatedUsers    from "./pages/MyCreatedUsers"
+// ── Pages (Lazy Chunked) ──
+const Home                   = lazy(() => import("./pages/Home"))
+const Store                  = lazy(() => import("./pages/Store"))
+const Services               = lazy(() => import("./pages/Services"))
+const Cart                   = lazy(() => import("./pages/Cart"))
+const Checkout               = lazy(() => import("./pages/Checkout"))
+const Orders                 = lazy(() => import("./pages/Orders"))
+const Login                  = lazy(() => import("./pages/Login"))
+const Admin                  = lazy(() => import("./pages/Admin"))
+const AdminProductList       = lazy(() => import("./pages/AdminProductList"))
+const AdminUsers             = lazy(() => import("./pages/AdminUsers"))
+const PasswordHelp           = lazy(() => import("./pages/PasswordHelp"))
+const AdminPasswordReset     = lazy(() => import("./pages/AdminPasswordReset"))
+const AdminAddProduct        = lazy(() => import("./pages/AdminAddProduct"))
+const AdminRequests          = lazy(() => import("./pages/AdminRequests"))
+const AdminEmailSettings     = lazy(() => import("./pages/AdminEmailSettings"))
+const RaiseRequest           = lazy(() => import("./pages/RaiseRequest"))
+const JoinRequest            = lazy(() => import("./pages/JoinRequest"))
+const AdminRequestsHistory   = lazy(() => import("./pages/AdminRequestsHistory"))
+const MyCreatedUsers         = lazy(() => import("./pages/MyCreatedUsers"))
 
 // ── Dashboards ──
-import DistributorDashboard from "./dashboards/DistributorDashboard"
-import SellerDashboard      from "./dashboards/SellerDashboard"
+const DistributorDashboard   = lazy(() => import("./dashboards/DistributorDashboard"))
+const SellerDashboard        = lazy(() => import("./dashboards/SellerDashboard"))
 
 // ── Distributor ──
-import CreateSeller from "./pages/CreateSeller"
+const CreateSeller           = lazy(() => import("./pages/CreateSeller"))
 
 // ── Admin Extra ──
-import AdminNetworkView from "./pages/AdminNetworkView"
+const AdminNetworkView       = lazy(() => import("./pages/AdminNetworkView"))
 
 // ── Coin / Commission / Network ──
-import CoinWallet    from "./pages/CoinWallet"
-import MyCommission  from "./pages/MyCommission"
-import MyNetwork     from "./pages/MyNetwork"
+const CoinWallet             = lazy(() => import("./pages/CoinWallet"))
+const MyCommission           = lazy(() => import("./pages/MyCommission"))
+const MyNetwork              = lazy(() => import("./pages/MyNetwork"))
 
 // ── PPC System ──
-import PPCWallet                from "./pages/PPCWallet"
-import WithdrawalRequest        from "./pages/WithdrawalRequest"
-import AdminPPCSettings         from "./pages/AdminPPCSettings"
-import AdminWithdrawalManagement from "./pages/AdminWithdrawalManagement"
-import PPCStatement             from "./pages/PPCStatement"
-import AdminRoyaltyManagement   from "./pages/AdminRoyaltyManagement"
-import DistributorRoyalty       from "./pages/DistributorRoyalty"
-import TeamActivityRadar        from "./pages/TeamActivityRadar"
+const PPCWallet              = lazy(() => import("./pages/PPCWallet"))
+const WithdrawalRequest      = lazy(() => import("./pages/WithdrawalRequest"))
+const AdminPPCSettings       = lazy(() => import("./pages/AdminPPCSettings"))
+const AdminWithdrawalManagement = lazy(() => import("./pages/AdminWithdrawalManagement"))
+const PPCStatement           = lazy(() => import("./pages/PPCStatement"))
+const AdminRoyaltyManagement = lazy(() => import("./pages/AdminRoyaltyManagement"))
+const DistributorRoyalty     = lazy(() => import("./pages/DistributorRoyalty"))
+const TeamActivityRadar      = lazy(() => import("./pages/TeamActivityRadar"))
 
 // ── Profile ──
-import MyProfile from "./pages/MyProfile"
+const MyProfile              = lazy(() => import("./pages/MyProfile"))
 
 // ── Order Pages ──
-import AdminOrders       from "./pages/AdminOrders"
-import DistributorOrders from "./pages/DistributorOrders"
-import SellerOrders      from "./pages/SellerOrders"
+const AdminOrders            = lazy(() => import("./pages/AdminOrders"))
+const DistributorOrders      = lazy(() => import("./pages/DistributorOrders"))
+const SellerOrders           = lazy(() => import("./pages/SellerOrders"))
 
 // ── ☢️ NEW: Data Purge ──
-import AdminNukeData from "./pages/AdminNukeData"
-import AdminInvoiceSettings from "./pages/AdminInvoiceSettings"
-import AdminServices from "./pages/AdminServices"
-import AdminBannerManagement from "./pages/AdminBannerManagement"
+const AdminNukeData          = lazy(() => import("./pages/AdminNukeData"))
+const AdminInvoiceSettings   = lazy(() => import("./pages/AdminInvoiceSettings"))
+const AdminServices          = lazy(() => import("./pages/AdminServices"))
+const AdminBannerManagement  = lazy(() => import("./pages/AdminBannerManagement"))
 
 // ── Contexts ──
 import { StoreProvider, useStore } from "./context/StoreContext"
@@ -423,7 +424,9 @@ function AppContent() {
       {page === "home" && <HeroBanner setPage={setPage} />}
       <main className={page === "home" || page === "store" ? "w-full p-0 m-0 overflow-hidden" : "p-2 sm:p-6 pb-28 sm:pb-12 max-w-[1400px] mx-auto"}>
         <ErrorBoundary>
-          {renderPage()}
+          <Suspense fallback={<PageSkeleton />}>
+            {renderPage()}
+          </Suspense>
         </ErrorBoundary>
       </main>
     </div>
