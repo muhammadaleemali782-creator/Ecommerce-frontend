@@ -250,14 +250,16 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
             
             {/* 1. Name */}
-            <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
-              {order.sellerId?.fullName || order.sellerFullName || order.sellerName || order.sellerId?.name || "—"}
-            </div>
+            {settings?.showSellerName !== false && (
+              <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+                {order.sellerId?.fullName || order.sellerFullName || order.sellerName || order.sellerId?.name || "—"}
+              </div>
+            )}
 
             {/* 2. ID */}
-            {order.sellerId?.name && settings?.showSellerId !== false && (
-              <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
-                🆔 ID: {order.sellerId.name}
+            {order.sellerId?.name && (settings?.showSellerId !== false || settings?.showSellerName === false) && (
+              <div style={{fontSize: settings?.showSellerName === false ? 13 : 11, fontWeight:800, color:"#059669", fontFamily:"monospace", marginTop:2}}>
+                🆔 {settings?.showSellerName === false ? "User ID: " : "ID: "}{order.sellerId.name}
               </div>
             )}
 
@@ -454,7 +456,12 @@ function ThermalInvoice({ order, settings, invNo, meta, thermalWidth }) {
       {divider}
       <div style={{fontSize:9}}>
         {settings?.showSellerDetails !== false && (
-          <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName && settings?.showSellerId !== false ? `(${order.sellerId.name})` : ''}</div>
+          <div>
+            Seller: {settings?.showSellerName !== false
+              ? `${order.sellerId?.fullName || order.sellerId?.name || "—"}${order.sellerId?.name && order.sellerId?.fullName && settings?.showSellerId !== false ? ` (${order.sellerId.name})` : ""}`
+              : (order.sellerId?.name ? `ID: ${order.sellerId.name}` : "—")
+            }
+          </div>
         )}
         {order.distributorId&&<div>Dist : {order.distributorId?.fullName || order.distributorId?.name} {order.distributorId?.name && order.distributorId?.fullName && settings?.showDistributorId !== false ? `(${order.distributorId.name})` : ''}</div>}
         <div>Order: #{order._id?.slice(-6)}</div>
