@@ -312,7 +312,7 @@ export default function WithdrawalRequest() {
             : "bg-blue-50 border-blue-200 text-blue-800"
         }`}>
           <div>
-            <span className="font-bold">Min Withdrawal:</span> ₹{settings.minimumWithdrawal}
+            <span className="font-bold">Min Withdrawal:</span> {settings.minimumWithdrawal || 1} PPC
           </div>
           <div>
             <span className="font-bold">Current PPC Rate:</span> 1 PPC = ₹{currentRate}
@@ -693,8 +693,8 @@ export default function WithdrawalRequest() {
                         day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
                       })}
                     </p>
-                    {req.transactionId && (
-                      <p className="text-xs text-emerald-400 font-mono mt-1">Txn: {req.transactionId}</p>
+                    {(req.utrNumber || req.transactionId) && (
+                      <p className="text-xs text-emerald-400 font-mono mt-1">UTR / Ref: {req.utrNumber || req.transactionId}</p>
                     )}
                     {req.adminNote && (
                       <p className="text-xs text-stone-400 italic mt-1">Note: {req.adminNote}</p>

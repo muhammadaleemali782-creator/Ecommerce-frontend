@@ -254,7 +254,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
           </div>
 
           {/* 2. ID */}
-          {order.sellerId?.name && (
+          {order.sellerId?.name && settings?.showSellerId !== false && (
             <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
               🆔 ID: {order.sellerId.name}
             </div>
@@ -284,8 +284,12 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             order.distributorId && [
               "Distributor",
               order.distributorId?.fullName
-                ? `${order.distributorId.fullName} (${order.distributorId.name})`
-                : order.distributorId?.name || order.distributorFullName || order.distributorName || (typeof order.distributorId === "object" ? "—" : "—")
+                ? (settings?.showDistributorId !== false && order.distributorId?.name
+                    ? `${order.distributorId.fullName} (${order.distributorId.name})`
+                    : order.distributorId.fullName)
+                : (settings?.showDistributorId !== false
+                    ? (order.distributorId?.name || order.distributorFullName || order.distributorName || (typeof order.distributorId === "object" ? "—" : "—"))
+                    : (order.distributorFullName || order.distributorName || "—"))
             ],
           ].filter(Boolean).map(([k,v])=>(
             <div key={k} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:11,marginBottom:5}}>
@@ -447,8 +451,8 @@ function ThermalInvoice({ order, settings, invNo, meta, thermalWidth }) {
       </>}
       {divider}
       <div style={{fontSize:9}}>
-        <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName ? `(${order.sellerId.name})` : ''}</div>
-        {order.distributorId&&<div>Dist : {order.distributorId?.fullName || order.distributorId?.name} {order.distributorId?.name && order.distributorId?.fullName ? `(${order.distributorId.name})` : ''}</div>}
+        <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName && settings?.showSellerId !== false ? `(${order.sellerId.name})` : ''}</div>
+        {order.distributorId&&<div>Dist : {order.distributorId?.fullName || order.distributorId?.name} {order.distributorId?.name && order.distributorId?.fullName && settings?.showDistributorId !== false ? `(${order.distributorId.name})` : ''}</div>}
         <div>Order: #{order._id?.slice(-6)}</div>
       </div>
       {divider}

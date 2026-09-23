@@ -18,8 +18,8 @@ const DEMO_ORDER = {
     { title:"Premium Headphone", price:1999, qty:1, description:"Wireless Over-Ear" },
     { title:"Smart Watch",       price:999,  qty:1, description:"Fitness Tracker" },
   ],
-  sellerId:      { name:"DB001/DS001", email:"seller@company.com", role:"seller" },
-  distributorId: { name:"DB001" },
+  sellerId:      { fullName:"Aryan Verma", name:"DS001", email:"seller@company.com", role:"seller" },
+  distributorId: { fullName:"Vikram Malhotra", name:"DB001" },
   onBehalfOfId:   "demo_id",
   onBehalfOfName: "Priya Sharma",
   onBehalfOfRole: "user",
@@ -113,13 +113,19 @@ function LivePreview({ settings, previewStatus }) {
 
           <div style={{padding:"14px 16px",borderRight:`1px solid ${border}`}}>
             <div style={{fontSize:7,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Fulfillment Partner</div>
-            <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>{order.sellerId?.name}</div>
+            <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>{order.sellerId?.fullName || order.sellerId?.name}</div>
+            {settings?.showSellerId !== false && order.sellerId?.name && (
+              <div style={{fontSize:8,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>🆔 ID: {order.sellerId.name}</div>
+            )}
             <div style={{fontSize:9,color:"#64748b",marginTop:3}}>✉️ {order.sellerId?.email}</div>
           </div>
 
           <div style={{padding:"14px 16px"}}>
             <div style={{fontSize:7,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Distributor Hub</div>
-            <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>{order.distributorId?.name}</div>
+            <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>
+              {order.distributorId?.fullName || order.distributorId?.name}
+              {settings?.showDistributorId !== false && order.distributorId?.fullName ? ` (${order.distributorId.name})` : ""}
+            </div>
           </div>
         </div>
 
@@ -164,7 +170,9 @@ export default function AdminInvoiceSettings() {
   const [form, setForm] = useState({
     companyName: "", tagline: "", address: "", phone: "", email: "", gst: "",
     logo: "", showLogo: true, themeColor: "#1e293b",
-    footer: "", terms: "", showBehalfInfo: true, customFields: []
+    footer: "", terms: "", showBehalfInfo: true,
+    showSellerId: true, showDistributorId: true,
+    customFields: []
   })
   const [saving,setSaving]   = useState(false)
   const [saved,setSaved]     = useState(false)
@@ -471,6 +479,73 @@ export default function AdminInvoiceSettings() {
                   isDark ? "bg-black/40 text-white border-white/10" : "bg-stone-50 text-stone-900 border-stone-300"
                 }`}
               />
+            </div>
+          </div>
+
+          {/* Visibility & ID Controls */}
+          <div className={`p-5 sm:p-6 rounded-3xl border space-y-3.5 shadow-md ${
+            isDark ? "bg-[#111713] border-white/[0.08]" : "bg-white border-stone-200"
+          }`}>
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-[#fbbf24] flex items-center gap-2">
+              <span>👁️</span> Invoice Visibility & System ID Controls
+            </h2>
+            <div className="space-y-3">
+              <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                isDark ? "bg-black/30 border-white/[0.06] hover:bg-black/50" : "bg-stone-50 border-stone-200 hover:bg-stone-100"
+              }`}>
+                <div className="pr-3">
+                  <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    Seller System ID (🆔 DS...)
+                  </div>
+                  <div className={`text-[10px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                    Invoice me Seller ki System User ID dikhana hai ya nahi (On/Off)
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.showSellerId !== false}
+                  onChange={e=>setForm(p=>({...p,showSellerId:e.target.checked}))}
+                  className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                />
+              </label>
+
+              <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                isDark ? "bg-black/30 border-white/[0.06] hover:bg-black/50" : "bg-stone-50 border-stone-200 hover:bg-stone-100"
+              }`}>
+                <div className="pr-3">
+                  <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    Distributor System ID (🆔 DB...)
+                  </div>
+                  <div className={`text-[10px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                    Invoice me Distributor ki System User ID dikhana hai ya nahi (On/Off)
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.showDistributorId !== false}
+                  onChange={e=>setForm(p=>({...p,showDistributorId:e.target.checked}))}
+                  className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                />
+              </label>
+
+              <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                isDark ? "bg-black/30 border-white/[0.06] hover:bg-black/50" : "bg-stone-50 border-stone-200 hover:bg-stone-100"
+              }`}>
+                <div className="pr-3">
+                  <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    Ordered For / Placed By Details
+                  </div>
+                  <div className={`text-[10px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                    Order kisne place kiya aur kiske behalf pe hai, invoice me dikhana hai ya nahi
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.showBehalfInfo !== false}
+                  onChange={e=>setForm(p=>({...p,showBehalfInfo:e.target.checked}))}
+                  className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 

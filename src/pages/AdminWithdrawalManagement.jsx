@@ -202,6 +202,11 @@ export default function AdminWithdrawalManagement() {
   
   const handleApprove = async () => {
     try {
+      if (modalData.context === "withdrawal" && !modalData.transactionId?.trim()) {
+        alert("Payment UTR / Bank Reference Number dalna zaroori hai!")
+        return
+      }
+
       setLoading(true)
       
       const token = localStorage.getItem("token")
@@ -214,7 +219,8 @@ export default function AdminWithdrawalManagement() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          transactionId: modalData.transactionId,
+          transactionId: modalData.transactionId?.trim(),
+          utrNumber: modalData.transactionId?.trim(),
           note: modalData.note
         })
       })
@@ -613,11 +619,11 @@ export default function AdminWithdrawalManagement() {
                     </div>
                   )}
 
-                  {req.transactionId && (
+                  {(req.utrNumber || req.transactionId) && (
                     <div className={`p-3 rounded-xl border text-xs font-mono ${
                       isDark ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800"
                     }`}>
-                      <strong>Transaction ID / UTR:</strong> {req.transactionId}
+                      <strong>Payment UTR / Ref:</strong> {req.utrNumber || req.transactionId}
                     </div>
                   )}
 
@@ -693,16 +699,17 @@ export default function AdminWithdrawalManagement() {
                 <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
                   isDark ? "text-stone-300" : "text-stone-700"
                 }`}>
-                  Bank Reference / UTR Number
+                  Bank Reference / UTR Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
+                  required
                   value={modalData.transactionId}
                   onChange={(e) => setModalData({ ...modalData, transactionId: e.target.value })}
                   className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
                     isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
                   }`}
-                  placeholder="e.g. UTR123456789 / IMPS Ref"
+                  placeholder="e.g. UTR123456789 / IMPS Ref (Mandatory)"
                 />
               </div>
             )}

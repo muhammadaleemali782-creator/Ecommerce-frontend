@@ -393,21 +393,21 @@ export default function AdminPPCSettings() {
                 <label className={`block text-[11px] font-mono font-bold uppercase tracking-wider mb-1.5 ${
                   isDark ? "text-stone-400" : "text-stone-600"
                 }`}>
-                  Minimum Withdrawal Limit (₹) <span className="text-red-500">*</span>
+                  Minimum Withdrawal Limit (PPC) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
-                  step="0.01"
-                  min="0"
+                  step="1"
+                  min="1"
                   value={formData.minimumWithdrawal}
                   onChange={(e) => setFormData({ ...formData, minimumWithdrawal: e.target.value })}
                   required
                   className={`w-full px-4 py-2.5 font-mono font-bold border rounded-xl focus:outline-none ${
                     isDark ? "bg-[#121814] text-white border-white/10 focus:border-[#fbbf24]" : "bg-white text-stone-900 border-stone-300 focus:border-blue-500 shadow-sm"
                   }`}
-                  placeholder="100"
+                  placeholder="1"
                 />
-                <p className="text-[10px] text-stone-400 mt-1">Minimum wallet balance required to request bank payout</p>
+                <p className="text-[10px] text-stone-400 mt-1">Minimum PPC required for user/distributor to request withdrawal (e.g. 1 PPC)</p>
               </div>
             </div>
           </div>
@@ -876,7 +876,7 @@ export default function AdminPPCSettings() {
               isDark ? "bg-black/40 border-white/[0.06]" : "bg-stone-50 border-stone-200"
             }`}>
               <p className="text-[10px] font-mono text-amber-600 dark:text-blue-400 uppercase">Min Withdraw</p>
-              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>₹{settings.minimumWithdrawal}</p>
+              <p className={`text-lg font-black mt-0.5 ${isDark ? "text-white" : "text-stone-900"}`}>{settings.minimumWithdrawal} PPC</p>
             </div>
           </div>
           
