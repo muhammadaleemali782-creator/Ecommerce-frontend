@@ -13,6 +13,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
   // Form edit state
   const [editing, setEditing] = useState(false)
   const [poolPct, setPoolPct] = useState(1)
+  const [poolMult, setPoolMult] = useState(10)
   const [cyclePeriod, setCyclePeriod] = useState("monthly")
   const [savingSettings, setSavingSettings] = useState(false)
 
@@ -34,6 +35,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
       const json = await res.json()
       setData(json)
       setPoolPct(json.poolPercentage || 1)
+      setPoolMult(json.poolMultiplier || 10)
       setCyclePeriod(json.cyclePeriod || "monthly")
 
       // load history
@@ -62,7 +64,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/royalty/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ poolPercentage: Number(poolPct), cyclePeriod })
+        body: JSON.stringify({ poolMultiplier: Number(poolMult), poolPercentage: Number(poolPct), cyclePeriod })
       })
       if (res.ok) {
         setActionMsg({ type: "success", text: "✅ Royalty pool settings updated successfully!" })
@@ -123,7 +125,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
               Lifetime Distributor Royalty Pool Manager
             </h1>
             <p className={`text-xs mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
-              Poori company me aane wale PPC turnover se Distributors ko lifetime monthly royalty distribute karein
+              Formula: (Total Company PPC × {data.poolMultiplier || 10}) ÷ Total Distributors
             </p>
           </div>
         </div>
@@ -161,22 +163,22 @@ export default function AdminRoyaltyManagement({ setPage }) {
           isDark ? "bg-stone-900 border-blue-500/30" : "bg-amber-50/50 border-amber-300"
         }`}>
           <h3 className="text-sm font-black text-blue-500 uppercase tracking-wider">⚙️ Royalty Pool Settings</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold block mb-1">Royalty Percentage (% of total company PPC):</label>
+              <label className="text-xs font-bold block mb-1">Pool Multiplier (Total PPC × X):</label>
               <div className="flex items-center gap-2">
+                <span className="font-bold text-blue-500">×</span>
                 <input
                   type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={poolPct}
-                  onChange={(e) => setPoolPct(e.target.value)}
+                  min="1"
+                  max="1000"
+                  step="1"
+                  value={poolMult}
+                  onChange={(e) => setPoolMult(e.target.value)}
                   className={`w-full px-3 py-2 rounded-xl border text-sm font-bold ${
                     isDark ? "bg-black/50 border-white/[0.12]" : "bg-white border-stone-300"
                   }`}
                 />
-                <span className="font-bold text-blue-500">%</span>
               </div>
             </div>
             <div>
@@ -217,7 +219,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
         <div className={`p-5 rounded-3xl border ${
           isDark ? "bg-[#111713] border-blue-500/30 shadow-lg shadow-amber-500/5" : "bg-amber-50/50 border-amber-200"
         }`}>
-          <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Active Royalty Pool ({data.poolPercentage}%)</p>
+          <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Active Royalty Pool (Company PPC × {data.poolMultiplier || 10})</p>
           <p className="text-2xl font-black mt-1 text-blue-500">{Math.round(current.accumulatedPoolPPC || 0)} <span className="text-xs">PPC</span></p>
           <p className="text-xs font-bold text-emerald-500 mt-1">≈ ₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
         </div>

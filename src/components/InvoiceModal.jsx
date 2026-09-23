@@ -183,7 +183,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
       )}
 
       {/* PARTIES */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:`1px solid ${border}`}}>
+      <div style={{display:"grid",gridTemplateColumns:settings?.showSellerDetails !== false ? "1fr 1fr 1fr" : "1fr 1fr",borderBottom:`1px solid ${border}`}}>
 
         {/* BILL TO */}
         <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
@@ -245,34 +245,36 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
         </div>
 
         {/* SELLER */}
-        <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
-          <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
-          
-          {/* 1. Name */}
-          <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
-            {order.sellerId?.fullName || order.sellerFullName || order.sellerName || order.sellerId?.name || "—"}
+        {settings?.showSellerDetails !== false && (
+          <div style={{padding:"18px 22px",borderRight:`1px solid ${border}`}}>
+            <div style={{fontSize:9,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}}>Seller</div>
+            
+            {/* 1. Name */}
+            <div style={{fontWeight:800,fontSize:14,color:"#1e293b"}}>
+              {order.sellerId?.fullName || order.sellerFullName || order.sellerName || order.sellerId?.name || "—"}
+            </div>
+
+            {/* 2. ID */}
+            {order.sellerId?.name && settings?.showSellerId !== false && (
+              <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
+                🆔 ID: {order.sellerId.name}
+              </div>
+            )}
+
+            {/* 3. Email */}
+            {order.sellerId?.email && (
+              <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>
+                {order.sellerId.email}
+              </div>
+            )}
+            
+            {order.userId && order.userId?.name !== order.sellerId?.name && (
+              <div style={{marginTop:6,fontSize:10.5,background:"#eff6ff",borderRadius:6,padding:"3px 7px",color:"#1d4ed8",display:"inline-block"}}>
+                via: {order.userId?.fullName || order.userId?.name}
+              </div>
+            )}
           </div>
-
-          {/* 2. ID */}
-          {order.sellerId?.name && settings?.showSellerId !== false && (
-            <div style={{fontSize:11,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>
-              🆔 ID: {order.sellerId.name}
-            </div>
-          )}
-
-          {/* 3. Email */}
-          {order.sellerId?.email && (
-            <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>
-              {order.sellerId.email}
-            </div>
-          )}
-          
-          {order.userId && order.userId?.name !== order.sellerId?.name && (
-            <div style={{marginTop:6,fontSize:10.5,background:"#eff6ff",borderRadius:6,padding:"3px 7px",color:"#1d4ed8",display:"inline-block"}}>
-              via: {order.userId?.fullName || order.userId?.name}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* ORDER DETAILS */}
         <div style={{padding:"18px 22px"}}>
@@ -451,7 +453,9 @@ function ThermalInvoice({ order, settings, invNo, meta, thermalWidth }) {
       </>}
       {divider}
       <div style={{fontSize:9}}>
-        <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName && settings?.showSellerId !== false ? `(${order.sellerId.name})` : ''}</div>
+        {settings?.showSellerDetails !== false && (
+          <div>Seller: {order.sellerId?.fullName || order.sellerId?.name || "—"} {order.sellerId?.name && order.sellerId?.fullName && settings?.showSellerId !== false ? `(${order.sellerId.name})` : ''}</div>
+        )}
         {order.distributorId&&<div>Dist : {order.distributorId?.fullName || order.distributorId?.name} {order.distributorId?.name && order.distributorId?.fullName && settings?.showDistributorId !== false ? `(${order.distributorId.name})` : ''}</div>}
         <div>Order: #{order._id?.slice(-6)}</div>
       </div>

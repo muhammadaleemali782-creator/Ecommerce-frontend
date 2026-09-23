@@ -111,14 +111,16 @@ function LivePreview({ settings, previewStatus }) {
             )}
           </div>
 
-          <div style={{padding:"14px 16px",borderRight:`1px solid ${border}`}}>
-            <div style={{fontSize:7,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Fulfillment Partner</div>
-            <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>{order.sellerId?.fullName || order.sellerId?.name}</div>
-            {settings?.showSellerId !== false && order.sellerId?.name && (
-              <div style={{fontSize:8,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>🆔 ID: {order.sellerId.name}</div>
-            )}
-            <div style={{fontSize:9,color:"#64748b",marginTop:3}}>✉️ {order.sellerId?.email}</div>
-          </div>
+          {settings?.showSellerDetails !== false && (
+            <div style={{padding:"14px 16px",borderRight:`1px solid ${border}`}}>
+              <div style={{fontSize:7,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Fulfillment Partner</div>
+              <div style={{fontWeight:800,fontSize:12,color:"#1e293b"}}>{order.sellerId?.fullName || order.sellerId?.name}</div>
+              {settings?.showSellerId !== false && order.sellerId?.name && (
+                <div style={{fontSize:8,fontWeight:700,color:"#059669",fontFamily:"monospace",marginTop:2}}>🆔 ID: {order.sellerId.name}</div>
+              )}
+              <div style={{fontSize:9,color:"#64748b",marginTop:3}}>✉️ {order.sellerId?.email}</div>
+            </div>
+          )}
 
           <div style={{padding:"14px 16px"}}>
             <div style={{fontSize:7,fontWeight:800,color:"#94a3b8",letterSpacing:"0.1em",marginBottom:8,textTransform:"uppercase"}}>Distributor Hub</div>
@@ -171,6 +173,7 @@ export default function AdminInvoiceSettings() {
     companyName: "", tagline: "", address: "", phone: "", email: "", gst: "",
     logo: "", showLogo: true, themeColor: "#1e293b",
     footer: "", terms: "", showBehalfInfo: true,
+    showSellerDetails: true,
     showSellerId: true, showDistributorId: true,
     customFields: []
   })
@@ -490,6 +493,25 @@ export default function AdminInvoiceSettings() {
               <span>👁️</span> Invoice Visibility & System ID Controls
             </h2>
             <div className="space-y-3">
+              <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                isDark ? "bg-black/30 border-white/[0.06] hover:bg-black/50" : "bg-stone-50 border-stone-200 hover:bg-stone-100"
+              }`}>
+                <div className="pr-3">
+                  <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    Seller Details Section (Fulfillment Partner)
+                  </div>
+                  <div className={`text-[10px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
+                    Invoice me Seller/Fulfillment Partner ki details (Name, Email, Box) dikhana hai ya nahi (On/Off)
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.showSellerDetails !== false}
+                  onChange={e=>setForm(p=>({...p,showSellerDetails:e.target.checked}))}
+                  className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                />
+              </label>
+
               <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-colors ${
                 isDark ? "bg-black/30 border-white/[0.06] hover:bg-black/50" : "bg-stone-50 border-stone-200 hover:bg-stone-100"
               }`}>

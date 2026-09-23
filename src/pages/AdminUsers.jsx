@@ -3,6 +3,31 @@ import { getRoleLabel } from "../utils/roleLabels"
 import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
 
+function CopyBtn({ text, label = "" }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = (e) => {
+    e.stopPropagation()
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title={`Copy ${label || text}`}
+      className="p-1 rounded-md text-[10.5px] text-stone-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors inline-flex items-center gap-0.5 cursor-pointer shrink-0"
+    >
+      {copied ? (
+        <span className="text-emerald-500 font-bold text-[9.5px] whitespace-nowrap">✓ Copied</span>
+      ) : (
+        <span className="opacity-75 hover:opacity-100">📋</span>
+      )}
+    </button>
+  )
+}
+
 export default function AdminUsers() {
   const { isDark } = useTheme()
   const [users, setUsers] = useState([])
@@ -453,17 +478,23 @@ export default function AdminUsers() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-base font-black shrink-0 shadow-sm">
                       {(user.fullName || user.name || "U")[0].toUpperCase()}
                     </div>
-                    <div className="min-w-0">
-                      <h3 className={`text-sm font-black truncate ${
-                        isDark ? "text-white" : "text-stone-900"
-                      }`}>
-                        {user.fullName || user.name}
-                      </h3>
-                      <p className={`text-xs truncate ${
-                        isDark ? "text-stone-400" : "text-stone-500"
-                      }`}>
-                        {user.email}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1">
+                        <h3 className={`text-sm font-black truncate ${
+                          isDark ? "text-white" : "text-stone-900"
+                        }`}>
+                          {user.fullName || user.name}
+                        </h3>
+                        <CopyBtn text={user.fullName || user.name} label="Name" />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <p className={`text-xs truncate ${
+                          isDark ? "text-stone-400" : "text-stone-500"
+                        }`}>
+                          {user.email}
+                        </p>
+                        <CopyBtn text={user.email} label="Email" />
+                      </div>
                     </div>
                   </div>
 
@@ -476,6 +507,17 @@ export default function AdminUsers() {
                   }`}>
                     {roleLabel}
                   </span>
+                </div>
+
+                {/* System ID Pill with Copy */}
+                <div className="mt-2.5 flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider shrink-0">🆔 System ID:</span>
+                    <span className="font-mono text-xs font-black text-emerald-700 dark:text-emerald-300 tracking-wider truncate">
+                      {user.name}
+                    </span>
+                  </div>
+                  <CopyBtn text={user.name} label="System ID" />
                 </div>
 
                 {/* Status Badges */}
@@ -593,10 +635,16 @@ export default function AdminUsers() {
                 {(selectedUser.fullName || selectedUser.name || "?")[0].toUpperCase()}
               </div>
               <div>
-                <h2 className={`text-lg font-black leading-tight ${isDark ? "text-white" : "text-stone-900"}`}>
-                  {selectedUser.fullName || selectedUser.name}
-                </h2>
-                <p className={`text-xs font-mono ${isDark ? "text-stone-400" : "text-stone-500"}`}>{selectedUser.email}</p>
+                <div className="flex items-center gap-1">
+                  <h2 className={`text-lg font-black leading-tight ${isDark ? "text-white" : "text-stone-900"}`}>
+                    {selectedUser.fullName || selectedUser.name}
+                  </h2>
+                  <CopyBtn text={selectedUser.fullName || selectedUser.name} label="Name" />
+                </div>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <p className={`text-xs font-mono ${isDark ? "text-stone-400" : "text-stone-500"}`}>{selectedUser.email}</p>
+                  <CopyBtn text={selectedUser.email} label="Email" />
+                </div>
                 <span className="mt-1 inline-block text-[9.5px] font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-500/30 uppercase font-bold">
                   {getRoleLabel(selectedUser.role)}
                 </span>
@@ -615,9 +663,12 @@ export default function AdminUsers() {
                 <span className={isDark ? "text-stone-400" : "text-stone-500"}>📍 Address:</span>
                 <span className="font-bold text-right max-w-[200px] truncate">{selectedUser.address || "—"}</span>
               </div>
-              <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
+              <div className={`flex justify-between items-center py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
                 <span className={isDark ? "text-stone-400" : "text-stone-500"}>🆔 System ID:</span>
-                <span className="font-mono text-amber-600 dark:text-[#fbbf24] font-bold">{selectedUser.name}</span>
+                <div className="flex items-center gap-1">
+                  <span className="font-mono text-amber-600 dark:text-[#fbbf24] font-bold">{selectedUser.name}</span>
+                  <CopyBtn text={selectedUser.name} label="System ID" />
+                </div>
               </div>
               <div className={`flex justify-between py-1 border-b ${isDark ? "border-white/[0.04]" : "border-stone-200/60"}`}>
                 <span className={isDark ? "text-stone-400" : "text-stone-500"}>👆 Reports To:</span>
