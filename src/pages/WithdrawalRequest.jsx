@@ -4,6 +4,14 @@ import EducaLogo from "../components/EducaLogo"
 import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
 import DraftBanner from "../components/DraftBanner"
 
+/* ── Format User Name with System ID ── */
+const formatUser = (name, fullName) => {
+  if (fullName && fullName.trim() && fullName.trim() !== name) {
+    return `${fullName.trim()} (${name})`
+  }
+  return name || "—"
+}
+
 /* ── Collapsible Source Card ── */
 function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {
   const [open, setOpen] = useState(true)
@@ -69,7 +77,7 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className={`border-b ${isDark ? "border-white/[0.06]" : "border-stone-100"}`}>
-                {["System ID", "%", `PPC × ₹${rate} × %`, "Rupees"].map(h => (
+                {["User / System ID", "%", `PPC × ₹${rate} × %`, "Rupees"].map(h => (
                   <th key={h} className="text-[10px] font-bold text-stone-400 p-2 whitespace-nowrap">
                     {h}
                   </th>
@@ -222,8 +230,10 @@ export default function WithdrawalRequest() {
       const uid = (entry.fromUser?._id || "deleted") + "_" + (entry.positionType || "x")
       if (!sourceMap[uid]) {
         sourceMap[uid] = {
-          name:            entry.fromUser?.name || null,
+          name:            entry.fromUser?.name || entry.fromUserName || null,
+          fullName:        entry.fromUser?.fullName || entry.fromUserFullName || "",
           toUserName:      entry.toUserName || "",
+          toUserFullName:  entry.toUserFullName || "",
           role:            entry.fromUser?.role || "",
           isUserOrder:     entry.isUserOrder || (entry.fromUser?.role === "user") || false,
           positionType:    entry.positionType,
@@ -235,7 +245,13 @@ export default function WithdrawalRequest() {
         }
       }
       if (entry.chainInfo?.directSellerName) {
-        sourceMap[uid].chainInfo = entry.chainInfo
+        sourceMap[uid].chainInfo = { ...sourceMap[uid].chainInfo, ...entry.chainInfo }
+      }
+      if (entry.toUserFullName && !sourceMap[uid].toUserFullName) {
+        sourceMap[uid].toUserFullName = entry.toUserFullName
+      }
+      if ((entry.fromUser?.fullName || entry.fromUserFullName) && !sourceMap[uid].fullName) {
+        sourceMap[uid].fullName = entry.fromUser?.fullName || entry.fromUserFullName
       }
       if (entry.isUserOrder || entry.fromUser?.role === "user") {
         sourceMap[uid].isUserOrder = true
@@ -393,54 +409,64 @@ export default function WithdrawalRequest() {
                   const ci       = src.chainInfo || {}
                   const isUserOrd = src.isUserOrder || ci.isUserOrder || src.role === "user"
 
-                  const sellerName = ci.directSellerName || (src.role === "seller" ? src.name : "—") || "—"
-                  const parentName = ci.parentSellerName || ""
-                  const myName     = src.toUserName || "You"
-                  const distName   = ci.distributorName || "—"
+                  const sellerName     = ci.directSellerName || (src.role === "seller" ? src.name : "—") || "—"
+                  const sellerFullName = ci.directSellerFullName || (src.role === "seller" ? src.fullName : "") || ""
+                  const parentName     = ci.parentSellerName || ""
+                  const parentFullName = ci.parentSellerFullName || ""
+                  const myName         = src.toUserName || walletData?.name || "You"
+                  const myFullName     = src.toUserFullName || walletData?.fullName || ""
+                  const distName       = ci.distributorName || "—"
+                  const distFullName   = ci.distributorFullName || ""
+
+                  const sellerDisplay = formatUser(sellerName, sellerFullName)
+                  const parentDisplay = formatUser(parentName, parentFullName)
+                  const myDisplay     = formatUser(myName, myFullName)
+                  const distDisplay   = formatUser(distName, distFullName)
+                  const fromDisplay   = formatUser(src.name, src.fullName)
 
                   const orderBy =
-                    src.role === "user"   ? { icon: "👤", label: `User — ${src.name || "—"}` }
-                  : src.role === "seller" ? { icon: "🛍️", label: `Seller — ${sellerName || src.name || "—"}` }
-                  : { icon: "📦", label: src.name || "—" }
+                    src.role === "user"   ? { icon: "👤", label: `User — ${fromDisplay}` }
+                  : src.role === "seller" ? { icon: "🛍️", label: `Seller — ${sellerDisplay}` }
+                  : { icon: "📦", label: fromDisplay }
 
                   const chain =
                     isUserOrd && src.positionType === "direct"
                       ? [
-                          { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
-                          { who: distName,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                          { who: `${myDisplay} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                          { who: distDisplay,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
                         ]
                     : isUserOrd && src.positionType === "distributor"
                       ? [
-                          { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
-                          { who: `${myName} (You)`,   pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                          { who: sellerDisplay,        pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                          { who: `${myDisplay} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
                         ]
                     : src.positionType === "direct"
                       ? parentName
                         ? [
-                            { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
-                            { who: parentName,        pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
-                            { who: distName,          pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                            { who: `${myDisplay} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                            { who: parentDisplay,        pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                            { who: distDisplay,          pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
                           ]
                         : [
-                            { who: `${myName} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
-                            { who: distName,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                            { who: `${myDisplay} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                            { who: distDisplay,          pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
                           ]
                     : src.positionType === "parent"
                       ? [
-                          { who: sellerName,           pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
-                          { who: `${myName} (You)`,     pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
-                          { who: distName,             pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                          { who: sellerDisplay,        pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                          { who: `${myDisplay} (You)`, pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
+                          { who: distDisplay,          pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
                         ]
                     : src.positionType === "distributor"
                       ? pct === 25
                         ? [
-                            { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
-                            { who: parentName || "—",  pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
-                            { who: `${myName} (You)`,   pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
+                            { who: sellerDisplay,        pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                            { who: parentDisplay || "—", pct: 25, rupee: src.remainingPPC*rate*0.25, you: false },
+                            { who: `${myDisplay} (You)`, pct: 25, rupee: src.remainingPPC*rate*0.25, you: true  },
                           ]
                         : [
-                            { who: sellerName,         pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
-                            { who: `${myName} (You)`,   pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
+                            { who: sellerDisplay,        pct: 50, rupee: src.remainingPPC*rate*0.50, you: false },
+                            { who: `${myDisplay} (You)`, pct: 50, rupee: src.remainingPPC*rate*0.50, you: true  },
                           ]
                     : []
 
