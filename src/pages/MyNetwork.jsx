@@ -145,7 +145,22 @@ function ImageTree({ roots, onSelect, screenW }) {
 }
 
 function ImageTreeCanvas({ rows, onSelect, screenW }) {
-  const [collapsed, setCollapsed] = useState({})
+  const [collapsed, setCollapsed] = useState(() => {
+    const init = {}
+    rows.forEach((r, ri) => {
+      if (r.depth >= 1) init[ri] = true
+    })
+    return init
+  })
+
+  useEffect(() => {
+    const init = {}
+    rows.forEach((r, ri) => {
+      if (r.depth >= 1) init[ri] = true
+    })
+    setCollapsed(init)
+  }, [rows])
+
   const mainW = Math.min(L.mainW, Math.floor(screenW * 0.46))
   const sideW = Math.min(L.sideW, Math.floor(screenW * 0.30))
   const trunkX = L.padL + mainW + 8
@@ -628,9 +643,24 @@ const ZOOM_MIN = 0.5
 const ZOOM_MAX = 6
 const ZOOM_STEP = 0.25
 
+function getInitialCollapsed(roots) {
+  const init = {}
+  function walk(node, depth = 0) {
+    if (!node) return
+    const id = String(node.id || node._id || "")
+    const kids = node.children || []
+    if (depth >= 1 && kids.length > 0) {
+      init[id] = true
+    }
+    kids.forEach(k => walk(k, depth + 1))
+  }
+  (roots || []).forEach(r => walk(r, 0))
+  return init
+}
+
 function DesktopTree({ roots, onSelect }) {
   const { isDark } = useTheme() || {}
-  const [collapsed, setCollapsed] = useState({})
+  const [collapsed, setCollapsed] = useState(() => getInitialCollapsed(roots))
   const [lineColor, setLineColor] = useState("#7c3aed")
   const [highlightId, setHighlightId] = useState(null)
   const [zoomMult, setZoomMult] = useState(1)
@@ -645,8 +675,12 @@ function DesktopTree({ roots, onSelect }) {
     window.addEventListener("resize",measure)
     return()=>{if(ro)ro.disconnect();window.removeEventListener("resize",measure)}
   },[])
-  // ✅ Reset zoom & focus whenever the tree being shown changes (filter/select switch)
-  useEffect(()=>{ setZoomMult(1); setFocusTarget(null) },[roots])
+  // ✅ Reset zoom, focus & default collapse (direct visible, deeper collapsed) whenever roots change
+  useEffect(()=>{ 
+    setZoomMult(1); 
+    setFocusTarget(null);
+    setCollapsed(getInitialCollapsed(roots))
+  },[roots])
   const zoomIn    = ()=>setZoomMult(z=>Math.min(ZOOM_MAX, +(z+ZOOM_STEP).toFixed(2)))
   const zoomOut   = ()=>setZoomMult(z=>Math.max(ZOOM_MIN, +(z-ZOOM_STEP).toFixed(2)))
   const zoomFit   = ()=>setZoomMult(1)
@@ -707,6 +741,10 @@ function DesktopTree({ roots, onSelect }) {
             style={{marginLeft:4,fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",color:isDark?"#94a3b8":"#64748b",cursor:"pointer",whiteSpace:"nowrap"}}>⛶ Fit</button>
           <button onClick={zoomUltra} disabled={zoomMult>=ZOOM_MAX} title="Ultra Zoom"
             style={{fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:"1px solid #c4b5fd",background:"#f5f3ff",color:"#7c3aed",cursor:zoomMult>=ZOOM_MAX?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:zoomMult>=ZOOM_MAX?0.5:1}}>🔎 Ultra</button>
+          <button onClick={() => setCollapsed(getInitialCollapsed(roots))} title="Only show direct connections (collapse all sub-teams)"
+            style={{marginLeft:4,fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",color:isDark?"#94a3b8":"#64748b",cursor:"pointer",whiteSpace:"nowrap"}}>📁 Collapse</button>
+          <button onClick={() => setCollapsed({})} title="Expand all connections"
+            style={{fontSize:10,fontWeight:700,padding:"5px 9px",borderRadius:7,border:isDark?"1px solid rgba(255,255,255,0.12)":"1px solid #e2e8f0",background:isDark?"#18201c":"#fff",color:isDark?"#94a3b8":"#64748b",cursor:"pointer",whiteSpace:"nowrap"}}>📂 Expand All</button>
         </div>
         <span style={{fontSize:11,color:"#64748b",fontWeight:600}}>🎨 Connection Color:</span>
         {["#7c3aed","#2563eb","#16a34a","#dc2626","#d97706","#0d9488","#db2777","#334155"].map(c=>(

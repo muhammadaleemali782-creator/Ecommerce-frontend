@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import InlineLoader from "../components/InlineLoader"
 import EducaLogo from "../components/EducaLogo"
+import CollapsibleTeamTree from "../components/CollapsibleTeamTree"
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid
 } from "recharts"
@@ -466,35 +467,15 @@ export default function DistributorDashboard({ setPage }) {
               {/* List */}
               {loading ? (
                 <InlineLoader minHeight={100} />
-              ) : filteredDl.length === 0 ? (
-                <div className="py-8 text-center text-xs text-stone-400">
-                  Koi member nahi mila
-                </div>
               ) : (
-                <div className="space-y-2">
-                  {filteredDl.map(u => {
-                    const st = roleStyles[u.role] || roleStyles.user
-                    return (
-                      <div
-                        key={u._id}
-                        className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-                          isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-stone-50 border-stone-200/80"
-                        }`}
-                        style={{ paddingLeft: `${12 + (u.level - 1) * 8}px` }}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold truncate leading-tight">{u.name}</div>
-                          <div className="text-[10px] text-stone-400 font-mono mt-0.5">
-                            Level {u.level || 1}
-                          </div>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${st.badge}`}>
-                          {u.role === "seller" ? "Direct Seller" : u.role}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
+                <CollapsibleTeamTree
+                  downline={downline}
+                  rootUserId={user?._id || user?.id}
+                  isDark={isDark}
+                  roleStyles={roleStyles}
+                  search={search}
+                  roleFilter={roleFilter}
+                />
               )}
             </div>
           )}
@@ -926,33 +907,14 @@ export default function DistributorDashboard({ setPage }) {
               }`}
             />
 
-            {filteredDl.length === 0 ? (
-              <div className="py-12 text-center text-sm text-stone-400">
-                Koi network member nahi mila
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {filteredDl.map(u => {
-                  const st = roleStyles[u.role] || roleStyles.user
-                  return (
-                    <div
-                      key={u._id}
-                      className={`p-3.5 rounded-2xl border flex items-center justify-between gap-2.5 ${
-                        isDark ? "bg-white/[0.02] border-white/[0.05]" : "bg-stone-50 border-stone-200/80"
-                      }`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold truncate">{u.name}</div>
-                        <div className="text-[10px] text-stone-400 mt-0.5">Level {u.level || 1}</div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shrink-0 ${st.badge}`}>
-                        {u.role === "seller" ? "Direct Seller" : u.role}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <CollapsibleTeamTree
+              downline={downline}
+              rootUserId={user?._id || user?.id}
+              isDark={isDark}
+              roleStyles={roleStyles}
+              search={search}
+              roleFilter={roleFilter}
+            />
           </div>
         )}
 

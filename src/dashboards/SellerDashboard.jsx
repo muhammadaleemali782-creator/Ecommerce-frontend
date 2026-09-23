@@ -5,6 +5,7 @@ import { useStore } from "../context/StoreContext"
 import Store from "../pages/Store"
 import EducaLogo from "../components/EducaLogo"
 import InlineLoader from "../components/InlineLoader"
+import CollapsibleTeamTree from "../components/CollapsibleTeamTree"
 import { LineChart, AreaChart, Area, BarChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell } from "recharts"
 
 export default function SellerDashboard({ setPage }) {
@@ -442,20 +443,17 @@ export default function SellerDashboard({ setPage }) {
                   </button>
                 ))}
               </div>
-              {filteredDl.map(u=>(
-                <div key={u._id} style={{background:"#fff",borderRadius:14,padding:"12px 14px",boxShadow:"0 1px 6px #0001",display:"flex",alignItems:"center",gap:10,
-                  borderLeft:`3px solid ${u.role==="seller"?"#2563eb":"#9333ea"}`}}>
-                  <div style={{fontSize:18}}>{u.role==="seller"?"🛒":"👤"}</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:600,fontSize:13,color:"#1e293b"}}>{u.name}</div>
-                  </div>
-                  <span style={{fontSize:10,padding:"3px 8px",borderRadius:20,fontWeight:700,
-                    background:u.role==="seller"?"#eff6ff":"#faf5ff",color:u.role==="seller"?"#2563eb":"#9333ea"}}>
-                    {u.role === "seller" ? "Direct Seller" : u.role}
-                  </span>
-                </div>
-              ))}
-              {filteredDl.length===0 && <div style={{textAlign:"center",color:"#94a3b8",padding:24,fontSize:13}}>Koi member nahi</div>}
+              <CollapsibleTeamTree
+                downline={downline}
+                rootUserId={user?._id || user?.id}
+                isDark={isDark}
+                roleStyles={{
+                  seller: { badge: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+                  user:   { badge: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
+                  distributor: { badge: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
+                }}
+                roleFilter={roleFilter}
+              />
             </div>
           )}
 
@@ -816,19 +814,17 @@ export default function SellerDashboard({ setPage }) {
                 ))}
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              {filteredDl.map(u=>(
-                <div key={u._id} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:14,border:"1px solid #f1f5f9",background:"#fafafa",
-                  borderLeft:`3px solid ${u.role==="seller"?"#2563eb":"#9333ea"}`}}>
-                  <div style={{fontSize:20}}>{u.role==="seller"?"🛒":"👤"}</div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:600,fontSize:13,color:"#1e293b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.name}</div>
-                    <div style={{fontSize:10,color:u.role==="seller"?"#2563eb":"#9333ea",fontWeight:600,textTransform:"capitalize"}}>{u.role === "seller" ? "Direct Seller" : u.role}</div>
-                  </div>
-                </div>
-              ))}
-              {filteredDl.length===0 && <div style={{gridColumn:"1/-1",textAlign:"center",color:"#94a3b8",padding:24}}>Koi member nahi mila</div>}
-            </div>
+            <CollapsibleTeamTree
+              downline={downline}
+              rootUserId={user?._id || user?.id}
+              isDark={isDark}
+              roleStyles={{
+                seller: { badge: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+                user:   { badge: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
+                distributor: { badge: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
+              }}
+              roleFilter={roleFilter}
+            />
           </div>
         )}
 
