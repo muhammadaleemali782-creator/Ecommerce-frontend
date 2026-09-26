@@ -18,6 +18,8 @@ export default function AdminWithdrawalManagement() {
   const [message, setMessage] = useState({ type: "", text: "", reqForWhatsApp: null })
   const [ppcRate, setPpcRate] = useState(0)
   const [cardUtr, setCardUtr] = useState({})
+  const [copiedId, setCopiedId] = useState(null)
+  const [copiedAll, setCopiedAll] = useState(false)
 
   const [rewardRequests, setRewardRequests] = useState([])
   
@@ -371,6 +373,53 @@ export default function AdminWithdrawalManagement() {
     if (type === "distributorWallet") return "Distributor Wallet"
     return type
   }
+
+  const getRequestRowData = (req) => {
+    const rupeeVal = req.ppcRateAtRequest > 0 
+      ? (req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2))
+      : (ppcRate > 0 ? (req.amount * ppcRate * 0.25).toFixed(2) : (req.amount || 0))
+    const utr = cardUtr[req._id] || req.utrNumber || req.transactionId || ""
+    const dateStr = req.createdAt ? new Date(req.createdAt).toLocaleString("en-IN") : ""
+    const name = req.userId?.fullName || req.userId?.name || "Unknown"
+    const sysId = req.userId?.name || "—"
+    const role = req.userRole || "—"
+    const email = req.userId?.email || "—"
+    const phone = req.userId?.phone || "—"
+    const wallet = getWalletLabel(req.walletType)
+    const ppc = req.amount || 0
+    const paymentMode = req.paymentMethod || "—"
+    const paymentDetails = req.paymentDetails || "—"
+    const status = req.status?.toUpperCase() || "PENDING"
+
+    return [dateStr, name, sysId, role, phone, email, wallet, ppc, rupeeVal, paymentMode, paymentDetails, utr, status]
+  }
+
+  const copyForExcel = (req) => {
+    const headers = ["Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "UTR / Ref No", "Status"]
+    const row = getRequestRowData(req)
+    const tsv = headers.join("\t") + "\n" + row.join("\t")
+
+    navigator.clipboard.writeText(tsv).then(() => {
+      setCopiedId(req._id)
+      setTimeout(() => setCopiedId(null), 2500)
+    }).catch(err => {
+      console.error("Clipboard copy error:", err)
+    })
+  }
+
+  const copyAllForExcel = () => {
+    if (!requests.length) return
+    const headers = ["Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "UTR / Ref No", "Status"]
+    const rows = requests.map(r => getRequestRowData(r).join("\t"))
+    const tsv = headers.join("\t") + "\n" + rows.join("\n")
+
+    navigator.clipboard.writeText(tsv).then(() => {
+      setCopiedAll(true)
+      setTimeout(() => setCopiedAll(false), 2500)
+    }).catch(err => {
+      console.error("Clipboard copy error:", err)
+    })
+  }
   
   return (
     <div className={`space-y-6 select-none max-w-5xl mx-auto transition-colors duration-200 ${
@@ -595,7 +644,27 @@ export default function AdminWithdrawalManagement() {
             <p className={`text-xs mt-1 ${isDark ? "text-stone-400" : "text-stone-500"}`}>There are no {filter || "active"} withdrawal requests in this view.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2 px-1">
+              <span className={`text-xs font-mono font-medium ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+                Showing <b>{requests.length}</b> {filter} requests
+              </span>
+              <button
+                type="button"
+                onClick={copyAllForExcel}
+                className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm ${
+                  copiedAll
+                    ? "bg-emerald-600 text-white border-emerald-500"
+                    : isDark
+                      ? "bg-stone-800 hover:bg-stone-700 text-stone-200 border-white/10"
+                      : "bg-white hover:bg-stone-100 text-stone-800 border-stone-300"
+                }`}
+                title="Copy all requests to clipboard in Excel tab format"
+              >
+                {copiedAll ? "✅ All Copied for Excel!" : `📊 Copy All (${requests.length}) for Excel`}
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
             {requests.map((req) => {
               const rupeeVal = req.ppcRateAtRequest > 0 
                 ? (req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2))
@@ -633,15 +702,32 @@ export default function AdminWithdrawalManagement() {
                       </div>
                     </div>
 
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border self-start sm:self-auto ${
-                      req.status === "pending"
-                        ? "bg-blue-600/15 text-amber-600 dark:text-amber-300 border-blue-500/30"
-                        : req.status === "approved"
-                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
-                          : "bg-red-500/15 text-red-600 dark:text-red-300 border-red-500/30"
-                    }`}>
-                      {req.status}
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => copyForExcel(req)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
+                          copiedId === req._id
+                            ? "bg-emerald-600 text-white border-emerald-500"
+                            : isDark
+                              ? "bg-stone-800 hover:bg-stone-700 text-stone-200 border-white/10"
+                              : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+                        }`}
+                        title="Copy this request details to clipboard for Excel"
+                      >
+                        {copiedId === req._id ? "✅ Copied!" : "📋 Copy for Excel"}
+                      </button>
+
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase border ${
+                        req.status === "pending"
+                          ? "bg-blue-600/15 text-amber-600 dark:text-amber-300 border-blue-500/30"
+                          : req.status === "approved"
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
+                            : "bg-red-500/15 text-red-600 dark:text-red-300 border-red-500/30"
+                      }`}>
+                        {req.status}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Financial Grid */}
@@ -750,6 +836,20 @@ export default function AdminWithdrawalManagement() {
                         />
                         <button
                           type="button"
+                          onClick={() => copyForExcel(req)}
+                          className={`px-3.5 py-2 rounded-xl border text-xs font-bold whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-sm ${
+                            copiedId === req._id
+                              ? "bg-emerald-600 text-white border-emerald-500"
+                              : isDark
+                                ? "bg-stone-800 hover:bg-stone-700 text-stone-200 border-white/10"
+                                : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+                          }`}
+                          title="Copy details with UTR to paste in Excel"
+                        >
+                          {copiedId === req._id ? "✅ Copied!" : "📋 Copy for Excel"}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => sendWhatsAppApproval(req, cardUtr[req._id])}
                           className="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold whitespace-nowrap flex items-center justify-center gap-1 cursor-pointer"
                           title="Preview or Send WhatsApp message"
@@ -777,6 +877,7 @@ export default function AdminWithdrawalManagement() {
                 </div>
               )
             })}
+            </div>
           </div>
         )
       )}

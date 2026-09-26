@@ -122,7 +122,9 @@ function LivePreview({ settings, previewStatus }) {
                   🆔 {settings?.showSellerName === false ? "User ID: " : "ID: "}{order.sellerId.name}
                 </div>
               )}
-              <div style={{fontSize:9,color:"#64748b",marginTop:3}}>✉️ {order.sellerId?.email}</div>
+              {settings?.showSellerName !== false && order.sellerId?.email && (
+                <div style={{fontSize:9,color:"#64748b",marginTop:3}}>✉️ {order.sellerId?.email}</div>
+              )}
             </div>
           )}
 
@@ -522,10 +524,10 @@ export default function AdminInvoiceSettings() {
               }`}>
                 <div className="pr-3">
                   <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
-                    Seller Name Dikhana Hai Ya Gayab (Show Name vs Only User ID)
+                    Seller Name & Email Dikhana Hai Ya Gayab (Show Name & Email vs Only User ID)
                   </div>
                   <div className={`text-[10px] mt-0.5 ${isDark ? "text-stone-400" : "text-stone-500"}`}>
-                    Agar OFF karenge to seller ka full name gayab ho jayega aur invoice par sirf uski User ID (System ID) show hogi
+                    Agar OFF karenge to seller ka name aur email dono gayab ho jayenge aur invoice par sirf uski User ID (System ID) show hogi
                   </div>
                 </div>
                 <input

@@ -264,7 +264,7 @@ function NormalInvoice({ order, settings, theme, invNo, meta }) {
             )}
 
             {/* 3. Email */}
-            {order.sellerId?.email && (
+            {settings?.showSellerName !== false && order.sellerId?.email && (
               <div style={{fontSize:10.5,color:"#64748b",marginTop:3,wordBreak:"break-all"}}>
                 {order.sellerId.email}
               </div>
