@@ -592,8 +592,8 @@ export default function AdminWithdrawalManagement() {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Save QR to Google Drive and provide direct Download link
-    var qrDownloadUrl = "";
+    // Save QR to Google Drive and provide direct View/Download link
+    var qrViewUrl = "";
     if (data.qrBase64 && data.qrBase64.indexOf("data:image") === 0) {
       try {
         var parts = data.qrBase64.split(",");
@@ -609,16 +609,16 @@ export default function AdminWithdrawalManagement() {
         }
         var file = folder.createFile(blob);
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        qrDownloadUrl = "https://drive.google.com/uc?export=download&id=" + file.getId();
+        qrViewUrl = file.getUrl();
       } catch (e) {
         Logger.log("Drive save error: " + e.message);
       }
     } else if (data.qrCodeUrl) {
-      qrDownloadUrl = data.qrCodeUrl;
+      qrViewUrl = data.qrCodeUrl;
     }
     
     var sNo = Math.max(1, sheet.getLastRow());
-    var qrFormula = qrDownloadUrl ? '=HYPERLINK("' + qrDownloadUrl + '", "⬇️ Download QR")' : "—";
+    var qrFormula = qrViewUrl ? '=HYPERLINK("' + qrViewUrl + '", "👁️ View / Download QR")' : "—";
     var slipFormula = data.screenshot ? '=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")' : "";
     
     var newRow = [
@@ -643,6 +643,7 @@ export default function AdminWithdrawalManagement() {
     
     sheet.appendRow(newRow);
     var currentRow = sheet.getLastRow();
+    sheet.getRange(currentRow, 1).setNumberFormat("0"); // Ensure S.No is never formatted as date
     var rowRange = sheet.getRange(currentRow, 1, 1, headers.length);
     
     // Border formatting on entire row
@@ -738,6 +739,7 @@ function fixAndMergeAllData() {
   ];
   
   sheet.clear();
+  sheet.getRange("A:A").setNumberFormat("0"); // Clear any old Date formatting from Column A
   sheet.appendRow(headers);
   
   var headerRange = sheet.getRange(1, 1, 1, headers.length);
@@ -749,9 +751,9 @@ function fixAndMergeAllData() {
     [2, "23/9/2026, 20:56:14", "DB001/DS001", "DB001/DS001", "seller", "'7457908475", "akgupta0004@educa.com", "Direct Seller Wallet", 10, 100, "phonepe", "7457908475.wallet@phonepe", "—", "", "REJECTED", "", ""],
     [3, "26/9/2026, 20:02:49", "DB001/DS001", "DB001/DS001", "seller", "'7457908475", "akgupta0004@educa.com", "Direct Seller Wallet", 12, 120, "upi", "7457908475@fam", "—", "366883091841", "APPROVED", "", "PAYMENT DONE"],
     [4, "26/9/2026, 20:17:32", "Sandhya Gupta", "DB001/DS022", "seller", "'7619967319", "sandhya@educa.com", "User Wallet", 12, 240, "upi", "7619967319@fam", "—", "", "REJECTED", "", "NOT WORKING DS"],
-    [5, "26/9/2026, 22:02:00", "VIVEK", "DB001/DS024", "seller", "'6361438937", "vivek@educa.com", "User Wallet", 56, 1120, "gpay", "7267965160-g2d3-3@ybl", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1-qtU07Pt0PwscZ6lGCDhxmfX3lqwT9wc", "⬇️ Download QR")', "", "PENDING", "", ""],
-    [6, "26/9/2026, 22:10:00", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "upi", "90765kjnkjn", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1TVmN5tWT_puFbTIyUrTsssic4mNPpSK", "⬇️ Download QR")', "", "PENDING", "", ""],
-    [7, "Saturday, 26/9/2026, 22:42:56", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "paytm", "asdasdsa", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1TVmN5tWT_puFbTIyUrTsssic4mNPpSK", "⬇️ Download QR")', "", "APPROVED", "", "PAYMENT DONE"]
+    [5, "26/9/2026, 22:02:00", "VIVEK", "DB001/DS024", "seller", "'6361438937", "vivek@educa.com", "User Wallet", 56, 1120, "gpay", "7267965160-g2d3-3@ybl", '=HYPERLINK("https://drive.google.com/file/d/1-qtU07Pt0PwscZ6lGCDhxmfX3lqwT9wc/view?usp=sharing", "👁️ View / Download QR")', "", "PENDING", "", ""],
+    [6, "26/9/2026, 22:10:00", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "upi", "90765kjnkjn", '=HYPERLINK("https://drive.google.com/file/d/1TVmN5tWT_puFbTIyUrTsssic4mNPpSK/view?usp=sharing", "👁️ View / Download QR")', "", "PENDING", "", ""],
+    [7, "Saturday, 26/9/2026, 22:42:56", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "paytm", "asdasdsa", '=HYPERLINK("https://drive.google.com/file/d/1TVmN5tWT_puFbTIyUrTsssic4mNPpSK/view?usp=sharing", "👁️ View / Download QR")', "", "APPROVED", "", "PAYMENT DONE"]
   ];
   
   for (var r = 0; r < allData.length; r++) {
@@ -759,6 +761,7 @@ function fixAndMergeAllData() {
   }
   
   var totalRows = allData.length;
+  sheet.getRange(2, 1, totalRows, 1).setNumberFormat("0");
   var dataRange = sheet.getRange(2, 1, totalRows, headers.length);
   dataRange.setBorder(true, true, true, true, true, true, "#888888", SpreadsheetApp.BorderStyle.SOLID);
   
