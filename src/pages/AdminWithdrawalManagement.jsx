@@ -607,6 +607,7 @@ export default function AdminWithdrawalManagement() {
         } else {
           folder = DriveApp.createFolder("Educa_Withdrawal_QR");
         }
+        folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         var file = folder.createFile(blob);
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         qrViewUrl = file.getUrl();
