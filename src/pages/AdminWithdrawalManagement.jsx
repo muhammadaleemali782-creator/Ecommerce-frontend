@@ -481,7 +481,9 @@ export default function AdminWithdrawalManagement() {
       ? (req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2))
       : (ppcRate > 0 ? (req.amount * ppcRate * 0.25).toFixed(2) : (req.amount || 0))
     const utr = cardUtr[req._id] || req.utrNumber || req.transactionId || ""
-    const dateStr = req.createdAt ? new Date(req.createdAt).toLocaleString("en-IN") : ""
+    const d = req.createdAt ? new Date(req.createdAt) : new Date()
+    const day = d.toLocaleDateString("en-IN", { weekday: "long" })
+    const dateStr = `${day}, ${d.toLocaleString("en-IN")}`
     const name = req.userId?.fullName || req.userId?.name || "Unknown"
     const sysId = req.userId?.name || "—"
     const role = req.userRole || req.userId?.role || "—"
@@ -554,7 +556,7 @@ export default function AdminWithdrawalManagement() {
       headerRange.setBorder(true, true, true, true, true, true, "#555555", SpreadsheetApp.BorderStyle.SOLID);
     }
     
-    // If UPDATE action (Admin approved / rejected / attached proof)
+    // If UPDATE action (Admin approved / rejected / attached proof on website)
     if (data.action === "UPDATE") {
       var lastRow = sheet.getLastRow();
       if (lastRow > 1) {
@@ -590,8 +592,8 @@ export default function AdminWithdrawalManagement() {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Save QR to Google Drive if base64 provided
-    var qrLink = data.qrCodeUrl || "";
+    // Save QR to Google Drive and provide direct Download link
+    var qrDownloadUrl = "";
     if (data.qrBase64 && data.qrBase64.indexOf("data:image") === 0) {
       try {
         var parts = data.qrBase64.split(",");
@@ -607,14 +609,16 @@ export default function AdminWithdrawalManagement() {
         }
         var file = folder.createFile(blob);
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        qrLink = file.getUrl();
+        qrDownloadUrl = "https://drive.google.com/uc?export=download&id=" + file.getId();
       } catch (e) {
         Logger.log("Drive save error: " + e.message);
       }
+    } else if (data.qrCodeUrl) {
+      qrDownloadUrl = data.qrCodeUrl;
     }
     
     var sNo = Math.max(1, sheet.getLastRow());
-    var qrFormula = qrLink ? '=HYPERLINK("' + qrLink + '", "👁️ View QR")' : "—";
+    var qrFormula = qrDownloadUrl ? '=HYPERLINK("' + qrDownloadUrl + '", "⬇️ Download QR")' : "—";
     var slipFormula = data.screenshot ? '=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")' : "";
     
     var newRow = [
@@ -650,9 +654,15 @@ export default function AdminWithdrawalManagement() {
     sheet.getRange(currentRow, 9, 1, 2).setHorizontalAlignment("right");
     sheet.getRange(currentRow, 13).setHorizontalAlignment("center").setFontColor("#0284c7").setFontWeight("bold");
     
-    // Status formatting
+    // Status Dropdown & Color formatting
     var statusCell = sheet.getRange(currentRow, 15);
     statusCell.setHorizontalAlignment("center").setFontWeight("bold");
+    var statusRule = SpreadsheetApp.newDataValidation()
+      .requireValueInList(["PENDING", "APPROVED", "REJECTED"], true)
+      .setAllowInvalid(false)
+      .build();
+    statusCell.setDataValidation(statusRule);
+
     if (data.status === "APPROVED") {
       statusCell.setFontColor("#15803d");
     } else if (data.status === "REJECTED") {
@@ -661,12 +671,58 @@ export default function AdminWithdrawalManagement() {
       statusCell.setFontColor("#d97706");
     }
     
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrLink }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrDownloadUrl }))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ⭐ TWO-WAY SYNC: Jab bhi Google Sheet me Status, UTR ya Screenshot edit hoga, website pe auto update ho jayega!
+function onEdit(e) {
+  try {
+    var sheet = e.source.getActiveSheet();
+    var range = e.range;
+    var row = range.getRow();
+    var col = range.getColumn();
+    if (row < 2) return; // Skip header
+    
+    // Columns: UTR (14), Status (15), Screenshot (16), Remarks (17)
+    if (col >= 14 && col <= 17) {
+      var systemId = sheet.getRange(row, 4).getValue(); // Col D: System ID
+      if (!systemId) return;
+      
+      var utrNumber = String(sheet.getRange(row, 14).getValue() || "").trim();
+      var status = String(sheet.getRange(row, 15).getValue() || "").trim();
+      var screenshot = String(sheet.getRange(row, 16).getValue() || "").trim();
+      var remarks = String(sheet.getRange(row, 17).getValue() || "").trim();
+      
+      // Update cell color if status changed
+      if (col === 15) {
+        var statusCell = sheet.getRange(row, 15);
+        if (status === "APPROVED") statusCell.setFontColor("#15803d").setFontWeight("bold");
+        else if (status === "REJECTED") statusCell.setFontColor("#b91c1c").setFontWeight("bold");
+        else statusCell.setFontColor("#d97706").setFontWeight("bold");
+      }
+      
+      var backendUrl = "https://ecommerce-backend-10a1.onrender.com/api/withdrawal/sheet-sync";
+      UrlFetchApp.fetch(backendUrl, {
+        method: "POST",
+        contentType: "application/json",
+        muteHttpExceptions: true,
+        payload: JSON.stringify({
+          systemId: systemId,
+          utrNumber: utrNumber,
+          status: status,
+          screenshot: screenshot,
+          remarks: remarks
+        })
+      });
+    }
+  } catch (err) {
+    Logger.log("onEdit sync error: " + err.toString());
   }
 }`
     navigator.clipboard.writeText(scriptCode).then(() => {
