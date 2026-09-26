@@ -801,7 +801,7 @@ function saveSlipToActiveRow(base64Data, fileName) {
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   
   var slipUrl = file.getUrl();
-  sheet.getRange(row, 16).setFormula(\'=HYPERLINK("\' + slipUrl + \'", "👁️ View Slip")\');
+  sheet.getRange(row, 16).setFormula('=HYPERLINK("' + slipUrl + '", "👁️ View Slip")');
   
   var systemId = sheet.getRange(row, 4).getValue();
   var utrNumber = String(sheet.getRange(row, 14).getValue() || "").trim();
