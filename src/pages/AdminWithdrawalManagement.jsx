@@ -28,6 +28,10 @@ export default function AdminWithdrawalManagement() {
   const [copiedAll, setCopiedAll] = useState(false)
 
   const [rewardRequests, setRewardRequests] = useState([])
+  const [googleSheetWebhookUrl, setGoogleSheetWebhookUrl] = useState("")
+  const [showSheetSettings, setShowSheetSettings] = useState(false)
+  const [sheetUrlInput, setSheetUrlInput] = useState("")
+  const [savingSheetUrl, setSavingSheetUrl] = useState(false)
   
   const [modalData, setModalData] = useState({
     show: false,
@@ -155,9 +159,37 @@ export default function AdminWithdrawalManagement() {
       if (res.ok) {
         const data = await res.json()
         setPpcRate(data.basePPCValue || 0)
+        setGoogleSheetWebhookUrl(data.googleSheetWebhookUrl || "")
+        setSheetUrlInput(data.googleSheetWebhookUrl || "")
       }
     } catch (err) {
       console.error("PPC rate fetch error:", err)
+    }
+  }
+
+  const handleSaveSheetUrl = async () => {
+    try {
+      setSavingSheetUrl(true)
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ppc-settings/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ googleSheetWebhookUrl: sheetUrlInput.trim() })
+      })
+      if (res.ok) {
+        setGoogleSheetWebhookUrl(sheetUrlInput.trim())
+        setShowSheetSettings(false)
+        setMessage({ type: "success", text: "Google Sheet Webhook URL saved successfully!" })
+      } else {
+        alert("Failed to save Sheet Webhook URL")
+      }
+    } catch {
+      alert("Error saving Sheet Webhook URL")
+    } finally {
+      setSavingSheetUrl(false)
     }
   }
   
@@ -517,32 +549,89 @@ export default function AdminWithdrawalManagement() {
           </p>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className={`flex items-center gap-1.5 p-1 rounded-2xl border ${
-          isDark ? "bg-black/40 border-white/10" : "bg-stone-100 border-stone-200"
-        }`}>
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => switchView("withdrawal")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              view === "withdrawal"
-                ? "bg-[#fbbf24] text-black font-black shadow-sm"
-                : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
+            type="button"
+            onClick={() => setShowSheetSettings(!showSheetSettings)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 shadow-sm ${
+              googleSheetWebhookUrl
+                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
+                : isDark ? "bg-stone-800 text-stone-300 border-white/10 hover:bg-stone-700" : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"
             }`}
+            title="Configure Google Sheet / Excel auto sync webhook"
           >
-            💸 Withdrawals
+            <span>📊 {googleSheetWebhookUrl ? "Excel/Sheet Connected" : "Connect Google Sheet"}</span>
           </button>
-          <button
-            onClick={() => switchView("rewards")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              view === "rewards"
-                ? "bg-purple-600 text-white font-black shadow-sm"
-                : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
-            }`}
-          >
-            🎁 Reward Claims
-          </button>
+
+          {/* View Switcher Tabs */}
+          <div className={`flex items-center gap-1.5 p-1 rounded-2xl border ${
+            isDark ? "bg-black/40 border-white/10" : "bg-stone-100 border-stone-200"
+          }`}>
+            <button
+              onClick={() => switchView("withdrawal")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                view === "withdrawal"
+                  ? "bg-[#fbbf24] text-black font-black shadow-sm"
+                  : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
+              }`}
+            >
+              💸 Withdrawals
+            </button>
+            <button
+              onClick={() => switchView("rewards")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                view === "rewards"
+                  ? "bg-purple-600 text-white font-black shadow-sm"
+                  : isDark ? "text-stone-400 hover:text-white" : "text-stone-600 hover:text-black"
+              }`}
+            >
+              🎁 Reward Claims
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* ── GOOGLE SHEET SYNC CONFIG PANEL ── */}
+      {showSheetSettings && (
+        <div className={`p-5 rounded-3xl border space-y-3 transition-all ${
+          isDark ? "bg-[#111713] border-emerald-500/30 text-white" : "bg-emerald-50/50 border-emerald-200 text-stone-900"
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">📊</span>
+              <h3 className="font-bold text-sm">Google Sheet / Excel Live Sync</h3>
+            </div>
+            <button
+              onClick={() => setShowSheetSettings(false)}
+              className="text-stone-400 hover:text-white text-xs font-bold cursor-pointer"
+            >
+              ✕ Close
+            </button>
+          </div>
+          <p className="text-xs text-stone-400">
+            Paste your Google Apps Script Web App URL below. Whenever a user submits a withdrawal request with their QR code, the entire row will be appended directly into your Google Sheet table!
+          </p>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <input
+              type="url"
+              placeholder="https://script.google.com/macros/s/.../exec"
+              value={sheetUrlInput}
+              onChange={(e) => setSheetUrlInput(e.target.value)}
+              className={`flex-1 px-3.5 py-2 rounded-xl text-xs font-mono border outline-none ${
+                isDark ? "bg-black/60 border-white/15 text-white placeholder-stone-500" : "bg-white border-stone-300 text-stone-900 placeholder-stone-400"
+              }`}
+            />
+            <button
+              type="button"
+              disabled={savingSheetUrl}
+              onClick={handleSaveSheetUrl}
+              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider cursor-pointer shadow-sm transition-all"
+            >
+              {savingSheetUrl ? "Saving..." : "Save Webhook"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── STATUS MESSAGE ── */}
       {message.text && (

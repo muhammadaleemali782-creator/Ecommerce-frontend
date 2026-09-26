@@ -145,7 +145,8 @@ export default function WithdrawalRequest() {
     walletType: "",
     amount: "",
     paymentMethod: "",
-    paymentDetails: ""
+    paymentDetails: "",
+    qrBase64: ""
   }
   const [formData, setFormData] = useState(() => getFormDraft(DRAFT_KEY, defaultForm))
   const [hasRestoredDraft, setHasRestoredDraft] = useState(() => hasFormDraft(DRAFT_KEY))
@@ -290,7 +291,7 @@ export default function WithdrawalRequest() {
         clearFormDraft(DRAFT_KEY)
         setHasRestoredDraft(false)
         setMessage({ type: "success", text: "Withdrawal request submitted successfully!" })
-        setFormData({ walletType: "", amount: "", paymentMethod: "", paymentDetails: "" })
+        setFormData({ walletType: "", amount: "", paymentMethod: "", paymentDetails: "", qrBase64: "" })
         fetchData()
       } else {
         setMessage({ type: "error", text: data.message || "Failed to submit request" })
@@ -624,6 +625,50 @@ export default function WithdrawalRequest() {
                     : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500 placeholder-stone-400"
                 }`}
               />
+            </div>
+
+            {/* Payment QR Code Upload */}
+            <div>
+              <label className="block text-xs font-bold mb-1 text-stone-400">
+                Payment QR Code (Optional)
+              </label>
+              <div className="flex items-center gap-2">
+                <label className={`px-3 py-2 rounded-xl border text-xs font-bold cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all shadow-sm ${
+                  isDark ? "bg-stone-800 hover:bg-stone-700 text-stone-200 border-white/10" : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+                }`}>
+                  <span>📷 Upload UPI QR Code</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, qrBase64: reader.result })
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    }}
+                  />
+                </label>
+                {formData.qrBase64 && (
+                  <span className="text-[11px] text-emerald-400 font-bold">✓ QR Attached</span>
+                )}
+              </div>
+              {formData.qrBase64 && (
+                <div className="mt-2 flex items-center gap-2 p-2 rounded-xl border border-white/10 bg-black/20 w-fit">
+                  <img src={formData.qrBase64} alt="QR Preview" className="w-14 h-14 object-contain rounded-lg border border-white/20" />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, qrBase64: "" })}
+                    className="text-xs text-red-400 hover:underline cursor-pointer ml-2"
+                  >
+                    Remove QR
+                  </button>
+                </div>
+              )}
             </div>
 
             <button
