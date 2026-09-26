@@ -653,8 +653,14 @@ export default function AdminWithdrawalManagement() {
       qrViewUrl = data.qrCodeUrl;
     }
     
-    var sNo = Math.max(1, sheet.getLastRow());
-    var qrFormula = qrViewUrl ? '=HYPERLINK("' + qrViewUrl + '", "👁️ View / Download QR")' : "—";
+    var qrDirectDownload = "";
+    if (file) {
+      qrDirectDownload = "https://drive.google.com/uc?export=download&id=" + file.getId();
+    } else if (data.qrCodeUrl) {
+      var matchId = data.qrCodeUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      qrDirectDownload = matchId ? ("https://drive.google.com/uc?export=download&id=" + matchId[1]) : data.qrCodeUrl;
+    }
+    var qrFormula = qrDirectDownload ? '=HYPERLINK("' + qrDirectDownload + '", "⬇️ Download QR")' : "—";
     var slipFormula = data.screenshot ? '=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")' : "";
     
     var newRow = [
@@ -708,13 +714,118 @@ export default function AdminWithdrawalManagement() {
       statusCell.setFontColor("#d97706");
     }
     
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrViewUrl }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrViewUrl, qrDownload: qrDirectDownload }))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// ⭐ CUSTOM MENU IN GOOGLE SHEETS FOR INSERTING SCREENSHOT / SLIP
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("📸 Educa Actions")
+    .addItem("📎 Attach Screenshot to Selected Row", "showUploadDialog")
+    .addToUi();
+}
+
+function showUploadDialog() {
+  var html = HtmlService.createHtmlOutput(
+    '<!DOCTYPE html><html><head><base target="_top"><style>' +
+    'body { font-family: sans-serif; padding: 16px; margin: 0; background: #f8fafc; color: #1e293b; }' +
+    'h3 { margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #0f172a; }' +
+    'p { font-size: 12px; color: #64748b; margin: 0 0 14px 0; }' +
+    '.file-box { border: 2px dashed #94a3b8; border-radius: 10px; padding: 20px; text-align: center; background: white; cursor: pointer; display: block; }' +
+    '.file-box:hover { border-color: #0284c7; background: #f0f9ff; }' +
+    'input[type="file"] { display: none; }' +
+    'button { width: 100%; margin-top: 12px; background: #0284c7; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }' +
+    '#msg { margin-top: 10px; font-size: 12px; font-weight: 600; text-align: center; }' +
+    '</style></head><body>' +
+    '<h3>📎 Attach Payment Screenshot</h3>' +
+    '<p>Selected row me screenshot attach ho jayega aur website pe sync ho jayega.</p>' +
+    '<label class="file-box" for="slipInput">' +
+    '  <span id="labelTxt">📁 Choose Screenshot / Receipt</span>' +
+    '  <input type="file" id="slipInput" accept="image/*" onchange="onFile(this)" />' +
+    '</label>' +
+    '<button id="uploadBtn" onclick="doUpload()" style="display:none;">Upload & Attach to Row</button>' +
+    '<div id="msg"></div>' +
+    '<script>' +
+    'var selectedFile = null;' +
+    'function onFile(input) {' +
+    '  if (input.files && input.files[0]) {' +
+    '    selectedFile = input.files[0];' +
+    '    document.getElementById("labelTxt").innerText = "✓ " + selectedFile.name;' +
+    '    document.getElementById("uploadBtn").style.display = "block";' +
+    '  }' +
+    '}' +
+    'function doUpload() {' +
+    '  if (!selectedFile) return;' +
+    '  var btn = document.getElementById("uploadBtn");' +
+    '  btn.disabled = true; btn.innerText = "Uploading to Drive...";' +
+    '  var reader = new FileReader();' +
+    '  reader.onload = function(e) {' +
+    '    google.script.run' +
+    '      .withSuccessHandler(function(res) {' +
+    '        document.getElementById("msg").innerHTML = "<span style=\'color:#16a34a\'>✓ Attached! Closing...</span>";' +
+    '        setTimeout(function() { google.script.host.close(); }, 1200);' +
+    '      })' +
+    '      .withFailureHandler(function(err) {' +
+    '        document.getElementById("msg").innerHTML = "<span style=\'color:#dc2626\'>Error: " + err.message + "</span>";' +
+    '        btn.disabled = false; btn.innerText = "Retry Upload";' +
+    '      })' +
+    '      .saveSlipToActiveRow(e.target.result, selectedFile.name);' +
+    '  };' +
+    '  reader.readAsDataURL(selectedFile);' +
+    '}' +
+    '</script></body></html>'
+  ).setWidth(400).setHeight(270);
+  SpreadsheetApp.getUi().showModalDialog(html, "Attach Screenshot");
+}
+
+function saveSlipToActiveRow(base64Data, fileName) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var row = sheet.getActiveCell().getRow();
+  if (row < 2) throw new Error("Kripya row 2 ya uske neeche wali data row select karein!");
+  
+  var parts = base64Data.split(",");
+  var mime = parts[0].match(/:(.*?);/)[1];
+  var decoded = Utilities.base64Decode(parts[1]);
+  var blob = Utilities.newBlob(decoded, mime, fileName || ("Slip-" + Date.now() + ".jpg"));
+  
+  var folders = DriveApp.getFoldersByName("Educa_Withdrawal_QR");
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder("Educa_Withdrawal_QR");
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  
+  var slipUrl = file.getUrl();
+  sheet.getRange(row, 16).setFormula(\'=HYPERLINK("\' + slipUrl + \'", "👁️ View Slip")\');
+  
+  var systemId = sheet.getRange(row, 4).getValue();
+  var utrNumber = String(sheet.getRange(row, 14).getValue() || "").trim();
+  var status = String(sheet.getRange(row, 15).getValue() || "PENDING").trim();
+  var remarks = String(sheet.getRange(row, 17).getValue() || "").trim();
+  
+  if (systemId) {
+    var backendUrl = "https://e-commerce-backend-80q6.onrender.com/api/withdrawal/sheet-sync";
+    try {
+      UrlFetchApp.fetch(backendUrl, {
+        method: "POST",
+        contentType: "application/json",
+        muteHttpExceptions: true,
+        payload: JSON.stringify({
+          systemId: systemId,
+          utrNumber: utrNumber,
+          status: status,
+          screenshot: slipUrl,
+          remarks: remarks
+        })
+      });
+    } catch (_) {}
+  }
+  return { success: true, url: slipUrl };
 }
 
 // ⭐ TWO-WAY SYNC: Jab bhi Google Sheet me Status, UTR ya Screenshot edit hoga, website pe auto update ho jayega!
@@ -744,7 +855,7 @@ function onEdit(e) {
         else statusCell.setFontColor("#d97706").setFontWeight("bold");
       }
       
-      var backendUrl = "https://ecommerce-backend-10a1.onrender.com/api/withdrawal/sheet-sync";
+      var backendUrl = "https://e-commerce-backend-80q6.onrender.com/api/withdrawal/sheet-sync";
       UrlFetchApp.fetch(backendUrl, {
         method: "POST",
         contentType: "application/json",
