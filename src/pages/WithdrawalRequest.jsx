@@ -645,8 +645,28 @@ export default function WithdrawalRequest() {
                       const file = e.target.files?.[0]
                       if (file) {
                         const reader = new FileReader()
-                        reader.onloadend = () => {
-                          setFormData({ ...formData, qrBase64: reader.result })
+                        reader.onload = (ev) => {
+                          const img = new Image()
+                          img.onload = () => {
+                            const canvas = document.createElement("canvas")
+                            const maxDim = 800
+                            let { width, height } = img
+                            if (width > maxDim || height > maxDim) {
+                              if (width > height) {
+                                height = Math.round((height * maxDim) / width)
+                                width = maxDim
+                              } else {
+                                width = Math.round((width * maxDim) / height)
+                                height = maxDim
+                              }
+                            }
+                            canvas.width = width
+                            canvas.height = height
+                            const ctx = canvas.getContext("2d")
+                            ctx.drawImage(img, 0, 0, width, height)
+                            setFormData((prev) => ({ ...prev, qrBase64: canvas.toDataURL("image/jpeg", 0.75) }))
+                          }
+                          img.src = ev.target.result
                         }
                         reader.readAsDataURL(file)
                       }
