@@ -62,32 +62,61 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
   const driveDirectImg = isDrive ? getDriveDirectImageUrl(effectiveUrl) : null
 
   const handleDownload = async () => {
-    if (isDrive) {
-      window.open(driveDownload, "_blank")
-      return
-    }
-    if (effectiveUrl.startsWith("data:image")) {
-      const a = document.createElement("a")
-      a.href = effectiveUrl
-      a.download = `payment-qr-${request?.utrNumber || request?.userId || Date.now()}.jpg`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      return
-    }
     try {
-      const res = await fetch(effectiveUrl)
-      const blob = await res.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = blobUrl
-      a.download = `payment-slip-${request?.utrNumber || Date.now()}.png`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(blobUrl)
+      if (effectiveUrl.startsWith("data:image")) {
+        const a = document.createElement("a")
+        a.href = effectiveUrl
+        a.download = `payment-qr-${request?.utrNumber || request?.userId?.name || request?.userId || Date.now()}.jpg`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        return
+      }
+
+      const dlUrl = isDrive 
+        ? (driveDirectImg || driveDownload || effectiveUrl)
+        : effectiveUrl
+
+      // Try image-canvas extraction to bypass Google Drive pop-up blocks
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = img.naturalWidth || img.width || 600
+          canvas.height = img.naturalHeight || img.height || 600
+          const ctx = canvas.getContext("2d")
+          ctx.drawImage(img, 0, 0)
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.95)
+          const a = document.createElement("a")
+          a.href = dataUrl
+          a.download = `payment-${request?.utrNumber || Date.now()}.jpg`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        } catch {
+          const a = document.createElement("a")
+          a.href = isDrive ? driveDownload : dlUrl
+          a.target = "_blank"
+          a.rel = "noreferrer"
+          a.download = `payment-${Date.now()}.jpg`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        }
+      }
+      img.onerror = () => {
+        const a = document.createElement("a")
+        a.href = isDrive ? driveDownload : dlUrl
+        a.target = "_blank"
+        a.rel = "noreferrer"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
+      img.src = dlUrl
     } catch {
-      window.open(effectiveUrl, "_blank")
+      window.open(isDrive ? driveDownload : effectiveUrl, "_blank")
     }
   }
 

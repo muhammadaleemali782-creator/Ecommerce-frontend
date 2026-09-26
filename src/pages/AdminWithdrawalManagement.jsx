@@ -556,6 +556,26 @@ export default function AdminWithdrawalManagement() {
       headerRange.setBorder(true, true, true, true, true, true, "#555555", SpreadsheetApp.BorderStyle.SOLID);
     }
     
+    // Standalone file upload to Google Drive (Admin attaches proof/screenshot)
+    if (data.action === "UPLOAD_FILE" && data.fileBase64) {
+      try {
+        var pParts = data.fileBase64.split(",");
+        var pMime = pParts[0].match(/:(.*?);/)[1];
+        var pDecoded = Utilities.base64Decode(pParts[1]);
+        var pBlob = Utilities.newBlob(pDecoded, pMime, (data.fileName || "Slip-" + Date.now()) + ".jpg");
+        var pFolders = DriveApp.getFoldersByName("Educa_Withdrawal_QR");
+        var pFolder = pFolders.hasNext() ? pFolders.next() : DriveApp.createFolder("Educa_Withdrawal_QR");
+        pFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        var pFile = pFolder.createFile(pBlob);
+        pFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        return ContentService.createTextOutput(JSON.stringify({ status: "success", url: pFile.getUrl() }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
     // If UPDATE action (Admin approved / rejected / attached proof on website)
     if (data.action === "UPDATE") {
       var lastRow = sheet.getLastRow();
@@ -578,7 +598,22 @@ export default function AdminWithdrawalManagement() {
               }
             }
             if (data.screenshot) {
-              sheet.getRange(targetRow, 16).setFormula('=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")');
+              var slipUrl = data.screenshot;
+              if (slipUrl.indexOf("data:image") === 0) {
+                try {
+                  var sParts = slipUrl.split(",");
+                  var sMime = sParts[0].match(/:(.*?);/)[1];
+                  var sDecoded = Utilities.base64Decode(sParts[1]);
+                  var sBlob = Utilities.newBlob(sDecoded, sMime, "Slip-" + (data.systemId || "slip") + "-" + Date.now() + ".jpg");
+                  var sFolders = DriveApp.getFoldersByName("Educa_Withdrawal_QR");
+                  var sFolder = sFolders.hasNext() ? sFolders.next() : DriveApp.createFolder("Educa_Withdrawal_QR");
+                  sFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+                  var sFile = sFolder.createFile(sBlob);
+                  sFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+                  slipUrl = sFile.getUrl();
+                } catch (_) {}
+              }
+              sheet.getRange(targetRow, 16).setFormula('=HYPERLINK("' + slipUrl + '", "👁️ View Slip")');
             }
             if (data.remarks) sheet.getRange(targetRow, 17).setValue(data.remarks);
             
@@ -1613,15 +1648,15 @@ function fixAndMergeAllData() {
                 </div>
 
                 {/* Payment Proof / Receipt Attachment in Modal */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
+                <div className="p-3 rounded-2xl border bg-black/20 border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
                     <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
                       isDark ? "text-stone-300" : "text-stone-700"
                     }`}>
-                      Payment Proof Screenshot (Optional)
+                      Payment Proof / Slip Screenshot
                     </label>
-                    <label className="text-[11px] font-bold text-sky-500 hover:underline cursor-pointer flex items-center gap-1">
-                      <span>📎 Upload File</span>
+                    <label className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 shadow-sm transition-all">
+                      <span>📷 Select From Device</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1652,6 +1687,7 @@ function fixAndMergeAllData() {
                       />
                     </label>
                   </div>
+
                   <input
                     type="text"
                     value={modalData.paymentProof || ""}
@@ -1659,19 +1695,29 @@ function fixAndMergeAllData() {
                     className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
                       isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
                     }`}
-                    placeholder="Paste Google Drive link or web image link"
+                    placeholder="Or paste Google Drive link here"
                   />
+
                   {modalData.paymentProof && (
-                    <div className="mt-1 flex items-center justify-between text-[11px]">
-                      <span className="text-emerald-400 font-medium truncate max-w-[280px]">
-                        Attached: {modalData.paymentProof}
-                      </span>
+                    <div className="p-2 rounded-xl border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20">
+                      <img 
+                        src={modalData.paymentProof.startsWith("http") || modalData.paymentProof.startsWith("data:") 
+                          ? modalData.paymentProof 
+                          : `${import.meta.env.VITE_API_URL || ""}${modalData.paymentProof}`} 
+                        alt="Slip Preview" 
+                        className="w-14 h-14 object-cover rounded-lg border border-emerald-500/30 shadow-sm bg-white"
+                        onError={(e) => { e.target.style.display = 'none' }}
+                      />
+                      <div className="flex-1 min-w-0 text-xs">
+                        <p className="font-bold text-emerald-400">✓ Screenshot Attached</p>
+                        <p className="text-[11px] text-stone-400 truncate font-mono">{modalData.paymentProof}</p>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setModalData(prev => ({ ...prev, paymentProof: "" }))}
-                        className="text-red-400 hover:underline cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer"
                       >
-                        Remove
+                        ✕ Remove
                       </button>
                     </div>
                   )}
