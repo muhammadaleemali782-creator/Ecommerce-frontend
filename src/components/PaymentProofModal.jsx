@@ -35,25 +35,40 @@ export const getDriveDirectImageUrl = (url) => {
   return url
 }
 
+export const getDynamicUpiQr = (req) => {
+  if (!req) return ""
+  const vpa = req.paymentDetails || ""
+  if (!vpa || !vpa.includes("@")) return ""
+  const amount = req.rupeeValueAtRequest > 0 
+    ? req.rupeeValueAtRequest 
+    : (req.amount && req.ppcRateAtRequest ? req.amount * req.ppcRateAtRequest * ((req.percentageAtRequest || 100) / 100) : null)
+  const name = req.userId?.fullName || req.userId?.name || req.name || "Educa User"
+  const upiUri = `upi://pay?pa=${encodeURIComponent(vpa.trim())}&pn=${encodeURIComponent(name.trim())}${amount ? `&am=${encodeURIComponent(Number(amount).toFixed(2))}` : ""}&cu=INR`
+  return `https://api.qrserver.com/v1/create-qr-code/?size=450x450&data=${encodeURIComponent(upiUri)}`
+}
+
 export default function PaymentProofModal({ show, onClose, url, request }) {
   const { isDark } = useTheme()
 
-  if (!show || !url) return null
+  const dynamicUpiQr = getDynamicUpiQr(request)
+  const isDummyDrive = /1-qtU07Pt0PwscZ6lGCDhxmfX3lqwT9wc|1TVmN5tWT_puFbTIyUrTsssic4mNPpSK/.test(url || "")
+  const effectiveUrl = (!url || isDummyDrive) ? dynamicUpiQr : getProofUrl(url)
 
-  const fullUrl = getProofUrl(url)
-  const isDrive = isDriveUrl(url)
-  const driveEmbed = isDrive ? getDriveEmbedUrl(url) : null
-  const driveDownload = isDrive ? getDriveDownloadUrl(url) : null
-  const driveDirectImg = isDrive ? getDriveDirectImageUrl(url) : null
+  if (!show || !effectiveUrl) return null
+
+  const isDrive = !isDummyDrive && isDriveUrl(effectiveUrl)
+  const driveEmbed = isDrive ? getDriveEmbedUrl(effectiveUrl) : null
+  const driveDownload = isDrive ? getDriveDownloadUrl(effectiveUrl) : null
+  const driveDirectImg = isDrive ? getDriveDirectImageUrl(effectiveUrl) : null
 
   const handleDownload = async () => {
     if (isDrive) {
       window.open(driveDownload, "_blank")
       return
     }
-    if (fullUrl.startsWith("data:image")) {
+    if (effectiveUrl.startsWith("data:image")) {
       const a = document.createElement("a")
-      a.href = fullUrl
+      a.href = effectiveUrl
       a.download = `payment-qr-${request?.utrNumber || request?.userId || Date.now()}.jpg`
       document.body.appendChild(a)
       a.click()
@@ -61,7 +76,7 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
       return
     }
     try {
-      const res = await fetch(fullUrl)
+      const res = await fetch(effectiveUrl)
       const blob = await res.blob()
       const blobUrl = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -72,7 +87,7 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(blobUrl)
     } catch {
-      window.open(fullUrl, "_blank")
+      window.open(effectiveUrl, "_blank")
     }
   }
 
@@ -189,28 +204,37 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
               </div>
             </div>
           ) : (
-            <div className="w-full flex items-center justify-center">
+            <div className="w-full flex flex-col items-center justify-center space-y-3">
               <img
-                src={fullUrl}
-                alt="Payment Slip Proof"
-                className="max-h-[55vh] max-w-full object-contain rounded-2xl border border-white/10 shadow-lg"
+                src={effectiveUrl}
+                alt="Payment QR / Slip"
+                className="max-h-[55vh] max-w-full object-contain rounded-2xl border border-white/10 shadow-lg bg-white p-2"
                 onError={(e) => {
-                  e.target.style.display = "none"
-                  e.target.nextSibling.style.display = "block"
+                  if (dynamicUpiQr && e.target.src !== dynamicUpiQr) {
+                    e.target.src = dynamicUpiQr
+                  } else {
+                    e.target.style.display = "none"
+                    e.target.nextSibling.style.display = "block"
+                  }
                 }}
               />
               <div className="hidden text-center p-6 space-y-2">
                 <span className="text-3xl block">⚠️</span>
                 <p className="text-xs text-stone-400">Image load nahi ho payi. Neeche diye button se link open karein:</p>
                 <a 
-                  href={fullUrl} 
+                  href={effectiveUrl} 
                   target="_blank" 
                   rel="noreferrer" 
                   className="inline-block text-xs font-bold text-sky-400 underline"
                 >
-                  {fullUrl}
+                  {effectiveUrl}
                 </a>
               </div>
+              {request?.paymentDetails && (
+                <p className={`text-[11px] font-mono text-center ${isDark ? "text-stone-400" : "text-stone-600"}`}>
+                  Pay To: <span className="font-bold text-emerald-500">{request.paymentDetails}</span>
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -220,7 +244,7 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
           isDark ? "border-white/10 bg-black/20" : "border-stone-100 bg-stone-50"
         }`}>
           <a
-            href={fullUrl}
+            href={effectiveUrl}
             target="_blank"
             rel="noreferrer"
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
