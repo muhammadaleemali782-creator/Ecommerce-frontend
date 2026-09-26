@@ -32,6 +32,7 @@ export default function AdminWithdrawalManagement() {
   const [showSheetSettings, setShowSheetSettings] = useState(false)
   const [sheetUrlInput, setSheetUrlInput] = useState("")
   const [savingSheetUrl, setSavingSheetUrl] = useState(false)
+  const [copiedScript, setCopiedScript] = useState(false)
   
   const [modalData, setModalData] = useState({
     show: false,
@@ -475,7 +476,7 @@ export default function AdminWithdrawalManagement() {
     return type
   }
 
-  const getRequestRowData = (req) => {
+  const getRequestRowData = (req, idx = 1) => {
     const rupeeVal = req.ppcRateAtRequest > 0 
       ? (req.rupeeValueAtRequest?.toFixed(2) || (req.amount * req.ppcRateAtRequest * (req.percentageAtRequest / 100)).toFixed(2))
       : (ppcRate > 0 ? (req.amount * ppcRate * 0.25).toFixed(2) : (req.amount || 0))
@@ -483,21 +484,24 @@ export default function AdminWithdrawalManagement() {
     const dateStr = req.createdAt ? new Date(req.createdAt).toLocaleString("en-IN") : ""
     const name = req.userId?.fullName || req.userId?.name || "Unknown"
     const sysId = req.userId?.name || "—"
-    const role = req.userRole || "—"
+    const role = req.userRole || req.userId?.role || "—"
     const email = req.userId?.email || "—"
     const phone = req.userId?.phone || "—"
     const wallet = getWalletLabel(req.walletType)
     const ppc = req.amount || 0
     const paymentMode = req.paymentMethod || "—"
     const paymentDetails = req.paymentDetails || "—"
+    const qrLink = req.qrCodeUrl ? (req.qrCodeUrl.startsWith("http") ? req.qrCodeUrl : `${window.location.origin}${req.qrCodeUrl}`) : ""
     const status = req.status?.toUpperCase() || "PENDING"
+    const screenshot = req.paymentProof ? (req.paymentProof.startsWith("http") ? req.paymentProof : `${window.location.origin}${req.paymentProof}`) : ""
+    const remarks = req.adminNote || (req.status === "approved" ? "PAYMENT DONE" : req.status === "rejected" ? (req.rejectionReason || "REJECTED") : "")
 
-    return [dateStr, name, sysId, role, phone, email, wallet, ppc, rupeeVal, paymentMode, paymentDetails, utr, status]
+    return [idx, dateStr, name, sysId, role, phone, email, wallet, ppc, rupeeVal, paymentMode, paymentDetails, qrLink, utr, status, screenshot, remarks]
   }
 
   const copyForExcel = (req) => {
-    const headers = ["Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "UTR / Ref No", "Status"]
-    const row = getRequestRowData(req)
+    const headers = ["S no", "Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "QR Code", "UTR / Ref No", "Status", "Screenshot", "REMARKS"]
+    const row = getRequestRowData(req, 1)
     const tsv = headers.join("\t") + "\n" + row.join("\t")
 
     navigator.clipboard.writeText(tsv).then(() => {
@@ -510,8 +514,8 @@ export default function AdminWithdrawalManagement() {
 
   const copyAllForExcel = () => {
     if (!requests.length) return
-    const headers = ["Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "UTR / Ref No", "Status"]
-    const rows = requests.map(r => getRequestRowData(r).join("\t"))
+    const headers = ["S no", "Date", "Name", "System ID", "Role", "Phone", "Email", "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details", "QR Code", "UTR / Ref No", "Status", "Screenshot", "REMARKS"]
+    const rows = requests.map((r, i) => getRequestRowData(r, i + 1).join("\t"))
     const tsv = headers.join("\t") + "\n" + rows.join("\n")
 
     navigator.clipboard.writeText(tsv).then(() => {
@@ -519,6 +523,155 @@ export default function AdminWithdrawalManagement() {
       setTimeout(() => setCopiedAll(false), 2500)
     }).catch(err => {
       console.error("Clipboard copy error:", err)
+    })
+  }
+
+  const copyAppsScriptCode = () => {
+    const scriptCode = `function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "No post data received" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Withdrawals") || ss.getActiveSheet();
+    
+    var headers = [
+      "S no", "Date", "Name", "System ID", "Role", "Phone", "Email",
+      "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details",
+      "QR Code", "UTR / Ref No", "Status", "Screenshot", "REMARKS"
+    ];
+    
+    // Set headers if new/empty sheet
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(headers);
+      var headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#d9d9d9");
+      headerRange.setHorizontalAlignment("center");
+      headerRange.setBorder(true, true, true, true, true, true, "#555555", SpreadsheetApp.BorderStyle.SOLID);
+    }
+    
+    // If UPDATE action (Admin approved / rejected / attached proof)
+    if (data.action === "UPDATE") {
+      var lastRow = sheet.getLastRow();
+      if (lastRow > 1) {
+        var dataRange = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+        for (var i = dataRange.length - 1; i >= 0; i--) {
+          var rowSysId = String(dataRange[i][3] || "").trim(); // System ID is Col D
+          var rowStatus = String(dataRange[i][14] || "").trim(); // Status is Col O
+          
+          if ((data.systemId && rowSysId === String(data.systemId).trim()) || (rowStatus === "PENDING")) {
+            var targetRow = i + 2;
+            if (data.utrNumber) sheet.getRange(targetRow, 14).setValue(data.utrNumber);
+            if (data.status) {
+              var statusCell = sheet.getRange(targetRow, 15);
+              statusCell.setValue(data.status);
+              if (data.status === "APPROVED") {
+                statusCell.setFontColor("#15803d").setFontWeight("bold");
+              } else if (data.status === "REJECTED") {
+                statusCell.setFontColor("#b91c1c").setFontWeight("bold");
+              }
+            }
+            if (data.screenshot) {
+              sheet.getRange(targetRow, 16).setFormula('=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")');
+            }
+            if (data.remarks) sheet.getRange(targetRow, 17).setValue(data.remarks);
+            
+            // Reapply borders
+            sheet.getRange(targetRow, 1, 1, headers.length).setBorder(true, true, true, true, true, true, "#999999", SpreadsheetApp.BorderStyle.SOLID);
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", updated: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Save QR to Google Drive if base64 provided
+    var qrLink = data.qrCodeUrl || "";
+    if (data.qrBase64 && data.qrBase64.indexOf("data:image") === 0) {
+      try {
+        var parts = data.qrBase64.split(",");
+        var mime = parts[0].match(/:(.*?);/)[1];
+        var decoded = Utilities.base64Decode(parts[1]);
+        var blob = Utilities.newBlob(decoded, mime, "QR-" + (data.userId || "user") + "-" + new Date().getTime() + ".jpg");
+        var folder;
+        var folders = DriveApp.getFoldersByName("Educa_Withdrawal_QR");
+        if (folders.hasNext()) {
+          folder = folders.next();
+        } else {
+          folder = DriveApp.createFolder("Educa_Withdrawal_QR");
+        }
+        var file = folder.createFile(blob);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        qrLink = file.getUrl();
+      } catch (e) {
+        Logger.log("Drive save error: " + e.message);
+      }
+    }
+    
+    var sNo = Math.max(1, sheet.getLastRow());
+    var qrFormula = qrLink ? '=HYPERLINK("' + qrLink + '", "👁️ View QR")' : "—";
+    var slipFormula = data.screenshot ? '=HYPERLINK("' + data.screenshot + '", "👁️ View Slip")' : "";
+    
+    var newRow = [
+      sNo,
+      data.date || new Date().toLocaleString("en-IN"),
+      data.name || "",
+      data.userId || "",
+      data.role || "",
+      data.phone ? "'" + data.phone : "",
+      data.email || "",
+      data.originWallet || "",
+      data.amountPPC || 0,
+      data.rupeeValue || 0,
+      data.paymentMethod || "",
+      data.paymentDetails || "",
+      qrFormula,
+      data.utrNumber || "",
+      data.status || "PENDING",
+      slipFormula,
+      data.remarks || ""
+    ];
+    
+    sheet.appendRow(newRow);
+    var currentRow = sheet.getLastRow();
+    var rowRange = sheet.getRange(currentRow, 1, 1, headers.length);
+    
+    // Border formatting on entire row
+    rowRange.setBorder(true, true, true, true, true, true, "#888888", SpreadsheetApp.BorderStyle.SOLID);
+    
+    // Alignment and Styling
+    sheet.getRange(currentRow, 1).setHorizontalAlignment("center");
+    sheet.getRange(currentRow, 5).setHorizontalAlignment("center");
+    sheet.getRange(currentRow, 9, 1, 2).setHorizontalAlignment("right");
+    sheet.getRange(currentRow, 13).setHorizontalAlignment("center").setFontColor("#0284c7").setFontWeight("bold");
+    
+    // Status formatting
+    var statusCell = sheet.getRange(currentRow, 15);
+    statusCell.setHorizontalAlignment("center").setFontWeight("bold");
+    if (data.status === "APPROVED") {
+      statusCell.setFontColor("#15803d");
+    } else if (data.status === "REJECTED") {
+      statusCell.setFontColor("#b91c1c");
+    } else {
+      statusCell.setFontColor("#d97706");
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrLink }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`
+    navigator.clipboard.writeText(scriptCode).then(() => {
+      setCopiedScript(true)
+      setTimeout(() => setCopiedScript(false), 2500)
     })
   }
   
@@ -628,6 +781,23 @@ export default function AdminWithdrawalManagement() {
               className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider cursor-pointer shadow-sm transition-all"
             >
               {savingSheetUrl ? "Saving..." : "Save Webhook"}
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <span className="text-[11px] text-stone-400">
+              Need Google Apps Script code for auto border & columns?
+            </span>
+            <button
+              type="button"
+              onClick={copyAppsScriptCode}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                copiedScript 
+                  ? "bg-emerald-600 text-white border-emerald-500"
+                  : isDark ? "bg-white/10 hover:bg-white/20 text-white border-white/10" : "bg-stone-200 hover:bg-stone-300 text-stone-900 border-stone-300"
+              }`}
+            >
+              {copiedScript ? "✅ Apps Script Copied!" : "📋 Copy Google Apps Script Code"}
             </button>
           </div>
         </div>
