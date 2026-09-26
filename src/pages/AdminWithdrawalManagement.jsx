@@ -672,7 +672,7 @@ export default function AdminWithdrawalManagement() {
       statusCell.setFontColor("#d97706");
     }
     
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrDownloadUrl }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", qrUrl: qrViewUrl }))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (err) {

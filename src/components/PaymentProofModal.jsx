@@ -14,7 +14,6 @@ export const isDriveUrl = (url) => {
 
 export const getDriveEmbedUrl = (url) => {
   if (!url) return ""
-  // Replace /view with /preview for embedding
   return url.replace(/\/view(\?.*)?$/, "/preview")
 }
 
@@ -23,6 +22,15 @@ export const getDriveDownloadUrl = (url) => {
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/)
   if (match && match[1]) {
     return `https://drive.google.com/uc?export=download&id=${match[1]}`
+  }
+  return url
+}
+
+export const getDriveDirectImageUrl = (url) => {
+  if (!url) return ""
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/)
+  if (match && match[1]) {
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`
   }
   return url
 }
@@ -36,10 +44,20 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
   const isDrive = isDriveUrl(url)
   const driveEmbed = isDrive ? getDriveEmbedUrl(url) : null
   const driveDownload = isDrive ? getDriveDownloadUrl(url) : null
+  const driveDirectImg = isDrive ? getDriveDirectImageUrl(url) : null
 
   const handleDownload = async () => {
     if (isDrive) {
       window.open(driveDownload, "_blank")
+      return
+    }
+    if (fullUrl.startsWith("data:image")) {
+      const a = document.createElement("a")
+      a.href = fullUrl
+      a.download = `payment-qr-${request?.utrNumber || request?.userId || Date.now()}.jpg`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
       return
     }
     try {
@@ -134,21 +152,24 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col items-center justify-center min-h-[260px] max-h-[60vh]">
           {isDrive ? (
             <div className="w-full space-y-4 text-center">
-              <div className={`p-6 rounded-2xl border flex flex-col items-center justify-center gap-3 ${
+              <div className={`p-4 sm:p-6 rounded-2xl border flex flex-col items-center justify-center gap-3 ${
                 isDark ? "bg-black/40 border-white/10" : "bg-blue-50/50 border-blue-200"
               }`}>
-                <span className="text-4xl">📁</span>
-                <div>
-                  <h4 className="font-bold text-sm">Google Drive Attached Receipt</h4>
-                  <p className={`text-xs mt-1 max-w-md mx-auto truncate font-mono ${
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  }`}>
-                    {url}
-                  </p>
-                </div>
+                {driveDirectImg && (
+                  <img
+                    src={driveDirectImg}
+                    alt="Drive Preview"
+                    className="max-h-[50vh] max-w-full object-contain rounded-xl border border-white/10 shadow-lg"
+                    onError={(e) => {
+                      e.target.style.display = "none"
+                      const fallback = document.getElementById("drive-iframe-container")
+                      if (fallback) fallback.style.display = "block"
+                    }}
+                  />
+                )}
 
                 {driveEmbed && (
-                  <div className="w-full h-72 sm:h-96 rounded-xl overflow-hidden border border-white/10 bg-black/50 mt-2">
+                  <div id="drive-iframe-container" className={`w-full h-72 sm:h-96 rounded-xl overflow-hidden border border-white/10 bg-black/50 ${driveDirectImg ? "hidden" : "block"}`}>
                     <iframe 
                       src={driveEmbed} 
                       className="w-full h-full border-0" 
@@ -157,6 +178,14 @@ export default function PaymentProofModal({ show, onClose, url, request }) {
                     />
                   </div>
                 )}
+
+                <div>
+                  <p className={`text-[11px] mt-1 max-w-md mx-auto truncate font-mono ${
+                    isDark ? "text-stone-400" : "text-stone-600"
+                  }`}>
+                    {url}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
