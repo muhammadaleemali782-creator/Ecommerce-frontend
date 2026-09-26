@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext"
 import EducaLogo from "../components/EducaLogo"
 import { saveFormDraft, getFormDraft, clearFormDraft, hasFormDraft } from "../utils/formDraftManager"
 import DraftBanner from "../components/DraftBanner"
+import PaymentProofModal from "../components/PaymentProofModal"
 
 /* ── Format User Name with System ID ── */
 const formatUser = (name, fullName) => {
@@ -137,6 +138,7 @@ export default function WithdrawalRequest() {
   const [settings, setSettings] = useState(null)
   const [historyFilter, setHistoryFilter] = useState("all")
   const [showHistory, setShowHistory] = useState(false)
+  const [viewProofModal, setViewProofModal] = useState({ show: false, url: "", req: null })
 
   const DRAFT_KEY = "withdrawal_request"
   const defaultForm = {
@@ -722,6 +724,21 @@ export default function WithdrawalRequest() {
                     {(req.utrNumber || req.transactionId) && (
                       <p className="text-xs text-emerald-400 font-mono mt-1">UTR / Ref: {req.utrNumber || req.transactionId}</p>
                     )}
+                    {req.paymentProof && (
+                      <div className="pt-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setViewProofModal({ show: true, url: req.paymentProof, req })}
+                          className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                            isDark
+                              ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border-purple-500/30"
+                              : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                          }`}
+                        >
+                          <span>🖼️ View Payment Slip / Proof</span>
+                        </button>
+                      </div>
+                    )}
                     {req.adminNote && (
                       <p className="text-xs text-stone-400 italic mt-1">Note: {req.adminNote}</p>
                     )}
@@ -732,6 +749,14 @@ export default function WithdrawalRequest() {
           </div>
         )}
       </div>
+
+      {/* ── PAYMENT PROOF VIEWER MODAL ── */}
+      <PaymentProofModal
+        show={viewProofModal.show}
+        onClose={() => setViewProofModal({ show: false, url: "", req: null })}
+        url={viewProofModal.url}
+        request={viewProofModal.req}
+      />
 
     </div>
   )

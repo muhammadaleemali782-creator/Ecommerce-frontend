@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import InlineLoader from "../components/InlineLoader"
 import { useTheme } from "../context/ThemeContext"
 import { CardSkeleton } from "../components/Skeleton"
+import PaymentProofModal, { getProofUrl } from "../components/PaymentProofModal"
 
 /* =====================================================
    ADMIN WITHDRAWAL MANAGEMENT (MOBILE RESPONSIVE)
@@ -18,6 +19,11 @@ export default function AdminWithdrawalManagement() {
   const [message, setMessage] = useState({ type: "", text: "", reqForWhatsApp: null })
   const [ppcRate, setPpcRate] = useState(0)
   const [cardUtr, setCardUtr] = useState({})
+  const [cardProof, setCardProof] = useState({})
+  const [uploadingProof, setUploadingProof] = useState({})
+  const [viewProofModal, setViewProofModal] = useState({ show: false, url: "", req: null })
+  const [editingProofId, setEditingProofId] = useState(null)
+  const [editProofUrl, setEditProofUrl] = useState("")
   const [copiedId, setCopiedId] = useState(null)
   const [copiedAll, setCopiedAll] = useState(false)
 
@@ -29,7 +35,8 @@ export default function AdminWithdrawalManagement() {
     context: "withdrawal", // "withdrawal" | "reward"
     request: null,
     transactionId: "",
-    note: ""
+    note: "",
+    paymentProof: ""
   })
 
   const switchView = (v) => {
@@ -218,7 +225,8 @@ export default function AdminWithdrawalManagement() {
       context,
       request,
       transactionId: cardUtr[request?._id] || "",
-      note: ""
+      note: "",
+      paymentProof: cardProof[request?._id] || request?.paymentProof || ""
     })
     setMessage({ type: "", text: "", reqForWhatsApp: null })
   }
@@ -230,8 +238,65 @@ export default function AdminWithdrawalManagement() {
       context: "withdrawal",
       request: null,
       transactionId: "",
-      note: ""
+      note: "",
+      paymentProof: ""
     })
+  }
+
+  const handleFileUpload = async (file, reqId) => {
+    if (!file) return
+    try {
+      setUploadingProof(prev => ({ ...prev, [reqId]: true }))
+      const token = localStorage.getItem("token")
+      const formData = new FormData()
+      formData.append("proof", file)
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/upload-proof`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        setCardProof(prev => ({ ...prev, [reqId]: data.url }))
+      } else {
+        alert(data.message || "Failed to upload file")
+      }
+    } catch (err) {
+      console.error("Upload error:", err)
+      alert("Error uploading screenshot")
+    } finally {
+      setUploadingProof(prev => ({ ...prev, [reqId]: false }))
+    }
+  }
+
+  const handleUpdateProof = async (reqId, proofUrl) => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/update-proof/${reqId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ paymentProof: proofUrl })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMessage({ type: "success", text: "Payment slip/proof updated successfully!" })
+        setEditingProofId(null)
+        setEditProofUrl("")
+        fetchRequests()
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to update proof" })
+      }
+    } catch (err) {
+      console.error("Update proof error:", err)
+      setMessage({ type: "error", text: "Failed to update payment proof" })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDirectCardApprove = async (req) => {
@@ -247,6 +312,8 @@ export default function AdminWithdrawalManagement() {
       const token = localStorage.getItem("token")
       if (!token) return
 
+      const proof = (cardProof[req._id] || "").trim()
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/approve/${req._id}`, {
         method: "POST",
         headers: {
@@ -256,14 +323,15 @@ export default function AdminWithdrawalManagement() {
         body: JSON.stringify({
           transactionId: utr,
           utrNumber: utr,
-          note: "Approved via quick UTR"
+          note: "Approved via quick UTR",
+          paymentProof: proof
         })
       })
 
       const data = await res.json()
 
       if (res.ok) {
-        const approvedReq = { ...req, utrNumber: utr }
+        const approvedReq = { ...req, utrNumber: utr, paymentProof: proof }
         setMessage({ 
           type: "success", 
           text: `Withdrawal approved successfully! UTR: ${utr}`,
@@ -302,14 +370,15 @@ export default function AdminWithdrawalManagement() {
         body: JSON.stringify({
           transactionId: modalData.transactionId?.trim(),
           utrNumber: modalData.transactionId?.trim(),
-          note: modalData.note
+          note: modalData.note,
+          paymentProof: (modalData.paymentProof || "").trim()
         })
       })
       
       const data = await res.json()
       
       if (res.ok) {
-        const approvedReq = { ...modalData.request, utrNumber: modalData.transactionId?.trim() }
+        const approvedReq = { ...modalData.request, utrNumber: modalData.transactionId?.trim(), paymentProof: (modalData.paymentProof || "").trim() }
         setMessage({ 
           type: "success", 
           text: `Withdrawal approved successfully! UTR: ${modalData.transactionId?.trim()}`,
@@ -802,14 +871,117 @@ export default function AdminWithdrawalManagement() {
                       <div>
                         <strong>Payment UTR / Ref:</strong> {req.utrNumber || req.transactionId}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => sendWhatsAppApproval(req)}
-                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
-                        title="Send WhatsApp confirmation without saving number"
-                      >
-                        📲 WhatsApp Slip
-                      </button>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {req.paymentProof && (
+                          <button
+                            type="button"
+                            onClick={() => setViewProofModal({ show: true, url: req.paymentProof, req })}
+                            className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 cursor-pointer shadow-sm"
+                            title="View payment receipt screenshot"
+                          >
+                            🖼️ View Slip / Proof
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => sendWhatsAppApproval(req)}
+                          className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                          title="Send WhatsApp confirmation without saving number"
+                        >
+                          📲 WhatsApp Slip
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payment Slip row for approved requests */}
+                  {req.status === "approved" && (
+                    <div className={`p-2.5 rounded-xl border flex items-center justify-between flex-wrap gap-2 text-xs ${
+                      isDark ? "bg-black/30 border-white/[0.06]" : "bg-stone-50 border-stone-200"
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[11px] uppercase tracking-wider text-stone-400">Payment Slip:</span>
+                        {req.paymentProof ? (
+                          <span className="text-emerald-500 font-mono text-[11px] truncate max-w-[200px] sm:max-w-xs">
+                            ✓ Attached
+                          </span>
+                        ) : (
+                          <span className="text-stone-400 italic text-[11px]">Not attached</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {req.paymentProof && (
+                          <button
+                            type="button"
+                            onClick={() => setViewProofModal({ show: true, url: req.paymentProof, req })}
+                            className="px-2.5 py-1 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+                          >
+                            🖼️ View Proof
+                          </button>
+                        )}
+                        {editingProofId === req._id ? (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <input
+                              type="text"
+                              placeholder="Paste Google Drive / Image URL"
+                              value={editProofUrl}
+                              onChange={(e) => setEditProofUrl(e.target.value)}
+                              className={`px-2 py-1 rounded-lg text-xs font-mono border outline-none ${
+                                isDark ? "bg-black text-white border-white/20" : "bg-white text-stone-900 border-stone-300"
+                              }`}
+                            />
+                            <label className={`px-2 py-1 rounded-lg border text-xs font-bold cursor-pointer whitespace-nowrap ${
+                              isDark ? "bg-stone-800 text-stone-200 border-white/10" : "bg-stone-200 text-stone-800 border-stone-300"
+                            }`}>
+                              📎 Local
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  if (e.target.files?.[0]) {
+                                    const file = e.target.files[0]
+                                    const token = localStorage.getItem("token")
+                                    const formData = new FormData()
+                                    formData.append("proof", file)
+                                    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/upload-proof`, {
+                                      method: "POST",
+                                      headers: { Authorization: `Bearer ${token}` },
+                                      body: formData
+                                    })
+                                    const data = await res.json()
+                                    if (res.ok && data.url) setEditProofUrl(data.url)
+                                  }
+                                }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateProof(req._id, editProofUrl)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setEditingProofId(null); setEditProofUrl("") }}
+                              className="px-2 py-1 rounded-lg text-stone-400 hover:text-white text-xs cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => { setEditingProofId(req._id); setEditProofUrl(req.paymentProof || "") }}
+                            className={`px-2.5 py-1 rounded-lg border font-bold text-[11px] cursor-pointer transition-all ${
+                              isDark ? "bg-white/5 hover:bg-white/10 text-stone-300 border-white/10" : "bg-white hover:bg-stone-100 text-stone-700 border-stone-300"
+                            }`}
+                          >
+                            {req.paymentProof ? "✏️ Edit Slip" : "+ Attach Slip"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -858,6 +1030,57 @@ export default function AdminWithdrawalManagement() {
                         </button>
                       </div>
 
+                      {/* Payment Proof / Screenshot Row */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <div className="flex-1 flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Attach Screenshot: Google Drive Link OR Image URL"
+                            value={cardProof[req._id] || ""}
+                            onChange={(e) => setCardProof({ ...cardProof, [req._id]: e.target.value })}
+                            className={`flex-1 px-3.5 py-2 rounded-xl text-xs font-mono border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                              isDark ? "bg-black/60 border-white/10 text-white placeholder-stone-500" : "bg-white border-stone-300 text-stone-900 placeholder-stone-400"
+                            }`}
+                          />
+                          <label className={`px-3 py-2 rounded-xl border text-xs font-bold cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all shadow-sm ${
+                            uploadingProof[req._id]
+                              ? "opacity-50 cursor-wait"
+                              : isDark ? "bg-stone-800 hover:bg-stone-700 text-stone-200 border-white/10" : "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300"
+                          }`}>
+                            <span>{uploadingProof[req._id] ? "⏳ Uploading..." : "📎 Local File"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingProof[req._id]}
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) handleFileUpload(e.target.files[0], req._id)
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {cardProof[req._id] && (
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setViewProofModal({ show: true, url: cardProof[req._id], req })}
+                              className="px-3 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                              title="Preview attached proof"
+                            >
+                              👁️ Preview
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCardProof(prev => ({ ...prev, [req._id]: "" }))}
+                              className="px-2.5 py-2 rounded-xl text-xs text-red-400 hover:bg-red-500/10 cursor-pointer"
+                              title="Remove attachment"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDirectCardApprove(req)}
@@ -897,7 +1120,17 @@ export default function AdminWithdrawalManagement() {
             <div className={`p-3.5 rounded-2xl border text-xs space-y-1 ${
               isDark ? "bg-black/40 border-white/[0.06] text-stone-300" : "bg-stone-50 border-stone-200 text-stone-700"
             }`}>
-              <p><span className={isDark ? "text-stone-500" : "text-stone-400"}>Recipient:</span> <strong className={isDark ? "text-white" : "text-stone-900"}>{modalData.request?.userId?.name}</strong></p>
+              <p>
+                <span className={isDark ? "text-stone-500" : "text-stone-400"}>Recipient:</span>{" "}
+                <strong className={isDark ? "text-white" : "text-stone-900"}>
+                  {modalData.request?.userId?.fullName || modalData.request?.userId?.name}
+                </strong>
+                {modalData.request?.userId?.name && modalData.request?.userId?.name !== modalData.request?.userId?.fullName && (
+                  <span className="ml-2 font-mono text-xs text-sky-400 font-bold">
+                    🆔 {modalData.request.userId.name}
+                  </span>
+                )}
+              </p>
               {modalData.context === "reward" ? (
                 <>
                   <p><span className={isDark ? "text-stone-500" : "text-stone-400"}>Rank:</span> {modalData.request?.levelName}</p>
@@ -918,31 +1151,98 @@ export default function AdminWithdrawalManagement() {
             </div>
 
             {modalData.context === "withdrawal" && modalData.action === "approve" && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
-                    isDark ? "text-stone-300" : "text-stone-700"
-                  }`}>
-                    Bank Reference / UTR Number <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => sendWhatsAppApproval(modalData.request, modalData.transactionId)}
-                    className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    📲 WhatsApp Preview
-                  </button>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    }`}>
+                      Bank Reference / UTR Number <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => sendWhatsAppApproval(modalData.request, modalData.transactionId)}
+                      className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      📲 WhatsApp Preview
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={modalData.transactionId}
+                    onChange={(e) => setModalData({ ...modalData, transactionId: e.target.value })}
+                    className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
+                    }`}
+                    placeholder="e.g. UTR123456789 / IMPS Ref (Mandatory)"
+                  />
                 </div>
-                <input
-                  type="text"
-                  required
-                  value={modalData.transactionId}
-                  onChange={(e) => setModalData({ ...modalData, transactionId: e.target.value })}
-                  className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
-                    isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
-                  }`}
-                  placeholder="e.g. UTR123456789 / IMPS Ref (Mandatory)"
-                />
+
+                {/* Payment Proof / Receipt Attachment in Modal */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={`block text-[10.5px] font-mono font-bold uppercase tracking-wider ${
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    }`}>
+                      Payment Proof Screenshot (Optional)
+                    </label>
+                    <label className="text-[11px] font-bold text-sky-500 hover:underline cursor-pointer flex items-center gap-1">
+                      <span>📎 Upload File</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          if (e.target.files?.[0]) {
+                            const file = e.target.files[0]
+                            const token = localStorage.getItem("token")
+                            const formData = new FormData()
+                            formData.append("proof", file)
+                            try {
+                              const res = await fetch(`${import.meta.env.VITE_API_URL}/api/withdrawal/admin/upload-proof`, {
+                                method: "POST",
+                                headers: { Authorization: `Bearer ${token}` },
+                                body: formData
+                              })
+                              const data = await res.json()
+                              if (res.ok && data.url) {
+                                setModalData(prev => ({ ...prev, paymentProof: data.url }))
+                              } else {
+                                alert(data.message || "Failed to upload file")
+                              }
+                            } catch {
+                              alert("Upload failed")
+                            }
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={modalData.paymentProof || ""}
+                    onChange={(e) => setModalData({ ...modalData, paymentProof: e.target.value })}
+                    className={`w-full p-2.5 text-xs border rounded-xl focus:outline-none ${
+                      isDark ? "bg-black/40 text-white border-white/10 focus:border-[#fbbf24]" : "bg-stone-50 text-stone-900 border-stone-300 focus:border-blue-500"
+                    }`}
+                    placeholder="Paste Google Drive link or web image link"
+                  />
+                  {modalData.paymentProof && (
+                    <div className="mt-1 flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-medium truncate max-w-[280px]">
+                        Attached: {modalData.paymentProof}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setModalData(prev => ({ ...prev, paymentProof: "" }))}
+                        className="text-red-400 hover:underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -994,6 +1294,14 @@ export default function AdminWithdrawalManagement() {
           </div>
         </div>
       )}
+
+      {/* ── PAYMENT PROOF VIEWER MODAL ── */}
+      <PaymentProofModal
+        show={viewProofModal.show}
+        onClose={() => setViewProofModal({ show: false, url: "", req: null })}
+        url={viewProofModal.url}
+        request={viewProofModal.req}
+      />
 
     </div>
   )
