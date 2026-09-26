@@ -724,6 +724,68 @@ function onEdit(e) {
   } catch (err) {
     Logger.log("onEdit sync error: " + err.toString());
   }
+}
+
+// ⭐ RUN THIS ONCE TO CLEAN & MERGE ALL DATA FROM SHEET 2 & SHEET 1
+function fixAndMergeAllData() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Withdrawals") || ss.getActiveSheet();
+  
+  var headers = [
+    "S no", "Date", "Name", "System ID", "Role", "Phone", "Email",
+    "Origin Wallet", "PPC Amount", "Payout (₹)", "Payment Mode", "Account Details",
+    "QR Code", "UTR / Ref No", "Status", "Screenshot", "REMARKS"
+  ];
+  
+  sheet.clear();
+  sheet.appendRow(headers);
+  
+  var headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight("bold").setBackground("#d9d9d9").setHorizontalAlignment("center");
+  headerRange.setBorder(true, true, true, true, true, true, "#555555", SpreadsheetApp.BorderStyle.SOLID);
+  
+  var allData = [
+    [1, "23/9/2026, 22:20:08", "DB001/DS024", "DB001/DS024", "seller", "'6361438937", "vivek@educa.com", "User Wallet", 55, 1100, "gpay", "Kotak mahindra ban-5915 7267965160-g2d3-3@ybl", "—", "", "REJECTED", "", "UPI NOT FOUND"],
+    [2, "23/9/2026, 20:56:14", "DB001/DS001", "DB001/DS001", "seller", "'7457908475", "akgupta0004@educa.com", "Direct Seller Wallet", 10, 100, "phonepe", "7457908475.wallet@phonepe", "—", "", "REJECTED", "", ""],
+    [3, "26/9/2026, 20:02:49", "DB001/DS001", "DB001/DS001", "seller", "'7457908475", "akgupta0004@educa.com", "Direct Seller Wallet", 12, 120, "upi", "7457908475@fam", "—", "366883091841", "APPROVED", "", "PAYMENT DONE"],
+    [4, "26/9/2026, 20:17:32", "Sandhya Gupta", "DB001/DS022", "seller", "'7619967319", "sandhya@educa.com", "User Wallet", 12, 240, "upi", "7619967319@fam", "—", "", "REJECTED", "", "NOT WORKING DS"],
+    [5, "26/9/2026, 22:02:00", "VIVEK", "DB001/DS024", "seller", "'6361438937", "vivek@educa.com", "User Wallet", 56, 1120, "gpay", "7267965160-g2d3-3@ybl", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1-qtU07Pt0PwscZ6lGCDhxmfX3lqwT9wc", "⬇️ Download QR")', "", "PENDING", "", ""],
+    [6, "26/9/2026, 22:10:00", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "upi", "90765kjnkjn", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1TVmN5tWT_puFbTIyUrTsssic4mNPpSK", "⬇️ Download QR")', "", "PENDING", "", ""],
+    [7, "Saturday, 26/9/2026, 22:42:56", "Anand", "DB001", "distributor", "'630666765", "anand@educa.com", "Direct Seller Wallet", 78, 780, "paytm", "asdasdsa", '=HYPERLINK("https://drive.google.com/uc?export=download&id=1TVmN5tWT_puFbTIyUrTsssic4mNPpSK", "⬇️ Download QR")', "", "APPROVED", "", "PAYMENT DONE"]
+  ];
+  
+  for (var r = 0; r < allData.length; r++) {
+    sheet.appendRow(allData[r]);
+  }
+  
+  var totalRows = allData.length;
+  var dataRange = sheet.getRange(2, 1, totalRows, headers.length);
+  dataRange.setBorder(true, true, true, true, true, true, "#888888", SpreadsheetApp.BorderStyle.SOLID);
+  
+  sheet.getRange(2, 1, totalRows, 1).setHorizontalAlignment("center");
+  sheet.getRange(2, 5, totalRows, 1).setHorizontalAlignment("center");
+  sheet.getRange(2, 9, totalRows, 2).setHorizontalAlignment("right");
+  sheet.getRange(2, 13, totalRows, 1).setHorizontalAlignment("center").setFontColor("#0284c7").setFontWeight("bold");
+  sheet.getRange(2, 15, totalRows, 1).setHorizontalAlignment("center").setFontWeight("bold");
+  
+  var statusRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(["PENDING", "APPROVED", "REJECTED"], true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, 15, totalRows, 1).setDataValidation(statusRule);
+  
+  for (var i = 0; i < totalRows; i++) {
+    var rowIdx = i + 2;
+    var status = allData[i][14];
+    var cell = sheet.getRange(rowIdx, 15);
+    if (status === "APPROVED") cell.setFontColor("#15803d");
+    else if (status === "REJECTED") cell.setFontColor("#b91c1c");
+    else cell.setFontColor("#d97706");
+  }
+  
+  for (var c = 1; c <= headers.length; c++) {
+    sheet.autoResizeColumn(c);
+  }
 }`
     navigator.clipboard.writeText(scriptCode).then(() => {
       setCopiedScript(true)
