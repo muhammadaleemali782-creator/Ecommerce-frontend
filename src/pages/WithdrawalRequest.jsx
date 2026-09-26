@@ -769,6 +769,21 @@ export default function WithdrawalRequest() {
                     {(req.utrNumber || req.transactionId) && (
                       <p className="text-xs text-emerald-400 font-mono mt-1">UTR / Ref: {req.utrNumber || req.transactionId}</p>
                     )}
+                    {req.qrCodeUrl && (
+                      <div className="pt-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setViewProofModal({ show: true, url: req.qrCodeUrl, req })}
+                          className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                            isDark
+                              ? "bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border-sky-500/30"
+                              : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
+                          }`}
+                        >
+                          <span>📷 View My QR Photo</span>
+                        </button>
+                      </div>
+                    )}
                     {req.paymentProof && (
                       <div className="pt-1.5">
                         <button

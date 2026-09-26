@@ -942,6 +942,18 @@ export default function AdminWithdrawalManagement() {
                     }`}>
                       <p><strong>Payment Mode:</strong> {req.paymentMethod}</p>
                       {req.paymentDetails && <p className={`mt-0.5 ${isDark ? "text-stone-300" : "text-stone-700"}`}><strong>Account Details:</strong> {req.paymentDetails}</p>}
+                      {req.qrCodeUrl && (
+                        <div className="pt-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setViewProofModal({ show: true, url: req.qrCodeUrl, req })}
+                            className="px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-[11px] font-bold flex items-center gap-1 cursor-pointer w-fit"
+                            title="View user's submitted payment QR code"
+                          >
+                            📷 View User QR Photo
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
