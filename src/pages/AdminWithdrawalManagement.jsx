@@ -936,11 +936,11 @@ export default function AdminWithdrawalManagement() {
                   )}
 
                   {/* Payment Details */}
-                  {req.paymentMethod && (
+                  {(req.paymentMethod || req.paymentDetails || req.qrCodeUrl) && (
                     <div className={`p-3 rounded-xl border text-xs ${
                       isDark ? "bg-black/40 border-sky-500/20 text-sky-200" : "bg-sky-50 border-sky-200 text-sky-900"
                     }`}>
-                      <p><strong>Payment Mode:</strong> {req.paymentMethod}</p>
+                      {req.paymentMethod && <p><strong>Payment Mode:</strong> {req.paymentMethod}</p>}
                       {req.paymentDetails && <p className={`mt-0.5 ${isDark ? "text-stone-300" : "text-stone-700"}`}><strong>Account Details:</strong> {req.paymentDetails}</p>}
                       {req.qrCodeUrl && (
                         <div className="pt-1.5">
@@ -1097,6 +1097,26 @@ export default function AdminWithdrawalManagement() {
                     <div className={`space-y-2 pt-2 border-t ${
                       isDark ? "border-white/[0.06]" : "border-stone-100"
                     }`}>
+                      {/* User's QR Code Preview Banner */}
+                      {req.qrCodeUrl && (
+                        <div className="p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 bg-sky-500/10 border-sky-500/30">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">📷</span>
+                            <div>
+                              <p className="font-bold text-xs text-sky-400">User's UPI QR Code Attached</p>
+                              <p className="text-[11px] text-stone-400">Scan to pay ₹{rupeeVal} before entering UTR</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setViewProofModal({ show: true, url: req.qrCodeUrl, req })}
+                            className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          >
+                            <span>👁️ Scan / View QR</span>
+                          </button>
+                        </div>
+                      )}
+
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                         <input
                           type="text"
@@ -1250,6 +1270,26 @@ export default function AdminWithdrawalManagement() {
                 </>
               )}
             </div>
+
+            {/* QR Code Scan Banner in Modal */}
+            {modalData.request?.qrCodeUrl && (
+              <div className="p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 bg-sky-500/10 border-sky-500/30">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📷</span>
+                  <div>
+                    <p className="font-bold text-xs text-sky-400">User Payment QR Attached</p>
+                    <p className="text-[10.5px] text-stone-400">Scan to disburse payment before entering UTR</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewProofModal({ show: true, url: modalData.request.qrCodeUrl, req: modalData.request })}
+                  className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs cursor-pointer shadow-sm"
+                >
+                  👁️ View / Scan QR
+                </button>
+              </div>
+            )}
 
             {modalData.context === "withdrawal" && modalData.action === "approve" && (
               <div className="space-y-3">
