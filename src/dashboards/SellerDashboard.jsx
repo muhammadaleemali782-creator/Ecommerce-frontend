@@ -34,20 +34,64 @@ export default function SellerDashboard({ setPage }) {
   const hdr = () => ({ Authorization: `Bearer ${tkn()}` })
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [o, d, t] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/orders/mine`,       { headers: hdr() }),
-          fetch(`${import.meta.env.VITE_API_URL}/users/my-downline`, { headers: hdr() }),
-          fetch(`${import.meta.env.VITE_API_URL}/orders/team`,       { headers: hdr() }),
-        ])
-        if (o.ok) setOrders(await o.json())
-        if (d.ok) { const j = await d.json(); setDownline(j.downline || []) }
-        if (t.ok) { const tj = await t.json(); setTeamOrders(tj.orders || []) }
-      } catch(e) { console.error(e) }
+    // 1. Instant render from cache (0ms perceived load time)
+    try {
+      const cached = sessionStorage.getItem("educa_seller_dash_cache")
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed.orders)) setOrders(parsed.orders)
+        if (Array.isArray(parsed.downline)) setDownline(parsed.downline)
+        if (Array.isArray(parsed.teamOrders)) setTeamOrders(parsed.teamOrders)
+        setLoading(false)
+      }
+    } catch (_) {}
+
+    // 2. Progressive background data fetching
+    let active = true
+
+    const p1 = fetch(`${import.meta.env.VITE_API_URL}/orders/mine`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        if (!active) return []
+        const ords = Array.isArray(data) ? data : []
+        setOrders(ords)
+        setLoading(false)
+        return ords
+      }).catch(() => [])
+
+    const p2 = fetch(`${import.meta.env.VITE_API_URL}/users/my-downline`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : { downline: [] })
+      .then(data => {
+        if (!active) return []
+        const dl = data.downline || []
+        setDownline(dl)
+        setLoading(false)
+        return dl
+      }).catch(() => [])
+
+    const p3 = fetch(`${import.meta.env.VITE_API_URL}/orders/team`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : { orders: [] })
+      .then(data => {
+        if (!active) return []
+        const to = data.orders || []
+        setTeamOrders(to)
+        setLoading(false)
+        return to
+      }).catch(() => [])
+
+    Promise.all([p1, p2, p3]).then(([ords, dl, to]) => {
+      if (!active) return
       setLoading(false)
-    }
-    load()
+      try {
+        sessionStorage.setItem("educa_seller_dash_cache", JSON.stringify({
+          orders: ords,
+          downline: dl,
+          teamOrders: to
+        }))
+      } catch (_) {}
+    })
+
+    return () => { active = false }
   }, [])
 
   if (loading) {

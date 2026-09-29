@@ -35,22 +35,64 @@ export default function DistributorDashboard({ setPage }) {
   const hdr = () => ({ Authorization: `Bearer ${tkn()}` })
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [dl, ord, tm] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/users/my-downline`,  { headers: hdr() }),
-          fetch(`${import.meta.env.VITE_API_URL}/orders/distributor`, { headers: hdr() }),
-          fetch(`${import.meta.env.VITE_API_URL}/orders/team`,        { headers: hdr() }),
-        ])
-        if (dl.ok)  { const j = await dl.json();  setDownline(j.downline || []) }
-        if (ord.ok) { const j = await ord.json(); setAllOrders(Array.isArray(j) ? j : []) }
-        if (tm.ok)  { const j = await tm.json();  setTeamOrders(j.orders || []) }
-      } catch(e) {
-        console.error(e)
+    // 1. Instant render from cache (0ms perceived load time)
+    try {
+      const cached = sessionStorage.getItem("educa_dist_dash_cache")
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed.allOrders)) setAllOrders(parsed.allOrders)
+        if (Array.isArray(parsed.downline)) setDownline(parsed.downline)
+        if (Array.isArray(parsed.teamOrders)) setTeamOrders(parsed.teamOrders)
+        setLoading(false)
       }
+    } catch (_) {}
+
+    // 2. Progressive background data fetching
+    let active = true
+
+    const p1 = fetch(`${import.meta.env.VITE_API_URL}/orders/distributor`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        if (!active) return []
+        const ords = Array.isArray(data) ? data : []
+        setAllOrders(ords)
+        setLoading(false)
+        return ords
+      }).catch(() => [])
+
+    const p2 = fetch(`${import.meta.env.VITE_API_URL}/users/my-downline`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : { downline: [] })
+      .then(data => {
+        if (!active) return []
+        const dl = data.downline || []
+        setDownline(dl)
+        setLoading(false)
+        return dl
+      }).catch(() => [])
+
+    const p3 = fetch(`${import.meta.env.VITE_API_URL}/orders/team`, { headers: hdr() })
+      .then(r => r.ok ? r.json() : { orders: [] })
+      .then(data => {
+        if (!active) return []
+        const to = data.orders || []
+        setTeamOrders(to)
+        setLoading(false)
+        return to
+      }).catch(() => [])
+
+    Promise.all([p1, p2, p3]).then(([ords, dl, to]) => {
+      if (!active) return
       setLoading(false)
-    }
-    load()
+      try {
+        sessionStorage.setItem("educa_dist_dash_cache", JSON.stringify({
+          allOrders: ords,
+          downline: dl,
+          teamOrders: to
+        }))
+      } catch (_) {}
+    })
+
+    return () => { active = false }
   }, [])
 
   if (!user) {
