@@ -245,9 +245,16 @@ export default function PPCWallet({ setPage }) {
               <p className="text-2xl sm:text-3xl font-black text-emerald-500">
                 {walletData.totalPPCEarned || 0} <span className="text-lg font-bold text-emerald-400/80">PPC</span>
               </p>
-              <p className="text-xs text-stone-400 mt-1 font-medium">
-                Est: ₹{((walletData.totalPPCEarned || 0) * walletData.currentPPCRate * 0.5).toFixed(2)}
-              </p>
+              {(() => {
+                const totalEstVal = Object.values(walletData.wallets || {}).reduce((sum, w) => sum + (w.estimatedValue || 0), 0)
+                const fallbackVal = (walletData.totalPPCEarned || 0) * (walletData.currentPPCRate || 40) * (walletData.role === "seller" ? 0.5 : 0.25)
+                const displayEst = totalEstVal > 0 ? totalEstVal : fallbackVal
+                return (
+                  <p className="text-xs text-stone-400 mt-1 font-medium">
+                    Est: ₹{displayEst.toFixed(2)}
+                  </p>
+                )
+              })()}
             </div>
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl border ${
               isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-600 border-emerald-200"
@@ -267,9 +274,15 @@ export default function PPCWallet({ setPage }) {
               <p className="text-2xl sm:text-3xl font-black text-sky-500">
                 {walletData.totalWithdrawn || 0} <span className="text-lg font-bold text-sky-400/80">PPC</span>
               </p>
-              <p className="text-xs text-stone-400 mt-1 font-medium">
-                Est: ₹{((walletData.totalWithdrawn || 0) * walletData.currentPPCRate * 0.25).toFixed(2)}
-              </p>
+              {(() => {
+                const userShare = walletData.role === "seller" ? 0.5 : 0.25
+                const withdrawnEst = (walletData.totalWithdrawn || 0) * (walletData.currentPPCRate || 40) * userShare
+                return (
+                  <p className="text-xs text-stone-400 mt-1 font-medium">
+                    Est: ₹{withdrawnEst.toFixed(2)}
+                  </p>
+                )
+              })()}
             </div>
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl border ${
               isDark ? "bg-sky-500/10 text-sky-400 border-sky-500/20" : "bg-sky-50 text-sky-600 border-sky-200"
