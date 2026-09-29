@@ -6,9 +6,17 @@ import { CardSkeleton } from "../components/Skeleton"
 
 export default function DistributorOrders() {
   const [tab,         setTab]         = useState("pending")
-  const [orders,      setOrders]      = useState([])
+  const getCachedOrders = (t) => {
+    try {
+      const raw = sessionStorage.getItem(`educa_dist_orders_${t}`)
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  }
+  const cached = getCachedOrders(tab)
+
+  const [orders,      setOrders]      = useState(() => cached?.data || [])
   const [invoice,     setInvoice]     = useState(null)
-  const [loading,     setLoading]     = useState(true)
+  const [loading,     setLoading]     = useState(() => !cached)
   const [modal,       setModal]       = useState(null)  // { orderId, action: "approve"|"reject" }
   const [note,        setNote]        = useState("")
   const [noteVisible, setNoteVisible] = useState(false)
@@ -35,24 +43,38 @@ export default function DistributorOrders() {
     })
   }
 
-  const load = async () => {
+  const load = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
       const token = localStorage.getItem("token")
       const url = tab === "pending"
-        ? `${import.meta.env.VITE_API_URL}/orders/pending`
-        : `${import.meta.env.VITE_API_URL}/orders/distributor`
+        ? `${import.meta.env.VITE_API_URL}/orders/pending?limit=50`
+        : `${import.meta.env.VITE_API_URL}/orders/distributor?limit=50`
       const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       const data = await res.json()
-      setOrders(Array.isArray(data) ? data : [])
+      const arr = Array.isArray(data) ? data : []
+      setOrders(arr)
+      try {
+        sessionStorage.setItem(`educa_dist_orders_${tab}`, JSON.stringify({ data: arr, _ts: Date.now() }))
+      } catch (_) {}
     } catch(e) {
       console.error(e)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, [tab])
+  useEffect(() => {
+    const curCache = getCachedOrders(tab)
+    if (curCache?.data) {
+      setOrders(curCache.data)
+      setLoading(false)
+      const isFresh = curCache._ts && (Date.now() - curCache._ts < 20000)
+      load(isFresh)
+    } else {
+      load(false)
+    }
+  }, [tab])
 
   const handleAction = async () => {
     if (!modal) return

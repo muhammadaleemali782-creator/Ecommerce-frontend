@@ -77,26 +77,46 @@ export default function SellerOrders() {
   const { isDark } = useTheme() || {}
   const isUser = user?.role === "user"
 
-  const [orders,  setOrders]  = useState([])
-  const [loading, setLoading] = useState(true)
+  const getCachedOrders = () => {
+    try {
+      const raw = sessionStorage.getItem("educa_seller_orders_cache")
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  }
+  const cached = getCachedOrders()
+
+  const [orders,  setOrders]  = useState(() => cached?.data || [])
+  const [loading, setLoading] = useState(() => !cached)
   const [invoice, setInvoice] = useState(null)
 
-  const load = async () => {
+  const load = async (silent = false) => {
     try {
+      if (!silent) setLoading(true)
       const token = localStorage.getItem("token")
-      const res   = await fetch(`${import.meta.env.VITE_API_URL}/orders/mine`, {
+      const res   = await fetch(`${import.meta.env.VITE_API_URL}/orders/mine?limit=50`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-      setOrders(Array.isArray(data) ? data : [])
+      const arr = Array.isArray(data) ? data : []
+      setOrders(arr)
+      try {
+        sessionStorage.setItem("educa_seller_orders_cache", JSON.stringify({ data: arr, _ts: Date.now() }))
+      } catch (_) {}
     } catch (err) {
       setOrders([])
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    if (cached?.data) {
+      const isFresh = cached._ts && (Date.now() - cached._ts < 20000)
+      load(isFresh)
+    } else {
+      load(false)
+    }
+  }, [])
 
   const fmt = (n) => Number(n || 0).toLocaleString("en-IN")
 

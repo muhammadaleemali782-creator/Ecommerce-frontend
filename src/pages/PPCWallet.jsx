@@ -5,8 +5,16 @@ import { PageSkeleton } from "../components/Skeleton"
 
 export default function PPCWallet({ setPage }) {
   const { isDark } = useTheme()
-  const [loading, setLoading] = useState(true)
-  const [walletData, setWalletData] = useState(null)
+  const getCachedWallet = () => {
+    try {
+      const raw = sessionStorage.getItem("educa_ppc_wallet_cache")
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  }
+  const cachedWallet = getCachedWallet()
+
+  const [walletData, setWalletData] = useState(() => cachedWallet?.data || null)
+  const [loading, setLoading] = useState(() => !cachedWallet)
   const [error, setError] = useState("")
   const [showHistory, setShowHistory] = useState(false)
   const [showRoadmap, setShowRoadmap] = useState({})
@@ -125,6 +133,9 @@ export default function PPCWallet({ setPage }) {
       if (!res.ok) throw new Error("Failed to fetch wallet")
       const data = await res.json()
       setWalletData(data)
+      try {
+        sessionStorage.setItem("educa_ppc_wallet_cache", JSON.stringify({ data, _ts: Date.now() }))
+      } catch (_) {}
       setLastRefresh(new Date())
       setError("")
     } catch (err) {
@@ -134,9 +145,13 @@ export default function PPCWallet({ setPage }) {
     }
   }, [])
 
-  useEffect(() => { fetchWallet() }, [fetchWallet])
+  useEffect(() => {
+    // If cache is fresh, do silent background update without spinner
+    const isFresh = cachedWallet?._ts && (Date.now() - cachedWallet._ts < 20000)
+    fetchWallet(isFresh)
+  }, [fetchWallet])
 
-  if (loading) {
+  if (loading && !walletData) {
     return <PageSkeleton />
   }
 
