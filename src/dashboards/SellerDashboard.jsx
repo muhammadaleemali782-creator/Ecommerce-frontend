@@ -94,7 +94,7 @@ export default function SellerDashboard({ setPage }) {
     return () => { active = false }
   }, [])
 
-  if (loading) {
+  if (loading && orders.length === 0 && downline.length === 0) {
     return <PageSkeleton />
   }
 

@@ -129,7 +129,13 @@ function AppContent() {
     }
   }, [page])
 
-  const [booting, setBooting] = useState(true)
+  const [booting, setBooting] = useState(() => {
+    try {
+      return !sessionStorage.getItem("educa_booted")
+    } catch {
+      return false
+    }
+  })
   const [bootMsg, setBootMsg] = useState("")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -168,22 +174,25 @@ function AppContent() {
     }
   }, [])
 
-  /* 🌱 App khulte hi backend ko "jaga" do (Render free-tier cold-start).
-     Jab tak backend reply nahi karta ya 15s ho jate, GrowthLoader dikhta
-     rehta hai — user ko lagta nahi ki app atak gaya hai. */
+  /* 🌱 Wake backend in background without hanging UI */
   useEffect(() => {
     let done = false
-    const finish = () => { if (!done) { done = true; setBooting(false) } }
+    const finish = () => {
+      if (!done) {
+        done = true
+        setBooting(false)
+        try { sessionStorage.setItem("educa_booted", "true") } catch {}
+      }
+    }
 
     const slowTimer = setTimeout(() => {
-      setBootMsg("Bas thodi si der aur, achi shuruaat ho rahi hai... 🌱")
-    }, 4000)
+      setBootMsg("Bas thodi si der aur... 🌱")
+    }, 1500)
 
-    // Safety cap — loader kabhi bhi hamesha ke liye stuck nahi rahega
-    const hardTimeout = setTimeout(finish, 15000)
+    const hardTimeout = setTimeout(finish, 2000)
 
     fetch(`${import.meta.env.VITE_API_URL}/health`)
-      .catch(() => {}) // backend so raha tha, ab wake ho gaya hoga — fail bhi ho to aage badho
+      .catch(() => {})
       .finally(finish)
 
     return () => { clearTimeout(slowTimer); clearTimeout(hardTimeout) }

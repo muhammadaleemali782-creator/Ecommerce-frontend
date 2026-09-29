@@ -109,7 +109,7 @@ export default function DistributorDashboard({ setPage }) {
     )
   }
 
-  if (loading) {
+  if (loading && allOrders.length === 0 && downline.length === 0) {
     return <PageSkeleton />
   }
 
