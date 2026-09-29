@@ -13,14 +13,23 @@ export default function SellerDashboard({ setPage }) {
   const { user } = useAuth()
   const { isDark } = useTheme() || {}
   const { products = [] } = useStore()
-  const [orders, setOrders]     = useState([])
-  const [downline, setDownline] = useState([])
-  const [teamOrders, setTeamOrders] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [tab, setTab]           = useState("overview")
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const getCached = () => {
+    try {
+      const raw = sessionStorage.getItem("educa_seller_dash_cache")
+      if (raw) return JSON.parse(raw)
+    } catch {}
+    return null
+  }
+  const cached = getCached()
+
+  const [orders, setOrders]         = useState(() => cached?.orders || [])
+  const [downline, setDownline]     = useState(() => cached?.downline || [])
+  const [teamOrders, setTeamOrders] = useState(() => cached?.teamOrders || [])
+  const [loading, setLoading]       = useState(() => !cached)
+  const [tab, setTab]               = useState("overview")
+  const [isMobile, setIsMobile]     = useState(window.innerWidth < 768)
   const [roleFilter, setRoleFilter] = useState("all")
-  const [perfTab, setPerfTab] = useState("my")  // "my" | "team"
+  const [perfTab, setPerfTab]       = useState("my")  // "my" | "team"
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -34,22 +43,17 @@ export default function SellerDashboard({ setPage }) {
   const hdr = () => ({ Authorization: `Bearer ${tkn()}` })
 
   useEffect(() => {
-    // 1. Instant render from cache (0ms perceived load time)
-    try {
-      const cached = sessionStorage.getItem("educa_seller_dash_cache")
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed.orders)) setOrders(parsed.orders)
-        if (Array.isArray(parsed.downline)) setDownline(parsed.downline)
-        if (Array.isArray(parsed.teamOrders)) setTeamOrders(parsed.teamOrders)
-        setLoading(false)
-      }
-    } catch (_) {}
-
-    // 2. Progressive background data fetching
     let active = true
 
-    const p1 = fetch(`${import.meta.env.VITE_API_URL}/orders/mine`, { headers: hdr() })
+    // If cache is fresh (less than 25s old), don't hammer the network on repeated reloads
+    const isFresh = cached?._ts && (Date.now() - cached._ts < 25000)
+    if (isFresh && cached.orders?.length > 0) {
+      setLoading(false)
+      return
+    }
+
+    // Progressive background fetch
+    const p1 = fetch(`${import.meta.env.VITE_API_URL}/orders/mine?limit=50`, { headers: hdr() })
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         if (!active) return []
@@ -69,7 +73,7 @@ export default function SellerDashboard({ setPage }) {
         return dl
       }).catch(() => [])
 
-    const p3 = fetch(`${import.meta.env.VITE_API_URL}/orders/team`, { headers: hdr() })
+    const p3 = fetch(`${import.meta.env.VITE_API_URL}/orders/team?limit=50`, { headers: hdr() })
       .then(r => r.ok ? r.json() : { orders: [] })
       .then(data => {
         if (!active) return []
@@ -86,7 +90,8 @@ export default function SellerDashboard({ setPage }) {
         sessionStorage.setItem("educa_seller_dash_cache", JSON.stringify({
           orders: ords,
           downline: dl,
-          teamOrders: to
+          teamOrders: to,
+          _ts: Date.now()
         }))
       } catch (_) {}
     })

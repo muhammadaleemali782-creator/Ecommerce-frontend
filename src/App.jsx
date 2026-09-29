@@ -198,28 +198,7 @@ function AppContent() {
     return () => { clearTimeout(slowTimer); clearTimeout(hardTimeout) }
   }, [])
 
-  /* Auto block / session check */
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        if (!token) return
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/wallet/me`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        if (res.status === 401 || res.status === 403) {
-          alert("Your account is blocked, deleted, or session expired.")
-          if (typeof logout === "function") logout()
-          setPage("login")
-          localStorage.removeItem("token")
-          localStorage.removeItem("user")
-        }
-      } catch (err) {
-        console.error("Auth check error:", err)
-      }
-    }
-    checkUser()
-  }, [logout])
+
 
   const renderPage = () => {
     try {

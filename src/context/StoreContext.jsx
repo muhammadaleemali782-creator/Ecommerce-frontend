@@ -6,8 +6,14 @@ const StoreContext = createContext(null)
 export const StoreProvider = ({ children }) => {
 
   /* ================= PRODUCTS ================= */
-  const [products, setProducts] = useState([])
-  const [productsLoading, setProductsLoading] = useState(true)
+  const [products, setProducts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("products")) || []
+    } catch {
+      return []
+    }
+  })
+  const [productsLoading, setProductsLoading] = useState(false)
 
   /* ================= CART ================= */
   const [cart, setCart] = useState(() => {
