@@ -39,7 +39,8 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
               Is order se {src.remainingPPC} PPC mili
               {src.products && src.products.length > 0 && (
                 <span className="ml-1 text-amber-500 font-semibold">
-                  • {src.products.map(p => p.name).join(", ")}
+                  • {src.products.slice(0, 3).map(p => `${p.name} (×${p.qty})`).join(", ")}
+                  {src.products.length > 3 ? ` +${src.products.length - 3} aur` : ""}
                 </span>
               )}
             </div>
@@ -79,24 +80,26 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
         <div className="p-3 sm:p-4 overflow-x-auto">
           {/* Products that generated this PPC */}
           {src.products && src.products.length > 0 && (
-            <div className={`mb-3 p-2.5 rounded-xl border ${
+            <div className={`mb-3 p-3 rounded-xl border ${
               isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-stone-50 border-stone-200"
             }`}>
-              <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <span>📦 Is Order Ke Products</span>
+              <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
+                <span>📦 Is Order Ke Products ({src.products.length})</span>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {src.products.map((p, pi) => (
                   <span
                     key={pi}
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold border ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-xs ${
                       isDark ? "bg-[#18221a] border-emerald-500/20 text-stone-200" : "bg-white border-stone-200 text-stone-800"
                     }`}
                   >
                     <span>🍃 {p.name}</span>
-                    <span className="text-stone-400 font-mono text-[10px]">×{p.qty}</span>
+                    <span className="text-stone-400 font-mono text-[11px]">×{p.qty}</span>
                     {p.ppcReward && (
-                      <span className="text-amber-500 font-bold text-[10px]">({p.ppcReward} PPC)</span>
+                      <span className="text-amber-500 font-bold text-[10px] bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                        {p.ppcReward * p.qty} PPC ({p.ppcReward} PPC/pc)
+                      </span>
                     )}
                   </span>
                 ))}
@@ -300,7 +303,7 @@ export default function WithdrawalRequest() {
       if (!sourceMap[uid].products) sourceMap[uid].products = []
       if (Array.isArray(entry.items) && entry.items.length > 0) {
         entry.items.forEach(it => {
-          const name = it.title || it.name || "Product"
+          const name = it.productName || it.title || it.name || "Product"
           const existing = sourceMap[uid].products.find(p => p.name === name)
           if (existing) {
             existing.qty = (existing.qty || 1) + (it.qty || 1)
