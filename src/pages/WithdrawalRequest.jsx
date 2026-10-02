@@ -15,7 +15,7 @@ const formatUser = (name, fullName) => {
 
 /* ── Collapsible Source Card ── */
 function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   return (
     <div className={`rounded-2xl border overflow-hidden transition-all ${
@@ -37,6 +37,11 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
             </div>
             <div className="text-[10px] text-stone-400">
               Is order se {src.remainingPPC} PPC mili
+              {src.products && src.products.length > 0 && (
+                <span className="ml-1 text-amber-500 font-semibold">
+                  • {src.products.map(p => p.name).join(", ")}
+                </span>
+              )}
             </div>
             {src.role === "user" && (
               <div className={`mt-1 text-[10px] font-semibold rounded-md px-2 py-0.5 inline-block border ${
@@ -72,6 +77,33 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
       {/* Collapsible body */}
       {open && (
         <div className="p-3 sm:p-4 overflow-x-auto">
+          {/* Products that generated this PPC */}
+          {src.products && src.products.length > 0 && (
+            <div className={`mb-3 p-2.5 rounded-xl border ${
+              isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-stone-50 border-stone-200"
+            }`}>
+              <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <span>📦 Is Order Ke Products</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {src.products.map((p, pi) => (
+                  <span
+                    key={pi}
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold border ${
+                      isDark ? "bg-[#18221a] border-emerald-500/20 text-stone-200" : "bg-white border-stone-200 text-stone-800"
+                    }`}
+                  >
+                    <span>🍃 {p.name}</span>
+                    <span className="text-stone-400 font-mono text-[10px]">×{p.qty}</span>
+                    {p.ppcReward && (
+                      <span className="text-amber-500 font-bold text-[10px]">({p.ppcReward} PPC)</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="text-[10px] text-stone-400 font-bold tracking-wider uppercase mb-2">
             PPC Distribution — {src.remainingPPC} PPC × ₹{rate}
           </div>
@@ -264,6 +296,22 @@ export default function WithdrawalRequest() {
       }
       if (entry.isUserOrder || entry.fromUser?.role === "user") {
         sourceMap[uid].isUserOrder = true
+      }
+      if (!sourceMap[uid].products) sourceMap[uid].products = []
+      if (Array.isArray(entry.items) && entry.items.length > 0) {
+        entry.items.forEach(it => {
+          const name = it.title || it.name || "Product"
+          const existing = sourceMap[uid].products.find(p => p.name === name)
+          if (existing) {
+            existing.qty = (existing.qty || 1) + (it.qty || 1)
+          } else {
+            sourceMap[uid].products.push({
+              name,
+              qty: it.qty || 1,
+              ppcReward: it.ppcReward !== undefined ? it.ppcReward : 1
+            })
+          }
+        })
       }
       sourceMap[uid].remainingPPC += (entry.remainingPPC || 0)
       sourceMap[uid].totalRupees  += (entry.rupeeValue   || 0)

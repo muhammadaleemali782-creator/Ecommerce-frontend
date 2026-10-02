@@ -261,7 +261,9 @@ export default function PPCWallet({ setPage }) {
                 {walletData.totalPPCEarned || 0} <span className="text-lg font-bold text-emerald-400/80">PPC</span>
               </p>
               {(() => {
-                const totalEstVal = Object.values(walletData.wallets || {}).reduce((sum, w) => sum + (w.estimatedValue || 0), 0)
+                const totalEstVal = Object.entries(walletData.wallets || {})
+                  .filter(([k]) => k !== "royaltyWallet")
+                  .reduce((sum, [, w]) => sum + (w.estimatedValue || 0), 0)
                 const fallbackVal = (walletData.totalPPCEarned || 0) * (walletData.currentPPCRate || 40) * (walletData.role === "seller" ? 0.5 : 0.25)
                 const displayEst = totalEstVal > 0 ? totalEstVal : fallbackVal
                 return (
@@ -314,7 +316,9 @@ export default function PPCWallet({ setPage }) {
           <h2 className="text-base sm:text-lg font-bold uppercase tracking-wider text-stone-400">Your Wallets</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {Object.entries(walletData.wallets).map(([key, wallet]) => (
+            {Object.entries(walletData.wallets)
+              .filter(([key]) => key !== "royaltyWallet")
+              .map(([key, wallet]) => (
               <div
                 key={key}
                 className={`p-5 sm:p-6 rounded-3xl border shadow-xl flex flex-col justify-between ${

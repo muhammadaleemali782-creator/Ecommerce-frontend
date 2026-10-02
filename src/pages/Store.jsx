@@ -71,6 +71,7 @@ export default function Store({ setPage }) {
   const { isDark } = useTheme()
   const { products = [], productsLoading, addToCart, cart = [] } = useStore() || {}
   const { user, login, setAuthSession } = useAuth() || {}
+  const canSeePPC = Boolean(user && user.role && user.role !== "user")
 
   const [consultant, setConsultant] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -866,15 +867,23 @@ export default function Store({ setPage }) {
                         <div className={`mt-2.5 pt-2 border-t ${
                           isDark ? "border-white/[0.06]" : "border-stone-100"
                         }`}>
-                          <div className="flex items-baseline gap-1.5 mb-2">
-                            <span className={`text-sm sm:text-base font-black ${
-                              isDark ? "text-white" : "text-stone-950"
-                            }`}>
-                              ₹{Number(price).toLocaleString("en-IN")}
-                            </span>
-                            {mrp > price && (
-                              <span className="text-[10px] sm:text-xs text-stone-400 line-through">
-                                ₹{Number(mrp).toLocaleString("en-IN")}
+                          <div className="flex items-baseline justify-between gap-1.5 mb-2">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className={`text-sm sm:text-base font-black ${
+                                isDark ? "text-white" : "text-stone-950"
+                              }`}>
+                                ₹{Number(price).toLocaleString("en-IN")}
+                              </span>
+                              {mrp > price && (
+                                <span className="text-[10px] sm:text-xs text-stone-400 line-through">
+                                  ₹{Number(mrp).toLocaleString("en-IN")}
+                                </span>
+                              )}
+                            </div>
+                            {canSeePPC && (
+                              <span className="px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 text-[10px] sm:text-[11px] font-black tracking-wide flex items-center gap-1 shrink-0">
+                                <span>💎</span>
+                                <span>{product.ppcReward !== undefined ? product.ppcReward : 1} PPC</span>
                               </span>
                             )}
                           </div>
@@ -929,6 +938,15 @@ export default function Store({ setPage }) {
                           <div className="mt-2 text-[10px] sm:text-[11px] text-stone-300">
                             <span className="font-bold text-amber-400 font-mono">Category: </span>
                             <span className="text-stone-200">{product.category}</span>
+                          </div>
+                        )}
+
+                        {canSeePPC && (
+                          <div className="mt-1.5 text-[10px] sm:text-[11px] text-amber-400 font-bold flex items-center gap-1.5">
+                            <span className="font-mono">💎 PPC Reward:</span>
+                            <span className="font-black font-mono text-white bg-amber-500/20 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px]">
+                              {product.ppcReward !== undefined ? product.ppcReward : 1} PPC
+                            </span>
                           </div>
                         )}
 
