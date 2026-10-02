@@ -105,26 +105,36 @@ export default function DistributorRoyalty({ setPage }) {
       </div>
 
       {/* ── DISTRIBUTOR AVAILABLE ROYALTY CASH BALANCE & WITHDRAW ACTION ── */}
-      <div className={`p-6 rounded-3xl border shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isDark ? "bg-gradient-to-br from-[#121c16] via-[#101512] to-[#0c100e] border-amber-500/30 text-white" : "bg-gradient-to-br from-amber-50 via-white to-amber-50/50 border-amber-300 text-stone-900"
+      <div className={`p-6 sm:p-7 rounded-3xl border shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-5 ${
+        isDark
+          ? "bg-gradient-to-br from-[#182218] via-[#121814] to-[#0c100e] border-amber-500/40 text-white shadow-amber-950/20"
+          : "bg-gradient-to-br from-amber-50 via-white to-amber-50/60 border-amber-300 text-stone-900 shadow-amber-500/10"
       }`}>
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider">
-            💰 Withdrawable Royalty Cash
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider border border-amber-500/30">
+            🏢 Company Royalty Wallet Credited
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-amber-400">
-            ₹{((data?.myRoyaltyWallet ?? authUser?.royaltyWallet) || 0).toLocaleString("en-IN")}
-          </h2>
-          <p className="text-xs text-stone-400">
-            Yeh aapka Company Royalty Pool se mila direct cash balance hai. Ise aap kabhi bhi direct bank / UPI me withdraw kar sakte hain.
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-amber-400 font-mono tracking-tight">
+              ₹{((data?.myRoyaltyWallet ?? authUser?.royaltyWallet) || 0).toLocaleString("en-IN")}
+            </h2>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400/80">Direct Cash</span>
+          </div>
+          <p className="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+            <span>🎉</span>
+            <span>Company ki taraf se aapko aapke Royalty Wallet me <b>₹{((data?.myRoyaltyWallet ?? authUser?.royaltyWallet) || 0).toLocaleString("en-IN")}</b> diya gaya hai!</span>
+          </p>
+          <p className="text-xs text-stone-400 leading-relaxed">
+            Yeh direct rupee cash hai (isme koi PPC deduction nahi hoga). Is paise ko aap jab chahein apne Bank Account ya UPI me withdraw kar sakte hain.
           </p>
         </div>
 
         <button
           onClick={() => setPage && setPage("withdrawal")}
-          className="px-6 py-3 rounded-2xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all shrink-0 flex items-center justify-center gap-2"
+          className="px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 shadow-xl shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer select-none"
         >
-          💸 Withdraw Royalty Cash
+          <span>💸</span>
+          <span>Withdraw Royalty Cash</span>
         </button>
       </div>
 
@@ -152,7 +162,7 @@ export default function DistributorRoyalty({ setPage }) {
                 </div>
                 <div className="text-right">
                   <div className="font-black text-emerald-500 text-sm">₹{p.amountRupees.toLocaleString("en-IN")}</div>
-                  <div className="text-[10px] font-mono text-amber-400 font-semibold">Direct Cash Credited</div>
+                  <div className="text-[10px] font-mono text-amber-400 font-semibold">🏢 Company Direct Cash Credited</div>
                 </div>
               </div>
             ))}

@@ -483,9 +483,9 @@ export default function WithdrawalRequest() {
                   )}
                 </p>
                 <p className={`text-[11px] font-medium mt-1 ${
-                  w.key === "royaltyWallet" ? "text-amber-400/80" : "text-emerald-500/80"
+                  w.key === "royaltyWallet" ? "text-amber-400" : "text-emerald-500/80"
                 }`}>
-                  Withdraw kar sakte ho {w.key === "royaltyWallet" ? "(Direct ₹ Cash)" : ""}
+                  {w.key === "royaltyWallet" ? "🏢 Company ki taraf se mila direct cash" : "Withdraw kar sakte ho"}
                 </p>
               </div>
             ))}
