@@ -16,6 +16,7 @@ const formatUser = (name, fullName) => {
 /* ── Collapsible Source Card ── */
 function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDark }) {
   const [open, setOpen] = useState(false)
+  const [showProducts, setShowProducts] = useState(false)
 
   return (
     <div className={`rounded-2xl border overflow-hidden transition-all ${
@@ -29,18 +30,19 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
           isDark ? "bg-[#181d22] hover:bg-[#1d232a]" : "bg-stone-50 hover:bg-stone-100/80"
         } ${open ? (isDark ? "border-b border-white/[0.06]" : "border-b border-stone-200") : ""}`}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xl">{orderBy.icon}</span>
-          <div>
-            <div className={`text-xs font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-xl shrink-0">{orderBy.icon}</span>
+          <div className="min-w-0">
+            <div className={`text-xs font-bold truncate ${isDark ? "text-white" : "text-stone-900"}`}>
               {orderBy.label}
             </div>
-            <div className="text-[10px] text-stone-400">
-              Is order se {src.remainingPPC} PPC mili
+            <div className="text-[10px] text-stone-400 flex items-center gap-1.5 flex-wrap mt-0.5">
+              <span>Is order se <strong className="text-purple-400">{src.remainingPPC} PPC</strong></span>
               {src.products && src.products.length > 0 && (
-                <span className="ml-1 text-amber-500 font-semibold">
-                  • {src.products.slice(0, 3).map(p => `${p.name} (×${p.qty})`).join(", ")}
-                  {src.products.length > 3 ? ` +${src.products.length - 3} aur` : ""}
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-md text-[9.5px] font-bold border ${
+                  isDark ? "bg-amber-400/10 text-amber-300 border-amber-400/20" : "bg-amber-50 text-amber-700 border-amber-200"
+                }`}>
+                  📦 {src.products.length} {src.products.length === 1 ? "Product" : "Products"}
                 </span>
               )}
             </div>
@@ -64,7 +66,7 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0 ml-2">
           <div className="text-right">
             <div className="font-black text-sm text-purple-400">{src.remainingPPC} PPC</div>
             <div className="text-xs text-emerald-500 font-bold">≈ ₹{myRupees.toFixed(2)}</div>
@@ -78,32 +80,85 @@ function CollapsibleCard({ orderBy, src, myRupees, chain, rate, isUserOrd, isDar
       {/* Collapsible body */}
       {open && (
         <div className="p-3 sm:p-4 overflow-x-auto">
-          {/* Products that generated this PPC */}
+          {/* Products that generated this PPC - Collapsible & Clean UI */}
           {src.products && src.products.length > 0 && (
-            <div className={`mb-3 p-3 rounded-xl border ${
-              isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-stone-50 border-stone-200"
+            <div className={`mb-3.5 rounded-xl border transition-all overflow-hidden ${
+              isDark ? "bg-[#111713]/80 border-white/[0.08]" : "bg-stone-50/90 border-stone-200"
             }`}>
-              <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
-                <span>📦 Is Order Ke Products ({src.products.length})</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {src.products.map((p, pi) => (
-                  <span
-                    key={pi}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-xs ${
-                      isDark ? "bg-[#18221a] border-emerald-500/20 text-stone-200" : "bg-white border-stone-200 text-stone-800"
-                    }`}
-                  >
-                    <span>🍃 {p.name}</span>
-                    <span className="text-stone-400 font-mono text-[11px]">×{p.qty}</span>
-                    {p.ppcReward && (
-                      <span className="text-amber-500 font-bold text-[10px] bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                        {p.ppcReward * p.qty} PPC ({p.ppcReward} PPC/pc)
-                      </span>
-                    )}
+              {/* Toggle bar */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowProducts(p => !p)
+                }}
+                className={`w-full p-2.5 px-3 flex items-center justify-between text-left transition-colors cursor-pointer select-none ${
+                  isDark ? "hover:bg-white/[0.04]" : "hover:bg-stone-100"
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-sm">📦</span>
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    }`}>
+                      Order Products
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border font-mono ${
+                      isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-100 text-amber-800 border-amber-300"
+                    }`}>
+                      {src.products.length} items • {src.products.reduce((s, p) => s + (p.qty || 1), 0)} qty
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0 text-amber-500 font-bold text-[10px] uppercase tracking-wider">
+                  <span>{showProducts ? "Band Karein" : "Details Dekhein"}</span>
+                  <span className={`text-xs transition-transform duration-200 inline-block ${showProducts ? "rotate-180" : ""}`}>
+                    ▼
                   </span>
-                ))}
-              </div>
+                </div>
+              </button>
+
+              {/* Collapsed/Expanded Content */}
+              {showProducts && (
+                <div className={`p-2.5 sm:p-3 border-t divide-y ${
+                  isDark ? "border-white/[0.06] divide-white/[0.04]" : "border-stone-200 divide-stone-200/70"
+                }`}>
+                  {src.products.map((p, pi) => {
+                    const totalPPC = (p.ppcReward || 1) * (p.qty || 1)
+                    return (
+                      <div
+                        key={pi}
+                        className="py-2 first:pt-0 last:pb-0 flex items-center justify-between gap-2 text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs shrink-0 text-emerald-500">🍃</span>
+                          <div className="min-w-0">
+                            <div className="font-bold truncate text-stone-900 dark:text-stone-100">
+                              {p.name}
+                            </div>
+                            <div className="text-[10px] text-stone-400 font-mono">
+                              Quantity: <strong className="text-stone-300 dark:text-stone-300">{p.qty}</strong>
+                              {p.ppcReward ? ` • ${p.ppcReward} PPC / pc` : ""}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className={`inline-block text-[11px] font-black px-2 py-0.5 rounded-lg border font-mono ${
+                            isDark
+                              ? "bg-amber-500/10 text-amber-400 border-amber-500/25"
+                              : "bg-amber-50 text-amber-700 border-amber-200"
+                          }`}>
+                            +{totalPPC} PPC
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
