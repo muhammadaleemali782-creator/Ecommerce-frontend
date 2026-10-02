@@ -221,7 +221,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
         }`}>
           <p className="text-[10px] font-mono uppercase text-blue-500 font-bold">Active Royalty Pool (PPC × ₹{data.poolMultiplier || 10})</p>
           <p className="text-2xl font-black mt-1 text-blue-500">₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</p>
-          <p className="text-xs font-bold text-emerald-500 mt-1">≈ {current.accumulatedPoolPPC || 0} PPC (pool equivalent)</p>
+          <p className="text-xs font-bold text-emerald-500 mt-1">Direct Cash Payout (Non-PPC)</p>
         </div>
 
         <div className={`p-5 rounded-3xl border ${
@@ -237,7 +237,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
         }`}>
           <p className="text-[10px] font-mono uppercase text-emerald-500 font-bold">Projected Share / Dist.</p>
           <p className="text-2xl font-black mt-1 text-emerald-400">₹{(current.projectedSharePerDistributorRupees || 0).toLocaleString("en-IN")}</p>
-          <p className="text-xs font-mono text-stone-400 mt-1">({current.projectedSharePerDistributorPPC || 0} PPC)</p>
+          <p className="text-xs font-mono text-stone-400 mt-1">Direct ₹ Cash to Royalty Wallet</p>
         </div>
       </div>
 
@@ -320,7 +320,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
               <span className="text-4xl">👑</span>
               <h3 className="text-base font-black">Confirm Monthly Royalty Disbursement</h3>
               <p className="text-xs text-stone-400">
-                Aap <strong>{current.eligibleDistributorsCount} Qualified Distributors</strong> ko <strong>₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</strong> ({Math.round(current.accumulatedPoolPPC || 0)} PPC) distribute karne ja rahe hain.
+                Aap <strong>{current.eligibleDistributorsCount} Qualified Distributors</strong> ko direct cash total <strong>₹{(current.accumulatedPoolRupees || 0).toLocaleString("en-IN")}</strong> distribute karne ja rahe hain.
               </p>
             </div>
 
@@ -329,7 +329,7 @@ export default function AdminRoyaltyManagement({ setPage }) {
                 <span>Per Distributor Payout:</span>
                 <span className="text-emerald-500">₹{(current.projectedSharePerDistributorRupees || 0).toLocaleString("en-IN")}</span>
               </div>
-              <div className="text-[10px] text-stone-400">Yeh amount har distributor ke Seller Wallet me instant credit ho jayega.</div>
+              <div className="text-[10px] text-stone-400">Yeh amount har distributor ke Royalty Cash Wallet me direct ₹ cash credit hoga (Koi PPC add nahi hoga).</div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">

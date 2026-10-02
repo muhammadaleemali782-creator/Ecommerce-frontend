@@ -209,12 +209,17 @@ export default function WithdrawalRequest() {
       userWallet:        "userWalletAsSeller",
     }
     return Object.entries(walletData.wallets)
-      .filter(([_, w]) => w.withdrawable && (w.ppcCount || 0) > 0)
-      .map(([key, w]) => ({ key, dbField: dbFieldMap[key] || key, ...w, estimatedValue: w.estimatedValue || 0 }))
+      .filter(([_, w]) => w.withdrawable && ((w.ppcCount || 0) > 0 || (w.rupeeBalance || 0) > 0))
+      .map(([key, w]) => ({
+        key,
+        dbField: dbFieldMap[key] || key,
+        ...w,
+        estimatedValue: w.isCash ? (w.rupeeBalance || 0) : (w.estimatedValue || 0)
+      }))
   }
 
   const withdrawableWallets = getWithdrawableWallets()
-  const currentBalance = withdrawableWallets.reduce((s, w) => s + (w.ppcCount || 0), 0)
+  const currentBalance = withdrawableWallets.filter(w => !w.isCash).reduce((s, w) => s + (w.ppcCount || 0), 0)
   const totalPPCEarned  = walletData?.totalPPCEarned || 0
   const totalWithdrawn  = Math.max(0, totalPPCEarned - currentBalance)
   const currentRate     = walletData?.currentPPCRate || 0
@@ -223,6 +228,7 @@ export default function WithdrawalRequest() {
     if (key === "sellerWallet" || key === "sellerWalletAsSeller") return "Direct Seller Wallet"
     if (key === "userWallet"   || key === "userWalletAsSeller")   return "User Wallet"
     if (key === "distributorWallet")                               return "Distributor Wallet"
+    if (key === "royaltyWallet")                                   return "Royalty Cash Wallet"
     return key
   }
 
@@ -353,17 +359,28 @@ export default function WithdrawalRequest() {
               <div
                 key={w.key}
                 className={`p-5 text-center ${
-                  isDark ? "bg-emerald-500/5" : "bg-emerald-50/60"
+                  w.key === "royaltyWallet"
+                    ? (isDark ? "bg-amber-500/10" : "bg-amber-50/80")
+                    : (isDark ? "bg-emerald-500/5" : "bg-emerald-50/60")
                 } ${idx < withdrawableWallets.length - 1 ? (isDark ? "border-r border-white/[0.06]" : "border-r border-stone-100") : ""}`}
               >
                 <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                  {w.key === "sellerWallet" ? "Direct Seller Wallet" :
-                   w.key === "userWallet"   ? "User Wallet"   : "Wallet"} ✅
+                  {walletLabel(w.key)} ✅
                 </p>
-                <p className="text-2xl sm:text-3xl font-black text-emerald-500">
-                  {w.ppcCount || 0} <span className="text-sm font-semibold">PPC</span>
+                <p className={`text-2xl sm:text-3xl font-black ${
+                  w.key === "royaltyWallet" ? "text-amber-400" : "text-emerald-500"
+                }`}>
+                  {w.key === "royaltyWallet" ? (
+                    <>₹{(w.rupeeBalance || 0).toLocaleString("en-IN")}</>
+                  ) : (
+                    <>{w.ppcCount || 0} <span className="text-sm font-semibold">PPC</span></>
+                  )}
                 </p>
-                <p className="text-[11px] text-emerald-500/80 font-medium mt-1">Withdraw kar sakte ho</p>
+                <p className={`text-[11px] font-medium mt-1 ${
+                  w.key === "royaltyWallet" ? "text-amber-400/80" : "text-emerald-500/80"
+                }`}>
+                  Withdraw kar sakte ho {w.key === "royaltyWallet" ? "(Direct ₹ Cash)" : ""}
+                </p>
               </div>
             ))}
           </div>
@@ -557,14 +574,19 @@ export default function WithdrawalRequest() {
                 <option value="">-- Choose Wallet --</option>
                 {withdrawableWallets.map(w => (
                   <option key={w.key} value={w.key}>
-                    {walletLabel(w.key)} — ₹{(w.estimatedValue || 0).toFixed(2)} ({w.ppcCount} PPC)
+                    {w.key === "royaltyWallet"
+                      ? `${walletLabel(w.key)} — ₹${(w.rupeeBalance || 0).toLocaleString("en-IN")} (Direct Cash)`
+                      : `${walletLabel(w.key)} — ₹${(w.estimatedValue || 0).toFixed(2)} (${w.ppcCount} PPC)`
+                    }
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold mb-1 text-stone-400">Amount (PPC) *</label>
+              <label className="block text-xs font-bold mb-1 text-stone-400">
+                {formData.walletType === "royaltyWallet" ? "Amount (₹ Rupees) *" : "Amount (PPC) *"}
+              </label>
               <input
                 type="number"
                 step="1"
@@ -572,24 +594,34 @@ export default function WithdrawalRequest() {
                 required
                 value={formData.amount}
                 onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                placeholder="Kitne PPC withdraw karna hai"
+                placeholder={
+                  formData.walletType === "royaltyWallet"
+                    ? "Kitne Rupees withdraw karna hai (e.g. 1000)"
+                    : "Kitne PPC withdraw karna hai"
+                }
                 className={`w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none transition-all ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white focus:border-emerald-500 placeholder-stone-500"
                     : "bg-stone-50 border-stone-200 text-stone-900 focus:border-emerald-500 placeholder-stone-400"
                 }`}
               />
-              {formData.amount && currentRate > 0 && (() => {
-                const selectedW = withdrawableWallets.find(w => w.key === formData.walletType)
-                const perPPC = selectedW && selectedW.ppcCount > 0
-                  ? (selectedW.estimatedValue / selectedW.ppcCount)
-                  : currentRate * 0.5
-                return (
-                  <p className="text-[11px] text-emerald-400 font-bold mt-1">
-                    ≈ ₹{(formData.amount * perPPC).toFixed(2)} estimated
+              {formData.amount && (
+                formData.walletType === "royaltyWallet" ? (
+                  <p className="text-[11px] text-amber-400 font-bold mt-1">
+                    Direct Payout: ₹{Number(formData.amount).toLocaleString("en-IN")}
                   </p>
-                )
-              })()}
+                ) : currentRate > 0 && (() => {
+                  const selectedW = withdrawableWallets.find(w => w.key === formData.walletType)
+                  const perPPC = selectedW && selectedW.ppcCount > 0
+                    ? (selectedW.estimatedValue / selectedW.ppcCount)
+                    : currentRate * 0.5
+                  return (
+                    <p className="text-[11px] text-emerald-400 font-bold mt-1">
+                      ≈ ₹{(formData.amount * perPPC).toFixed(2)} estimated
+                    </p>
+                  )
+                })()
+              )}
             </div>
 
             <div>

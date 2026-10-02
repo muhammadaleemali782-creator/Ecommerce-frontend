@@ -100,8 +100,32 @@ export default function DistributorRoyalty({ setPage }) {
         }`}>
           <p className="text-[10px] font-mono uppercase text-emerald-500 font-bold">Your Projected Monthly Royalty</p>
           <p className="text-2xl font-black mt-1 text-emerald-500">₹{(current.projectedSharePerDistributorRupees || 0).toLocaleString("en-IN")}</p>
-          <p className="text-xs font-mono text-stone-400 mt-1">Equally distributed ({current.projectedSharePerDistributorPPC || 0} PPC)</p>
+          <p className="text-xs text-stone-400 mt-1">Direct ₹ cash payout (Zero PPC conversion)</p>
         </div>
+      </div>
+
+      {/* ── DISTRIBUTOR AVAILABLE ROYALTY CASH BALANCE & WITHDRAW ACTION ── */}
+      <div className={`p-6 rounded-3xl border shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        isDark ? "bg-gradient-to-br from-[#121c16] via-[#101512] to-[#0c100e] border-amber-500/30 text-white" : "bg-gradient-to-br from-amber-50 via-white to-amber-50/50 border-amber-300 text-stone-900"
+      }`}>
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+            💰 Withdrawable Royalty Cash
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-amber-400">
+            ₹{((data?.myRoyaltyWallet ?? authUser?.royaltyWallet) || 0).toLocaleString("en-IN")}
+          </h2>
+          <p className="text-xs text-stone-400">
+            Yeh aapka Company Royalty Pool se mila direct cash balance hai. Ise aap kabhi bhi direct bank / UPI me withdraw kar sakte hain.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setPage && setPage("withdrawal")}
+          className="px-6 py-3 rounded-2xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all shrink-0 flex items-center justify-center gap-2"
+        >
+          💸 Withdraw Royalty Cash
+        </button>
       </div>
 
       {/* ── MY ROYALTY PAYOUT HISTORY ── */}
@@ -128,7 +152,7 @@ export default function DistributorRoyalty({ setPage }) {
                 </div>
                 <div className="text-right">
                   <div className="font-black text-emerald-500 text-sm">₹{p.amountRupees.toLocaleString("en-IN")}</div>
-                  <div className="text-[10px] font-mono text-stone-400">+{p.amountPPC} PPC Credited</div>
+                  <div className="text-[10px] font-mono text-amber-400 font-semibold">Direct Cash Credited</div>
                 </div>
               </div>
             ))}
