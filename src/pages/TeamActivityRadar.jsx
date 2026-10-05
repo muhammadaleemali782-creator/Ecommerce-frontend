@@ -160,8 +160,16 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
   setInterval(runAutoSend, 500);
 })();`
 
+const ROLE_BASED_TEMPLATES = {
+  distributor: "🏢 Namaste {name} ji (Distributor)! 🌟\n\nEDUCA VEDA me aapka business & Royalty pool status check karein. Pichle *{daysInactive}* dino se aapki team me koi fresh order update nahi hua hai. Apne Direct Sellers aur active network se connect karke monthly turnover aur royalty payout boost karein!\n\nKisi bhi guidance ya scheme support ke liye connect karein.\n🛍️ Store & Dashboard: {storeLink}",
+
+  seller: "💼 Namaste {name} ji (Direct Seller)! 🚀\n\nEDUCA VEDA par aapka Per Product Commission (PPC) aur retail margin badhane ke naye Ayurvedic offers live hain! Pichle *{daysInactive}* dino se naya order lagana pending hai. Apne customer orders lagayein aur direct commission wallet balance grow karein!\n\n🛍️ Store Link: {storeLink}",
+
+  user: "🌿 Namaste {name} ji! 👋\n\nHumne notice kiya aapne pichle *{daysInactive}* dino se EDUCA VEDA se apna Ayurvedic health care order nahi lagaya hai. Aapke *{category}* aur pure herbal formulations par special discounts available hain.\n\nSehat ki behtar dekhbhal ke liye aaj hi visit karein:\n🛍️ Store Link: {storeLink}"
+}
+
 const PRESET_TEMPLATES = {
-  followup: "Namaste {name} ji! 👋\n\nHumne notice kiya aapne pichle *{daysInactive}* dino se EDUCA VEDA me koi naya order nahi lagaya hai. Kisi bhi product guidance ya support ke liye humse connect karein!\n\n🛍️ Store Link: {storeLink}",
+  followup: "🎯 Auto Role-Based (Distributor/Seller/User alag-alag)",
   category: "Namaste {name} ji! 👋\n\nAapke *{category}* related health requirements ke liye hamare paas pure Ayurvedic formulations aur expert solutions available hain.\n\nKoi bhi consultation ya order help chahiye toh batayein!\n🛍️ Store Link: {storeLink}",
   offer: "🎉 Namaste {name} ji!\n\nEDUCA VEDA par naye Ayurvedic formulations aur special health store offers live ho gaye hain! Apne manpasand products dekhne aur order karne ke liye visit karein:\n🛍️ Store Link: {storeLink}",
   group: "Namaste {name} ji ({role})! 🏢\n\nEDUCA VEDA me aapki team activity aur business growth ke liye hamari special schemes live hain. Apne direct sellers aur network ko active karein!\n\n🛍️ Store: {storeLink}",
@@ -268,6 +276,51 @@ export default function TeamActivityRadar({ setPage }) {
     loadRadar()
     loadCustomGroups()
   }, [loadRadar, loadCustomGroups])
+
+  // Live listener for Extension broadcast progress events
+  useEffect(() => {
+    const handleBridgeMessage = (event) => {
+      if (event.data?.type === "EDUCA_MEMBER_SENT") {
+        const item = event.data.data
+        if (item?.id) {
+          setSentBroadcastIds(prev => new Set([...prev, item.id]))
+          setBulkProgress(prev => ({
+            ...prev,
+            current: (item.index !== undefined ? item.index + 1 : prev.current + 1),
+            statusText: `✅ ${item.name || 'Member'} ko WhatsApp bhej diya! Agla queue me...`,
+            done: false
+          }))
+
+          // Record follow-up note in backend for THIS member
+          if (token) {
+            fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+              body: JSON.stringify({
+                memberId: item.id,
+                note: `Auto Broadcast WhatsApp sent [${broadcastTemplate}]`,
+                contactMethod: "whatsapp",
+                status: "follow_up_taken"
+              })
+            }).catch(() => {})
+          }
+        }
+      }
+
+      if (event.data?.type === "EDUCA_BROADCAST_COMPLETED") {
+        setBulkProgress(prev => ({
+          ...prev,
+          statusText: "🎉 Sabhi members ko WhatsApp message bhej diya gaya hai!",
+          done: true
+        }))
+        setIsBulkSending(false)
+        loadRadar()
+      }
+    }
+
+    window.addEventListener("message", handleBridgeMessage)
+    return () => window.removeEventListener("message", handleBridgeMessage)
+  }, [token, broadcastTemplate, loadRadar])
 
   const openNotesModal = async (member) => {
     setSelectedMember(member)
@@ -476,7 +529,21 @@ export default function TeamActivityRadar({ setPage }) {
     const days = member.daysInactive !== null && member.daysInactive !== undefined ? `${member.daysInactive}` : "0"
 
     const myStoreLink = `${window.location.origin}/?storeRef=${encodeURIComponent(authUser?.name || "")}&page=store`
-    const baseText = (customText && customText.trim()) ? customText : (PRESET_TEMPLATES[template] || PRESET_TEMPLATES.followup)
+
+    let baseText = ""
+    if (customText && customText.trim() && template === "custom") {
+      baseText = customText
+    } else if (template === "followup" || !template) {
+      if (member.role === "distributor") {
+        baseText = ROLE_BASED_TEMPLATES.distributor
+      } else if (member.role === "seller") {
+        baseText = ROLE_BASED_TEMPLATES.seller
+      } else {
+        baseText = ROLE_BASED_TEMPLATES.user
+      }
+    } else {
+      baseText = PRESET_TEMPLATES[template] || ROLE_BASED_TEMPLATES.user
+    }
 
     return baseText
       .replace(/{name}/g, name)
@@ -640,11 +707,11 @@ export default function TeamActivityRadar({ setPage }) {
 
     setIsBulkSending(true)
     setBulkProgress({
-      current: 1,
+      current: 0,
       total: queue.length,
       statusText: invalidCount > 0
-        ? `🚀 Extension v2.2 active! ${queue.length} valid members ko bhej raha hai (${invalidCount} galat/9-digit numbers auto-skip kiye)...`
-        : `🚀 Extension v2.2 active! WhatsApp Web par ${queue.length} members ka auto-broadcast shuru ho gaya...`,
+        ? `🚀 Broadcast shuru! ${queue.length} valid members (${invalidCount} invalid skip kiye). WhatsApp Web me auto-sequence chalu hai...`
+        : `🚀 Broadcast shuru! WhatsApp Web tab me ${queue.length} members ko 1-by-1 auto-send ho raha hai...`,
       done: false
     })
 
@@ -659,34 +726,6 @@ export default function TeamActivityRadar({ setPage }) {
     const first = queue[0]
     const firstUrl = `https://web.whatsapp.com/send?phone=${first.phone}&text=${encodeURIComponent(first.message)}`
     window.open(firstUrl, "educa_wa_broadcast")
-
-    // Record follow-up notes in backend
-    for (const m of unsentMembers) {
-      setSentBroadcastIds(prev => new Set([...prev, m._id]))
-      try {
-        fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            memberId: m._id,
-            note: `Auto Broadcast WhatsApp sent [${broadcastTemplate}]`,
-            contactMethod: "whatsapp",
-            status: "follow_up_taken"
-          })
-        })
-      } catch {}
-    }
-
-    setTimeout(() => {
-      setBulkProgress({
-        current: queue.length,
-        total: queue.length,
-        statusText: `✅ Sabhi ${queue.length} members WhatsApp Web auto-sender me queued ho gaye! WhatsApp tab me live progress dekhein.`,
-        done: true
-      })
-      setIsBulkSending(false)
-      loadRadar()
-    }, 2000)
   }
 
   if (loading) {
@@ -1664,7 +1703,7 @@ export default function TeamActivityRadar({ setPage }) {
                       isDark ? "bg-stone-800 border-white/[0.1] text-white" : "bg-stone-50 border-stone-300 text-stone-900"
                     }`}
                   >
-                    <option value="followup">🔥 Re-engagement & Follow-Up</option>
+                    <option value="followup">🎯 Auto Role-Based (Distributor / Seller / User alag-alag msg)</option>
                     <option value="category">🩺 Health & Category Consultation</option>
                     <option value="offer">🎉 New Products & Store Offers</option>
                     <option value="group">🏢 Team & Distributor Growth Scheme</option>
