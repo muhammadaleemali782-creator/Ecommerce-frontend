@@ -6,7 +6,7 @@ import InlineLoader from "../components/InlineLoader"
 const TAMPERMONKEY_SCRIPT = `// ==UserScript==
 // @name         EDUCA WhatsApp 100% Hands-Free Auto-Send
 // @namespace    https://educa-store.vercel.app/
-// @version      1.2
+// @version      2.3
 // @description  Automatically clicks Send once on WhatsApp Web without needing to press Enter or click Send button
 // @match        https://web.whatsapp.com/*
 // @grant        none
@@ -15,10 +15,11 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
 
 (function() {
   'use strict';
-  console.log('[EDUCA Auto-Send] Safe Engine Initialized');
+  console.log('[EDUCA Auto-Send v2.3] Initialized');
 
   let lastSentUrl = "";
   let isSendingLock = false;
+  let readyTime = 0;
 
   function updateBadge(text, color = "#25D366") {
     let badge = document.getElementById('educa-wa-badge');
@@ -32,14 +33,67 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
     badge.innerHTML = text;
   }
 
+  function isVoiceOrMic(btn) {
+    if (!btn) return true;
+    const label = (btn.getAttribute('aria-label') || '').toLowerCase();
+    if (label.includes('voice') || label.includes('record') || label.includes('mic') || label.includes('ptt')) return true;
+    if (btn.querySelector('[data-icon*="ptt"], [data-icon*="mic"]')) return true;
+    return false;
+  }
+
+  function getSendButton() {
+    const selectors = [
+      'footer button[aria-label="Send"]',
+      'button[aria-label="Send"]',
+      'footer button[data-testid="compose-btn-send"]',
+      'button[data-testid="compose-btn-send"]',
+      'footer button[data-testid="send"]',
+      'button[data-testid="send"]',
+      'footer span[data-icon="send"]',
+      'span[data-icon="send"]',
+      'footer span[data-icon="wds-ic-send-solid"]',
+      'span[data-icon="wds-ic-send-solid"]',
+      'footer span[data-icon="wds-ic-send"]',
+      'footer span[data-icon="send-light"]',
+      'footer span[data-icon*="send"]',
+      'footer [data-icon*="send"]'
+    ];
+
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) {
+        const btn = el.tagName === 'BUTTON' ? el : el.closest('button');
+        if (btn && !btn.disabled && !isVoiceOrMic(btn)) {
+          return btn;
+        }
+      }
+    }
+
+    const footerButtons = Array.from(document.querySelectorAll('footer button'));
+    for (let i = footerButtons.length - 1; i >= 0; i--) {
+      const b = footerButtons[i];
+      if (!b.disabled && !isVoiceOrMic(b)) {
+        return b;
+      }
+    }
+    return null;
+  }
+
   function clickElement(el) {
     if (!el) return;
     try {
       const opts = { bubbles: true, cancelable: true, view: window };
+      el.dispatchEvent(new PointerEvent('pointerdown', opts));
       el.dispatchEvent(new MouseEvent('mousedown', opts));
+      el.dispatchEvent(new PointerEvent('pointerup', opts));
       el.dispatchEvent(new MouseEvent('mouseup', opts));
       el.click();
-    } catch (e) {}
+      if (el.parentElement && typeof el.parentElement.click === 'function') {
+        el.parentElement.click();
+      }
+    } catch (e) {
+      try { el.click(); } catch (err) {}
+    }
   }
 
   function runAutoSend() {
@@ -48,6 +102,7 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
     if (lastSentUrl && lastSentUrl !== currentUrl) {
       lastSentUrl = "";
       isSendingLock = false;
+      readyTime = 0;
     }
 
     if (lastSentUrl === currentUrl || isSendingLock) {
@@ -56,10 +111,13 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
     }
 
     const input = document.querySelector('footer div[contenteditable="true"]')
-      || document.querySelector('div[contenteditable="true"][data-tab="10"]');
+      || document.querySelector('div[contenteditable="true"][data-lexical-editor="true"]')
+      || document.querySelector('div[contenteditable="true"][data-tab="10"]')
+      || document.querySelector('div[contenteditable="true"]');
 
-    const hasText = input && input.innerText && input.innerText.trim().length > 0;
+    const hasText = input && (input.innerText || input.textContent || '').trim().length > 0;
     if (!hasText) {
+      readyTime = 0;
       updateBadge('⏳ EDUCA: Waiting for message text...', '#eab308');
       return;
     }
@@ -70,41 +128,36 @@ const TAMPERMONKEY_SCRIPT = `// ==UserScript==
       targetPhone = urlParams.get('phone') || "";
     } catch (e) {}
 
-    updateBadge('⚡ Sending to ' + (targetPhone || 'Contact') + '...', '#3b82f6');
-
-    const sendBtn = document.querySelector('button[aria-label="Send"]')
-      || document.querySelector('span[data-icon="send"]')?.closest('button')
-      || document.querySelector('span[data-icon="wds-ic-send-solid"]')?.closest('button')
-      || document.querySelector('[data-testid="send"]')?.closest('button')
-      || document.querySelector('[data-testid="compose-btn-send"]')?.closest('button');
-
-    if (sendBtn && !sendBtn.disabled) {
-      const isVoice = sendBtn.querySelector('[data-icon*="ptt"]')
-        || sendBtn.querySelector('[data-icon*="mic"]')
-        || sendBtn.getAttribute('aria-label')?.toLowerCase().includes('voice')
-        || sendBtn.getAttribute('aria-label')?.toLowerCase().includes('record');
-
-      if (!isVoice) {
-        isSendingLock = true;
-        lastSentUrl = currentUrl;
-        clickElement(sendBtn);
-        updateBadge('✅ Sent to ' + (targetPhone || 'Contact') + '! Agla bnda aane de...', '#22c55e');
-        return;
-      }
+    const sendBtn = getSendButton();
+    if (!sendBtn) {
+      updateBadge('⏳ Message ready, finding Send button...', '#eab308');
+      return;
     }
 
-    if (hasText && !isSendingLock) {
+    if (!readyTime) {
+      readyTime = Date.now();
+      updateBadge('⚡ Auto Sending to ' + (targetPhone || 'Contact') + ' in 0.5s...', '#3b82f6');
+      return;
+    }
+
+    if (Date.now() - readyTime >= 500) {
       isSendingLock = true;
       lastSentUrl = currentUrl;
-      input.focus();
-      const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
-      input.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
-      input.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
-      updateBadge('✅ Sent via Enter to ' + (targetPhone || 'Contact') + '!', '#22c55e');
+      clickElement(sendBtn);
+
+      setTimeout(() => {
+        const stillText = input && (input.innerText || input.textContent || '').trim().length > 0;
+        if (stillText) {
+          const retryBtn = getSendButton();
+          if (retryBtn) clickElement(retryBtn);
+        }
+      }, 350);
+
+      updateBadge('✅ Sent to ' + (targetPhone || 'Contact') + '! Agla number aane de...', '#22c55e');
     }
   }
 
-  setInterval(runAutoSend, 600);
+  setInterval(runAutoSend, 500);
 })();`
 
 const PRESET_TEMPLATES = {
