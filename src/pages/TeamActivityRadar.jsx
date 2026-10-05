@@ -1372,12 +1372,12 @@ export default function TeamActivityRadar({ setPage }) {
 
       {/* ── WHATSAPP BROADCAST MODAL ── */}
       {showBroadcastModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className={`w-full max-w-2xl p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-3.5 max-h-[94vh] flex flex-col ${
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className={`w-full max-w-2xl rounded-3xl border shadow-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden my-auto ${
             isDark ? "bg-stone-900 border-white/[0.12] text-white" : "bg-white border-stone-300 text-stone-900"
           }`}>
             {/* Modal Header */}
-            <div className="flex items-start justify-between border-b pb-2.5 border-white/[0.08]">
+            <div className="flex items-start justify-between border-b p-4 sm:p-5 border-white/[0.08] shrink-0 bg-inherit">
               <div>
                 <h3 className="text-base font-black flex items-center gap-2">
                   📢 WhatsApp Personalized Broadcast
@@ -1393,13 +1393,15 @@ export default function TeamActivityRadar({ setPage }) {
               </div>
               <button
                 onClick={() => setShowBroadcastModal(false)}
-                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold shrink-0"
+                className="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold shrink-0 hover:bg-stone-600 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* In-Modal Group & Category Filter Bar */}
+            {/* Modal Scrollable Body */}
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-3.5 overscroll-contain">
+              {/* In-Modal Group & Category Filter Bar */}
             <div className="p-2.5 rounded-2xl border bg-black/20 dark:bg-black/40 border-white/[0.08] space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] font-black uppercase text-stone-400 tracking-wider">🎯 Filter Recipients By Group:</span>
@@ -1914,9 +1916,10 @@ export default function TeamActivityRadar({ setPage }) {
                 )
               })}
             </div>
+            </div>
 
-            {/* Modal Bottom Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+            {/* Modal Bottom Controls (Sticky Footer) */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 border-t border-white/[0.08] bg-black/25 dark:bg-black/50 shrink-0">
               <div className="text-xs text-stone-400 font-mono">
                 {sentBroadcastIds.size === filteredMembers.length ? (
                   <span className="text-emerald-500 font-bold">🎉 Sabhi members ko WhatsApp message bhej diya gaya hai!</span>
