@@ -706,26 +706,85 @@ export default function TeamActivityRadar({ setPage }) {
     }
 
     setIsBulkSending(true)
-    setBulkProgress({
-      current: 0,
-      total: queue.length,
-      statusText: invalidCount > 0
-        ? `🚀 Broadcast shuru! ${queue.length} valid members (${invalidCount} invalid skip kiye). WhatsApp Web me auto-sequence chalu hai...`
-        : `🚀 Broadcast shuru! WhatsApp Web tab me ${queue.length} members ko 1-by-1 auto-send ho raha hai...`,
-      done: false
-    })
+    stopAutoSendRef.current = false
 
-    // Post queue to Extension Bridge (store-bridge.js)
-    window.postMessage({
-      type: "EDUCA_START_BROADCAST",
-      queue: queue,
-      delay: autoSendDelay || 5
-    }, "*")
+    let waTab = null
+    const delaySec = Math.max(Number(autoSendDelay) || 6, 5)
 
-    // Open WhatsApp Web for the first contact in named tab
-    const first = queue[0]
-    const firstUrl = `https://web.whatsapp.com/send?phone=${first.phone}&text=${encodeURIComponent(first.message)}`
-    window.open(firstUrl, "educa_wa_broadcast")
+    for (let i = 0; i < queue.length; i++) {
+      if (stopAutoSendRef.current) {
+        setBulkProgress(prev => ({
+          ...prev,
+          statusText: `🛑 Auto-send roka gaya (${i} / ${queue.length} bheje gaye).`,
+          done: true
+        }))
+        break
+      }
+
+      const item = queue[i]
+      const url = `https://web.whatsapp.com/send?phone=${item.phone}&text=${encodeURIComponent(item.message)}`
+
+      setBulkProgress({
+        current: i + 1,
+        total: queue.length,
+        statusText: `🚀 (${i + 1}/${queue.length}) ${item.name} (${item.role}) ka WhatsApp open ho raha hai...`,
+        done: false
+      })
+
+      try {
+        if (!waTab || waTab.closed) {
+          waTab = window.open(url, "educa_wa_broadcast")
+        } else {
+          waTab.location.href = url
+          try { waTab.focus() } catch (err) {}
+        }
+      } catch (e) {
+        waTab = window.open(url, "educa_wa_broadcast")
+      }
+
+      // Countdown delaySec seconds for WhatsApp Web to load & extension to auto-send
+      for (let s = delaySec; s > 0; s--) {
+        if (stopAutoSendRef.current) break
+        setBulkProgress({
+          current: i + 1,
+          total: queue.length,
+          statusText: `⏳ (${i + 1}/${queue.length}) ${item.name} ko send ho raha hai... Agla number ${s}s me...`,
+          done: false
+        })
+        await new Promise(r => setTimeout(r, 1000))
+      }
+
+      if (stopAutoSendRef.current) break
+
+      // Mark this specific member as sent live!
+      setSentBroadcastIds(prev => new Set([...prev, item.id]))
+
+      // Record follow-up note in backend
+      if (token) {
+        fetch(`${import.meta.env.VITE_API_URL}/api/team/follow-up-note`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            memberId: item.id,
+            note: `Auto Broadcast WhatsApp sent [${broadcastTemplate}] [${item.role}]`,
+            contactMethod: "whatsapp",
+            status: "follow_up_taken"
+          })
+        }).catch(() => {})
+      }
+    }
+
+    if (!stopAutoSendRef.current) {
+      setBulkProgress({
+        current: queue.length,
+        total: queue.length,
+        statusText: `🎉 Sabhi ${queue.length} members ko WhatsApp message safaltapoorvak send ho gaya!`,
+        done: true
+      })
+      loadRadar()
+    }
+
+    setIsBulkSending(false)
   }
 
   if (loading) {
