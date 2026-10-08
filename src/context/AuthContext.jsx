@@ -20,21 +20,21 @@ const DEMO_USERS = [
   {
     id: 1,
     name: "Admin",
-    email: "admin@gmail.com",
+    email: "admin@educa.com",
     password: "12345",
     role: "admin"
   },
   {
     id: 2,
     name: "Distributor",
-    email: "distributor@gmail.com",
+    email: "distributor@educa.com",
     password: "12345",
     role: "distributor"
   },
   {
     id: 3,
     name: "Seller",
-    email: "seller@gmail.com",
+    email: "seller@educa.com",
     password: "12345",
     role: "seller"
   }

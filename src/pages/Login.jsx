@@ -111,7 +111,7 @@ export default function Login({ setPage }) {
         name: "Acharya Vaidya",
         email: "admin@educa.com",
         role: "ADMIN",
-        fallbackEmail: "admin@gmail.com",
+        fallbackEmail: "admin@educa.com",
         lastActive: "Active Session",
         avatar: "🌿"
       },
@@ -120,7 +120,7 @@ export default function Login({ setPage }) {
         name: "Himalaya Herbal Network",
         email: "distributor@educa.com",
         role: "DISTRIBUTOR",
-        fallbackEmail: "distributor@gmail.com",
+        fallbackEmail: "distributor@educa.com",
         lastActive: "Verified 2h ago",
         avatar: "🏔️"
       },
@@ -129,7 +129,7 @@ export default function Login({ setPage }) {
         name: "Rasayana Seller Hub",
         email: "seller@educa.com",
         role: "SELLER",
-        fallbackEmail: "seller@gmail.com",
+        fallbackEmail: "seller@educa.com",
         lastActive: "Verified Yesterday",
         avatar: "🌱"
       }
@@ -157,7 +157,10 @@ export default function Login({ setPage }) {
       return;
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    let cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.endsWith("@gmail.com")) {
+      cleanEmail = cleanEmail.replace(/@gmail\.com$/, "@educa.com");
+    }
     const cleanPass = password.trim();
 
     if (!cleanEmail || !cleanPass) {
@@ -394,7 +397,7 @@ export default function Login({ setPage }) {
                 <input
                   type="text"
                   required
-                  placeholder="name@example.com / DS001"
+                  placeholder="name@educa.com / DS001"
                   value={email}
                   onFocus={() => setActiveField("email")}
                   onBlur={() => setActiveField(null)}
