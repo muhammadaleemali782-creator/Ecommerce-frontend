@@ -83,6 +83,8 @@ export default function Login({ setPage }) {
   const [ssoStage, setSsoStage] = useState("idle"); // idle -> scanning -> discovered -> authenticating -> success
   const [customEducaEmail, setCustomEducaEmail] = useState("");
   const [discoveredProfiles, setDiscoveredProfiles] = useState([]);
+  const [ssoError, setSsoError] = useState("");
+  const [ssoLoading, setSsoLoading] = useState(false);
 
   // Change Password States
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -645,9 +647,13 @@ export default function Login({ setPage }) {
                 e.preventDefault()
                 const mailInput = e.target.educaMailInput.value
                 const passInput = e.target.educaPassInput?.value
-                if (!mailInput || !passInput) return
+                if (!mailInput || !passInput) {
+                  setSsoError("Kripya ID/Email aur password dono dalein.")
+                  return
+                }
+                setSsoLoading(true)
+                setSsoError("")
                 try {
-                  setError("")
                   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/educa-sso`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -672,14 +678,29 @@ export default function Login({ setPage }) {
                       window.location.reload()
                     }
                   } else {
-                    setError(data.message || "EDUCA Mail credentials invalid")
+                    if (res.status === 404) {
+                      setSsoError("⚠️ Account / ID maujood nahi hai. Kripya Distributor, Seller ya Admin se apna account create karwayein.")
+                    } else if (res.status === 401) {
+                      setSsoError("❌ Galat credentials! Kripya apna sahi password dalein.")
+                    } else {
+                      setSsoError(data.message || "EDUCA Mail credentials invalid")
+                    }
                   }
                 } catch (err) {
-                  setError("EDUCA Mail connection error")
+                  setSsoError("EDUCA Mail connection error. Server unreachable.")
+                } finally {
+                  setSsoLoading(false)
                 }
               }}
               className="space-y-3.5 pt-2"
             >
+              {ssoError && (
+                <div className="p-3 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs font-medium flex items-start gap-2 animate-fadeIn">
+                  <span className="text-sm mt-0.5">⚠️</span>
+                  <div className="flex-1 leading-snug">{ssoError}</div>
+                </div>
+              )}
+
               <div>
                 <label className="text-[10px] font-mono text-stone-300 font-bold block mb-1">
                   Company User ID / EDUCA Mail:
@@ -688,8 +709,9 @@ export default function Login({ setPage }) {
                   name="educaMailInput"
                   type="text"
                   required
+                  disabled={ssoLoading}
                   placeholder="e.g. DS001 ya name@educa.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 />
               </div>
 
@@ -701,17 +723,28 @@ export default function Login({ setPage }) {
                   name="educaPassInput"
                   type="password"
                   required
+                  disabled={ssoLoading}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 transition-all cursor-pointer flex items-center justify-center gap-2"
+                disabled={ssoLoading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:from-indigo-500 hover:to-blue-400 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <span>⚡ Sign In with EDUCA Mail</span>
-                <span>➔</span>
+                {ssoLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Verifying Credentials...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>⚡ Sign In with EDUCA Mail</span>
+                    <span>➔</span>
+                  </>
+                )}
               </button>
             </form>
 
