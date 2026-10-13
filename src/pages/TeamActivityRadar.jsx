@@ -5,7 +5,7 @@ import InlineLoader from "../components/InlineLoader"
 
 const TAMPERMONKEY_SCRIPT = `// ==UserScript==
 // @name         EDUCA WhatsApp 100% Hands-Free Auto-Send
-// @namespace    https://educa-store.vercel.app/
+// @namespace    https://educastore.vercel.app/
 // @version      2.3
 // @description  Automatically clicks Send once on WhatsApp Web without needing to press Enter or click Send button
 // @match        https://web.whatsapp.com/*

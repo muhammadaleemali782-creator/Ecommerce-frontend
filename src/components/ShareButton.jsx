@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext"
   hai, uska naam/number bhi message me chala jaata hai.
 */
 
-const WEBSITE_URL = "https://educa-store.vercel.app/"
+const WEBSITE_URL = "https://educastore.vercel.app/"
 
 // ⭐ Jab APK ko kahin (Google Drive / GitHub Release / apni site) host
 // kar do, uska public link yahan daal dena — turant app download button
