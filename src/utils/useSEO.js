@@ -2,13 +2,13 @@ import { useEffect } from "react"
 
 const PAGE_META = {
   home: {
-    title: "EDUCA — Official Portal: EDUCA VEDA, EDUCA STORE, EDUCA FINTECH & GURUKUL INSTITUTE",
-    desc: "Official portal for EDUCA: EDUCA VEDA & EDUCA STORE (Ayurvedic medicines for Sugar, BP, Shecurevedic period pain, Daat rog), EDUCA FINTECH (Royalty network), and EDUCA INSTITUTE / GURUKUL. Prayagraj.",
+    title: "EducaStore (Educa Store & Educa Veda) — Official Ayurvedic Health, Fintech & Gurukul Portal",
+    desc: "Official portal for EducaStore & Educa Veda: Pure Ayurvedic medicines for Sugar, BP, Shecurevedic period pain, Daat rog, EDUCA FINTECH (Royalty network), and EDUCA INSTITUTE / GURUKUL. Prayagraj.",
     path: ""
   },
   store: {
-    title: "EDUCA STORE — Official Ayurvedic Medicines & Formulations | EDUCA VEDA",
-    desc: "Shop authentic Ayurvedic medicines for Diabetes, High BP, Shecurevedic period care, toothache, and pure Shilajit energy on EDUCA STORE. Fast doorstep delivery across India.",
+    title: "EducaStore (Educa Store) — Official Ayurvedic Medicines & Formulations | EDUCA VEDA",
+    desc: "Shop authentic Ayurvedic medicines for Diabetes, High BP, Shecurevedic period care, toothache, and pure Shilajit energy on EducaStore. Fast doorstep delivery across India.",
     path: "?page=store"
   },
   services: {

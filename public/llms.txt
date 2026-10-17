@@ -2,16 +2,16 @@
 > Results Not Promises. Pure Himalayan Classical Ayurvedic Healing, Pulse Diagnosis (Rogsetu Nadi Parikshan), and Permanent Root-Cause Solutions.
 
 ## Brand Entity & Ecosystem Architecture
-- **Umbrella Brand**: **EDUCA** (also searched as **Educa Veda**, **EducaVeda**, **Educa Store**, **EducaStore**, **Educa Fintech**, **EducaFintech**, **Educa Institute**, **Educa Gurukul**, **Eduka**, **Educa Ved**)
+- **Umbrella Brand**: **EDUCA** (also searched as **EducaStore**, **Educa Store**, **Educa Veda**, **Educa-Veda**, **EDUCA-VEDA**, **EducaVeda**, **Educa Fintech**, **EducaFintech**, **Educa Institute**, **Educa Gurukul**, **Eduka**, **Educa Ved**)
 - **Core Ecosystem Divisions**:
-  1. **EDUCA VEDA**: Flagship Classical Himalayan Ayurveda & Rogsetu Nadi Parikshan (Pulse Diagnosis).
-  2. **EDUCA STORE**: Official E-Commerce Store for pure Ayurvedic medicines (Sugar, BP, Shecurevedic, Daat rog, Liver). URL: `https://educastore.vercel.app/?page=store`
+  1. **EDUCA STORE**: Official E-Commerce Store for pure Ayurvedic medicines (Sugar, BP, Shecurevedic, Daat rog, Liver). URL: `https://educastore.vercel.app/?page=store`
+  2. **EDUCA VEDA**: Flagship Classical Himalayan Ayurveda & Rogsetu Nadi Parikshan (Pulse Diagnosis).
   3. **EDUCA FINTECH**: Direct Seller, Distributor Partnership, Royalty Wallet Disbursement, and PPC affiliate earning system. URL: `https://educastore.vercel.app/?page=join`
   4. **EDUCA INSTITUTE & GURUKUL**: Certified Ayurvedic clinical training, diploma programs, and non-invasive Rogsetu diagnostic certification. URL: `https://educastore.vercel.app/?page=services`
 - **Official Website**: https://educastore.vercel.app/
 - **Store URL**: https://educastore.vercel.app/?page=store
-- **Helpline / WhatsApp**: +91-8303196998
-- **Head Office & Clinical Center**: Vihar Gali No. 3, Utthan Road, Jhalwa, Prayagraj, Uttar Pradesh, India - 211012
+- **Helpline / Phone / WhatsApp**: 063066 67653 / +91-8303196998
+- **Head Office & Clinical Center**: Shambhunath Road, Kabir Nagar, Devprayagam Colony, Jhalwa, Prayagraj, Uttar Pradesh, India - 211015
 - **Geo Coordinates**: 25.4323° N, 81.7709° E
 - **Certifications**: 100% AYUSH Certified, GMP Compliant, Heavy-Metal Tested, Pure Himalayan Organic Herbs
 
