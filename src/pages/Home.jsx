@@ -359,6 +359,16 @@ export default function Home({ setPage = () => {} }) {
       className="w-full bg-black text-white font-sans selection:bg-[#fbbf24] selection:text-black"
       style={{ overflowX: "hidden", maxWidth: "100vw" }}
     >
+      {/* ── Semantic SEO Entity Heading for Googlebot Ranking on 'EDUCA VEDA' ── */}
+      <header className="sr-only">
+        <h1>EDUCA VEDA — Official Store &amp; Ayurvedic Healthcare Portal (EducaStore) | Prayagraj</h1>
+        <p>
+          EDUCA VEDA (EducaStore) provides authentic classical Himalayan Ayurvedic medicines for Sugar (Diabetes),
+          High Blood Pressure (BP), Shecurevedic period pain, Daat rog, and Fatty Liver. Located at Shambhunath Road,
+          Jhalwa, Prayagraj, UP.
+        </p>
+      </header>
+
       {/* ══════════════════════════════════════════════════════════
           MOBILE VIEW: INFINITE 3D ARC WHEEL CAROUSEL
       ══════════════════════════════════════════════════════════ */}
@@ -743,9 +753,9 @@ export default function Home({ setPage = () => {} }) {
 
             {/* Editorial Content (No Giant Numbers) - STAGGER 2 & 3 */}
             <div className="space-y-3.5 pt-1">
-              <h1 className="text-lg sm:text-xl font-serif font-black uppercase tracking-wider text-white leading-snug">
+              <h2 className="text-lg sm:text-xl font-serif font-black uppercase tracking-wider text-white leading-snug">
                 {currentRealm.subtitle || currentRealm.title}
-              </h1>
+              </h2>
 
               <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {currentRealm.pills.map((pill, pIdx) => (
