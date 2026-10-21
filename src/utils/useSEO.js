@@ -2,8 +2,8 @@ import { useEffect } from "react"
 
 const PAGE_META = {
   home: {
-    title: "EDUCA VEDA — Official Store & Ayurvedic Healthcare Portal (EducaStore) | Prayagraj",
-    desc: "Official portal for EDUCA VEDA & EducaStore: Pure Ayurvedic medicines for Sugar, BP, Shecurevedic period pain, Daat rog, EDUCA FINTECH (Royalty network), and EDUCA INSTITUTE / GURUKUL. Prayagraj.",
+    title: "EDUCA VEDA — Educa Store, Educa Fintech & Educa Institute | Prayagraj",
+    desc: "Official portal of EDUCA VEDA: 1. EDUCA STORE (Ayurvedic health), 2. EDUCA FINTECH (Royalty earning), 3. EDUCA INSTITUTE (Ayurveda clinical diploma), and 4. ROGSETU clinic. Prayagraj.",
     path: ""
   },
   store: {

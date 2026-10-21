@@ -361,11 +361,10 @@ export default function Home({ setPage = () => {} }) {
     >
       {/* ── Semantic SEO Entity Heading for Googlebot Ranking on 'EDUCA VEDA' ── */}
       <header className="sr-only">
-        <h1>EDUCA VEDA — Official Store &amp; Ayurvedic Healthcare Portal (EducaStore) | Prayagraj</h1>
+        <h1>EDUCA VEDA — Educa Store, Educa Fintech &amp; Educa Institute | Prayagraj</h1>
         <p>
-          EDUCA VEDA (EducaStore) provides authentic classical Himalayan Ayurvedic medicines for Sugar (Diabetes),
-          High Blood Pressure (BP), Shecurevedic period pain, Daat rog, and Fatty Liver. Located at Shambhunath Road,
-          Jhalwa, Prayagraj, UP.
+          Official portal of EDUCA VEDA: 1. EDUCA STORE (Pure Ayurvedic medicines for Sugar, BP, Shecurevedic, Daat rog &amp; Liver),
+          2. EDUCA FINTECH (Direct seller royalty wallet network), 3. EDUCA INSTITUTE &amp; GURUKUL (Ayurvedic clinical diploma training &amp; Rogsetu Nadi Parikshan). Located at Shambhunath Road, Jhalwa, Prayagraj, UP.
         </p>
       </header>
 
