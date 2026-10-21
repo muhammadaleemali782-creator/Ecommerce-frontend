@@ -61,7 +61,7 @@ export function useSEO(page) {
     setMeta("twitter:title", fullTitle)
     setMeta("twitter:description", meta.desc)
 
-    const canonicalUrl = meta.path ? `https://educastore.vercel.app/${meta.path}` : "https://educastore.vercel.app/"
+    const canonicalUrl = meta.path ? `https://educaveda.vercel.app/${meta.path}` : "https://educaveda.vercel.app/"
     setMeta("og:url", canonicalUrl, true)
     let linkCanonical = document.querySelector('link[rel="canonical"]')
     if (!linkCanonical) {

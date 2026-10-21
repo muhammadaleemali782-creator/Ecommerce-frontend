@@ -64,7 +64,7 @@ export default function MyProfile() {
   const handleShare = async () => {
     const name  = profile.fullName || profile.name || "EDUCA Store"
     const phone = profile.phone || ""
-    const siteUrl = "https://educastore.vercel.app/"
+    const siteUrl = "https://educaveda.vercel.app/"
 
     const text =
       `👋 ${name} ki taraf se!\n` +
