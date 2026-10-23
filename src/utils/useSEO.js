@@ -2,9 +2,14 @@ import { useEffect } from "react"
 
 const PAGE_META = {
   home: {
-    title: "EDUCA VEDA — Educa Store, Educa Fintech & Educa Institute | Prayagraj",
-    desc: "Official portal of EDUCA VEDA: 1. EDUCA STORE (Ayurvedic health), 2. EDUCA FINTECH (Royalty earning), 3. EDUCA INSTITUTE (Ayurveda clinical diploma), and 4. ROGSETU clinic. Prayagraj.",
+    title: "Educaveda (EDUCA VEDA) — Official Store, Fintech & Institute | Prayagraj",
+    desc: "Official portal of Educaveda (EDUCA VEDA): 1. EDUCA STORE (Ayurvedic health), 2. EDUCA FINTECH (Royalty earning), 3. EDUCA INSTITUTE (Ayurveda clinical diploma), and 4. ROGSETU clinic. Prayagraj.",
     path: ""
+  },
+  educaveda: {
+    title: "Educaveda — Official Website & Health Ecosystem | EDUCA VEDA",
+    desc: "Educaveda is the verified official enterprise portal uniting Educaveda Store (Ayurveda), Educaveda Fintech (12% Savings & Royalty), Educaveda Institute (Ayurveda Diploma), and Rogsetu Clinic Prayagraj.",
+    path: "educaveda"
   },
   store: {
     title: "EducaStore (Educa Store) — Official Ayurvedic Medicines & Formulations | EDUCA VEDA",

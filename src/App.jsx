@@ -7,6 +7,7 @@ import { PageSkeleton } from "./components/Skeleton"
 
 // ── Pages (Lazy Chunked) ──
 const Home                   = lazy(() => import("./pages/Home"))
+const Educaveda              = lazy(() => import("./pages/Educaveda"))
 const Store                  = lazy(() => import("./pages/Store"))
 const Services               = lazy(() => import("./pages/Services"))
 const Cart                   = lazy(() => import("./pages/Cart"))
@@ -82,6 +83,8 @@ const Unauth = () => (
 function AppContent() {
   const [page, setPage] = useState(() => {
     try {
+      const pathname = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '')
+      if (pathname === "educaveda" || pathname === "educaveda.html") return "educaveda"
       const params = new URLSearchParams(window.location.search)
       const storeRef = params.get("storeRef") || (params.get("page") === "store" ? params.get("ref") : null)
       if (storeRef) {
@@ -205,8 +208,9 @@ function AppContent() {
       switch (page) {
 
         // ── PUBLIC ──
-        case "home":     return <Home setPage={setPage} />
-        case "services": return <Services setPage={setPage} />
+        case "home":      return <Home setPage={setPage} />
+        case "educaveda": return <Educaveda setPage={setPage} />
+        case "services":  return <Services setPage={setPage} />
         case "store":    return <Store setPage={setPage} />
         case "cart":     return <Cart setPage={setPage} />
         case "checkout": return <Checkout setPage={setPage} />

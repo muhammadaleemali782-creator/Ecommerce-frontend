@@ -520,6 +520,13 @@ export default function Home({ setPage = () => {} }) {
           
           <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-[11px] font-sans text-slate-400">
             <button
+              onClick={() => setPage("educaveda")}
+              className="text-emerald-400 font-bold hover:text-emerald-300 transition-colors cursor-pointer"
+            >
+              🏛️ Educaveda Portal
+            </button>
+            <span className="opacity-40">•</span>
+            <button
               onClick={handleShare}
               className="hover:text-white transition-colors cursor-pointer font-medium"
             >
@@ -971,6 +978,8 @@ export default function Home({ setPage = () => {} }) {
             {/* Official Ecosystem Portals for SEO & User Discovery */}
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-sans text-amber-300 py-1">
               <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">Official Portals:</span>
+              <button onClick={() => setPage("educaveda")} className="hover:underline font-bold text-teal-300 cursor-pointer">🏛️ Educaveda Portal</button>
+              <span className="text-slate-600">•</span>
               <a href="https://educaveda.vercel.app/?page=store" className="hover:underline font-bold text-emerald-400">🌿 Educa Store</a>
               <span className="text-slate-600">•</span>
               <a href="https://educafintech.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline font-bold text-amber-400">💳 Educa Fintech (12% Interest)</a>

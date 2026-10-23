@@ -69,6 +69,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
 
   const publicLinks = [
     { label: "HOME", pg: "home" },
+    { label: "EDUCAVEDA", pg: "educaveda" },
     { label: "HEALTH", pg: "home", section: "billboard-ayurved" },
     { label: "ROGSETU", pg: "home", section: "billboard-rogsetu" },
     { label: "GURUKUL", pg: "home", section: "billboard-gurukul" },
@@ -148,6 +149,7 @@ export default function Navbar({ setPage, currentPage = "home", cartCount, pageB
   const getNavIcon = (link) => {
     const label = (link.label || "").toUpperCase()
     if (link.pg === "home" && !link.section) return <Home size={18} strokeWidth={2} />
+    if (link.pg === "educaveda") return <Sparkles size={18} strokeWidth={2} />
     if (link.section === "billboard-ayurved") return <Sparkles size={18} strokeWidth={2} />
     if (link.section === "billboard-rogsetu") return <Stethoscope size={18} strokeWidth={2} />
     if (link.section === "billboard-gurukul") return <BookOpen size={18} strokeWidth={2} />
