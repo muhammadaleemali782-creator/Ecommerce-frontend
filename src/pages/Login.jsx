@@ -92,6 +92,7 @@ export default function Login({ setPage }) {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [syncToEducaMail, setSyncToEducaMail] = useState(true);
+  const [showGuideModal, setShowGuideModal] = useState(false);
 
   // Lockout countdown
   useEffect(() => {
@@ -379,6 +380,19 @@ export default function Login({ setPage }) {
           </div>
         )}
 
+        {/* ── 📖 NEW USER LOGIN & PASSWORD GUIDE BANNER ── */}
+        {!showChangePassword && (
+          <button
+            type="button"
+            onClick={() => setShowGuideModal(true)}
+            className="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+          >
+            <span>📖</span>
+            <span>Naye Member Hain? Login & Password Guide</span>
+            <span className="text-amber-400 font-mono text-xs">➔</span>
+          </button>
+        )}
+
         {/* ── STANDARD CREDENTIAL LOGIN FORM ── */}
         {!showChangePassword && (
           <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
@@ -552,19 +566,110 @@ export default function Login({ setPage }) {
           </form>
         )}
 
-        {/* Visit Website / Back to Home Link */}
-        <div className="text-center pt-2 border-t border-white/[0.08]">
+        {/* Bottom Navigation Links */}
+        <div className="flex items-center justify-center gap-4 pt-2 border-t border-white/[0.08] text-xs">
+          <button
+            type="button"
+            onClick={() => setShowGuideModal(true)}
+            className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-1 font-bold"
+          >
+            <span>📖</span>
+            <span>Login Guide</span>
+          </button>
+          <span className="text-stone-600">•</span>
           <button
             type="button"
             onClick={() => setPage("home")}
-            className="text-xs text-blue-400 hover:text-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto font-bold"
+            className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer flex items-center gap-1 font-bold"
           >
             <span>🌐</span>
-            <span>Visit Website / Back to Home</span>
+            <span>Visit Website</span>
           </button>
         </div>
 
       </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          NEW USER LOGIN & PASSWORD RESET GUIDE MODAL
+      ══════════════════════════════════════════════════════════ */}
+      {showGuideModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
+          <div className="relative max-w-lg w-full max-h-[88vh] bg-[#0c100e] border border-amber-500/25 p-5 sm:p-7 rounded-3xl shadow-[0_30px_90px_rgba(0,0,0,0.95)] flex flex-col gap-4 text-white overflow-y-auto">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setShowGuideModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/20 text-white flex items-center justify-center text-sm cursor-pointer transition-colors"
+            >
+              ✕
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+              <EducaLogo size={38} />
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <span>📖</span>
+                  <span>New User Login & Password Guide</span>
+                </h3>
+                <p className="text-[10.5px] text-amber-400 font-mono">
+                  EDUCA-VEDA · Official User Manual
+                </p>
+              </div>
+            </div>
+
+            {/* Step 1 */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px]">1</span>
+                <span>Pehli Baar Login (Temporary Password)</span>
+              </div>
+              <p className="text-[11.5px] text-stone-300 leading-relaxed pl-7">
+                Apna official <strong>EDUCA Email</strong> (e.g. <span className="text-amber-300 font-mono">name@educa.com</span>) ya <strong>System ID</strong> (e.g. <span className="text-amber-300 font-mono">DS001</span>) aur mila hua temporary password dalein, fir <strong>Continue ➔</strong> click karein.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-blue-400">
+                <span className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px]">2</span>
+                <span>Permanent Master Password Set Karein</span>
+              </div>
+              <p className="text-[11.5px] text-stone-300 leading-relaxed pl-7">
+                Temporary password se login hote hi <strong>"CREATE MASTER PASSWORD"</strong> ka popup aayega. Wahan apna naya permanent password (kam se kam 6 characters) set karke <strong>Save & Continue</strong> karein.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+                <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px]">3</span>
+                <span>Password Bhool Jane Par Reset Kaise Karein</span>
+              </div>
+              <p className="text-[11.5px] text-stone-300 leading-relaxed pl-7">
+                Login page par <strong>"Forgot password?"</strong> dabayein:
+                <br />• <strong>Option A (Self OTP):</strong> Apna email/ID daalein aur OTP se turant naya password banayein.
+                <br />• <strong>Option B (Support):</strong> Support tab se WhatsApp request submit karein.
+              </p>
+            </div>
+
+            {/* Security Tip */}
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200/90 leading-relaxed">
+              💡 <strong>Note:</strong> System me keval official <span className="bg-black/40 px-1 py-0.5 rounded text-amber-300 font-mono">@educa.com</span> email aur System ID valid hain.
+            </div>
+
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowGuideModal(false)}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-black font-black text-xs uppercase tracking-wider hover:from-emerald-400 hover:to-green-400 transition-all cursor-pointer shadow-lg"
+            >
+              Samajh Gaya / Login Karein ➔
+            </button>
+
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════
           REAL EDUCA MAIL SSO LOGIN MODAL
