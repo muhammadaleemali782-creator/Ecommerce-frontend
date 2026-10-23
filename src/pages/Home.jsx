@@ -363,7 +363,7 @@ export default function Home({ setPage = () => {} }) {
     >
       {/* ── Semantic SEO Entity Heading for Googlebot Ranking on 'EDUCA VEDA' ── */}
       <header className="sr-only">
-        <h1>EDUCA VEDA — Educa Store, Educa Fintech &amp; Educa Institute | Prayagraj</h1>
+        <h1>Educaveda (EDUCA VEDA) — Official Educa Store, Educa Fintech &amp; Educa Institute | Prayagraj</h1>
         <p>
           Official portal of EDUCA VEDA: 1. EDUCA STORE (Pure Ayurvedic medicines for Sugar, BP, Shecurevedic, Daat rog &amp; Liver),
           2. EDUCA FINTECH (Direct seller royalty wallet network), 3. EDUCA INSTITUTE &amp; GURUKUL (Ayurvedic clinical diploma training &amp; Rogsetu Nadi Parikshan). Located at Shambhunath Road, Jhalwa, Prayagraj, UP.
