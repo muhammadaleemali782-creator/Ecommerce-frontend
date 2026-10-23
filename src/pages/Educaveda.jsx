@@ -28,8 +28,8 @@ export default function Educaveda({ setPage }) {
 
   const faqs = [
     {
-      q: "Kya Educaveda aur Edu Veda ek hi hain?",
-      a: "Nahi. Educaveda (EDUCA VEDA) hamara registered enterprise aur official healthcare ecosystem hai jiska headoffice Jhalwa, Prayagraj me sthit hai. Agar aapne iPhone ya Android par 'educaveda' search kiya aur Google ne autocorrect karke 'edu veda' ke Anya websites dikhaye, to dhyan dein ki authentic aur verified portal yahi hai (https://educaveda.vercel.app)."
+      q: "Kya Educaveda aur Edu Veda ek hi hain? Kya 'edcuaveda' aapki hi site hai?",
+      a: "Educaveda (EDUCA VEDA) hamara registered healthcare ecosystem hai jiska headoffice Jhalwa, Prayagraj me sthit hai. Typing me aksar log 'educaveda' ko galti se 'edcuaveda' (c aur u swap) likh dete hain. Agar Google ne autocorrect karke 'Showing results for eduveda' ya Anya websites dikhaye, to dhyan dein ki authentic aur verified portal yahi hai (https://educaveda.vercel.app)."
     },
     {
       q: "Educaveda portal par kaun-kaun si suvidhayein uplabdh hain?",
@@ -91,7 +91,7 @@ export default function Educaveda({ setPage }) {
         <div className="mt-5 p-3.5 max-w-xl mx-auto rounded-xl bg-blue-950/40 border border-blue-500/30 text-left flex items-start gap-3">
           <Search size={18} className="text-blue-400 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-200 leading-relaxed font-sans">
-            <strong className="text-white font-semibold">iPhone &amp; Android Search Notice:</strong> Agar aapke phone par Google ne <em>"Showing results for edu veda"</em> dikhaya tha, to dhyan dein ki <strong>Educaveda (educaveda.vercel.app)</strong> ka verified official ecosystem yahi hai.
+            <strong className="text-white font-semibold">iPhone &amp; Android Search Notice:</strong> Agar aapne galti se <em>edcuaveda</em> ya <em>educaveda</em> search kiya aur Google ne <em>"Showing results for eduveda"</em> ya <em>"edu veda"</em> dikhaya, to dhyan dein ki <strong>Educaveda (educaveda.vercel.app)</strong> ka verified official portal yahi hai.
           </p>
         </div>
       </header>
