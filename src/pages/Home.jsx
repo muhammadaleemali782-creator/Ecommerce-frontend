@@ -88,7 +88,8 @@ export const REALMS = [
     intro: "Seekhein Ayurvedic medicine aur banein certified Wellness Consultant: Bahut hi kam daam me course karein, medicine seekhein aur logon ki bimari door karke madad karein.",
     story1: "Gurukul me Dravyaguna herbology, Panchakarma, aur rog nivaran ki comprehensive training di jati hai jisse aap swasthya salahkar ban sakte hain.",
     story2: "Course complete karne ke baad aap ek certified wellness consultant ban kar apne samaj me logon ko swasth jeevan pradan kar sakte hain aur achhi aamdani bhi kama sakte hain.",
-    cta: "ENROLL IN GURUKUL",
+    cta: "VISIT EDUCA INSTITUTE PORTAL ➔",
+    externalUrl: "https://lccedu.vercel.app",
     pageTarget: "services",
     items: [
       { name: "Medicine Training", role: "Ayurvedic Herbs", note: "Jadibooti ka pura gyan", icon: "📜" },
@@ -98,28 +99,29 @@ export const REALMS = [
   },
   {
     id: "b4",
-    subTag: "INSTANT MICRO-CAPITAL",
-    title: "EDUCA FINANCE",
-    subtitle: "ON FASTEST LOAN DISBURSAL & HIGH INVESTMENT RETURNS",
-    category: "Sabse Tez Loan & High Return Investment",
-    date: "FAST APPROVAL · HIGH ROI",
+    subTag: "INSTANT MICRO-CAPITAL & FINTECH",
+    title: "EDUCA FINTECH & FINANCE",
+    subtitle: "12% INTEREST SAVINGS & INSTANT ₹199 MICRO LOANS",
+    category: "Official Finance & Fintech Division",
+    date: "12% SAVINGS ROI · INSTANT LOANS",
     rating: "9.9",
     desktopImg: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
     mobileImg: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
     accentColor: "#fbbf24",
     bgGradient: "from-amber-950/70 via-[#12161f]/95 to-[#050505]",
     ambientGlow: "rgba(251,191,36,0.16)",
-    pills: ["SABSE FAST LOAN", "HIGH ROI RETURN", "INVEST & EARN"],
-    desc: "Sabse fast aur bina jhanjhat ke loan payein. Humare sath invest karke secure liquidity aur guaranteed high returns ka laabh uthayein.",
-    intro: "Hum dete hain sabse fast loan approval. Hamari company me agar aap invest karte hain to aapko milta hai behtareen munafa aur surakshit laabh.",
+    pills: ["12% SAVINGS INTEREST", "INSTANT ₹199 LOANS", "ZERO CIBIL"],
+    desc: "Official Finance and Fintech division of EDUCA VEDA. India's highest 12% savings interest, instant recharge loans, bike loans, and partner royalty disbursements.",
+    intro: "Educa Fintech EDUCA VEDA ka official financial division hai jo 12% annual interest savings account aur instant micro-loans pradan karta hai.",
     story1: "Health emergency, personal needs ya business ke liye turant micro-loan approval milta hai, bina kisi lambe process ya paper jhanjhat ke.",
     story2: "Hamare liquidity investment pools me funds daal kar aap regular high yields aur guaranteed staking returns ka laabh le sakte hain.",
-    cta: "APPLY FOR LOAN / INVEST",
+    cta: "OPEN EDUCA FINTECH PORTAL ➔",
+    externalUrl: "https://educafintech.vercel.app",
     pageTarget: "ppc-wallet",
     items: [
-      { name: "Fast Loans", role: "Quick Disbursal", note: "Sabse tez loan suvidha", icon: "⚡" },
-      { name: "Invest & Earn", role: "High Profits", note: "Invest karein aur laabh payein", icon: "📈" },
-      { name: "100% Secure", role: "Protected Funds", note: "Surakshit capital guarantee", icon: "🔒" },
+      { name: "12% Savings", role: "Highest Return", note: "Yearly 12% interest", icon: "⚡" },
+      { name: "Instant Loans", role: "Fast Approval", note: "Recharge & Bike loans", icon: "📈" },
+      { name: "100% Secure", role: "Protected Funds", note: "Official Educa portal", icon: "🔒" },
     ]
   }
 ];
@@ -966,6 +968,16 @@ export default function Home({ setPage = () => {} }) {
               </div>
             </div>
 
+            {/* Official Ecosystem Portals for SEO & User Discovery */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-sans text-amber-300 py-1">
+              <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">Official Portals:</span>
+              <a href="https://educaveda.vercel.app/?page=store" className="hover:underline font-bold text-emerald-400">🌿 Educa Store</a>
+              <span className="text-slate-600">•</span>
+              <a href="https://educafintech.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline font-bold text-amber-400">💳 Educa Fintech (12% Interest)</a>
+              <span className="text-slate-600">•</span>
+              <a href="https://lccedu.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline font-bold text-indigo-400">🎓 Educa Institute (Ayurveda Diploma)</a>
+            </div>
+
             <div className="flex items-center gap-4 text-xs font-sans">
               <button onClick={handleShare} className="hover:text-white transition-colors cursor-pointer">Share App</button>
               <span>•</span>
@@ -1009,10 +1021,14 @@ export default function Home({ setPage = () => {} }) {
             <button
               onClick={() => {
                 setActiveModal(null);
+                if (currentRealm.externalUrl) {
+                  window.open(currentRealm.externalUrl, "_blank", "noopener,noreferrer");
+                  return;
+                }
                 const target = currentRealm.pageTarget;
                 safeSetPage(target === "ppc-wallet" ? (loggedIn ? "ppc-wallet" : "login") : target);
               }}
-              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase rounded-xl hover:bg-slate-200 transition-colors cursor-pointer"
+              className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-black font-black text-xs uppercase rounded-xl hover:from-amber-300 hover:to-amber-400 transition-all cursor-pointer shadow-lg"
             >
               {currentRealm.cta}
             </button>
